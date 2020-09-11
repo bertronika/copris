@@ -27,8 +27,7 @@
 #define BACKLOG 1
 #define BUFSIZE 24
 
-int copris_listen(server_t* server, int portno)
-{
+int copris_listen(server_t* server, int portno) {
     int fderr; // Error code of a socket operation
     struct sockaddr_in serveraddr; // Server's address
 
@@ -86,8 +85,7 @@ int copris_listen(server_t* server, int portno)
     return 0;
 }
 
-int copris_read(server_t* server, char* destination, int trfile_set)
-{
+int copris_read(server_t* server, char* destination, int trfile_set) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum = 0;       // Received/sent message (byte) size

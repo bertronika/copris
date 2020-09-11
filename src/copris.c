@@ -28,15 +28,14 @@
  */
 int verbosity = 1;
 
-int main(int argc, char **argv)
-{
-	int portno = -1;    // Listening port of this server
-	int daemon = 0;     // Is the daemon option set?
-	int trfile_set = 0; // Is the translation file option set?
-	int opt;            // Char read by getopt
-	server_t server      = { 0 }; // File descriptor struct initialisation
-	char destination[32] = "0";   // Which device to output final data to
-	char trfile[32]      = "0";   // Specified translation file
+int main(int argc, char **argv) {
+	int portno     = -1; // Listening port of this server
+	int daemon     = 0;  // Is the daemon option set?
+	int trfile_set = 0;  // Is the translation file option set?
+	int opt;             // Character, read by getopt
+	server_t server      = { 0 }; // Socket file descriptor initialisation
+	char destination[32] = "";    // Output filename
+	char trfile[32]      = "";    // Input translation file
 
 	// Bail if there is not even a port specified.
 	if(argc < 2) {
@@ -58,7 +57,6 @@ int main(int argc, char **argv)
 	};
 	
 	// int argc, char* argv[], char* optstring, struct* long_options, int* longindex
-// 	while((opt = getopt_long(argc, argv, ":p:dt:vqhV", long_options, &longindex)) != -1) {
 	while((opt = getopt_long(argc, argv, ":p:dt:vqhV", long_options, NULL)) != -1) {
 		switch(opt) {
 			case 'p':
@@ -104,11 +102,9 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	// If the last argument is a file, copy it to destination[], otherwise to stdout
+	// If the last argument is present, copy it to destination[]
+	// Only one argument is accepted, others are discarded
 	if(argv[optind] != NULL) {
-	// 		destination = argv[optind];
-// 			printf("velikost argv = %ld\n", sizeof(destination));
-			
 		if(strlen(argv[optind]) >= sizeof(destination)) {
 			fprintf(stderr, "Destination filename too long (%s). " 
 			                "Exiting...\n", argv[optind]);
@@ -127,9 +123,6 @@ int main(int argc, char **argv)
 // 		while (optind < argc)
 // 			printf("%s ", argv[optind++]);
 // 		printf("\n");
-// 	} else {
-// 		
-// 	}
 
 	if(portno < 1) {
 		fprintf(stderr, "Port number is missing. Set it with the '-p' option. " 
@@ -153,8 +146,8 @@ int main(int argc, char **argv)
 		printf("Server listening port set to %d.\n", portno);
 	}
 	
-	// Is destination not stdout?
-	if(destination[0] != '0') {
+	// We are writing to a file if destination[0] is not NULL (false).
+	if(destination[0]) {
 		// Are we able to write to the output file?
 		if(access(destination, W_OK) == -1)
 			log_perr(-1, "access", "Unable to write to output file/printer. " 
@@ -165,14 +158,15 @@ int main(int argc, char **argv)
 	if(log_info()) {
 		log_date();
 		printf("Data stream will be sent to ");
-		if(destination[0] != '0')
+		if(destination[0])
 			printf("%s.\n", destination);
 		else
 			printf("stdout.\n");
 	}
 	
-	// Read the translation file
-	if(trfile[0] != '0') {
+	// Read the translation file. This function populates global variables *input
+	// and *replacement, defined in translate.c
+	if(trfile[0]) {
 		copris_trfile(trfile);
 	}
 	

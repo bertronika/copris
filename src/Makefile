@@ -7,14 +7,18 @@ ODIR = obj
 DEPS = debug.h server.h writer.h translate.h
 OBJ = debug.o server.o writer.o translate.o copris.o
 
+.PHONY: all debug clean
+
+all: copris
+
+debug: CFLAGS += -g
+debug: copris
 
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 copris: $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
-
-.PHONY: clean
 
 clean:
 	rm -f *.o

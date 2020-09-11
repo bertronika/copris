@@ -18,8 +18,7 @@
 unsigned char *input;       // Chars that should be picked out
 unsigned char *replacement; // Chars that should be put in instead
 
-void copris_trfile(char *filename)
-{
+void copris_trfile(char *filename) {
 	FILE *dat;        // Translation file
 	int c;            // Character, read from *dat
 	int lines    = 0; // Number of lines in *dat
@@ -186,8 +185,7 @@ unsigned char *copris_translate(unsigned char *source,       // Input string
 								int            source_len,
 								unsigned char *t_input,      // Chars to be picked out
 								unsigned char *t_replacement // Chars to be put in
-							   )
-{
+							   ) {
 	unsigned char *ret = malloc(2 * source_len + 1); // Final translated array
 	int i; // Source array iterator
 	int j; // Return array iterator

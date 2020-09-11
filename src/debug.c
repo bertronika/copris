@@ -21,8 +21,7 @@
  *  perr	system error message (errno)
  *  mesg	custom error message
  */
-void log_perr(int errnum, char *perr, char *mesg)
-{
+void log_perr(int errnum, char *perr, char *mesg) {
 	if(errnum < 0) {
 		fprintf(stderr, "%s\n", mesg);
 		perror(perr);
@@ -37,23 +36,19 @@ void log_perr(int errnum, char *perr, char *mesg)
  * 3  debug
  */
 
-int log_err()
-{
+int log_err() {
 	return (verbosity > 0) ? 1 : 0;
 }
 
-int log_info()
-{
+int log_info() {
 	return (verbosity > 1) ? 1 : 0;
 }
 
-int log_debug()
-{
+int log_debug() {
 	return (verbosity > 2) ? 1 : 0;
 }
 
-void log_date()
-{
+void log_date() {
 	time_t t = time(NULL);
 	struct tm cur_time = *localtime(&t);
 	printf("%02d.%02d.%d %02d:%02d:%02d copris[%d]: ",
@@ -62,8 +57,7 @@ void log_date()
 }
 
 
-void copris_help()
-{
+void copris_help() {
 	printf("Usage: copris [-p PORT] (optional arguments) <printer location>\n\n");
 	printf("  -p, --port     Port to listen to\n");
 	printf("  -d, --daemon   Run continuously, as a daemon\n");
@@ -80,16 +74,11 @@ void copris_help()
 	printf("\n");
 }
 
-void copris_version()
-{
+void copris_version() {
 	printf("COPRIS version %s\n", COPRIS_VER);
 	printf("(C) 2020 Nejc Bertoncelj <nejc@bertoncelj.eu.org>\n\n");
 // 	printf("Available/compiled options: -TRFILE -PRINTERDEF -IPV6\n\n");
 	printf("Included printer feature sets:\n");
 	printf("none\n");
-// 	printf(" epson_lx3xx\n");
-// 	printf(" epson_generic\n");
-// 	printf(" oki8xxx\n");
-// 	printf(" star_15xx\n");
 	printf("\n");
 }

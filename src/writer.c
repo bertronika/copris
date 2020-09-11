@@ -40,7 +40,7 @@ int copris_write(char *dest, unsigned char *data)
 	if(buf_written < buf_num) {
 		fprintf(stderr, "fwrite: Failure while writing to output file; " 
 		                "not enough bytes transferred.\n");
-// 		exit(1);
+// 		exit(1); -- should we actually terminate the program?
 	}
 	
 	ferr = fclose(file_ptr);
