@@ -5,7 +5,5 @@ int  log_err();
 int  log_info();
 int  log_debug();
 void log_date();
-void copris_help();
-void copris_version();
 
 extern int verbosity;

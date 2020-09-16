@@ -8,6 +8,8 @@
  * - https://azrael.digipen.edu/~mmead/www/Courses/CS180/getopt.html
  */
 
+#define COPRIS_VER "0.9"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,9 +17,12 @@
 #include <getopt.h>
 
 #include "debug.h"
+#include "copris.h"
 #include "server.h"
 #include "writer.h"
 #include "translate.h"
+
+#define FNAME_LEN 36
 
 /* 
  * Verbosity levels:
@@ -33,9 +38,9 @@ int main(int argc, char **argv) {
 	int daemon     = 0;  // Is the daemon option set?
 	int trfile_set = 0;  // Is the translation file option set?
 	int opt;             // Character, read by getopt
-	server_t server      = { 0 }; // Socket file descriptor initialisation
-	char destination[32] = "";    // Output filename
-	char trfile[32]      = "";    // Input translation file
+	server_t server = { 0 };          // Socket file descriptor
+	char destination[FNAME_LEN] = ""; // Output filename
+	char trfile[FNAME_LEN]      = ""; // Input translation file
 
 	// Bail if there is not even a port specified.
 	if(argc < 2) {
@@ -184,4 +189,32 @@ int main(int argc, char **argv) {
 	}
 	
 	return 0;
+}
+
+void copris_help() {
+	printf("Usage: copris [-p PORT] (optional arguments) <printer location>\n\n");
+	printf("  -p, --port     Port to listen to\n");
+	printf("  -d, --daemon   Run continuously, as a daemon\n");
+	printf("  -t, --trfile   (optional) character translation file\n");
+	printf("\n");
+	printf("  -v, --verbose  Be verbose (-vv more, -vvv even more)\n");
+	printf("  -q, --quiet    Display nothing except fatal errors (stderr)\n");
+	printf("  -h, --help     Show this help\n");
+	printf("  -V, --version  Show program version and included printer \n");
+	printf("                 feature sets\n");
+	printf("\n");
+	printf("Printer location can either be an actual printer address, such\n");
+	printf("as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n");
+	printf("\n");
+}
+
+void copris_version() {
+	printf("COPRIS version %s\n", COPRIS_VER);
+	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
+	printf("Compiled options:\n");
+	printf("  Buffer size:        %d B\n", BUFSIZE);
+	printf("  Connection backlog: %d\n", BACKLOG);
+	printf("Included printer feature sets:\n");
+	printf("  none\n");
+	printf("\n");
 }

@@ -6,15 +6,12 @@
  * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  */
 
-#define COPRIS_VER "0.9"
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h> /* getpid() */
 #include <time.h>
 
 #include "debug.h"
-#include "server.h"
 
 /* 
  * Fatal errors, which go to STDERR. Arguments:
@@ -55,34 +52,4 @@ void log_date() {
 	printf("%02d.%02d.%d %02d:%02d:%02d copris[%d]: ",
 		cur_time.tm_mday, cur_time.tm_mon + 1, cur_time.tm_year + 1900,
 		cur_time.tm_hour, cur_time.tm_min, cur_time.tm_sec, getpid());
-}
-
-
-void copris_help() {
-	printf("Usage: copris [-p PORT] (optional arguments) <printer location>\n\n");
-	printf("  -p, --port     Port to listen to\n");
-	printf("  -d, --daemon   Run continuously, as a daemon\n");
-	printf("  -t, --trfile   (optional) character translation file\n");
-	printf("\n");
-	printf("  -v, --verbose  Be verbose (-vv more, -vvv even more)\n");
-	printf("  -q, --quiet    Display nothing except fatal errors (stderr)\n");
-	printf("  -h, --help     Show this help\n");
-	printf("  -V, --version  Show program version and included printer \n");
-	printf("                 feature sets\n");
-	printf("\n");
-	printf("Printer location can either be an actual printer address, such\n");
-	printf("as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n");
-	printf("\n");
-}
-
-void copris_version() {
-	printf("COPRIS version %s\n", COPRIS_VER);
-	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
-// 	printf("Available/compiled options: -TRFILE -PRINTERDEF -IPV6\n\n");
-	printf("Available/compiled options:\n  ");
-	printf("  Buffer size: %d B\n", BUFSIZE);
-	printf("  Maximum num. of connections: %d\n", BACKLOG);
-	printf("Included printer feature sets:\n");
-	printf("  none\n");
-	printf("\n");
 }
