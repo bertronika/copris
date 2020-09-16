@@ -27,16 +27,16 @@
 const int BUFSIZE = 256;
 const int BACKLOG = 1;
 
-int copris_listen(server_t* server, int portno) {
+int copris_listen(server_t *server, int portno) {
     int fderr; // Error code of a socket operation
     struct sockaddr_in serveraddr; // Server's address
 
-    /* 
-    * Create a system socket using the following:
-    *   AF_INET      IPv4
-    *   SOCK_STREAM  TCP protocol
-    *   IPPROTO_IP   IP protocol
-    */
+	/* 
+	 * Create a system socket using the following:
+	 *   AF_INET      IPv4
+	 *   SOCK_STREAM  TCP protocol
+	 *   IPPROTO_IP   IP protocol
+	 */
     fderr = (server->parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
     log_perr(fderr, "socket", "Failed to create socket endpoint.");
 	if(log_debug()) {
@@ -44,13 +44,13 @@ int copris_listen(server_t* server, int portno) {
 		printf("Socket endpoint created.\n");
 	}
 
-    /* 
-	 * A hack from tcpserver.c: (line l87)
-     * setsockopt: Handy debugging trick that lets 
-     * us rerun the server immediately after we kill it; 
-     * otherwise we have to wait about 20 secs. 
-     * Eliminates "ERROR on binding: Address already in use" error. 
-     */
+	/* 
+	 * A hack from tcpserver.c: (line 87)
+	 * setsockopt: Handy debugging trick that lets 
+	 * us rerun the server immediately after we kill it; 
+	 * otherwise we have to wait about 20 secs. 
+	 * Eliminates "ERROR on binding: Address already in use" error. 
+	 */
     int optval = 1;
     setsockopt(server->parentfd, SOL_SOCKET, SO_REUSEADDR, 
 			   (const void *)&optval, sizeof(int));
@@ -85,7 +85,7 @@ int copris_listen(server_t* server, int portno) {
     return 0;
 }
 
-int copris_read(server_t* server, char* destination, int trfile_set) {
+int copris_read(server_t *server, char *destination, int trfile_set) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum = 0;       // Received/sent message (byte) size

@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
 	int daemon     = 0;  // Is the daemon option set?
 	int trfile_set = 0;  // Is the translation file option set?
 	int opt;             // Character, read by getopt
-	server_t server = { 0 };          // Socket file descriptor
-	char destination[FNAME_LEN] = ""; // Output filename
-	char trfile[FNAME_LEN]      = ""; // Input translation file
+	char *trfile                = 0;     // Input translation file
+	char destination[FNAME_LEN] = { 0 }; // Output filename
+	server_t server             = { 0 }; // Socket file descriptor
 
 	// Bail if there is not even a port specified.
 	if(argc < 2) {
@@ -72,7 +72,14 @@ int main(int argc, char **argv) {
 				break;
 			case 't':
 				trfile_set = 1;
-				strcpy(trfile, optarg);
+				if(strlen(optarg) <= FNAME_LEN) {
+					trfile = malloc(strlen(optarg) + 1);
+					trfile = optarg;
+				} else {
+					fprintf(stderr, "Trfile filename too long (%s). "
+					                "Exiting...\n", optarg);
+					exit(1);
+				}
 				break;
 			case 'v':
 				if(verbosity < 3)
@@ -109,18 +116,14 @@ int main(int argc, char **argv) {
 	
 	// If the last argument is present, copy it to destination[]
 	// Only one argument is accepted, others are discarded
-	if(argv[optind] != NULL) {
-		if(strlen(argv[optind]) >= sizeof(destination)) {
+	if(argv[optind]) {
+		if(strlen(argv[optind]) <= FNAME_LEN) {
+			strcpy(destination, argv[optind]);
+		} else {
 			fprintf(stderr, "Destination filename too long (%s). " 
 			                "Exiting...\n", argv[optind]);
 			exit(1);
-		} else {
-			strcpy(destination, argv[optind]);
 		}
-		
-		//char *destination;
-		//destination = argv[optind];
-		
 	}
 	
 // 	if(optind < argc) {
@@ -140,7 +143,6 @@ int main(int argc, char **argv) {
 		printf("Verbosity level set to %d.\n", verbosity);
 	}
 	
-	
 	if(daemon && log_debug()) {
 		log_date();
 		printf("Daemon mode enabled.\n");
@@ -151,7 +153,7 @@ int main(int argc, char **argv) {
 		printf("Server listening port set to %d.\n", portno);
 	}
 	
-	// We are writing to a file if destination[0] is not NULL (false).
+	// We are writing to a file if destination is not NULL.
 	if(destination[0]) {
 		// Are we able to write to the output file?
 		if(access(destination, W_OK) == -1)
@@ -169,10 +171,11 @@ int main(int argc, char **argv) {
 			printf("stdout.\n");
 	}
 	
-	// Read the translation file. This function populates global variables *input
+	// Read the translation file. The function populates global variables *input
 	// and *replacement, defined in translate.c
-	if(trfile[0]) {
+	if(trfile) {
 		copris_trfile(trfile);
+// 		free(trfile);
 	}
 	
 	// Open socket and listen
@@ -212,8 +215,9 @@ void copris_version() {
 	printf("COPRIS version %s\n", COPRIS_VER);
 	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
 	printf("Compiled options:\n");
-	printf("  Buffer size:        %d B\n", BUFSIZE);
-	printf("  Connection backlog: %d\n", BACKLOG);
+	printf("  Buffer size:          %d B\n", BUFSIZE);
+	printf("  Connection backlog:   %d connection(s)\n", BACKLOG);
+	printf("  Max. filename length: %d characters\n", FNAME_LEN);
 	printf("Included printer feature sets:\n");
 	printf("  none\n");
 	printf("\n");

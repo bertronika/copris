@@ -12,8 +12,7 @@
 #include "debug.h"
 #include "writer.h"
 
-int copris_write(char *dest, unsigned char *data)
-{
+int copris_write(char *dest, unsigned char *data) {
 	FILE *file_ptr;  // File stream pointer
 	int buf_num;     // Number of bytes in buffer
 	int buf_written; // Number of written bytes to file
