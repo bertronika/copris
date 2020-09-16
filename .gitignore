@@ -1,4 +1,5 @@
 *.o
+*.kate-swp
 old/
 tcpserver.c
 trfile*

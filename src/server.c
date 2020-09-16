@@ -24,9 +24,7 @@
 #include "writer.h"
 #include "translate.h"
 
-// #define BACKLOG 1
-// #define BUFSIZE 24
-const int BUFSIZE = 1024;
+const int BUFSIZE = 256;
 const int BACKLOG = 1;
 
 int copris_listen(server_t* server, int portno) {
@@ -129,7 +127,7 @@ int copris_read(server_t* server, char* destination, int trfile_set) {
 	
 	if(log_err()) {
 		printf("Inbound connection from %s (%s).\n", host, hostaddrp);
-		if(destination[0] == '0')
+		if(!destination[0])
 			printf("; BOS\n");
 	}
 
@@ -175,7 +173,7 @@ int copris_read(server_t* server, char* destination, int trfile_set) {
 	fderr = close(childfd);
 	log_perr(fderr, "close", "Failed to close the connection.");
 	
-	if(log_err() && destination[0] == '0')
+	if(log_err() && !destination[0])
 		printf("; EOS\n");
 	
 	if(log_info())
