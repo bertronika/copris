@@ -47,6 +47,10 @@ Decimal codes on the right, however, should conform to your printer's
 character set. Each printer and each country have a different set. Check
 your printer's manual or experiment on your own (a test file is included).
 
+Also included is a Slovenian translation file (or Yugoslavian, as the keyboard
+layout doesn't differ). Letters with carons should convert normally, lost
+characters are replaced with my own selections.
+
 ## Usage
 COPRIS requires at least the port parameter to be specified (`-p` or `--port`).
 Superuser privileges are not required, as long as the specified port is
