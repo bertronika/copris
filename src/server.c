@@ -24,8 +24,10 @@
 #include "writer.h"
 #include "translate.h"
 
-#define BACKLOG 1
-#define BUFSIZE 24
+// #define BACKLOG 1
+// #define BUFSIZE 24
+const int BUFSIZE = 1024;
+const int BACKLOG = 1;
 
 int copris_listen(server_t* server, int portno) {
     int fderr; // Error code of a socket operation
@@ -150,7 +152,7 @@ int copris_read(server_t* server, char* destination, int trfile_set) {
 		}
 		
 		// Destination can be either stdout or a file
-		if(destination[0] == '0' && log_err()) {
+		if(!destination[0] && log_err()) {
 			printf("%s", to_print);              // Print received text to stdout
 		} else {
 			copris_write(destination, to_print); // Write to the output file/printer

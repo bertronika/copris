@@ -11,6 +11,10 @@ OBJ = debug.o server.o writer.o translate.o copris.o
 
 all: copris
 
+# You normally don't want to have a debug recipe like this,
+# because you could mix debug and non-debug object files. This
+# situation is all right though, as only debugger symbols are
+# added and files are not modified.
 debug: CFLAGS += -g
 debug: copris
 

@@ -14,6 +14,7 @@
 #include <time.h>
 
 #include "debug.h"
+#include "server.h"
 
 /* 
  * Fatal errors, which go to STDERR. Arguments:
@@ -70,15 +71,18 @@ void copris_help() {
 	printf("                 feature sets\n");
 	printf("\n");
 	printf("Printer location can either be an actual printer address, such\n");
-	printf("as /dev/ttyS0, or a file. If left empty, output is printed to STDOUT.\n");
+	printf("as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n");
 	printf("\n");
 }
 
 void copris_version() {
 	printf("COPRIS version %s\n", COPRIS_VER);
-	printf("(C) 2020 Nejc Bertoncelj <nejc@bertoncelj.eu.org>\n\n");
+	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
 // 	printf("Available/compiled options: -TRFILE -PRINTERDEF -IPV6\n\n");
+	printf("Available/compiled options:\n  ");
+	printf("  Buffer size: %d B\n", BUFSIZE);
+	printf("  Maximum num. of connections: %d\n", BACKLOG);
 	printf("Included printer feature sets:\n");
-	printf("none\n");
+	printf("  none\n");
 	printf("\n");
 }

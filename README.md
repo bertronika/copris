@@ -30,10 +30,10 @@ consists of additional characters (including some Greek letters), which can
 imitate the ones we've lost in the process.
 
 ## Translation file format
-Translation files are made of newline (\n) separated ``definitions''. Each
+Translation files are made of newline (`\n`) separated "definitions". Each
 definition consists of a character that should be detected and a decimal number
 of a character that should be sent to printer instead. Values are separated by
-a single tab (\t).
+a single tab (`\t`).
 
 Trfile example:
 ```
