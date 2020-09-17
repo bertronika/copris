@@ -191,7 +191,8 @@ unsigned char *copris_translate(unsigned char *source,       // Input string
 	int j; // Return array iterator
 	int k; // Input/replacement array iterator
 	
-	for(i = 0; source[i] != '\0'; i++) {      // Loop through source text
+	for(i = 0, j = 0; source[i] != '\0'; i++, j++) {      // Loop through source text
+		ret[j] = 0;
 		for(k = 0; t_input[k] != '\0'; k++) { // Loop through input chars
 			// Source matches input, start character exchange
 			if(source[i] == t_input[k] && source[i] != ' ') {
@@ -219,7 +220,7 @@ unsigned char *copris_translate(unsigned char *source,       // Input string
 		if(log_debug())
 			printf("   %x -> %c\n", source[i], ret[j]);
 		
-		j++;
+// 		j++;
 	}
 	ret[j] = '\0'; // This odd zero looks somewhat important, I presume...
 	

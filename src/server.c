@@ -31,7 +31,7 @@ int copris_listen(server_t *server, int portno) {
     int fderr; // Error code of a socket operation
     struct sockaddr_in serveraddr; // Server's address
 
-	/* 
+	/*
 	 * Create a system socket using the following:
 	 *   AF_INET      IPv4
 	 *   SOCK_STREAM  TCP protocol
@@ -46,10 +46,10 @@ int copris_listen(server_t *server, int portno) {
 
 	/* 
 	 * A hack from tcpserver.c: (line 87)
-	 * setsockopt: Handy debugging trick that lets 
-	 * us rerun the server immediately after we kill it; 
-	 * otherwise we have to wait about 20 secs. 
-	 * Eliminates "ERROR on binding: Address already in use" error. 
+	 * setsockopt: Handy debugging trick that lets
+	 * us rerun the server immediately after we kill it;
+	 * otherwise we have to wait about 20 secs.
+	 * Eliminates "ERROR on binding: Address already in use" error.
 	 */
     int optval = 1;
     setsockopt(server->parentfd, SOL_SOCKET, SO_REUSEADDR, 
@@ -94,9 +94,7 @@ int copris_read(server_t *server, char *destination, int trfile_set) {
 	char *hostaddrp;                // Host address string
 	char host[NI_MAXHOST];          // Host info (IP, hostname). NI_MAXHOST is built in
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
-	unsigned char *buf_transl;      // Trfile processed buffer
-// 	unsigned char *buf_markdw;      // Markdown parsed buffer
-	unsigned char *to_print;        // Final stream to be printed
+	unsigned char *to_print;        // Final, converted stream
 
 	// Set the struct size
 	clientlen = sizeof(clientaddr);
@@ -136,17 +134,10 @@ int copris_read(server_t *server, char *destination, int trfile_set) {
 
 	// Read the data sent by the client into the buffer
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
-// 		printf("Read %d bytes...\n", bytenum);
-		
-		//copris_markdown()
+		to_print = buf;
 		
 		if(trfile_set) {
-			buf_transl = malloc(BUFSIZE + 1);
-			buf_transl = copris_translate(buf, BUFSIZE, input, replacement);
-	// 		printf("\n\n%s\n", buf_transl);
-			to_print = buf_transl;
-		} else {
-			to_print = buf;
+			to_print = copris_translate(buf, BUFSIZE, input, replacement);
 		}
 		
 		// Destination can be either stdout or a file
@@ -155,15 +146,14 @@ int copris_read(server_t *server, char *destination, int trfile_set) {
 		} else {
 			copris_write(destination, to_print); // Write to the output file/printer
 		}
-			
-		bytenum += fderr;               // Append read bytes to the total byte counter
-		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
 		
 		if(trfile_set) {
-			free(buf_transl);
+			copris_cleanup(to_print);
 		}
-// 		free(buf_markdw);
-	};
+		
+		bytenum += fderr;               // Append read bytes to the total byte counter
+		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
+	}
 	log_perr(fderr, "read", "Error reading from socket.");
 
 	free(input);
@@ -188,4 +178,8 @@ int copris_read(server_t *server, char *destination, int trfile_set) {
 	}
     
     return 0;
+}
+
+void copris_cleanup(unsigned char *to_print) {
+  free(to_print);
 }

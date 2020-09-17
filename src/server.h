@@ -11,3 +11,4 @@ extern const int BACKLOG;
 
 int copris_listen(server_t *server, int portno);
 int copris_read(server_t *server, char *destination, int trfile_set);
+void copris_cleanup(unsigned char *to_print);
