@@ -57,7 +57,7 @@ Superuser privileges are not required, as long as the specified port is
 greater than 1023. For a summary of all options, run `-h` or `--help`.
 
 If no errors are printed out, COPRIS should be listening on the specified
-port. You may use the verbose parameter (`-v` or `--verbose`) up to three
+port. You may use the verbose parameter (`-v` or `--verbose`) up to two
 times to debug. More parameters, more verbosity.
 
 The physical printer should be specified as the last argument. It may also

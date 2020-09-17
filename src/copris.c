@@ -198,7 +198,7 @@ void copris_help() {
 	printf("  -d, --daemon   Run continuously, as a daemon\n");
 	printf("  -t, --trfile   (optional) character translation file\n");
 	printf("\n");
-	printf("  -v, --verbose  Be verbose (-vv more, -vvv even more)\n");
+	printf("  -v, --verbose  Be verbose (-vv more\n");
 	printf("  -q, --quiet    Display nothing except fatal errors (stderr)\n");
 	printf("  -h, --help     Show this help\n");
 	printf("  -V, --version  Show program version and included printer \n");
