@@ -216,9 +216,8 @@ unsigned char *copris_translate(unsigned char *source,       // Input string
 				ret[j] = (source[i] <= 127) ? source[i] : '!';
 			}
 		}
-			
-		if(log_debug())
-			printf("   %x -> %c\n", source[i], ret[j]);
+		if(log_debug() && i < source_len - 1)
+			printf("   %x -> %c\n", source[i], (j > -1) ? ret[j] : ' ');
 		
 // 		j++;
 	}

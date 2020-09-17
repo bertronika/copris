@@ -22,7 +22,7 @@
 #include "writer.h"
 #include "translate.h"
 
-#define FNAME_LEN 6
+#define FNAME_LEN 36
 
 /* 
  * Verbosity levels:
