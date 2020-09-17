@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 	int daemon     = 0;  // Is the daemon option set?
 	int trfile_set = 0;  // Is the translation file option set?
 	int opt;             // Character, read by getopt
-	char *trfile                = 0;     // Input translation file
+	char trfile[FNAME_LEN]      = { 0 }; // Input translation file
 	char destination[FNAME_LEN] = { 0 }; // Output filename
 	server_t server             = { 0 }; // Socket file descriptor
 
@@ -73,8 +73,9 @@ int main(int argc, char **argv) {
 			case 't':
 				trfile_set = 1;
 				if(strlen(optarg) <= FNAME_LEN) {
-					trfile = malloc(strlen(optarg) + 1);
-					trfile = optarg;
+// 					trfile = malloc(strlen(optarg) + 1);
+// 					trfile = optarg;
+					strcpy(trfile, optarg);
 				} else {
 					fprintf(stderr, "Trfile filename too long (%s). "
 					                "Exiting...\n", optarg);
@@ -173,7 +174,7 @@ int main(int argc, char **argv) {
 	
 	// Read the translation file. The function populates global variables *input
 	// and *replacement, defined in translate.c
-	if(trfile) {
+	if(trfile[0]) {
 		copris_trfile(trfile);
 // 		free(trfile);
 	}
