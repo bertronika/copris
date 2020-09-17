@@ -181,31 +181,27 @@ void copris_trfile(char *filename) {
 	log_perr(ferr, "close", "Failed to close the translation file after reading.");
 }
 
-unsigned char *copris_translate(unsigned char *source,       // Input string
-								int            source_len,
-								unsigned char *t_input,      // Chars to be picked out
-								unsigned char *t_replacement // Chars to be put in
-							   ) {
+unsigned char *copris_translate(unsigned char *source, int source_len) {
 	unsigned char *ret = malloc(2 * source_len + 1); // Final translated array
 	int i; // Source array iterator
 	int j; // Return array iterator
 	int k; // Input/replacement array iterator
 	
-	for(i = 0, j = 0; source[i] != '\0'; i++, j++) {      // Loop through source text
+	for(i = 0, j = 0; source[i] != '\0'; i++, j++) { // Loop through source text
 		ret[j] = 0;
-		for(k = 0; t_input[k] != '\0'; k++) { // Loop through input chars
+		for(k = 0; input[k] != '\0'; k++) {          // Loop through input chars
 			// Source matches input, start character exchange
-			if(source[i] == t_input[k] && source[i] != ' ') {
-				if(t_replacement[k] != ' ') {
-					ret[j] = t_replacement[k];
+			if(source[i] == input[k] && source[i] != ' ') {
+				if(replacement[k] != ' ') {
+					ret[j] = replacement[k];
 				} else {
-					// Get rid of the extra leading spaces in t_replacement
+					// Get rid of the extra leading spaces in replacement
 					j--;
 				}
 				
-				// Get rid of the extra trailing spaces in t_input
-				if(t_input[k + 1] == ' ') {
-					ret[++j] = t_replacement[++k];
+				// Get rid of the extra trailing spaces in input
+				if(input[k + 1] == ' ') {
+					ret[++j] = replacement[++k];
 				}
 				
 				break;

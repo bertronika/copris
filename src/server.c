@@ -137,7 +137,7 @@ int copris_read(int *parentfd, char *destination, int trfile_set) {
 		to_print = buf;
 		
 		if(trfile_set) {
-			to_print = copris_translate(buf, BUFSIZE, input, replacement);
+			to_print = copris_translate(buf, BUFSIZE);
 		}
 		
 		// Destination can be either stdout or a file
