@@ -22,7 +22,7 @@
 #include "writer.h"
 #include "translate.h"
 
-#define FNAME_LEN 36
+#define FNAME_LEN 6
 
 /* 
  * Verbosity levels:
@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
 	int daemon     = 0;  // Is the daemon option set?
 	int trfile_set = 0;  // Is the translation file option set?
 	int opt;             // Character, read by getopt
-	char trfile[FNAME_LEN]      = { 0 }; // Input translation file
-	char destination[FNAME_LEN] = { 0 }; // Output filename
-	server_t server             = { 0 }; // Socket file descriptor
+	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
+	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
+	server_t server                 = { 0 }; // Socket file descriptor
 
 	// Bail if there is not even a port specified.
 	if(argc < 2) {
@@ -73,8 +73,6 @@ int main(int argc, char **argv) {
 			case 't':
 				trfile_set = 1;
 				if(strlen(optarg) <= FNAME_LEN) {
-// 					trfile = malloc(strlen(optarg) + 1);
-// 					trfile = optarg;
 					strcpy(trfile, optarg);
 				} else {
 					fprintf(stderr, "Trfile filename too long (%s). "
@@ -176,7 +174,6 @@ int main(int argc, char **argv) {
 	// and *replacement, defined in translate.c
 	if(trfile[0]) {
 		copris_trfile(trfile);
-// 		free(trfile);
 	}
 	
 	// Open socket and listen
