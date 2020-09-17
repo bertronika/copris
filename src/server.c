@@ -27,7 +27,7 @@
 const int BUFSIZE = 256;
 const int BACKLOG = 1;
 
-int copris_listen(server_t *server, int portno) {
+int copris_listen(int *parentfd, int portno) {
     int fderr; // Error code of a socket operation
     struct sockaddr_in serveraddr; // Server's address
 
@@ -37,7 +37,7 @@ int copris_listen(server_t *server, int portno) {
 	 *   SOCK_STREAM  TCP protocol
 	 *   IPPROTO_IP   IP protocol
 	 */
-    fderr = (server->parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
+    fderr = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
     log_perr(fderr, "socket", "Failed to create socket endpoint.");
 	if(log_debug()) {
 		log_date();
@@ -52,7 +52,7 @@ int copris_listen(server_t *server, int portno) {
 	 * Eliminates "ERROR on binding: Address already in use" error.
 	 */
     int optval = 1;
-    setsockopt(server->parentfd, SOL_SOCKET, SO_REUSEADDR, 
+    setsockopt(*parentfd, SOL_SOCKET, SO_REUSEADDR,
 			   (const void *)&optval, sizeof(int));
 
 // 	memset((char *)&serveraddr, '\0', sizeof(serveraddr)); // TODO: is this necessary?
@@ -62,7 +62,7 @@ int copris_listen(server_t *server, int portno) {
     serveraddr.sin_port        = htons((unsigned short)portno);
 
     // Associate the parent socket with a port
-    fderr = bind(server->parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
+    fderr = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
     log_perr(fderr, "bind", "Failed to bind socket to address. " 
 	                "Non-root users should set it >1023.");
 	if(log_debug()) {
@@ -72,7 +72,7 @@ int copris_listen(server_t *server, int portno) {
 
     // Make the parent socket passive - accept incoming connections.
     // Also limit the number of connections to BACKLOG
-    fderr = listen(server->parentfd, BACKLOG);
+    fderr = listen(*parentfd, BACKLOG);
     log_perr(fderr, "listen", "Failed to make socket passive.");
 	if(log_info()) {
 		log_date();
@@ -85,7 +85,7 @@ int copris_listen(server_t *server, int portno) {
     return 0;
 }
 
-int copris_read(server_t *server, char *destination, int trfile_set) {
+int copris_read(int *parentfd, char *destination, int trfile_set) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum = 0;       // Received/sent message (byte) size
@@ -100,7 +100,7 @@ int copris_read(server_t *server, char *destination, int trfile_set) {
 	clientlen = sizeof(clientaddr);
 
 	// Wait for a connection request and accept it
-	childfd = accept(server->parentfd, (struct sockaddr *)&clientaddr, &clientlen);
+	childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
 	log_perr(childfd, "accept", "Failed to accept the connection.");
 	if(log_info()) {
 		log_date();

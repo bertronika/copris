@@ -34,13 +34,13 @@
 int verbosity = 1;
 
 int main(int argc, char **argv) {
+	int parentfd   = 0;  // Parent file descriptor to hold a socket
 	int portno     = -1; // Listening port of this server
 	int daemon     = 0;  // Is the daemon option set?
 	int trfile_set = 0;  // Is the translation file option set?
 	int opt;             // Character, read by getopt
 	char trfile[FNAME_LEN]      = { 0 }; // Input translation file
 	char destination[FNAME_LEN] = { 0 }; // Output filename
-	server_t server             = { 0 }; // Socket file descriptor
 
 	// Bail if there is not even a port specified.
 	if(argc < 2) {
@@ -73,8 +73,6 @@ int main(int argc, char **argv) {
 			case 't':
 				trfile_set = 1;
 				if(strlen(optarg) <= FNAME_LEN) {
-// 					trfile = malloc(strlen(optarg) + 1);
-// 					trfile = optarg;
 					strcpy(trfile, optarg);
 				} else {
 					fprintf(stderr, "Trfile filename too long (%s). "
@@ -180,11 +178,11 @@ int main(int argc, char **argv) {
 	}
 	
 	// Open socket and listen
-	copris_listen(&server, portno);
+	copris_listen(&parentfd, portno);
 	
 	do {
 		// Accept incoming connections
-	    copris_read(&server, destination, trfile_set);
+	    copris_read(&parentfd, destination, trfile_set);
 	} while(daemon);
 	
 	if(log_info()) {
