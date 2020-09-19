@@ -85,7 +85,7 @@ int copris_listen(int *parentfd, int portno) {
     return 0;
 }
 
-int copris_read(int *parentfd, char *destination, int trfile_set) {
+int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum = 0;       // Received/sent message (byte) size
@@ -94,7 +94,8 @@ int copris_read(int *parentfd, char *destination, int trfile_set) {
 	char *hostaddrp;                // Host address string
 	char host[NI_MAXHOST];          // Host info (IP, hostname). NI_MAXHOST is built in
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
-	unsigned char *to_print;        // Final, converted stream
+// 	unsigned char *to_print;        // Final, converted stream
+	unsigned char to_print[4 * BUFSIZE + 1];        // Final, converted stream
 
 	// Set the struct size
 	clientlen = sizeof(clientaddr);
@@ -131,24 +132,30 @@ int copris_read(int *parentfd, char *destination, int trfile_set) {
 
 	// Empty out the inbound buffer
 	memset(buf, '\0', BUFSIZE + 1);
+// 	memset(to_print, '\0', 4 * BUFSIZE + 1);
 
+	int z;
 	// Read the data sent by the client into the buffer
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
-		to_print = buf;
-		
-		if(trfile_set) {
-			to_print = copris_translate(buf, fderr);
-		}
+			for(z = 0; buf[z]; z++) {
+				to_print[z] = buf[z];
+			}
+			to_print[z] = '\0';
+			
+			if(printerset) {
+				copris_printerset(buf, fderr, to_print);
+				if(trfile) {
+					copris_translate(to_print, fderr, to_print);
+				}
+			} else if(trfile) {
+				copris_translate(buf, fderr, to_print);
+			}
 		
 		// Destination can be either stdout or a file
 		if(!destination[0] && log_err()) {
 			printf("%s", to_print);              // Print received text to stdout
 		} else {
 			copris_write(destination, to_print); // Write to the output file/printer
-		}
-		
-		if(trfile_set) {
-			copris_cleanup(to_print);
 		}
 		
 		bytenum += fderr;               // Append read bytes to the total byte counter
@@ -180,6 +187,6 @@ int copris_read(int *parentfd, char *destination, int trfile_set) {
     return 0;
 }
 
-void copris_cleanup(unsigned char *to_print) {
-  free(to_print);
-}
+// void copris_cleanup(unsigned char *to_print) {
+//   free(to_print);
+// }

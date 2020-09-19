@@ -1,8 +1,10 @@
 /* Header for the translate.c file processing and code table translations */
 
-void copris_trfile(char *filename);
-unsigned char *copris_translate(unsigned char *source, int source_len);
-int power10(int exp);
-
 extern unsigned char *input;
 extern unsigned char *replacement;
+
+void copris_trfile(char *filename);
+void copris_translate(unsigned char *source, int source_len, unsigned char *ret);
+void copris_printerset(unsigned char *source, int source_len, unsigned char *ret);
+int escinsert(unsigned char *ret, int r, char *printerset);
+int power10(int exp);

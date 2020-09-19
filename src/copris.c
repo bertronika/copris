@@ -10,6 +10,8 @@
 
 #define COPRIS_VER "0.9"
 
+#define FNAME_LEN 36
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -19,10 +21,9 @@
 #include "debug.h"
 #include "copris.h"
 #include "server.h"
-#include "writer.h"
 #include "translate.h"
+#include "printerset.h"
 
-#define FNAME_LEN 36
 
 /* 
  * Verbosity levels:
@@ -37,9 +38,11 @@ int main(int argc, char **argv) {
 	int parentfd   = 0;  // Parent file descriptor to hold a socket
 	int portno     = -1; // Listening port of this server
 	int daemon     = 0;  // Is the daemon option set?
-	int trfile_set = 0;  // Is the translation file option set?
+// 	int trfile_set = 0;  // Is the translation file option set?
+// 	int prfile_set = 0;  // Is the printer feature set selected?
 	int opt;             // Character, read by getopt
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
+	char printerset[PRSET_LEN + 1]  = { 0 }; // Input translation file
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
 
 	// Bail if there is not even a port specified.
@@ -54,6 +57,7 @@ int main(int argc, char **argv) {
 		{"port",    1, NULL, 'p'},
 		{"daemon",  0, NULL, 'd'},
 		{"trfile",  1, NULL, 't'},
+		{"printer", 1, NULL, 'r'},
 		{"verbose", 1, NULL, 'v'},
 		{"quiet",   0, NULL, 'q'},
 		{"help",    0, NULL, 'h'},
@@ -62,7 +66,7 @@ int main(int argc, char **argv) {
 	};
 	
 	// int argc, char* argv[], char* optstring, struct* long_options, int* longindex
-	while((opt = getopt_long(argc, argv, ":p:dt:vqhV", long_options, NULL)) != -1) {
+	while((opt = getopt_long(argc, argv, ":p:dt:r:vqhV", long_options, NULL)) != -1) {
 		switch(opt) {
 			case 'p':
 				portno = atoi(optarg);
@@ -71,11 +75,22 @@ int main(int argc, char **argv) {
 				daemon = 1;
 				break;
 			case 't':
-				trfile_set = 1;
+// 				trfile_set = 1;
 				if(strlen(optarg) <= FNAME_LEN) {
 					strcpy(trfile, optarg);
 				} else {
 					fprintf(stderr, "Trfile filename too long (%s). "
+					                "Exiting...\n", optarg);
+					exit(1);
+				}
+				break;
+			case 'r':
+// 				prfile_set = 1;
+				if(strlen(optarg) <= PRSET_LEN) {
+					strcpy(printerset, optarg);
+				} else {
+					// Excessive length already makes it wrong
+					fprintf(stderr, "Wrong printer feature set (%s). "
 					                "Exiting...\n", optarg);
 					exit(1);
 				}
@@ -181,10 +196,11 @@ int main(int argc, char **argv) {
 	
 	do {
 		// Accept incoming connections
-	    copris_read(&parentfd, destination, trfile_set);
+// 	    copris_read(&parentfd, destination, trfile[0], printerset[0]);
+	    copris_read(&parentfd, destination, trfile[0], 1);
 	} while(daemon);
 	
-	if(log_info()) {
+	if(log_debug()) {
 		log_date();
 		printf("Daemon mode is not set, exiting...\n");
 	}
@@ -197,6 +213,7 @@ void copris_help() {
 	printf("  -p, --port     Port to listen to\n");
 	printf("  -d, --daemon   Run continuously, as a daemon\n");
 	printf("  -t, --trfile   (optional) character translation file\n");
+	printf("  -r, --printer  (optional) printer feature set\n");
 	printf("\n");
 	printf("  -v, --verbose  Be verbose (-vv more\n");
 	printf("  -q, --quiet    Display nothing except fatal errors (stderr)\n");
@@ -216,7 +233,13 @@ void copris_version() {
 	printf("  Buffer size:          %d B\n", BUFSIZE);
 	printf("  Connection backlog:   %d connection(s)\n", BACKLOG);
 	printf("  Max. filename length: %d characters\n", FNAME_LEN);
-	printf("Included printer feature sets:\n");
-	printf("  none\n");
+	printf("Included printer feature sets:\n  ");
+	if(prsets[0]) {
+		for(int p = 0; prsets[p][0] != '\0'; p++) {
+			printf("%s  ", prsets[p]);
+		}
+	} else {
+		printf("(none)");
+	}
 	printf("\n");
 }

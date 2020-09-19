@@ -13,6 +13,7 @@
 
 #include "debug.h"
 #include "translate.h"
+//#include "printerset.h"
 
 // These two variables are used by both trfile and translate functions
 unsigned char *input;       // Chars that should be picked out
@@ -35,7 +36,7 @@ void copris_trfile(char *filename) {
 	if(!dat) {
 		log_perr(-1, "fopen", "Failed to open translation file for reading.");
 	} else {
-		log_debug("Loaded translation file %s\n", dat);
+		log_debug("Opened translation file %s\n", dat);
 	}
 	
 	// Determine the number of lines/definitions
@@ -148,14 +149,23 @@ void copris_trfile(char *filename) {
 			}
 		}
 	}
-		if(digit != -1) {
-			fprintf(stderr, "Integers in translation file lacking digits " 
-			                "(leading 0?). Exiting...\n");
-			exit(1);
-		}
+	
+	if(digit != -1) {
+		fprintf(stderr, "Integers in translation file lacking digits " 
+						"(leading 0?). Exiting...\n");
+		exit(1);
+	}
+	
+	ferr = fclose(dat);
+	log_perr(ferr, "close", "Failed to close the translation file after reading.");
 	
 	input[i]       = '\0';
 	replacement[j] = '\0';
+	
+	if(log_info()) {
+		log_date();
+		printf("%d translation definition(s) successfully loaded.\n", lines);
+	}
 	
 	if(log_debug()) {
 		printf("input      : ");
@@ -175,20 +185,16 @@ void copris_trfile(char *filename) {
 		
 		printf("\n");
 	}
-	
-// 	printf("\n");
-	ferr = fclose(dat);
-	log_perr(ferr, "close", "Failed to close the translation file after reading.");
 }
 
-unsigned char *copris_translate(unsigned char *source, int source_len) {
-	unsigned char *ret = malloc(2 * source_len + 1); // Final translated array
+void copris_translate(unsigned char *source, int source_len, unsigned char *ret) {
+// 	unsigned char *ret = malloc(2 * source_len + 1); // Final translated array
 	int i; // Source array iterator
 	int j; // Return array iterator
 	int k; // Input/replacement array iterator
 	
 	for(i = 0, j = 0; source[i] != '\0'; i++, j++) { // Loop through source text
-		ret[j] = 0;
+// 		ret[j] = 0;
 		for(k = 0; input[k] != '\0'; k++) {          // Loop through input chars
 			// Source matches input, start character exchange
 			if(source[i] == input[k] && source[i] != ' ') {
@@ -213,18 +219,99 @@ unsigned char *copris_translate(unsigned char *source, int source_len) {
 			}
 		}
 		if(log_debug() && i < source_len - 1)
-			printf("   %x -> %c\n", source[i], (j > -1) ? ret[j] : ' ');
+			printf("%d   %x -> %c\n", i, source[i], (j > -1) ? ret[j] : ' ');
 		
 // 		j++;
 	}
 	ret[j] = '\0'; // This odd zero looks somewhat important, I presume...
+}
+
+/*
+ * Instructions in printerset[]:
+ * 0  newline + reset
+ * 1  bell
+ * 2  h1
+ * 3  h2
+ * 4  h3
+ * 5  bold on
+ * 6  bold off
+ * 7  ital on
+ * 8  ital off
+ */
+
+struct _attribs {
+	int bold_on;
+	int ital_on;
+	int head_on;
+};
+
+struct _attribs attribs = { 0 };
+
+void copris_printerset(unsigned char *source, int source_len, unsigned char *ret) {
+	int r = 0;
+	char printerset[9][6] = { "E!0\n", "BEL", "E!168", "E!40", "E!32", "EE", "EF", "E4", "E5" };
 	
-	return ret;
+	for(int s = 0; s < source_len; s++) {
+		if(source[s]     == '*' && 
+		   source[s + 1] == '*'
+		) {
+			r = escinsert(ret, r, attribs.ital_on ? printerset[8] : printerset[7]);
+			attribs.ital_on = !attribs.ital_on;
+			s = s + 1;
+			
+		} else if(source[s] == '*') {
+			r = escinsert(ret, r, attribs.bold_on ? printerset[6] : printerset[5]);
+			attribs.bold_on = !attribs.bold_on;
+			
+		} else if(source[s]     == '#' && 
+			      source[s + 1] == '#' && 
+			      source[s + 2] == '#' && 
+			      source[s + 3] == ' ' && // space after
+			      s == 0                  // no character before
+		) {
+			r = escinsert(ret, r, printerset[4]);
+			attribs.head_on = 1;
+			s = s + 3;
+			
+		} else if(source[s]     == '#' && 
+			      source[s + 1] == '#' && 
+			      source[s + 2] == ' ' &&
+			      s == 0
+		) {
+			r = escinsert(ret, r, printerset[3]);
+			attribs.head_on = 1;
+			s = s + 2;
+				
+		} else if(source[s]     == '#' && 
+			      source[s + 1] == ' ' &&
+			      s == 0
+		) {
+			r = escinsert(ret, r, printerset[2]);
+			attribs.head_on = 1;
+			s = s + 1;
+			
+		} else if(source[s] == '\n' && attribs.head_on) {
+			r = escinsert(ret, r, printerset[0]);
+			attribs.head_on = 0;
+			
+		} else {
+			ret[r] = source[s];
+			r++;
+		}
+	}
+
+	ret[r] = '\0';
+}
+
+int escinsert(unsigned char *ret, int r, char *printerset) {
+	for(int b = 0; printerset[b]; b++)
+		ret[r++] = printerset[b];
+
+	return r;
 }
 
 // Yes, this function can overflow. Not with hardcoded maximum exponent though.
-int power10(int exp)
-{
+int power10(int exp) {
 	int result = 1;
 	
 	for(; exp > 0; exp--) {
