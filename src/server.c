@@ -143,7 +143,7 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 			to_print[z] = '\0';
 			
 			if(printerset) {
-				copris_printerset(buf, fderr, to_print);
+				copris_printerset(buf, fderr, to_print, printerset);
 				if(trfile) {
 					copris_translate(to_print, fderr, to_print);
 				}

@@ -152,6 +152,42 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	
+	// We are writing to a file if destination is not NULL.
+	if(destination[0]) {
+		// Are we able to write to the output file?
+		if(access(destination, W_OK) == -1)
+			log_perr(-1, "access", "Unable to write to output file/printer. " 
+			                       "Does it exist?");
+	}
+	
+	// Check if printer set exists and set it to its index + 1
+	if(printerset[0]) {
+		for(int p = 0; prsets[p][0] != '\0'; p++) {
+			if(strcmp(printerset, prsets[p]) == 0) {
+				if(log_info()) {
+					log_date();
+					printf("Selected printer feature set %s.\n", printerset);
+				}
+				printerset[0] = p + 1;
+				printerset[1] = -1;
+				
+				break;
+			}
+		}
+		
+		if(printerset[1] != -1){
+			fprintf(stderr, "Selected printer feature set does not exist. " 
+		                    "Exiting...\n");
+			return 1;
+		}
+	}
+	
+	// Read the translation file. The function populates global variables *input
+	// and *replacement, defined in translate.c
+	if(trfile[0]) {
+		copris_trfile(trfile);
+	}
+	
 	if(log_info()) {
 		log_date();
 		printf("Verbosity level set to %d.\n", verbosity);
@@ -167,14 +203,6 @@ int main(int argc, char **argv) {
 		printf("Server listening port set to %d.\n", portno);
 	}
 	
-	// We are writing to a file if destination is not NULL.
-	if(destination[0]) {
-		// Are we able to write to the output file?
-		if(access(destination, W_OK) == -1)
-			log_perr(-1, "access", "Unable to write to output file/printer. " 
-			                       "Does it exist?");
-	}
-	
 	// Where does the output go?
 	if(log_info()) {
 		log_date();
@@ -185,19 +213,12 @@ int main(int argc, char **argv) {
 			printf("stdout.\n");
 	}
 	
-	// Read the translation file. The function populates global variables *input
-	// and *replacement, defined in translate.c
-	if(trfile[0]) {
-		copris_trfile(trfile);
-	}
-	
 	// Open socket and listen
 	copris_listen(&parentfd, portno);
 	
 	do {
-		// Accept incoming connections
-// 	    copris_read(&parentfd, destination, trfile[0], printerset[0]);
-	    copris_read(&parentfd, destination, trfile[0], 1);
+		// Accept incoming connections, process data and send it out
+	    copris_read(&parentfd, destination, trfile[0], printerset[0]);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -234,7 +255,7 @@ void copris_version() {
 	printf("  Connection backlog:   %d connection(s)\n", BACKLOG);
 	printf("  Max. filename length: %d characters\n", FNAME_LEN);
 	printf("Included printer feature sets:\n  ");
-	if(prsets[0]) {
+	if(*prsets[0]) {
 		for(int p = 0; prsets[p][0] != '\0'; p++) {
 			printf("%s  ", prsets[p]);
 		}

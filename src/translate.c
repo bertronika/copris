@@ -13,7 +13,7 @@
 
 #include "debug.h"
 #include "translate.h"
-//#include "printerset.h"
+#include "printerset.h"
 
 // These two variables are used by both trfile and translate functions
 unsigned char *input;       // Chars that should be picked out
@@ -247,20 +247,20 @@ struct _attribs {
 
 struct _attribs attribs = { 0 };
 
-void copris_printerset(unsigned char *source, int source_len, unsigned char *ret) {
+void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set) {
 	int r = 0;
-	char printerset[9][6] = { "E!0\n", "BEL", "E!168", "E!40", "E!32", "EE", "EF", "E4", "E5" };
+	set--;
 	
 	for(int s = 0; s < source_len; s++) {
 		if(source[s]     == '*' && 
 		   source[s + 1] == '*'
 		) {
-			r = escinsert(ret, r, attribs.ital_on ? printerset[8] : printerset[7]);
+			r = escinsert(ret, r, attribs.ital_on ? printerset[set][8] : printerset[set][7]);
 			attribs.ital_on = !attribs.ital_on;
 			s = s + 1;
 			
 		} else if(source[s] == '*') {
-			r = escinsert(ret, r, attribs.bold_on ? printerset[6] : printerset[5]);
+			r = escinsert(ret, r, attribs.bold_on ? printerset[set][6] : printerset[set][5]);
 			attribs.bold_on = !attribs.bold_on;
 			
 		} else if(source[s]     == '#' && 
@@ -269,7 +269,7 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			      source[s + 3] == ' ' && // space after
 			      s == 0                  // no character before
 		) {
-			r = escinsert(ret, r, printerset[4]);
+			r = escinsert(ret, r, printerset[set][4]);
 			attribs.head_on = 1;
 			s = s + 3;
 			
@@ -278,7 +278,7 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			      source[s + 2] == ' ' &&
 			      s == 0
 		) {
-			r = escinsert(ret, r, printerset[3]);
+			r = escinsert(ret, r, printerset[set][3]);
 			attribs.head_on = 1;
 			s = s + 2;
 				
@@ -286,12 +286,12 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			      source[s + 1] == ' ' &&
 			      s == 0
 		) {
-			r = escinsert(ret, r, printerset[2]);
+			r = escinsert(ret, r, printerset[set][2]);
 			attribs.head_on = 1;
 			s = s + 1;
 			
 		} else if(source[s] == '\n' && attribs.head_on) {
-			r = escinsert(ret, r, printerset[0]);
+			r = escinsert(ret, r, printerset[set][0]);
 			attribs.head_on = 0;
 			
 		} else {
