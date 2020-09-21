@@ -169,13 +169,13 @@ int main(int argc, char **argv) {
 					printf("Selected printer feature set %s.\n", printerset);
 				}
 				printerset[0] = p + 1;
-				printerset[1] = -1;
+				printerset[1] = 0;
 				
 				break;
 			}
 		}
 		
-		if(printerset[1] != -1){
+		if(printerset[1] != 0){
 			fprintf(stderr, "Selected printer feature set does not exist. " 
 		                    "Exiting...\n");
 			return 1;
@@ -236,7 +236,7 @@ void copris_help() {
 	printf("  -t, --trfile   (optional) character translation file\n");
 	printf("  -r, --printer  (optional) printer feature set\n");
 	printf("\n");
-	printf("  -v, --verbose  Be verbose (-vv more\n");
+	printf("  -v, --verbose  Be verbose (-vv more)\n");
 	printf("  -q, --quiet    Display nothing except fatal errors (stderr)\n");
 	printf("  -h, --help     Show this help\n");
 	printf("  -V, --version  Show program version and included printer \n");
