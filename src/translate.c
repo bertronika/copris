@@ -241,6 +241,7 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 int bold_on;
 int ital_on;
 int head_on;
+char lastchar = '\n'; // If last char is not newline, do not make a heading
 
 void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set) {
 	int r = 0;
@@ -264,20 +265,20 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			r = escinsert(ret, r, bold_on ? printerset[set][6] : printerset[set][5]);
 			bold_on = !bold_on;
 			
-		} else if(source[s]     == '#' && 
-			      source[s + 1] == '#' && 
-			      source[s + 2] == '#' && 
-			      source[s + 3] == ' ' && // space after
-			      s == 0                  // no character before
+		} else if(lastchar      == '\n' &&
+				  source[s]     == '#'  &&
+				  source[s + 1] == '#'  &&
+				  source[s + 2] == '#'  &&
+				  source[s + 3] == ' '
 		) {
 			r = escinsert(ret, r, printerset[set][2]);
 			head_on = 3;
 			s = s + 3;
 			
-		} else if(source[s]     == '#' && 
-			      source[s + 1] == '#' && 
-			      source[s + 2] == ' ' &&
-			      s == 0
+		} else if(lastchar      == '\n' &&
+				  source[s]     == '#'  &&
+				  source[s + 1] == '#'  &&
+				  source[s + 2] == ' '
 		) {
 			r = escinsert(ret, r, printerset[set][2]);
 			r = escinsert(ret, r, printerset[set][3]);
@@ -285,9 +286,9 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			head_on = 2;
 			s = s + 2;
 				
-		} else if(source[s]     == '#' && 
-			      source[s + 1] == ' ' &&
-			      s == 0
+		} else if(lastchar      == '\n' &&
+				  source[s]     == '#'  &&
+				  source[s + 1] == ' '
 		) {
 			r = escinsert(ret, r, printerset[set][2]);
 			r = escinsert(ret, r, printerset[set][3]);
@@ -313,6 +314,8 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			ret[r] = source[s];
 			r++;
 		}
+		
+		lastchar = source[s];
 	}
 
 	ret[r] = '\0';
