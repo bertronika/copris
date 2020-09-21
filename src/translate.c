@@ -1,6 +1,6 @@
 /*
  * translate.c
- * Translation file processing and translation for foreign printer code tables
+ * Text and markdown translation/conversion for printers
  * 
  * Part of COPRIS - a converting printer server
  * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
@@ -188,7 +188,6 @@ void copris_trfile(char *filename) {
 }
 
 void copris_translate(unsigned char *source, int source_len, unsigned char *ret) {
-// 	unsigned char *ret = malloc(2 * source_len + 1); // Final translated array
 	int i; // Source array iterator
 	int j; // Return array iterator
 	int k; // Input/replacement array iterator
@@ -221,7 +220,6 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 		if(log_debug() && i < source_len - 1)
 			printf("%d   %x -> %c\n", i, source[i], (j > -1) ? ret[j] : ' ');
 		
-// 		j++;
 	}
 	ret[j] = '\0'; // This odd zero looks somewhat important, I presume...
 }

@@ -1,6 +1,6 @@
 /*
  * copris.c
- * Main program. Contains an argument parser and the essential COPRIS program structure.
+ * Parses arguments, trfile and printerset selections and runs the server
  * 
  * COPRIS - a converting printer server
  * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
@@ -38,8 +38,6 @@ int main(int argc, char **argv) {
 	int parentfd   = 0;  // Parent file descriptor to hold a socket
 	int portno     = -1; // Listening port of this server
 	int daemon     = 0;  // Is the daemon option set?
-// 	int trfile_set = 0;  // Is the translation file option set?
-// 	int prfile_set = 0;  // Is the printer feature set selected?
 	int opt;             // Character, read by getopt
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
 	char printerset[PRSET_LEN + 1]  = { 0 }; // Input translation file
@@ -75,7 +73,6 @@ int main(int argc, char **argv) {
 				daemon = 1;
 				break;
 			case 't':
-// 				trfile_set = 1;
 				if(strlen(optarg) <= FNAME_LEN) {
 					strcpy(trfile, optarg);
 				} else {
@@ -85,12 +82,11 @@ int main(int argc, char **argv) {
 				}
 				break;
 			case 'r':
-// 				prfile_set = 1;
 				if(strlen(optarg) <= PRSET_LEN) {
 					strcpy(printerset, optarg);
 				} else {
 					// Excessive length already makes it wrong
-					fprintf(stderr, "Wrong printer feature set (%s). "
+					fprintf(stderr, "Selected printer feature set does not exist (%s). "
 					                "Exiting...\n", optarg);
 					exit(1);
 				}
@@ -139,12 +135,6 @@ int main(int argc, char **argv) {
 			exit(1);
 		}
 	}
-	
-// 	if(optind < argc) {
-// 		printf("Non-option args: ");
-// 		while (optind < argc)
-// 			printf("%s ", argv[optind++]);
-// 		printf("\n");
 
 	if(portno < 1) {
 		fprintf(stderr, "Port number is missing. Set it with the '-p' option. " 
@@ -203,7 +193,6 @@ int main(int argc, char **argv) {
 		printf("Server listening port set to %d.\n", portno);
 	}
 	
-	// Where does the output go?
 	if(log_info()) {
 		log_date();
 		printf("Data stream will be sent to ");

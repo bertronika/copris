@@ -1,5 +1,3 @@
-/* Header for the translate.c file processing and code table translations */
-
 extern unsigned char *input;
 extern unsigned char *replacement;
 

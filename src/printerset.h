@@ -1,5 +1,3 @@
-/* Header for the printerset.c printer feature sets */
-
 #define PRSET_LEN 12
 #define INSTRUC_LEN 5
 

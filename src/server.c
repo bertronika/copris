@@ -1,6 +1,6 @@
 /*
  * server.c
- * Stream socket server implementation
+ * Stream socket server with trfile and prset hooks
  * 
  * Part of COPRIS - a converting printer server
  * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
@@ -23,6 +23,7 @@
 #include "server.h"
 #include "writer.h"
 #include "translate.h"
+#include "printerset.h"
 
 const int BUFSIZE = 256;
 const int BACKLOG = 1;
@@ -94,8 +95,7 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 	char *hostaddrp;                // Host address string
 	char host[NI_MAXHOST];          // Host info (IP, hostname). NI_MAXHOST is built in
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
-// 	unsigned char *to_print;        // Final, converted stream
-	unsigned char to_print[4 * BUFSIZE + 1];        // Final, converted stream
+	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
 
 	// Set the struct size
 	clientlen = sizeof(clientaddr);
@@ -186,7 +186,3 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
     
     return 0;
 }
-
-// void copris_cleanup(unsigned char *to_print) {
-//   free(to_print);
-// }
