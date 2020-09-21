@@ -257,13 +257,13 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		} else if(source[s]     == '*' && 
 		          source[s + 1] == '*'
 		) {
-			r = escinsert(ret, r, ital_on ? printerset[set][8] : printerset[set][7]);
-			ital_on = !ital_on;
+			r = escinsert(ret, r, bold_on ? printerset[set][6] : printerset[set][5]);
+			bold_on = !bold_on;
 			s = s + 1;
 			
 		} else if(source[s] == '*') {
-			r = escinsert(ret, r, bold_on ? printerset[set][6] : printerset[set][5]);
-			bold_on = !bold_on;
+			r = escinsert(ret, r, ital_on ? printerset[set][8] : printerset[set][7]);
+			ital_on = !ital_on;
 			
 		} else if(lastchar      == '\n' &&
 				  source[s]     == '#'  &&
