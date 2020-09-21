@@ -228,40 +228,43 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 
 /*
  * Instructions in printerset[]:
- * 0  newline + reset
+ * 0  reset
  * 1  bell
- * 2  h1
- * 3  h2
- * 4  h3
+ * 2  double-width
+ * 3  underline on
+ * 4  underline off
  * 5  bold on
  * 6  bold off
- * 7  ital on
- * 8  ital off
+ * 7  italic on
+ * 8  italic off
  */
 
-struct _attribs {
-	int bold_on;
-	int ital_on;
-	int head_on;
-};
-
-struct _attribs attribs = { 0 };
+// Text attributes, preserved over multiple printerset function calls
+int bold_on;
+int ital_on;
+int head_on;
 
 void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set) {
 	int r = 0;
 	set--;
 	
 	for(int s = 0; s < source_len; s++) {
-		if(source[s]     == '*' && 
-		   source[s + 1] == '*'
+		if(source[s]     == '~' &&
+		   source[s + 1] == 'r'
 		) {
-			r = escinsert(ret, r, attribs.ital_on ? printerset[set][8] : printerset[set][7]);
-			attribs.ital_on = !attribs.ital_on;
+			r = escinsert(ret, r, printerset[set][0]);
+			s = s + 1;
+		
+		} else if(source[s]     == '*' && 
+		          source[s + 1] == '*'
+		) {
+			r = escinsert(ret, r, ital_on ? printerset[set][8] : printerset[set][7]);
+			ital_on = !ital_on;
 			s = s + 1;
 			
 		} else if(source[s] == '*') {
-			r = escinsert(ret, r, attribs.bold_on ? printerset[set][6] : printerset[set][5]);
-			attribs.bold_on = !attribs.bold_on;
+			r = escinsert(ret, r, bold_on ? printerset[set][6] : printerset[set][5]);
+			bold_on = !bold_on;
 			
 		} else if(source[s]     == '#' && 
 			      source[s + 1] == '#' && 
@@ -269,8 +272,8 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			      source[s + 3] == ' ' && // space after
 			      s == 0                  // no character before
 		) {
-			r = escinsert(ret, r, printerset[set][4]);
-			attribs.head_on = 1;
+			r = escinsert(ret, r, printerset[set][2]);
+			head_on = 3;
 			s = s + 3;
 			
 		} else if(source[s]     == '#' && 
@@ -278,8 +281,10 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			      source[s + 2] == ' ' &&
 			      s == 0
 		) {
+			r = escinsert(ret, r, printerset[set][2]);
 			r = escinsert(ret, r, printerset[set][3]);
-			attribs.head_on = 1;
+			r = escinsert(ret, r, printerset[set][7]);
+			head_on = 2;
 			s = s + 2;
 				
 		} else if(source[s]     == '#' && 
@@ -287,12 +292,24 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			      s == 0
 		) {
 			r = escinsert(ret, r, printerset[set][2]);
-			attribs.head_on = 1;
+			r = escinsert(ret, r, printerset[set][3]);
+			r = escinsert(ret, r, printerset[set][5]);
+			head_on = 1;
 			s = s + 1;
 			
-		} else if(source[s] == '\n' && attribs.head_on) {
-			r = escinsert(ret, r, printerset[set][0]);
-			attribs.head_on = 0;
+		} else if(source[s] == '\n' && head_on) {
+			if(head_on == 2) {
+				r = escinsert(ret, r, printerset[set][8]);
+				r = escinsert(ret, r, printerset[set][4]);
+			}
+			
+			if(head_on == 1) {
+				r = escinsert(ret, r, printerset[set][6]);
+				r = escinsert(ret, r, printerset[set][4]);
+			}
+			
+			r = escinsert(ret, r, "\n"); // newline
+			head_on = 0;
 			
 		} else {
 			ret[r] = source[s];
