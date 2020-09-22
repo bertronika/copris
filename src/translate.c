@@ -263,6 +263,7 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 				r = escinsert(ret, r, printerset[set][1]);
 			}
 			reset_on = 0;
+			s++; // Remove the newline
 			continue;
 		}
 		
@@ -305,10 +306,19 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		}
 		
 		if(heading_level) {
-			if(source[s] != ' ') {       // If there is no space after #, it is
-				heading_on = 0;          // not a heading.
-			} else if(lastchar == '#') { // If there is a space, skip putting it
-				s++;                     // into output.
+			// If there is no space after #, it is not a heading.
+			// However, add # symbols back
+			if(source[s] != ' ') {
+				if(lastchar == '#') {
+					for(; heading_level > 0; heading_level--) {
+						r = escinsert(ret, r, "#");
+					}
+				}
+				heading_on = 0;
+				
+			// If there is a space, skip putting it into output.
+			} else if(lastchar == '#') {
+				s++;
 			}
 		}
 		
