@@ -137,19 +137,19 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 	int z;
 	// Read the data sent by the client into the buffer
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
-			for(z = 0; buf[z]; z++) {
-				to_print[z] = buf[z];
+		for(z = 0; z <= BUFSIZE; z++) {
+			to_print[z] = buf[z];
+		}
+		to_print[z] = '\0';
+		
+		if(printerset) {
+			copris_printerset(buf, fderr, to_print, printerset);
+			if(trfile) {
+				copris_translate(to_print, fderr, to_print);
 			}
-			to_print[z] = '\0';
-			
-			if(printerset) {
-				copris_printerset(buf, fderr, to_print, printerset);
-				if(trfile) {
-					copris_translate(to_print, fderr, to_print);
-				}
-			} else if(trfile) {
-				copris_translate(buf, fderr, to_print);
-			}
+		} else if(trfile) {
+			copris_translate(buf, fderr, to_print);
+		}
 		
 		// Destination can be either stdout or a file
 		if(!destination[0] && log_err()) {
