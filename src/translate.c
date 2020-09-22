@@ -238,9 +238,11 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
  */
 
 // Text attributes, preserved over multiple printerset function calls
-int bold_on;
-int ital_on;
-int head_on;
+int bold_on  = 0;
+int ital_on  = 0;
+int reset_on = 0;
+int heading_level = 0;
+int heading_on    = 0;
 char lastchar = '\n'; // If last char is not newline, do not make a heading
 
 void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set) {
@@ -248,73 +250,111 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 	set--;
 	
 	for(int s = 0; s < source_len; s++) {
-		if(source[s]     == '~' &&
-		   source[s + 1] == 'r'
-		) {
-			r = escinsert(ret, r, printerset[set][0]);
-			s = s + 1;
+		/* Reset sequences */
+		if(source[s] == '~' && lastchar == '\n') {
+			reset_on = 1;
+			continue;
+		}
 		
-		} else if(source[s]     == '*' && 
-		          source[s + 1] == '*'
-		) {
-			r = escinsert(ret, r, bold_on ? printerset[set][6] : printerset[set][5]);
-			bold_on = !bold_on;
-			s = s + 1;
+		if(reset_on) {
+			if(source[s] == 'r') {
+				r = escinsert(ret, r, printerset[set][0]);
+			} else if(source[s] == 'b') {
+				r = escinsert(ret, r, printerset[set][1]);
+			}
+			reset_on = 0;
+			continue;
+		}
+		
+		/* Italic and bold handling */
+		if(source[s] == '*' && lastchar == '*' /*&& ital_on*/) {
+// 			if(!bold_on)
+// 				bold_on = 1;
+// 			else
+// 				bold_on = -1;
+			bold_on = bold_on ? -1 : 1;
+
+			ital_on = 0; // TODO: this is problematic (*epson**oki**star*)
+			lastchar = source[s];  //                     doesn't close ^
+			continue;
+		}
+		
+		if(source[s] == '*') {
+// 			if(!ital_on)
+// 				ital_on = 1;
+// 			else
+// 				ital_on = -1;
+			ital_on = ital_on ? -1 : 1;
 			
-		} else if(source[s] == '*') {
-			r = escinsert(ret, r, ital_on ? printerset[set][8] : printerset[set][7]);
-			ital_on = !ital_on;
-			
-		} else if(lastchar      == '\n' &&
-				  source[s]     == '#'  &&
-				  source[s + 1] == '#'  &&
-				  source[s + 2] == '#'  &&
-				  source[s + 3] == ' '
-		) {
-			r = escinsert(ret, r, printerset[set][2]);
-			head_on = 3;
-			s = s + 3;
-			
-		} else if(lastchar      == '\n' &&
-				  source[s]     == '#'  &&
-				  source[s + 1] == '#'  &&
-				  source[s + 2] == ' '
-		) {
-			r = escinsert(ret, r, printerset[set][2]);
-			r = escinsert(ret, r, printerset[set][3]);
-			r = escinsert(ret, r, printerset[set][7]);
-			head_on = 2;
-			s = s + 2;
-				
-		} else if(lastchar      == '\n' &&
-				  source[s]     == '#'  &&
-				  source[s + 1] == ' '
-		) {
-			r = escinsert(ret, r, printerset[set][2]);
-			r = escinsert(ret, r, printerset[set][3]);
-			r = escinsert(ret, r, printerset[set][5]);
-			head_on = 1;
-			s = s + 1;
-			
-		} else if(source[s] == '\n' && head_on) {
-			if(head_on == 2) {
+			lastchar = source[s];
+			continue;
+		}
+		
+		/* Heading handling */
+		if(source[s] == '#' && lastchar == '\n') {
+			heading_level++;
+			heading_on = 1;
+			lastchar = source[s];
+			continue;
+		}
+		
+		if(source[s] == '#' && heading_level > 0 && heading_level < 3) {
+			heading_level++;
+			lastchar = source[s];
+			continue;
+		}
+		
+		if(heading_level) {
+			if(source[s] != ' ') {       // If there is no space after #, it is
+				heading_on = 0;          // not a heading.
+			} else if(lastchar == '#') { // If there is a space, skip putting it
+				s++;                     // into output.
+			}
+		}
+		
+		/* Text output to returned array */
+		if(source[s] == '\n') {
+			if(heading_level == 1) {
+				r = escinsert(ret, r, printerset[set][6]);
+				r = escinsert(ret, r, printerset[set][4]);
+			} else if(heading_level == 2) {
 				r = escinsert(ret, r, printerset[set][8]);
 				r = escinsert(ret, r, printerset[set][4]);
 			}
-			
-			if(head_on == 1) {
-				r = escinsert(ret, r, printerset[set][6]);
-				r = escinsert(ret, r, printerset[set][4]);
-			}
-			
-			r = escinsert(ret, r, "\n"); // newline
-			head_on = 0;
-			
-		} else {
-			ret[r] = source[s];
-			r++;
+			heading_level = 0;
 		}
 		
+		if(bold_on == 1) {
+			r = escinsert(ret, r, printerset[set][5]);
+			bold_on = 2;
+		} else if(bold_on == -1) {
+			r = escinsert(ret, r, printerset[set][6]);
+			bold_on = 0;
+		}
+		
+		if(ital_on == 1) {
+			r = escinsert(ret, r, printerset[set][7]);
+			ital_on = 2;
+		} else if(ital_on == -1) {
+			r = escinsert(ret, r, printerset[set][8]);
+			ital_on = 0;
+		}
+		
+		if(heading_on) {
+			r = escinsert(ret, r, printerset[set][2]);
+			
+			if(heading_level == 1) {
+				r = escinsert(ret, r, printerset[set][3]);
+				r = escinsert(ret, r, printerset[set][5]);
+			} else if(heading_level == 2) {
+				r = escinsert(ret, r, printerset[set][3]);
+				r = escinsert(ret, r, printerset[set][7]);
+			}
+			
+			heading_on = 0;
+		}
+		
+		ret[r++] = source[s];
 		lastchar = source[s];
 	}
 
