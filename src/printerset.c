@@ -23,14 +23,14 @@
  * 8  italic off
  */
 
-// Array of available presets
+// Available presets to be listed when invoking the -v argument
 char prsets[][PRSET_LEN + 1] = {
 	"epson",
 	"dummy",
 	{ '\0' }
 };
 
-// Array of preset definitions, order corresponding to prsets[]
+// Preset definitions, order corresponding to prsets[]
 char printerset[][9][INSTRUC_LEN + 1] = {{
 	"\x1b\x40",     "\x07",
 	"\x0e",

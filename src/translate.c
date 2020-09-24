@@ -240,7 +240,7 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 // Text attributes, preserved over multiple printerset function calls
 int bold_on  = 0;
 int ital_on  = 0;
-int reset_on = 0;
+int reset_on = 0; /* 1 for reset sequence, 2 for char. escape */
 int heading_level = 0;
 int heading_on    = 0;
 char lastchar = '\n'; // If last char is not newline, do not make a heading
@@ -251,28 +251,34 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 	
 	for(int s = 0; s < source_len; s++) {
 		/* Reset sequences */
-		if(source[s] == '~' && lastchar == '\n') {
+		if(source[s] == '?' && lastchar == '\n') {
 			reset_on = 1;
 			continue;
 		}
 		
-		if(reset_on) {
+		if(reset_on == 1) {
 			if(source[s] == 'r') {
 				r = escinsert(ret, r, printerset[set][0]);
 			} else if(source[s] == 'b') {
 				r = escinsert(ret, r, printerset[set][1]);
 			}
-			reset_on = 0;
 			s++; // Remove the newline
+			reset_on = 0;
 			continue;
 		}
 		
+		if(source[s] == '\\') {
+			reset_on = 2;
+			continue;
+		}
+		
+		if(reset_on == 2) {
+			reset_on = 0;
+			goto copy_char; /* Oh no, goto */
+		}
+		
 		/* Italic and bold handling */
-		if(source[s] == '*' && lastchar == '*' /*&& ital_on*/) {
-// 			if(!bold_on)
-// 				bold_on = 1;
-// 			else
-// 				bold_on = -1;
+		if(source[s] == '*' && lastchar == '*') {
 			bold_on = bold_on ? -1 : 1;
 
 			ital_on = 0; // TODO: this is problematic (*epson**oki**star*)
@@ -281,10 +287,6 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		}
 		
 		if(source[s] == '*') {
-// 			if(!ital_on)
-// 				ital_on = 1;
-// 			else
-// 				ital_on = -1;
 			ital_on = ital_on ? -1 : 1;
 			
 			lastchar = source[s];
@@ -364,6 +366,7 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			heading_on = 0;
 		}
 		
+		copy_char:
 		ret[r++] = source[s];
 		lastchar = source[s];
 	}
