@@ -257,13 +257,16 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		}
 		
 		if(reset_on == 1) {
+			reset_on = 0;
 			if(source[s] == 'r') {
 				r = escinsert(ret, r, printerset[set][0]);
 			} else if(source[s] == 'b') {
 				r = escinsert(ret, r, printerset[set][1]);
+			} else {
+				r = escinsert(ret, r, "?");
+				goto copy_char;
 			}
 			s++; // Remove the newline
-			reset_on = 0;
 			continue;
 		}
 		

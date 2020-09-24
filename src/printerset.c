@@ -38,7 +38,7 @@ char printerset[][9][INSTRUC_LEN + 1] = {{
 	"\x1b\x45",     "\x1b\x46",
 	"\x1b\x34",     "\x1b\x35"
 },{
-	"+RES", "+BEL",
+	"+RES\n", "+BEL\n",
 	"+DW",
 	"+UL1", "+UL0",
 	"+B1",  "+B0",
