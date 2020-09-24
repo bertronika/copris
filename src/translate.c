@@ -238,9 +238,9 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
  */
 
 // Text attributes, preserved over multiple printerset function calls
-int bold_on  = 0;
-int ital_on  = 0;
-int reset_on = 0; /* 1 for reset sequence, 2 for char. escape */
+int bold_on   = 0;
+int ital_on   = 0;
+int reset_esc = 0; /* 1 for reset sequence, 2 for char. escape */
 int heading_level = 0;
 int heading_on    = 0;
 char lastchar = '\n'; // If last char is not newline, do not make a heading
@@ -252,12 +252,12 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 	for(int s = 0; s < source_len; s++) {
 		/* Reset sequences */
 		if(source[s] == '?' && lastchar == '\n') {
-			reset_on = 1;
+			reset_esc = 1;
 			continue;
 		}
 		
-		if(reset_on == 1) {
-			reset_on = 0;
+		if(reset_esc == 1) {
+			reset_esc = 0;
 			if(source[s] == 'r') {
 				r = escinsert(ret, r, printerset[set][0]);
 			} else if(source[s] == 'b') {
@@ -270,14 +270,16 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 			continue;
 		}
 		
-		if(source[s] == '\\') {
-			reset_on = 2;
+		if(source[s] == '\\' && reset_esc != 2) {
+			reset_esc = 2;
 			continue;
 		}
 		
-		if(reset_on == 2) {
-			reset_on = 0;
-			goto copy_char; /* Oh no, goto */
+		if(reset_esc == 2) {
+			reset_esc = 0;
+			if(source[s] != '\\') {
+				goto copy_char; /* Oh no, goto */
+			}
 		}
 		
 		/* Italic and bold handling */
