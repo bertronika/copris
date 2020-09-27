@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
 	
 	do {
 		// Accept incoming connections, process data and send it out
-	    copris_read(&parentfd, destination, trfile[0], printerset[0]);
+	    copris_read(&parentfd, destination, daemon, trfile[0], printerset[0]);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -241,7 +241,6 @@ void copris_version() {
 	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
 	printf("Compiled options:\n");
 	printf("  Buffer size:          %d B\n", BUFSIZE);
-	printf("  Connection backlog:   %d connection(s)\n", BACKLOG);
 	printf("  Max. filename length: %d characters\n", FNAME_LEN);
 	printf("Included printer feature sets:\n  ");
 	if(*prsets[0]) {

@@ -18,6 +18,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 
 #include "debug.h"
 #include "server.h"
@@ -26,7 +27,13 @@
 #include "printerset.h"
 
 const int BUFSIZE = 256;
-const int BACKLOG = 1;
+
+#define BACKLOG 2
+
+/*
+ * Round backlog to a power of 2.
+ * https://stackoverflow.com/a/5111841
+ */
 
 int copris_listen(int *parentfd, int portno) {
     int fderr; // Error code of a socket operation
@@ -86,7 +93,7 @@ int copris_listen(int *parentfd, int portno) {
     return 0;
 }
 
-int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
+int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum = 0;       // Received/sent message (byte) size
@@ -97,9 +104,9 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
 	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
 
-	// Set the struct size
+	// Get the struct size
 	clientlen = sizeof(clientaddr);
-
+	
 	// Wait for a connection request and accept it
 	childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
 	log_perr(childfd, "accept", "Failed to accept the connection.");
@@ -108,14 +115,20 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 		printf("Connection to socket accepted.\n");
 	}
 	
-	// Get the hostname of the connected party - the client
+	// Prevent more than one connection if not a daemon
+	if(!daemon) {
+		fderr = close(*parentfd);
+		log_perr(fderr, "close", "Failed to close the parent connection.");
+	}
+	
+	// Get the hostname of the client
 	fderr = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr), 
 						host, sizeof(host), NULL, 0, 0);
 	if(fderr != 0){
 		fprintf(stderr, "getnameinfo: Failed getting hostname from address.\n");
 	}
 
-	// Convert host's address from network byte order to a dotted-decimal form
+	// Convert client's address from network byte order to a dotted-decimal form
 	hostaddrp = inet_ntoa(clientaddr.sin_addr);
 	if(hostaddrp == NULL) {
 		fprintf(stderr, "inet_ntoa: Failed converting host's address.\n");
@@ -132,7 +145,6 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 
 	// Empty out the inbound buffer
 	memset(buf, '\0', BUFSIZE + 1);
-// 	memset(to_print, '\0', 4 * BUFSIZE + 1);
 
 	int z;
 	// Read the data sent by the client into the buffer
@@ -168,7 +180,7 @@ int copris_read(int *parentfd, char *destination, int trfile, int printerset) {
 	
 	// Close the current connection 
 	fderr = close(childfd);
-	log_perr(fderr, "close", "Failed to close the connection.");
+	log_perr(fderr, "close", "Failed to close the child connection.");
 	
 	if(log_err() && !destination[0])
 		printf("; EOS\n");
