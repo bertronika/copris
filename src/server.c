@@ -27,6 +27,7 @@
 #include "printerset.h"
 
 const int BUFSIZE = 256;
+const int RECVLIM = 16;
 
 #define BACKLOG 2
 
@@ -103,6 +104,8 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	char host[NI_MAXHOST];          // Host info (IP, hostname). NI_MAXHOST is built in
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
 	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
+	char limit_message[] = "Send size limit exceeded, terminating connection.\n";
+	int limit_set = 0;
 
 	// Get the struct size
 	clientlen = sizeof(clientaddr);
@@ -149,6 +152,17 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	int z;
 	// Read the data sent by the client into the buffer
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
+		if(limit_set && bytenum + fderr > RECVLIM) {
+			if(log_err())
+				printf("Client exceeded send size limit (%d B/%d B), "
+				       "terminating connection.\n", bytenum + fderr, RECVLIM);
+				
+			fderr = write(childfd, limit_message, strlen(limit_message));
+			log_perr(fderr, "write", "Error sending termination text to socket.");
+			
+			break;
+		}
+		
 		for(z = 0; z <= BUFSIZE; z++) {
 			to_print[z] = buf[z];
 		}
@@ -189,7 +203,8 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		log_date();
 	
 	if(log_err())
-		printf("End of stream, received %d bytes in total.\n", bytenum);
+		printf("End of stream, received %d bytes in %d chunk(s).\n", 
+			   bytenum, (bytenum < BUFSIZE && bytenum) ? 1 : bytenum / BUFSIZE);
 	
 	if(log_info()) {
 		log_date();
