@@ -27,14 +27,12 @@
 #include "printerset.h"
 
 const int BUFSIZE = 256;
-const int RECVLIM = 16;
-
-#define BACKLOG 2
 
 /*
  * Round backlog to a power of 2.
  * https://stackoverflow.com/a/5111841
  */
+#define BACKLOG 2
 
 int copris_listen(int *parentfd, int portno) {
     int fderr; // Error code of a socket operation
@@ -94,10 +92,11 @@ int copris_listen(int *parentfd, int portno) {
     return 0;
 }
 
-int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset) {
+int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset, int limitnum) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
-	int bytenum = 0;       // Received/sent message (byte) size
+	int bytenum   = 0;     // Received/sent message (byte) size
+	int discarded = 0;     // Discarded number of bytes, if limit is set
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
 	char *hostaddrp;                // Host address string
@@ -105,7 +104,6 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
 	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
 	char limit_message[] = "Send size limit exceeded, terminating connection.\n";
-	int limit_set = 0;
 
 	// Get the struct size
 	clientlen = sizeof(clientaddr);
@@ -152,11 +150,14 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	int z;
 	// Read the data sent by the client into the buffer
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
-		if(limit_set && bytenum + fderr > RECVLIM) {
+		bytenum += fderr; // Append read bytes to the total byte counter
+		if(limitnum && bytenum > limitnum) {
 			if(log_err())
 				printf("Client exceeded send size limit (%d B/%d B), "
-				       "terminating connection.\n", bytenum + fderr, RECVLIM);
-				
+				       "terminating connection.\n", bytenum, limitnum);
+			
+			discarded = fderr;
+			
 			fderr = write(childfd, limit_message, strlen(limit_message));
 			log_perr(fderr, "write", "Error sending termination text to socket.");
 			
@@ -184,7 +185,6 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 			copris_write(destination, to_print); // Write to the output file/printer
 		}
 		
-		bytenum += fderr;               // Append read bytes to the total byte counter
 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
 	}
 	log_perr(fderr, "read", "Error reading from socket.");
@@ -202,9 +202,12 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	if(log_info())
 		log_date();
 	
-	if(log_err())
-		printf("End of stream, received %d bytes in %d chunk(s).\n", 
-			   bytenum, (bytenum < BUFSIZE && bytenum) ? 1 : bytenum / BUFSIZE);
+	if(log_err()) {
+		printf("End of stream, received %d B in %d chunk(s)", 
+			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
+		
+		printf(discarded ? ", %d B discarded.\n" : ".\n", discarded);
+	}
 	
 	if(log_info()) {
 		log_date();
