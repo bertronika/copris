@@ -5,6 +5,8 @@
  * COPRIS - a converting printer server
  * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  * 
+ * Licensed under the MIT/Expat license.
+ * 
  * - https://azrael.digipen.edu/~mmead/www/Courses/CS180/getopt.html
  */
 
