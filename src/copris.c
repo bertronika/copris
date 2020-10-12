@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
 	int parentfd   = 0;  // Parent file descriptor to hold a socket
 	int portno     = -1; // Listening port of this server
 	int daemon     = 0;  // Is the daemon option set?
+	int limitnum   = 0;  // Limit received number of bytes
 	int opt;             // Character, read by getopt
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
 	char printerset[PRSET_LEN + 1]  = { 0 }; // Input translation file
@@ -58,6 +59,7 @@ int main(int argc, char **argv) {
 		{"daemon",  0, NULL, 'd'},
 		{"trfile",  1, NULL, 't'},
 		{"printer", 1, NULL, 'r'},
+		{"limit",   1, NULL, 'l'},
 		{"verbose", 1, NULL, 'v'},
 		{"quiet",   0, NULL, 'q'},
 		{"help",    0, NULL, 'h'},
@@ -66,7 +68,7 @@ int main(int argc, char **argv) {
 	};
 	
 	// int argc, char* argv[], char* optstring, struct* long_options, int* longindex
-	while((opt = getopt_long(argc, argv, ":p:dt:r:vqhV", long_options, NULL)) != -1) {
+	while((opt = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch(opt) {
 			case 'p':
 				portno = atoi(optarg);
@@ -92,6 +94,9 @@ int main(int argc, char **argv) {
 					                "Exiting...\n", optarg);
 					exit(1);
 				}
+				break;
+			case 'l':
+				limitnum = atoi(optarg);
 				break;
 			case 'v':
 				if(verbosity < 3)
@@ -190,6 +195,11 @@ int main(int argc, char **argv) {
 		printf("Daemon mode enabled.\n");
 	}
 	
+	if(limitnum > 0 && log_debug()) {
+		log_date();
+		printf("Limiting received number of bytes to %d B.\n", limitnum);
+	}
+	
 	if(log_debug()) {
 		log_date();
 		printf("Server listening port set to %d.\n", portno);
@@ -209,7 +219,7 @@ int main(int argc, char **argv) {
 	
 	do {
 		// Accept incoming connections, process data and send it out
-	    copris_read(&parentfd, destination, trfile[0], printerset[0]);
+	    copris_read(&parentfd, destination, daemon, trfile[0], printerset[0], limitnum);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -222,10 +232,11 @@ int main(int argc, char **argv) {
 
 void copris_help() {
 	printf("Usage: copris [-p PORT] (optional arguments) <printer location>\n\n");
-	printf("  -p, --port     Port to listen to\n");
-	printf("  -d, --daemon   Run continuously, as a daemon\n");
-	printf("  -t, --trfile   (optional) character translation file\n");
-	printf("  -r, --printer  (optional) printer feature set\n");
+	printf("  -p, --port     Listening port (required)\n");
+	printf("  -d, --daemon   Run continuously\n");
+	printf("  -t, --trfile   Character translation file\n");
+	printf("  -r, --printer  Printer feature set\n");
+	printf("  -l, --limit    Limit number of received bytes\n");
 	printf("\n");
 	printf("  -v, --verbose  Be verbose (-vv more)\n");
 	printf("  -q, --quiet    Display nothing except fatal errors (stderr)\n");
@@ -243,7 +254,6 @@ void copris_version() {
 	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
 	printf("Compiled options:\n");
 	printf("  Buffer size:          %d B\n", BUFSIZE);
-	printf("  Connection backlog:   %d connection(s)\n", BACKLOG);
 	printf("  Max. filename length: %d characters\n", FNAME_LEN);
 	printf("Included printer feature sets:\n  ");
 	if(*prsets[0]) {
