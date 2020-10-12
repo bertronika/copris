@@ -37,13 +37,14 @@
 int verbosity = 1;
 
 int main(int argc, char **argv) {
-	int parentfd   = 0;  // Parent file descriptor to hold a socket
-	int portno     = -1; // Listening port of this server
-	int daemon     = 0;  // Is the daemon option set?
-	int limitnum   = 0;  // Limit received number of bytes
+	int parentfd = 0;    // Parent file descriptor to hold a socket
+	int daemon   = 0;    // Is the daemon option set?
+	int portno   = -1;   // Listening port of this server
+	int limitnum = -1;   // Limit received number of bytes
 	int opt;             // Character, read by getopt
+	char *parserr;       // String to integer conversion error
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
-	char printerset[PRSET_LEN + 1]  = { 0 }; // Input translation file
+	char printerset[PRSET_LEN + 1]  = { 0 }; // Input printer set
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
 
 	// Bail if there is not even a port specified.
@@ -60,7 +61,7 @@ int main(int argc, char **argv) {
 		{"trfile",  1, NULL, 't'},
 		{"printer", 1, NULL, 'r'},
 		{"limit",   1, NULL, 'l'},
-		{"verbose", 1, NULL, 'v'},
+		{"verbose", 2, NULL, 'v'},
 		{"quiet",   0, NULL, 'q'},
 		{"help",    0, NULL, 'h'},
 		{"version", 0, NULL, 'V'},
@@ -71,7 +72,18 @@ int main(int argc, char **argv) {
 	while((opt = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch(opt) {
 			case 'p':
-				portno = atoi(optarg);
+				portno = strtol(optarg, &parserr, 10);
+				if(*parserr) {
+					fprintf(stderr, "Unrecognised characters in port number (%s). " 
+					                "Exiting...\n", parserr);
+					return 1;
+				}
+				
+				if(portno > 65535 || portno < 1) {
+					fprintf(stderr, "Port number out of range. " 
+					                "Exiting...\n");
+					return 1;
+				}
 				break;
 			case 'd':
 				daemon = 1;
@@ -82,7 +94,7 @@ int main(int argc, char **argv) {
 				} else {
 					fprintf(stderr, "Trfile filename too long (%s). "
 					                "Exiting...\n", optarg);
-					exit(1);
+					return 1;
 				}
 				break;
 			case 'r':
@@ -92,11 +104,22 @@ int main(int argc, char **argv) {
 					// Excessive length already makes it wrong
 					fprintf(stderr, "Selected printer feature set does not exist (%s). "
 					                "Exiting...\n", optarg);
-					exit(1);
+					return 1;
 				}
 				break;
 			case 'l':
-				limitnum = atoi(optarg);
+				limitnum = strtol(optarg, &parserr, 10);
+				if(*parserr) {
+					fprintf(stderr, "Unrecognised characters in limit number (%s). " 
+					                "Exiting...\n", parserr);
+					return 1;
+				}
+				
+				if(limitnum > 4096 || limitnum < 0) {
+					fprintf(stderr, "Limit number out of range. " 
+					                "Exiting...\n");
+					return 1;
+				}
 				break;
 			case 'v':
 				if(verbosity < 3)
@@ -113,20 +136,32 @@ int main(int argc, char **argv) {
 				return 0;
 			case ':':
 				if(optopt == 'p')
-					fprintf(stderr, "You need to specify the port number.\n");
+					fprintf(stderr, "Port number is missing. " 
+					                "Exiting...\n");
 				else if(optopt == 't')
-					fprintf(stderr, "You need to specify a translation file.\n");
+					fprintf(stderr, "Translation file is missing. "
+					                "Exiting...\n");
+				else if(optopt == 'r')
+					fprintf(stderr, "Printer set is missing. "
+					                "Exiting...\n");
+				else if(optopt == 'l')
+					fprintf(stderr, "Limit number is missing. "
+					                "Exiting...\n");
 				else
-					fprintf(stderr, "Option '-%c' is missing an argument.\n", optopt);
+					fprintf(stderr, "Option '-%c' is missing an argument. "
+					                "Exiting...\n", optopt);
 				return 1;
 			case '?':
 				if(optopt == 0)
-					fprintf(stderr, "Option '%s' not recognised.\n", argv[optind - 1]);
+					fprintf(stderr, "Option '%s' not recognised. "
+					                "Exiting...\n", argv[optind - 1]);
 				else
-					fprintf(stderr, "Error parsing option '-%c'\n", optopt);
+					fprintf(stderr, "Option '-%c' not recognised. " 
+					                "Exiting...\n" , optopt);
 				return 1;
 			default:
-				fprintf(stderr, "Undefined problem while parsing options\n");
+				fprintf(stderr, "Undefined problem while parsing options. "
+				                "Exiting... \n");
 				return 2;
 		}
 	}
@@ -139,13 +174,13 @@ int main(int argc, char **argv) {
 		} else {
 			fprintf(stderr, "Destination filename too long (%s). " 
 			                "Exiting...\n", argv[optind]);
-			exit(1);
+			return 1;
 		}
 	}
 
 	if(portno < 1) {
-		fprintf(stderr, "Port number is missing. Set it with the '-p' option. " 
-		                "Exiting...\n");
+		fprintf(stderr, "Port argument is missing. " 
+			            "Set it with the '-p' option. Exiting...\n");
 		return 1;
 	}
 	
@@ -195,7 +230,7 @@ int main(int argc, char **argv) {
 		printf("Daemon mode enabled.\n");
 	}
 	
-	if(limitnum > 0 && log_debug()) {
+	if(limitnum > -1 && log_debug()) {
 		log_date();
 		printf("Limiting received number of bytes to %d B.\n", limitnum);
 	}
@@ -224,7 +259,7 @@ int main(int argc, char **argv) {
 	
 	if(log_debug()) {
 		log_date();
-		printf("Daemon mode is not set, exiting...\n");
+		printf("Daemon mode is not set, exiting.\n");
 	}
 	
 	return 0;
