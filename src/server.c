@@ -18,7 +18,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <fcntl.h>
 
 #include "debug.h"
 #include "server.h"
