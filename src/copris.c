@@ -12,6 +12,12 @@
 
 #define COPRIS_VER "0.9"
 
+#ifndef REL
+#define COPRIS_RELEASE "-release"
+#else
+#define COPRIS_RELEASE ("." REL "-debug")
+#endif
+
 #define FNAME_LEN 36
 
 #include <stdio.h>
@@ -285,7 +291,7 @@ void copris_help() {
 }
 
 void copris_version() {
-	printf("COPRIS version %s\n", COPRIS_VER);
+	printf("COPRIS version %s%s\n", COPRIS_VER, COPRIS_RELEASE);
 	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
 	printf("Compiled options:\n");
 	printf("  Buffer size:          %d B\n", BUFSIZE);
