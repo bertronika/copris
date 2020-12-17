@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 	int opt;             // Character, read by getopt
 	char *parserr;       // String to integer conversion error
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
-	char printerset[PRSET_LEN + 1]  = { 0 }; // Input printer set
+	char prsetinput[PRSET_LEN + 1]  = { 0 }; // Input printer set
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
 
 	// Bail if there is not even a port specified.
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'r':
 				if(strlen(optarg) <= PRSET_LEN) {
-					strcpy(printerset, optarg);
+					strcpy(prsetinput, optarg);
 				} else {
 					// Excessive length already makes it wrong
 					fprintf(stderr, "Selected printer feature set does not exist (%s). "
@@ -199,21 +199,21 @@ int main(int argc, char **argv) {
 	}
 	
 	// Check if printer set exists and set it to its index + 1
-	if(printerset[0]) {
-		for(int p = 0; prsets[p][0] != '\0'; p++) {
-			if(strcmp(printerset, prsets[p]) == 0) {
+	if(prsetinput[0]) {
+		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
+			if(strcmp(prsetinput, printerset[p][0]) == 0) {
 				if(log_info()) {
 					log_date();
-					printf("Selected printer feature set %s.\n", printerset);
+					printf("Selected printer feature set %s.\n", prsetinput);
 				}
-				printerset[0] = p + 1;
-				printerset[1] = 0;
+				prsetinput[0] = p + 1;
+				prsetinput[1] = 0;
 				
 				break;
 			}
 		}
 		
-		if(printerset[1] != 0){
+		if(prsetinput[1] != 0){
 			fprintf(stderr, "Selected printer feature set does not exist. " 
 		                    "Exiting...\n");
 			return 1;
@@ -260,7 +260,7 @@ int main(int argc, char **argv) {
 	
 	do {
 		// Accept incoming connections, process data and send it out
-	    copris_read(&parentfd, destination, daemon, trfile[0], printerset[0], limitnum);
+	    copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0], limitnum);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -297,12 +297,8 @@ void copris_version() {
 	printf("  Buffer size:          %d B\n", BUFSIZE);
 	printf("  Max. filename length: %d characters\n", FNAME_LEN);
 	printf("Included printer feature sets:\n  ");
-	if(*prsets[0]) {
-		for(int p = 0; prsets[p][0] != '\0'; p++) {
-			printf("%s  ", prsets[p]);
-		}
-	} else {
-		printf("(none)");
+	for(int p = 0; printerset[p][0][0] != '\0'; p++) {
+		printf("%s  ", printerset[p][0]);
 	}
 	printf("\n");
 }

@@ -10,7 +10,7 @@ BIN = copris
 
 .PHONY: all debug clean
 
-all: copris
+all: debug
 
 # You normally don't want to have a debug recipe like this,
 # because you could mix debug and non-debug object files. This
