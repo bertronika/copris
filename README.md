@@ -5,8 +5,9 @@ to a dot-matrix printer over a network, while performing optional text
 conversion.
 
 COPRIS differs from CUPS. Not just by being smaller with less features, it has
-a different objective. Sure, CUPS is also a server, but it doesn't provide
-neither character conversion nor it has some bonus features.
+a different objective. While CUPS is intended for general (rich-text) printing
+and printer sharing, CUPS only processes raw text and applies optional character
+conversion to it.
 
 ## Why convert characters?
 In the late 1980's and 90's, when dot-matrix printers were getting affordable
