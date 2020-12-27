@@ -32,6 +32,8 @@
 #include "translate.h"
 #include "printerset.h"
 
+#define list_prsets() for(int p = 0; printerset[p][0][0] != '\0'; p++)\
+	printf("%s  ", printerset[p][0]);
 
 /* 
  * Verbosity levels:
@@ -294,11 +296,9 @@ void copris_version() {
 	printf("COPRIS version %s%s\n", COPRIS_VER, COPRIS_RELEASE);
 	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
 	printf("Compiled options:\n");
-	printf("  Buffer size:          %d B\n", BUFSIZE);
-	printf("  Max. filename length: %d characters\n", FNAME_LEN);
+	printf("  Buffer size:          %4d bytes\n", BUFSIZE);
+	printf("  Max. filename length: %4d characters\n", FNAME_LEN);
 	printf("Included printer feature sets:\n  ");
-	for(int p = 0; printerset[p][0][0] != '\0'; p++) {
-		printf("%s  ", printerset[p][0]);
-	}
+	list_prsets();
 	printf("\n");
 }
