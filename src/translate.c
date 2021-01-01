@@ -79,7 +79,7 @@ void copris_trfile(char *filename) {
 			/* 
 			 * If there's still data to be put into input array (eg. wide chars), 
 			 * fill the same indexes in replacement array with spaces. That way 
-			 * the array lenghts will stay the same after processing.
+			 * the array lengths will stay the same after processing.
 			 */
 			if(i_cont) {
 				/* 
@@ -152,7 +152,7 @@ void copris_trfile(char *filename) {
 	
 	if(digit != -1) {
 		fprintf(stderr, "Integers in translation file lacking digits " 
-						"(leading 0?). Exiting...\n");
+						"(leading zero?). Exiting...\n");
 		exit(1);
 	}
 	
@@ -314,7 +314,7 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		
 		if(heading_level) {
 			// If there is no space after #, it is not a heading.
-			// However, add # symbols back
+			// And if it's not, add it back.
 			if(source[s] != ' ') {
 				if(lastchar == '#') {
 					for(; heading_level > 0; heading_level--) {
