@@ -45,12 +45,13 @@
 int verbosity = 1;
 
 int main(int argc, char **argv) {
-	int parentfd = 0;    // Parent file descriptor to hold a socket
-	int daemon   = 0;    // Is the daemon option set?
-	int portno   = -1;   // Listening port of this server
-	int limitnum = 0;    // Limit received number of bytes
-	int opt;             // Character, read by getopt
-	char *parserr;       // String to integer conversion error
+	int parentfd = 0;      // Parent file descriptor to hold a socket
+	int daemon   = 0;      // Is the daemon option set?
+	int portno   = -1;     // Listening port of this server
+	int limitnum = 0;      // Limit received number of bytes
+	int limit_discard = 0; // Discard whole chunk of text instead of cutting it off
+	int opt;               // Character, read by getopt
+	char *parserr;         // String to integer conversion error
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
 	char prsetinput[PRSET_LEN + 1]  = { 0 }; // Input printer set
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
@@ -64,16 +65,17 @@ int main(int argc, char **argv) {
 
 	/* man 3 getopt_long */
 	static struct option long_options[] = {
-		{"port",    1, NULL, 'p'},
-		{"daemon",  0, NULL, 'd'},
-		{"trfile",  1, NULL, 't'},
-		{"printer", 1, NULL, 'r'},
-		{"limit",   1, NULL, 'l'},
-		{"verbose", 2, NULL, 'v'},
-		{"quiet",   0, NULL, 'q'},
-		{"help",    0, NULL, 'h'},
-		{"version", 0, NULL, 'V'},
-		{NULL,      0, NULL,   0} /* end-of-list */
+		{"port",          1, NULL, 'p'},
+		{"daemon",        0, NULL, 'd'},
+		{"trfile",        1, NULL, 't'},
+		{"printer",       1, NULL, 'r'},
+		{"limit",         1, NULL, 'l'},
+		{"discard-limit", 0, NULL, 'D'},
+		{"verbose",       2, NULL, 'v'},
+		{"quiet",         0, NULL, 'q'},
+		{"help",          0, NULL, 'h'},
+		{"version",       0, NULL, 'V'},
+		{NULL,            0, NULL,   0} /* end-of-list */
 	};
 	
 	// int argc, char* argv[], char* optstring, struct* long_options, int* longindex
@@ -128,6 +130,9 @@ int main(int argc, char **argv) {
 					                "Exiting...\n");
 					return 1;
 				}
+				break;
+			case 'D':
+				limit_discard = 1;
 				break;
 			case 'v':
 				if(verbosity < 3)
@@ -269,7 +274,8 @@ int main(int argc, char **argv) {
 	
 	do {
 		// Accept incoming connections, process data and send it out
-	    copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0], limitnum);
+	    copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
+					limitnum, limit_discard);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -287,6 +293,8 @@ void copris_help() {
 	printf("  -t, --trfile <trfile>  Character translation file\n");
 	printf("  -r, --printer <prset>  Printer feature set\n");
 	printf("  -l, --limit <number>   Limit number of received bytes\n");
+	printf("      --discard-limit    Discard whole chunk of text instead of\n");
+	printf("                         cutting it off.\n");
 	printf("\n");
 	printf("  -v, --verbose  Be verbose (-vv more)\n");
 	printf("  -q, --quiet    Display nothing except fatal errors (to stderr)\n");

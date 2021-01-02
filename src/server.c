@@ -91,7 +91,8 @@ int copris_listen(int *parentfd, int portno) {
     return 0;
 }
 
-int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset, int limitnum) {
+int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset,
+				int limitnum, int limit_discard) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum   = 0;     // Received/sent message (byte) size
@@ -147,12 +148,11 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	memset(buf, '\0', BUFSIZE + 1);
 
 	int z;
-	int discard = 0;
 	// Read the data sent by the client into the buffer
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
 		bytenum += fderr; // Append read bytes to the total byte counter
 		if(limitnum && bytenum > limitnum) {
-			if(discard) {
+			if(limit_discard) {
 				if(log_err())
 					printf("Client exceeded send size limit (%d B/%d B), discarding and"
 						   "terminating connection.\n", bytenum, limitnum);
@@ -166,7 +166,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 			} else {
 				buf[limitnum] = '\0';
 				discarded = bytenum - limitnum;
-				discard = 2;
+				limit_discard = 2;
 				
 				fderr = write(childfd, limit_message, strlen(limit_message));
 				log_perr(fderr, "write", "Error sending termination text to socket.");
@@ -195,7 +195,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		}
 		
 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
-		if(discard == 2) {
+		if(limit_discard == 2) {
 			if(log_err())
 				printf("Client exceeded send size limit (%d B/%d B), cutting off and "
 					   "terminating connection.\n", bytenum, limitnum);
@@ -222,7 +222,8 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
 		
 		if(discarded) {
-			printf(", %d B %s.\n", discarded, (discard == 2) ? "cut off" : "discarded");
+			printf(", %d B %s.\n", discarded,
+				   (limit_discard == 2) ? "cut off" : "discarded");
 		} else {
 			printf(".\n");
 		}
