@@ -224,8 +224,15 @@ int main(int argc, char **argv) {
 	
 	// Read the translation file. The function populates global variables *input
 	// and *replacement, defined in translate.c
-	if(trfile[0]) {
-		copris_trfile(trfile);
+	if(trfile[0] && copris_trfile(trfile)) {
+		if(verbosity) {
+			// Error in trfile. We are verbose, so notify and exit
+			fprintf(stderr, "Exiting...\n");
+			return 1;
+		} else {
+			// Error in trfile. We are quiet, so notify and continue
+			fprintf(stderr, "Continuing without trfile.\n");
+		}
 	}
 	
 	if(log_info()) {

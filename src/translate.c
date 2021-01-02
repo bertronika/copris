@@ -19,7 +19,7 @@
 unsigned char *input;       // Chars that should be picked out
 unsigned char *replacement; // Chars that should be put in instead
 
-void copris_trfile(char *filename) {
+int copris_trfile(char *filename) {
 	FILE *dat;        // Translation file
 	int c;            // Character, read from *dat
 	int lines    = 0; // Number of lines in *dat
@@ -100,15 +100,17 @@ void copris_trfile(char *filename) {
 		} else if(!is_input) {   /* Replacement mode */
 			// Exit if first character bigger than ASCII 2 (representing hundreds)
 			if(c > 50 && digit == 2) {
-				fprintf(stderr, "Integers in translation file either too big " 
-				                "or lacking digits. Exiting...\n");
-				exit(1);
+				fprintf(stderr, "One of integers in translation file is either too big "
+				                "or lacking digits. ");
+				lines = -1;
+				break;
 			}
 			
 			// Exit if character not in ASCII range [0-9]
 			if(c < 48 || c > 57) {
-				fprintf(stderr, "Errorneous integers in translation file. Exiting...\n");
-				exit(1);
+				fprintf(stderr, "One of integers in translation file is errorneous. ");
+				lines = -1;
+				break;
 			}
 			
 			i_cont = 0;
@@ -143,26 +145,34 @@ void copris_trfile(char *filename) {
 				}
 				
 			} else if(digit < -1) {
-				fprintf(stderr, "Found too many characters in translation file. " 
-				                "Exiting...\n");
-				exit(1);
+				fprintf(stderr, "Found too many characters in translation file. ");
+				lines = -1;
+				break;
 			}
 		}
 	}
 	
-	if(digit != -1) {
-		fprintf(stderr, "Integers in translation file lacking digits " 
-						"(leading zero?). Exiting...\n");
-		exit(1);
+	if(digit != -1 && lines > 0) {
+		fprintf(stderr, "One of integers in translation file is lacking digits " 
+						"(leading zero?). ");
+		lines = -1;
 	}
 	
 	ferr = fclose(dat);
 	log_perr(ferr, "close", "Failed to close the translation file after reading.");
 	
-	input[i]       = '\0';
-	replacement[j] = '\0';
+// 	if(lines < 0) {
+// 		input[0]       = '\0';
+// 		replacement[0] = '\0';
+// 	} else {
+// 		input[i]       = '\0';
+// 		replacement[j] = '\0';
+// 	}
 	
-	if(log_info()) {
+	input[lines < 0 ? 0 : i]       = '\0';
+	replacement[lines < 0 ? 0 : j] = '\0';
+	
+	if(log_info() && lines > 0) {
 		log_date();
 		printf("%d translation definition(s) successfully loaded.\n", lines);
 	}
@@ -185,6 +195,8 @@ void copris_trfile(char *filename) {
 		
 		printf("\n");
 	}
+	
+	return lines < 0 ? 1 : 0;
 }
 
 void copris_translate(unsigned char *source, int source_len, unsigned char *ret) {
