@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 	int parentfd = 0;    // Parent file descriptor to hold a socket
 	int daemon   = 0;    // Is the daemon option set?
 	int portno   = -1;   // Listening port of this server
-	int limitnum = -1;   // Limit received number of bytes
+	int limitnum = 0;    // Limit received number of bytes
 	int opt;             // Character, read by getopt
 	char *parserr;       // String to integer conversion error
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
 		printf("Daemon mode enabled.\n");
 	}
 	
-	if(limitnum > -1 && log_debug()) {
+	if(limitnum > 0 && log_debug()) {
 		log_date();
 		printf("Limiting received number of bytes to %d B.\n", limitnum);
 	}
