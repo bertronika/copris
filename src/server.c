@@ -149,12 +149,12 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	int z;
 	int discard = 0;
 	// Read the data sent by the client into the buffer
-	while((fderr = read(childfd, buf, BUFSIZE)) > 0 && discard != 2) {
+	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
 		bytenum += fderr; // Append read bytes to the total byte counter
 		if(limitnum && bytenum > limitnum) {
 			if(discard) {
 				if(log_err())
-					printf("Client exceeded send size limit (%d B/%d B), "
+					printf("Client exceeded send size limit (%d B/%d B), discarding and"
 						   "terminating connection.\n", bytenum, limitnum);
 				
 				discarded = fderr;
@@ -195,6 +195,12 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		}
 		
 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
+		if(discard == 2) {
+			if(log_err())
+				printf("Client exceeded send size limit (%d B/%d B), cutting off and "
+					   "terminating connection.\n", bytenum, limitnum);
+			break;
+		}
 	}
 	log_perr(fderr, "read", "Error reading from socket.");
 
