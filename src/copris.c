@@ -281,15 +281,15 @@ int main(int argc, char **argv) {
 }
 
 void copris_help() {
-	printf("Usage: copris [-p PORT] (optional arguments) <printer location>\n\n");
-	printf("  -p, --port     Listening port (required)\n");
-	printf("  -d, --daemon   Run continuously\n");
-	printf("  -t, --trfile   Character translation file\n");
-	printf("  -r, --printer  Printer feature set\n");
-	printf("  -l, --limit    Limit number of received bytes\n");
+	printf("Usage: copris [-p PORT] [optional arguments] <printer location>\n\n");
+	printf("  -p, --port <number>    Listening port (required)\n");
+	printf("  -d, --daemon           Run continuously\n");
+	printf("  -t, --trfile <trfile>  Character translation file\n");
+	printf("  -r, --printer <prset>  Printer feature set\n");
+	printf("  -l, --limit <number>   Limit number of received bytes\n");
 	printf("\n");
 	printf("  -v, --verbose  Be verbose (-vv more)\n");
-	printf("  -q, --quiet    Display nothing except fatal errors (stderr)\n");
+	printf("  -q, --quiet    Display nothing except fatal errors (to stderr)\n");
 	printf("  -h, --help     Show this help\n");
 	printf("  -V, --version  Show program version and included printer \n");
 	printf("                 feature sets\n");
