@@ -178,7 +178,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		}
 		
 		// Destination can be either stdout or a file
-		if(!destination[0] && log_err()) {
+		if(!destination[0]) {
 			printf("%s", to_print);              // Print received text to stdout
 		} else {
 			copris_write(destination, to_print); // Write to the output file/printer
