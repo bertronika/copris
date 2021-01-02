@@ -147,22 +147,32 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	memset(buf, '\0', BUFSIZE + 1);
 
 	int z;
+	int discard = 0;
 	// Read the data sent by the client into the buffer
-	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
+	while((fderr = read(childfd, buf, BUFSIZE)) > 0 && discard != 2) {
 		bytenum += fderr; // Append read bytes to the total byte counter
 		if(limitnum && bytenum > limitnum) {
-			if(log_err())
-				printf("Client exceeded send size limit (%d B/%d B), "
-				       "terminating connection.\n", bytenum, limitnum);
-			
-			discarded = fderr;
-			
-			fderr = write(childfd, limit_message, strlen(limit_message));
-			log_perr(fderr, "write", "Error sending termination text to socket.");
-			
-			break;
+			if(discard) {
+				if(log_err())
+					printf("Client exceeded send size limit (%d B/%d B), "
+						   "terminating connection.\n", bytenum, limitnum);
+				
+				discarded = fderr;
+				
+				fderr = write(childfd, limit_message, strlen(limit_message));
+				log_perr(fderr, "write", "Error sending termination text to socket.");
+				
+				break;
+			} else {
+				buf[limitnum] = '\0';
+				discarded = bytenum - limitnum;
+				discard = 2;
+				
+				fderr = write(childfd, limit_message, strlen(limit_message));
+				log_perr(fderr, "write", "Error sending termination text to socket.");
+			}
 		}
-		
+		// Only for prset/trfile magic
 		for(z = 0; z <= BUFSIZE; z++) {
 			to_print[z] = buf[z];
 		}
@@ -205,7 +215,11 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		printf("End of stream, received %d B in %d chunk(s)", 
 			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
 		
-		printf(discarded ? ", %d B discarded.\n" : ".\n", discarded);
+		if(discarded) {
+			printf(", %d B %s.\n", discarded, (discard == 2) ? "cut off" : "discarded");
+		} else {
+			printf(".\n");
+		}
 	}
 	
 	if(log_info()) {
