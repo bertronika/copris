@@ -204,10 +204,6 @@ int main(int argc, char **argv) {
 	if(prsetinput[0]) {
 		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
 			if(strcmp(prsetinput, printerset[p][0]) == 0) {
-				if(log_info()) {
-					log_date();
-					printf("Selected printer feature set %s.\n", prsetinput);
-				}
 				prsetinput[0] = p + 1;
 				prsetinput[1] = 0;
 				
@@ -243,6 +239,12 @@ int main(int argc, char **argv) {
 	if(daemon && log_debug()) {
 		log_date();
 		printf("Daemon mode enabled.\n");
+	}
+	
+	if(prsetinput[1] == 0 && log_info()) {
+		log_date();
+		printf("Selected printer feature set %s.\n", 
+			   printerset[(int)prsetinput[0] - 1][0]);
 	}
 	
 	if(limitnum > 0 && log_debug()) {
