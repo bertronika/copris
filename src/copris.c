@@ -225,7 +225,11 @@ int main(int argc, char **argv) {
 	
 	// Read the translation file. The function populates global variables *input
 	// and *replacement, defined in translate.c
+	// copris_trfile returns 1 if a failure is detected
 	if(trfile[0] && copris_trfile(trfile)) {
+		// These two are malloc'd by copris_trfile()
+		free(input);
+		free(replacement);
 		if(verbosity) {
 			// Error in trfile. We are verbose, so notify and exit
 			fprintf(stderr, "Exiting...\n");
