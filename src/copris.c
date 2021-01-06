@@ -45,12 +45,13 @@
 int verbosity = 1;
 
 int main(int argc, char **argv) {
-	int parentfd = 0;    // Parent file descriptor to hold a socket
-	int daemon   = 0;    // Is the daemon option set?
-	int portno   = -1;   // Listening port of this server
-	int limitnum = 0;    // Limit received number of bytes
-	int opt;             // Character, read by getopt
-	char *parserr;       // String to integer conversion error
+	int parentfd = 0;      // Parent file descriptor to hold a socket
+	int daemon   = 0;      // Is the daemon option set?
+	int portno   = -1;     // Listening port of this server
+	int limitnum = 0;      // Limit received number of bytes
+	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
+	int opt;               // Character, read by getopt
+	char *parserr;         // String to integer conversion error
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
 	char prsetinput[PRSET_LEN + 1]  = { 0 }; // Input printer set
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
@@ -64,16 +65,17 @@ int main(int argc, char **argv) {
 
 	/* man 3 getopt_long */
 	static struct option long_options[] = {
-		{"port",    1, NULL, 'p'},
-		{"daemon",  0, NULL, 'd'},
-		{"trfile",  1, NULL, 't'},
-		{"printer", 1, NULL, 'r'},
-		{"limit",   1, NULL, 'l'},
-		{"verbose", 2, NULL, 'v'},
-		{"quiet",   0, NULL, 'q'},
-		{"help",    0, NULL, 'h'},
-		{"version", 0, NULL, 'V'},
-		{NULL,      0, NULL,   0} /* end-of-list */
+		{"port",          1, NULL, 'p'},
+		{"daemon",        0, NULL, 'd'},
+		{"trfile",        1, NULL, 't'},
+		{"printer",       1, NULL, 'r'},
+		{"limit",         1, NULL, 'l'},
+		{"cutoff-limit",  0, NULL, 'D'},
+		{"verbose",       2, NULL, 'v'},
+		{"quiet",         0, NULL, 'q'},
+		{"help",          0, NULL, 'h'},
+		{"version",       0, NULL, 'V'},
+		{NULL,            0, NULL,   0} /* end-of-list */
 	};
 	
 	// int argc, char* argv[], char* optstring, struct* long_options, int* longindex
@@ -128,6 +130,9 @@ int main(int argc, char **argv) {
 					                "Exiting...\n");
 					return 1;
 				}
+				break;
+			case 'D':
+				limit_cutoff = 1;
 				break;
 			case 'v':
 				if(verbosity < 3)
@@ -271,7 +276,8 @@ int main(int argc, char **argv) {
 	
 	do {
 		// Accept incoming connections, process data and send it out
-	    copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0], limitnum);
+	    copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
+					limitnum, limit_cutoff);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -284,17 +290,19 @@ int main(int argc, char **argv) {
 
 void copris_help() {
 	printf("Usage: copris [-p PORT] [optional arguments] <printer location>\n\n");
-	printf("  -p, --port <number>    Listening port (required)\n");
-	printf("  -d, --daemon           Run continuously\n");
-	printf("  -t, --trfile <trfile>  Character translation file\n");
-	printf("  -r, --printer <prset>  Printer feature set\n");
-	printf("  -l, --limit <number>   Limit number of received bytes\n");
+	printf("  -p, --port NUMBER      Listening port (required)\n");
+	printf("  -d, --daemon           Run as a daemon\n");
+	printf("  -t, --trfile TRFILE    Character translation file\n");
+	printf("  -r, --printer PRSET    Printer feature set\n");
+	printf("  -l, --limit NUMBER     Limit number of received bytes\n");
+	printf("      --cutoff-limit     Cut text off at limit instead of\n");
+	printf("                         discarding the whole chunk\n");
 	printf("\n");
-	printf("  -v, --verbose  Be verbose (-vv more)\n");
-	printf("  -q, --quiet    Display nothing except fatal errors (to stderr)\n");
-	printf("  -h, --help     Show this help\n");
-	printf("  -V, --version  Show program version and included printer \n");
-	printf("                 feature sets\n");
+	printf("  -v, --verbose          Be verbose (-vv more)\n");
+	printf("  -q, --quiet            Display nothing except fatal errors (to stderr)\n");
+	printf("  -h, --help             Show this help\n");
+	printf("  -V, --version          Show program version and included printer\n");
+	printf("                         feature sets\n");
 	printf("\n");
 	printf("Printer location can either be an actual printer address, such\n");
 	printf("as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n");
