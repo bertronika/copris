@@ -13,9 +13,9 @@
 #define COPRIS_VER "0.9"
 
 #ifndef REL
-#define COPRIS_RELEASE "-release"
+#define COPRIS_RELEASE ""
 #else
-#define COPRIS_RELEASE ("." REL "-debug")
+#define COPRIS_RELEASE ("-" REL)
 #endif
 
 #define FNAME_LEN 36
