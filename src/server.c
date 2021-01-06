@@ -92,7 +92,7 @@ int copris_listen(int *parentfd, int portno) {
 }
 
 int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset,
-				int limitnum, int limit_discard) {
+				int limitnum, int limit_cutoff) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum   = 0;     // Received/sent message (byte) size
@@ -152,9 +152,16 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
 		bytenum += fderr; // Append read bytes to the total byte counter
 		if(limitnum && bytenum > limitnum) {
-			if(limit_discard) {
+			if(limit_cutoff) {
+				buf[limitnum] = '\0';
+				discarded = bytenum - limitnum;
+				limit_cutoff = 2;
+				
+				fderr = write(childfd, limit_message, strlen(limit_message));
+				log_perr(fderr, "write", "Error sending termination text to socket.");
+			} else {
 				if(log_err())
-					printf("Client exceeded send size limit (%d B/%d B), discarding and"
+					printf("Client exceeded send size limit (%d B/%d B), discarding and "
 						   "terminating connection.\n", bytenum, limitnum);
 				
 				discarded = fderr;
@@ -163,13 +170,6 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 				log_perr(fderr, "write", "Error sending termination text to socket.");
 				
 				break;
-			} else {
-				buf[limitnum] = '\0';
-				discarded = bytenum - limitnum;
-				limit_discard = 2;
-				
-				fderr = write(childfd, limit_message, strlen(limit_message));
-				log_perr(fderr, "write", "Error sending termination text to socket.");
 			}
 		}
 		// Only for prset/trfile magic
@@ -195,9 +195,9 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		}
 		
 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
-		if(limit_discard == 2) {
+		if(limit_cutoff == 2) {
 			if(log_err())
-				printf("Client exceeded send size limit (%d B/%d B), cutting off and "
+				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
 					   "terminating connection.\n", bytenum, limitnum);
 			break;
 		}
@@ -223,7 +223,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		
 		if(discarded) {
 			printf(", %d B %s.\n", discarded,
-				   (limit_discard == 2) ? "cut off" : "discarded");
+				   (limit_cutoff == 2) ? "cut off" : "discarded");
 		} else {
 			printf(".\n");
 		}

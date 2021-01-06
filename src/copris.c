@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 	int daemon   = 0;      // Is the daemon option set?
 	int portno   = -1;     // Listening port of this server
 	int limitnum = 0;      // Limit received number of bytes
-	int limit_discard = 0; // Discard whole chunk of text instead of cutting it off
+	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
 	int opt;               // Character, read by getopt
 	char *parserr;         // String to integer conversion error
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 		{"trfile",        1, NULL, 't'},
 		{"printer",       1, NULL, 'r'},
 		{"limit",         1, NULL, 'l'},
-		{"discard-limit", 0, NULL, 'D'},
+		{"cutoff-limit",  0, NULL, 'D'},
 		{"verbose",       2, NULL, 'v'},
 		{"quiet",         0, NULL, 'q'},
 		{"help",          0, NULL, 'h'},
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 				}
 				break;
 			case 'D':
-				limit_discard = 1;
+				limit_cutoff = 1;
 				break;
 			case 'v':
 				if(verbosity < 3)
@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
 	do {
 		// Accept incoming connections, process data and send it out
 	    copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
-					limitnum, limit_discard);
+					limitnum, limit_cutoff);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -288,19 +288,19 @@ int main(int argc, char **argv) {
 
 void copris_help() {
 	printf("Usage: copris [-p PORT] [optional arguments] <printer location>\n\n");
-	printf("  -p, --port <number>    Listening port (required)\n");
-	printf("  -d, --daemon           Run continuously\n");
-	printf("  -t, --trfile <trfile>  Character translation file\n");
-	printf("  -r, --printer <prset>  Printer feature set\n");
-	printf("  -l, --limit <number>   Limit number of received bytes\n");
-	printf("      --discard-limit    Discard whole chunk of text instead of\n");
-	printf("                         cutting it off.\n");
+	printf("  -p, --port NUMBER      Listening port (required)\n");
+	printf("  -d, --daemon           Run as a daemon\n");
+	printf("  -t, --trfile TRFILE    Character translation file\n");
+	printf("  -r, --printer PRSET    Printer feature set\n");
+	printf("  -l, --limit NUMBER     Limit number of received bytes\n");
+	printf("      --cutoff-limit     Cut text off at limit instead of\n");
+	printf("                         discarding the whole chunk\n");
 	printf("\n");
-	printf("  -v, --verbose  Be verbose (-vv more)\n");
-	printf("  -q, --quiet    Display nothing except fatal errors (to stderr)\n");
-	printf("  -h, --help     Show this help\n");
-	printf("  -V, --version  Show program version and included printer \n");
-	printf("                 feature sets\n");
+	printf("  -v, --verbose          Be verbose (-vv more)\n");
+	printf("  -q, --quiet            Display nothing except fatal errors (to stderr)\n");
+	printf("  -h, --help             Show this help\n");
+	printf("  -V, --version          Show program version and included printer\n");
+	printf("                         feature sets\n");
 	printf("\n");
 	printf("Printer location can either be an actual printer address, such\n");
 	printf("as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n");
