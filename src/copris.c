@@ -231,7 +231,7 @@ int main(int argc, char **argv) {
 		free(input);
 		free(replacement);
 		if(verbosity) {
-			// Error in trfile. We are verbose, so notify and exit
+			// Error in trfile. We are not quiet, so notify and exit
 			fprintf(stderr, "Exiting...\n");
 			return 1;
 		} else {
