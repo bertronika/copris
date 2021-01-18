@@ -229,16 +229,16 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 }
 
 /*
- * Instructions in printerset[]:
- * 1  reset
- * 2  bell
- * 3  double-width
- * 4  underline on
- * 5  underline off
- * 6  bold on
- * 7  bold off
- * 8  italic on
- * 9  italic off
+ * Instructions in printerset[] (printerset.h):
+ * C_RESET  reset
+ * C_BELL   bell
+ * C_DBLW   double-width
+ * C_ULON   underline on
+ * C_ULOFF  underline off
+ * C_BON    bold on
+ * C_BOFF   bold off
+ * C_ION    italic on
+ * C_IOFF   italic off
  */
 
 // Text attributes, preserved over multiple printerset function calls
@@ -263,9 +263,9 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		if(reset_esc == 1) {
 			reset_esc = 0;
 			if(source[s] == 'r') {
-				r = escinsert(ret, r, printerset[set][1]);
+				r = escinsert(ret, r, printerset[set][C_RESET]);
 			} else if(source[s] == 'b') {
-				r = escinsert(ret, r, printerset[set][2]);
+				r = escinsert(ret, r, printerset[set][C_BELL]);
 			} else {
 				r = escinsert(ret, r, "?");
 				goto copy_char;
@@ -336,40 +336,40 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		/* Text output to returned array */
 		if(source[s] == '\n') {
 			if(heading_level == 1) {
-				r = escinsert(ret, r, printerset[set][7]);
-				r = escinsert(ret, r, printerset[set][5]);
+				r = escinsert(ret, r, printerset[set][C_BOFF]);
+				r = escinsert(ret, r, printerset[set][C_ULOFF]);
 			} else if(heading_level == 2) {
-				r = escinsert(ret, r, printerset[set][9]);
-				r = escinsert(ret, r, printerset[set][5]);
+				r = escinsert(ret, r, printerset[set][C_IOFF]);
+				r = escinsert(ret, r, printerset[set][C_ULOFF]);
 			}
 			heading_level = 0;
 		}
 		
 		if(bold_on == 1) {
-			r = escinsert(ret, r, printerset[set][6]);
+			r = escinsert(ret, r, printerset[set][C_BON]);
 			bold_on = 2;
 		} else if(bold_on == -1) {
-			r = escinsert(ret, r, printerset[set][7]);
+			r = escinsert(ret, r, printerset[set][C_BOFF]);
 			bold_on = 0;
 		}
 		
 		if(ital_on == 1) {
-			r = escinsert(ret, r, printerset[set][8]);
+			r = escinsert(ret, r, printerset[set][C_ION]);
 			ital_on = 2;
 		} else if(ital_on == -1) {
-			r = escinsert(ret, r, printerset[set][9]);
+			r = escinsert(ret, r, printerset[set][C_IOFF]);
 			ital_on = 0;
 		}
 		
 		if(heading_on) {
-			r = escinsert(ret, r, printerset[set][3]);
+			r = escinsert(ret, r, printerset[set][C_DBLW]);
 			
 			if(heading_level == 1) {
-				r = escinsert(ret, r, printerset[set][4]);
-				r = escinsert(ret, r, printerset[set][6]);
+				r = escinsert(ret, r, printerset[set][C_ULON]);
+				r = escinsert(ret, r, printerset[set][C_BON]);
 			} else if(heading_level == 2) {
-				r = escinsert(ret, r, printerset[set][4]);
-				r = escinsert(ret, r, printerset[set][8]);
+				r = escinsert(ret, r, printerset[set][C_ULON]);
+				r = escinsert(ret, r, printerset[set][C_ION]);
 			}
 			
 			heading_on = 0;

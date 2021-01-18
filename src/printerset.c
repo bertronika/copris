@@ -11,16 +11,16 @@
 #include "printerset.h"
 
 /*
- * Instructions in printerset[]:
- * 1  reset
- * 2  bell
- * 3  double-width
- * 4  underline on
- * 5  underline off
- * 6  bold on
- * 7  bold off
- * 8  italic on
- * 9  italic off
+ * Instructions in printerset[] (printerset.h):
+ * C_RESET  reset
+ * C_BELL   bell
+ * C_DBLW   double-width
+ * C_ULON   underline on
+ * C_ULOFF  underline off
+ * C_BON    bold on
+ * C_BOFF   bold off
+ * C_ION    italic on
+ * C_IOFF   italic off
  */
 
 // Preset definitions with the name as the first string
