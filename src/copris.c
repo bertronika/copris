@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
 
 	if(portno < 1) {
 		fprintf(stderr, "Port argument is missing. " 
-			            "Set it with the '-p' option. Exiting...\n");
+		                "Set it with the '-p' option. Exiting...\n");
 		return 1;
 	}
 	
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
 		
 		if(prsetinput[1] != 0){
 			fprintf(stderr, "Selected printer feature set does not exist. " 
-		                    "Exiting...\n");
+			                "Exiting...\n");
 			return 1;
 		}
 	}
@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
 	if(prsetinput[1] == 0 && log_info()) {
 		log_date();
 		printf("Selected printer feature set %s.\n", 
-			   printerset[(int)prsetinput[0] - 1][0]);
+		       printerset[(int)prsetinput[0] - 1][0]);
 	}
 	
 	if(limitnum > 0 && log_debug()) {
@@ -280,8 +280,8 @@ int main(int argc, char **argv) {
 	
 	do {
 		// Accept incoming connections, process data and send it out
-	    copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
-					limitnum, limit_cutoff);
+		copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
+		            limitnum, limit_cutoff);
 	} while(daemon);
 	
 	if(log_debug()) {
@@ -293,24 +293,24 @@ int main(int argc, char **argv) {
 }
 
 void copris_help() {
-	printf("Usage: copris [-p PORT] [optional arguments] <printer location>\n\n");
-	printf("  -p, --port NUMBER      Listening port (required)\n");
-	printf("  -d, --daemon           Run as a daemon\n");
-	printf("  -t, --trfile TRFILE    Character translation file\n");
-	printf("  -r, --printer PRSET    Printer feature set\n");
-	printf("  -l, --limit NUMBER     Limit number of received bytes\n");
-	printf("      --cutoff-limit     Cut text off at limit instead of\n");
-	printf("                         discarding the whole chunk\n");
-	printf("\n");
-	printf("  -v, --verbose          Be verbose (-vv more)\n");
-	printf("  -q, --quiet            Display nothing except fatal errors (to stderr)\n");
-	printf("  -h, --help             Show this help\n");
-	printf("  -V, --version          Show program version and included printer\n");
-	printf("                         feature sets\n");
-	printf("\n");
-	printf("Printer location can either be an actual printer address, such\n");
-	printf("as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n");
-	printf("\n");
+	printf("Usage: copris [-p PORT] [optional arguments] <printer location>\n\n"
+	       "  -p, --port NUMBER      Listening port (required)\n"
+	       "  -d, --daemon           Run as a daemon\n"
+	       "  -t, --trfile TRFILE    Character translation file\n"
+	       "  -r, --printer PRSET    Printer feature set\n"
+	       "  -l, --limit NUMBER     Limit number of received bytes\n"
+	       "      --cutoff-limit     Cut text off at limit instead of\n"
+	       "                         discarding the whole chunk\n"
+	       "\n"
+	       "  -v, --verbose          Be verbose (-vv more)\n"
+	       "  -q, --quiet            Display nothing except fatal errors (to stderr)\n"
+	       "  -h, --help             Show this help\n"
+	       "  -V, --version          Show program version and included printer\n"
+	       "                         feature sets\n"
+	       "\n"
+	       "Printer location can either be an actual printer address, such\n"
+	       "as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n"
+	       "\n");
 }
 
 void copris_version() {

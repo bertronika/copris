@@ -34,8 +34,8 @@ const int BUFSIZE = 256;
 #define BACKLOG 2
 
 int copris_listen(int *parentfd, int portno) {
-    int fderr; // Error code of a socket operation
-    struct sockaddr_in serveraddr; // Server's address
+	int fderr; // Error code of a socket operation
+	struct sockaddr_in serveraddr; // Server's address
 
 	/*
 	 * Create a system socket using the following:
@@ -43,8 +43,8 @@ int copris_listen(int *parentfd, int portno) {
 	 *   SOCK_STREAM  TCP protocol
 	 *   IPPROTO_IP   IP protocol
 	 */
-    fderr = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
-    log_perr(fderr, "socket", "Failed to create socket endpoint.");
+	fderr = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
+	log_perr(fderr, "socket", "Failed to create socket endpoint.");
 	if(log_debug()) {
 		log_date();
 		printf("Socket endpoint created.\n");
@@ -57,29 +57,29 @@ int copris_listen(int *parentfd, int portno) {
 	 * otherwise we have to wait about 20 secs.
 	 * Eliminates "ERROR on binding: Address already in use" error.
 	 */
-    int optval = 1;
-    setsockopt(*parentfd, SOL_SOCKET, SO_REUSEADDR,
-			   (const void *)&optval, sizeof(int));
+	int optval = 1;
+	setsockopt(*parentfd, SOL_SOCKET, SO_REUSEADDR,
+	           (const void *)&optval, sizeof(int));
 
 // 	memset((char *)&serveraddr, '\0', sizeof(serveraddr)); // TODO: is this necessary?
 
-    serveraddr.sin_family      = AF_INET;
-    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serveraddr.sin_port        = htons((unsigned short)portno);
-
-    // Associate the parent socket with a port
-    fderr = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-    log_perr(fderr, "bind", "Failed to bind socket to address. " 
-	                "Non-root users should set it >1023.");
+	serveraddr.sin_family      = AF_INET;
+	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serveraddr.sin_port        = htons((unsigned short)portno);
+	
+	// Associate the parent socket with a port
+	fderr = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
+	log_perr(fderr, "bind", "Failed to bind socket to address. " 
+	                        "Non-root users should set it >1023.");
 	if(log_debug()) {
 		log_date();
 		printf("Socket bound to address.\n");
 	}
 
-    // Make the parent socket passive - accept incoming connections.
-    // Also limit the number of connections to BACKLOG
-    fderr = listen(*parentfd, BACKLOG);
-    log_perr(fderr, "listen", "Failed to make socket passive.");
+	// Make the parent socket passive - accept incoming connections.
+	// Also limit the number of connections to BACKLOG
+	fderr = listen(*parentfd, BACKLOG);
+	log_perr(fderr, "listen", "Failed to make socket passive.");
 	if(log_info()) {
 		log_date();
 		if(log_debug()) {
@@ -92,7 +92,7 @@ int copris_listen(int *parentfd, int portno) {
 }
 
 int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset,
-				int limitnum, int limit_cutoff) {
+                int limitnum, int limit_cutoff) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum   = 0;     // Received/sent message (byte) size
@@ -234,5 +234,5 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		printf("Connection from %s (%s) closed.\n", host, hostaddrp);
 	}
     
-    return 0;
+	return 0;
 }
