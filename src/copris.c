@@ -309,8 +309,8 @@ int main(int argc, char **argv) {
 }
 
 void copris_help() {
-	printf("Usage: copris [-p PORT] [optional arguments] <printer location>\n\n"
-	       "  -p, --port NUMBER      Listening port (required)\n"
+	printf("Usage: copris [arguments] <printer location>\n\n"
+	       "  -p, --port NUMBER      Listening port\n"
 	       "  -d, --daemon           Run as a daemon\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
 	       "  -r, --printer PRSET    Printer feature set\n"
@@ -325,8 +325,10 @@ void copris_help() {
 	       "                         feature sets\n"
 	       "\n"
 	       "Printer location can either be an actual printer address, such\n"
-	       "as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n"
-	       "\n");
+	       "as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n\n"
+		   "Data can also be read from stdin. If this is desired, omit the port\n"
+		   "argument, as incoming connections are prefered over stdin.\n"
+	       );
 }
 
 void copris_version() {
