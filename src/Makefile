@@ -16,7 +16,9 @@ all: debug
 # because you could mix debug and non-debug object files. This
 # situation is all right though, as only debugger symbols are
 # added and files are not modified.
-debug: CFLAGS += -g -DREL=\"$(shell git rev-parse --short HEAD)\"
+debug: HASH = $(shell git rev-parse --short HEAD)
+debug: BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+debug: CFLAGS += -g -DREL=\"$(HASH)-$(BRANCH)\"
 debug: copris
 
 %.o: %.c $(DEPS)
