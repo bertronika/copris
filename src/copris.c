@@ -58,13 +58,6 @@ int main(int argc, char **argv) {
 	char prsetinput[PRSET_LEN + 1]  = { 0 }; // Input printer set
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
 
-	// Bail if there is no port specified or no data in stdin
-	if(argc < 2 && isatty(STDIN_FILENO)) {
-		fprintf(stderr, "Missing arguments and no input data detected. Try "
-		                "using the '--help' option.\n");
-		return 1;
-	}
-
 	/* man 3 getopt_long */
 	static struct option long_options[] = {
 		{"port",          1, NULL, 'p'},
@@ -182,6 +175,14 @@ int main(int argc, char **argv) {
 		}
 	}
 	
+	if(argc < 2 && isatty(STDIN_FILENO)) {
+		printf("Without any arguments, COPRIS won't do much. Try using "
+               "using the '--help' option.\n");
+	}
+	
+	if(portno < 1)
+		is_stdin = 1;
+	
 	// If the last argument is present, copy it to destination[]
 	// Only one argument is accepted, others are discarded
 	if(argv[optind]) {
@@ -192,13 +193,6 @@ int main(int argc, char **argv) {
 			                "Exiting...\n", argv[optind]);
 			return 1;
 		}
-	}
-
-	if(portno < 1) {
-// 		fprintf(stderr, "Port argument is missing. " 
-// 		                "Set it with the '-p' option. Exiting...\n");
-// 		return 1;
-		is_stdin = 1;
 	}
 	
 	// We are writing to a file if destination is not NULL.
