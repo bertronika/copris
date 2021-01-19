@@ -25,7 +25,7 @@
 #include "translate.h"
 #include "printerset.h"
 
-const int BUFSIZE = 256;
+const int BUFSIZE = 16;
 
 /*
  * Round backlog to a power of 2.
@@ -102,7 +102,6 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	char *hostaddrp;                // Host address string
 	char host[NI_MAXHOST];          // Host info (IP, hostname). NI_MAXHOST is built in
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
-	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
 	char limit_message[] = "Send size limit exceeded, terminating connection.\n";
 
 	// Get the struct size
@@ -147,7 +146,6 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	// Empty out the inbound buffer
 	memset(buf, '\0', BUFSIZE + 1);
 
-	int z;
 	// Read the data sent by the client into the buffer
 	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
 		bytenum += fderr; // Append read bytes to the total byte counter
@@ -162,7 +160,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 			} else {
 				if(log_err())
 					printf("Client exceeded send size limit (%d B/%d B), discarding and "
-						   "terminating connection.\n", bytenum, limitnum);
+					       "terminating connection.\n", bytenum, limitnum);
 				
 				discarded = fderr;
 				
@@ -172,27 +170,8 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 				break;
 			}
 		}
-		// Only for prset/trfile magic
-		for(z = 0; z <= BUFSIZE; z++) {
-			to_print[z] = buf[z];
-		}
-		to_print[z] = '\0';
 		
-		if(printerset) {
-			copris_printerset(buf, fderr, to_print, printerset);
-			if(trfile) {
-				copris_translate(to_print, fderr, to_print);
-			}
-		} else if(trfile) {
-			copris_translate(buf, fderr, to_print);
-		}
-		
-		// Destination can be either stdout or a file
-		if(!destination[0]) {
-			printf("%s", to_print);              // Print received text to stdout
-		} else {
-			copris_write(destination, to_print); // Write to the output file/printer
-		}
+		copris_send(buf, fderr, destination, printerset, trfile);
 		
 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
 		if(limit_cutoff == 2) {
@@ -234,5 +213,72 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 		printf("Connection from %s (%s) closed.\n", host, hostaddrp);
 	}
     
+	return 0;
+}
+
+int copris_stdin(char *destination, int daemon, int trfile, int printerset) {
+	int bytenum = 0; // Nr. of read bytes
+	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
+	
+	memset(buf, '\0', BUFSIZE + 1);
+	
+	if(log_info()) {
+		log_date();
+		printf("Trying to read from stdin...\n");
+	}
+
+	if(!isatty(STDIN_FILENO)) {
+		if(log_err() && !destination[0])
+			printf("; BOS\n");
+		
+		while(fgets((char *)buf, BUFSIZE, stdin) != NULL) {
+			copris_send(buf, sizeof(buf), destination, printerset, trfile);
+			bytenum += strlen((char *)buf);
+		}
+		
+		if(log_err() && !destination[0])
+			printf("; EOS\n");
+		
+		if(log_err()) {
+			printf("End of stream, received %d B in %d chunk(s).\n", 
+				   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
+		}
+		
+		return 0;
+	} else {
+		fprintf(stderr, "No data was found on stdin. " 
+		                "Exiting...\n");
+		return 1;
+	}
+		
+}
+
+int copris_send(unsigned char *buffer, int buffer_size, char *destination,
+                int printerset, int trfile) {
+	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
+	
+	int z;
+	// Only for prset/trfile magic
+	for(z = 0; z <= BUFSIZE; z++) {
+		to_print[z] = buffer[z];
+	}
+	to_print[z] = '\0';
+	
+	if(printerset) {
+		copris_printerset(buffer, buffer_size, to_print, printerset);
+		if(trfile) {
+			copris_translate(to_print, buffer_size, to_print);
+		}
+	} else if(trfile) {
+		copris_translate(buffer, buffer_size, to_print);
+	}
+	
+	// Destination can be either stdout or a file
+	if(!destination[0]) {
+		printf("%s", to_print);              // Print received text to stdout
+	} else {
+		copris_write(destination, to_print); // Write to the output file/printer
+	}
+	
 	return 0;
 }
