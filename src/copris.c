@@ -175,7 +175,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	if(argc < 2 && isatty(STDIN_FILENO)) {
+	if(argc < 2) {
 		printf("Without any arguments, COPRIS won't do much. Try using "
                "using the '--help' option.\n");
 	}
