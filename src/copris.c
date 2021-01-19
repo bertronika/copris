@@ -47,6 +47,7 @@ int verbosity = 1;
 int main(int argc, char **argv) {
 	int parentfd = 0;      // Parent file descriptor to hold a socket
 	int daemon   = 0;      // Is the daemon option set?
+	int read_stdin = 0;
 	int portno   = -1;     // Listening port of this server
 	int limitnum = 0;      // Limit received number of bytes
 	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
@@ -192,9 +193,10 @@ int main(int argc, char **argv) {
 	}
 
 	if(portno < 1) {
-		fprintf(stderr, "Port argument is missing. " 
-		                "Set it with the '-p' option. Exiting...\n");
-		return 1;
+// 		fprintf(stderr, "Port argument is missing. " 
+// 		                "Set it with the '-p' option. Exiting...\n");
+// 		return 1;
+		read_stdin = 1;
 	}
 	
 	// We are writing to a file if destination is not NULL.
@@ -247,7 +249,10 @@ int main(int argc, char **argv) {
 	
 	if(daemon && log_debug()) {
 		log_date();
-		printf("Daemon mode enabled.\n");
+		if(read_stdin)
+			printf("Daemon mode not available while reading from stdin.\n");
+		else
+			printf("Daemon mode enabled.\n");
 	}
 	
 	if(prsetinput[1] == 0 && log_info()) {
@@ -261,7 +266,7 @@ int main(int argc, char **argv) {
 		printf("Limiting received number of bytes to %d B.\n", limitnum);
 	}
 	
-	if(log_debug()) {
+	if(log_debug() && !read_stdin) {
 		log_date();
 		printf("Server listening port set to %d.\n", portno);
 	}
@@ -276,15 +281,22 @@ int main(int argc, char **argv) {
 	}
 	
 	// Open socket and listen
-	copris_listen(&parentfd, portno);
+	if(!read_stdin)
+		copris_listen(&parentfd, portno);
 	
 	do {
-		// Accept incoming connections, process data and send it out
-		copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
-		            limitnum, limit_cutoff);
+		if(!read_stdin) {
+			// Accept incoming connections, process data and send it out
+			copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
+			            limitnum, limit_cutoff);
+		} else {
+			daemon = 0;
+			if(copris_stdin(destination, trfile[0], prsetinput[0]))
+				return 1;
+		}
 	} while(daemon);
 	
-	if(log_debug()) {
+	if(log_debug() && !read_stdin) {
 		log_date();
 		printf("Daemon mode is not set, exiting.\n");
 	}

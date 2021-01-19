@@ -216,7 +216,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	return 0;
 }
 
-int copris_stdin(char *destination, int daemon, int trfile, int printerset) {
+int copris_stdin(char *destination, int trfile, int printerset) {
 	int bytenum = 0; // Nr. of read bytes
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
 	
