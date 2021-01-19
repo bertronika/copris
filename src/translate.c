@@ -222,7 +222,7 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 			}
 		}
 		if(log_debug() && i < source_len - 1)
-			printf("%d   %x -> %c\n", i, source[i], (j > -1) ? ret[j] : ' ');
+			printf("%3d  %x -> %c\n", i, source[i], (j > -1) ? ret[j] : ' ');
 		
 	}
 	ret[j] = '\0'; // This odd zero looks somewhat important, I presume...
