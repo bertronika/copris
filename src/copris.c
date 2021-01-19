@@ -47,10 +47,11 @@ int verbosity = 1;
 int main(int argc, char **argv) {
 	int parentfd = 0;      // Parent file descriptor to hold a socket
 	int daemon   = 0;      // Is the daemon option set?
-	int read_stdin = 0;
 	int portno   = -1;     // Listening port of this server
 	int limitnum = 0;      // Limit received number of bytes
 	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
+	int is_stdin = 0;
+	int is_prset = 0;
 	int opt;               // Character, read by getopt
 	char *parserr;         // String to integer conversion error
 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
@@ -111,6 +112,7 @@ int main(int argc, char **argv) {
 			case 'r':
 				if(strlen(optarg) <= PRSET_LEN) {
 					strcpy(prsetinput, optarg);
+					is_prset = 1;
 				} else {
 					// Excessive length already makes it wrong
 					fprintf(stderr, "Selected printer feature set does not exist (%s). "
@@ -196,7 +198,7 @@ int main(int argc, char **argv) {
 // 		fprintf(stderr, "Port argument is missing. " 
 // 		                "Set it with the '-p' option. Exiting...\n");
 // 		return 1;
-		read_stdin = 1;
+		is_stdin = 1;
 	}
 	
 	// We are writing to a file if destination is not NULL.
@@ -208,17 +210,17 @@ int main(int argc, char **argv) {
 	}
 	
 	// Check if printer set exists and set it to its index + 1
-	if(prsetinput[0]) {
+	if(is_prset) {
 		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
 			if(strcmp(prsetinput, printerset[p][0]) == 0) {
 				prsetinput[0] = p + 1;
-				prsetinput[1] = 0;
+				is_prset = 2;
 				
 				break;
 			}
 		}
 		
-		if(prsetinput[1] != 0){
+		if(is_prset != 2){
 			fprintf(stderr, "Selected printer feature set does not exist. " 
 			                "Exiting...\n");
 			return 1;
@@ -249,13 +251,13 @@ int main(int argc, char **argv) {
 	
 	if(daemon && log_debug()) {
 		log_date();
-		if(read_stdin)
+		if(is_stdin)
 			printf("Daemon mode not available while reading from stdin.\n");
 		else
 			printf("Daemon mode enabled.\n");
 	}
 	
-	if(prsetinput[1] == 0 && log_info()) {
+	if(is_prset && log_info()) {
 		log_date();
 		printf("Selected printer feature set %s.\n", 
 		       printerset[(int)prsetinput[0] - 1][0]);
@@ -266,7 +268,7 @@ int main(int argc, char **argv) {
 		printf("Limiting received number of bytes to %d B.\n", limitnum);
 	}
 	
-	if(log_debug() && !read_stdin) {
+	if(log_debug() && !is_stdin) {
 		log_date();
 		printf("Server listening port set to %d.\n", portno);
 	}
@@ -281,11 +283,11 @@ int main(int argc, char **argv) {
 	}
 	
 	// Open socket and listen
-	if(!read_stdin)
+	if(!is_stdin)
 		copris_listen(&parentfd, portno);
 	
 	do {
-		if(!read_stdin) {
+		if(!is_stdin) {
 			// Accept incoming connections, process data and send it out
 			copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
 			            limitnum, limit_cutoff);
@@ -296,7 +298,7 @@ int main(int argc, char **argv) {
 		}
 	} while(daemon);
 	
-	if(log_debug() && !read_stdin) {
+	if(log_debug() && !is_stdin) {
 		log_date();
 		printf("Daemon mode is not set, exiting.\n");
 	}
