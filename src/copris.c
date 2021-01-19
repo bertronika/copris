@@ -58,10 +58,10 @@ int main(int argc, char **argv) {
 	char prsetinput[PRSET_LEN + 1]  = { 0 }; // Input printer set
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
 
-	// Bail if there is not even a port specified.
-	if(argc < 2) {
-		fprintf(stderr, "Missing arguments. The '--help' option will help you " 
-		                "pick them.\n");
+	// Bail if there is no port specified or no data in stdin
+	if(argc < 2 && isatty(STDIN_FILENO)) {
+		fprintf(stderr, "Missing arguments and no input data detected. Try "
+		                "using the '--help' option.\n");
 		return 1;
 	}
 
@@ -249,12 +249,21 @@ int main(int argc, char **argv) {
 		printf("Verbosity level set to %d.\n", verbosity);
 	}
 	
+	if(daemon && is_stdin) {
+		daemon = 0;
+		if(log_err()){
+			if(log_info())
+				log_date();
+			else
+				printf("Note: ");
+			
+			printf("Daemon mode not available while reading from stdin.\n");
+		}
+	}
+	
 	if(daemon && log_debug()) {
 		log_date();
-		if(is_stdin)
-			printf("Daemon mode not available while reading from stdin.\n");
-		else
-			printf("Daemon mode enabled.\n");
+		printf("Daemon mode enabled.\n");
 	}
 	
 	if(is_prset && log_info()) {
@@ -292,7 +301,6 @@ int main(int argc, char **argv) {
 			copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
 			            limitnum, limit_cutoff);
 		} else {
-			daemon = 0;
 			if(copris_stdin(destination, trfile[0], prsetinput[0]))
 				return 1;
 		}
