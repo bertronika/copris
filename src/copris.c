@@ -3,7 +3,7 @@
  * Parses arguments, trfile and printerset selections and runs the server
  * 
  * COPRIS - a converting printer server
- * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * (c) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  * 
  * Licensed under the MIT/Expat license.
  * 
@@ -330,7 +330,7 @@ void copris_help() {
 
 void copris_version() {
 	printf("COPRIS version %s%s\n", COPRIS_VER, COPRIS_RELEASE);
-	printf("(C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
+	printf("(C) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
 	printf("Compiled options:\n");
 	printf("  Buffer size:          %4d bytes\n", BUFSIZE);
 	printf("  Max. filename length: %4d characters\n", FNAME_LEN);

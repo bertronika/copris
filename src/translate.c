@@ -3,7 +3,7 @@
  * Text and markdown translation/conversion for printers
  * 
  * Part of COPRIS - a converting printer server
- * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * (c) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  * 
  * Strings in C are a bit challenging... Multibyte characters are a PITA
  */

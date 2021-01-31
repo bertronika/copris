@@ -3,7 +3,7 @@
  * Stream socket server with trfile and prset hooks
  * 
  * Part of COPRIS - a converting printer server
- * (c) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * (c) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  * 
  * - https://beej.us/guide/bgnet/html/
  * - https://ops.tips/blog/a-tcp-server-in-c/
