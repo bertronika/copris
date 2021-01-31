@@ -183,9 +183,6 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	}
 	log_perr(fderr, "read", "Error reading from socket.");
 
-	free(input);
-	free(replacement);
-	
 	// Close the current connection 
 	fderr = close(childfd);
 	log_perr(fderr, "close", "Failed to close the child connection.");
