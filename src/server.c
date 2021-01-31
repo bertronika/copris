@@ -19,13 +19,12 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#include "config.h"
 #include "debug.h"
 #include "server.h"
 #include "writer.h"
 #include "translate.h"
 #include "printerset.h"
-
-const int BUFSIZE = 16;
 
 /*
  * Round backlog to a power of 2.

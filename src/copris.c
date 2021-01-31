@@ -18,14 +18,13 @@
 #define COPRIS_RELEASE ("-" REL)
 #endif
 
-#define FNAME_LEN 36
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <getopt.h>
 
+#include "config.h"
 #include "debug.h"
 #include "copris.h"
 #include "server.h"

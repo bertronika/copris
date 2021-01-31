@@ -4,7 +4,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
 ODIR = obj
-DEPS = debug.h server.h writer.h translate.h printerset.h copris.h
+DEPS = debug.h server.h writer.h translate.h printerset.h copris.h config.h
 OBJ = debug.o server.o writer.o translate.o printerset.o copris.o
 BIN = copris
 
