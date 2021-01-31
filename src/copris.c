@@ -233,7 +233,8 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Exiting...\n");
 			return 1;
 		} else {
-			// Error in trfile. We are quiet, so notify and continue
+			// Error in trfile. We are quiet, so disable, notify and continue
+			trfile[0] = '\0';
 			fprintf(stderr, "Continuing without trfile.\n");
 		}
 	}
