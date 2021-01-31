@@ -225,9 +225,6 @@ int main(int argc, char **argv) {
 	// and *replacement, defined in translate.c
 	// copris_trfile returns 1 if a failure is detected
 	if(trfile[0] && copris_trfile(trfile)) {
-		// These two are malloc'd by copris_trfile()
-		free(input);
-		free(replacement);
 		if(verbosity) {
 			// Error in trfile. We are not quiet, so notify and exit
 			fprintf(stderr, "Exiting...\n");

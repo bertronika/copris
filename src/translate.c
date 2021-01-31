@@ -188,7 +188,12 @@ int copris_trfile(char *filename) {
 		printf("\n");
 	}
 	
-	return lines < 0 ? 1 : 0;
+	if(lines < 0) {
+		free(input);
+		free(replacement);
+		return 1;
+	} else
+		return 0;
 }
 
 void copris_translate(unsigned char *source, int source_len, unsigned char *ret) {
