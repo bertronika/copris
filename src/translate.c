@@ -260,7 +260,7 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 	
 	for(int s = 0; s < source_len; s++) {
 		/* Reset sequences */
-		if(source[s] == '?' && lastchar == '\n') {
+		if(source[s] == '?' && lastchar == '\n' && reset_esc != 2) {
 			reset_esc = 1;
 			continue;
 		}

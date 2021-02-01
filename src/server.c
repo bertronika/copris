@@ -228,7 +228,7 @@ int copris_stdin(char *destination, int trfile, int printerset) {
 			printf("; BOS\n");
 		
 		while(fgets((char *)buf, BUFSIZE, stdin) != NULL) {
-			copris_send(buf, sizeof(buf), destination, printerset, trfile);
+			copris_send(buf, strlen((char *)buf), destination, printerset, trfile);
 			bytenum += strlen((char *)buf);
 		}
 		
