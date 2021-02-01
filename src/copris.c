@@ -308,9 +308,9 @@ int main(int argc, char **argv) {
 void copris_help() {
 	printf("Usage: copris [arguments] <printer location>\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
-	       "  -d, --daemon           Run as a daemon\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
 	       "  -r, --printer PRSET    Printer feature set\n"
+	       "  -d, --daemon           Run as a daemon\n"
 	       "  -l, --limit NUMBER     Limit number of received bytes\n"
 	       "      --cutoff-limit     Cut text off at limit instead of\n"
 	       "                         discarding the whole chunk\n"
