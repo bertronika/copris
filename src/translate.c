@@ -249,10 +249,13 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 // Text attributes, preserved over multiple printerset function calls
 int bold_on   = 0;
 int ital_on   = 0;
+int ital_real = 0;
+int bold_real = 0;
 int reset_esc = 0; /* 1 for reset sequence, 2 for char. escape */
 int heading_level = 0;
 int heading_on    = 0;
-char lastchar = '\n'; // If last char is not newline, do not make a heading
+char lastchar  = '\n'; // If last char is not newline, do not make a heading
+char lastchar2 = '\n';
 
 void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set) {
 	int r = 0;
@@ -292,18 +295,29 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		}
 		
 		/* Italic and bold handling */
+		if(source[s] == '*' && lastchar == '*' && lastchar2 == '*') {
+			bold_on = bold_real ? -1 : 1;
+			ital_on = ital_real ? -1 : 1;
+			
+			lastchar2 = lastchar;
+			lastchar  = source[s];
+			continue;
+		}
+		
 		if(source[s] == '*' && lastchar == '*') {
 			bold_on = bold_on ? -1 : 1;
-
-			ital_on = 0; // TODO: this is problematic (*epson**oki**star*)
-			lastchar = source[s];  //                     doesn't close ^
+			ital_on = 0; // Turn off italic if bold detected
+			
+			lastchar2 = lastchar;
+			lastchar  = source[s];
 			continue;
 		}
 		
 		if(source[s] == '*') {
-			ital_on = ital_on ? -1 : 1;
+			ital_on = ital_real ? -1 : 1;
 			
-			lastchar = source[s];
+			lastchar2 = lastchar;
+			lastchar  = source[s];
 			continue;
 		}
 		
@@ -311,13 +325,17 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		if(source[s] == '#' && lastchar == '\n') {
 			heading_level++;
 			heading_on = 1;
-			lastchar = source[s];
+			
+			lastchar2 = lastchar;
+			lastchar  = source[s];
 			continue;
 		}
 		
 		if(source[s] == '#' && heading_level > 0 && heading_level < 3) {
 			heading_level++;
-			lastchar = source[s];
+			
+			lastchar2 = lastchar;
+			lastchar  = source[s];
 			continue;
 		}
 		
@@ -352,18 +370,22 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		
 		if(bold_on == 1) {
 			r = escinsert(ret, r, printerset[set][C_BON]);
-			bold_on = 2;
+			bold_on   = 2;
+			bold_real = 2;
 		} else if(bold_on == -1) {
 			r = escinsert(ret, r, printerset[set][C_BOFF]);
-			bold_on = 0;
+			bold_on   = 0;
+			bold_real = 0;
 		}
 		
 		if(ital_on == 1) {
 			r = escinsert(ret, r, printerset[set][C_ION]);
-			ital_on = 2;
+			ital_on   = 2;
+			ital_real = 2;
 		} else if(ital_on == -1) {
 			r = escinsert(ret, r, printerset[set][C_IOFF]);
-			ital_on = 0;
+			ital_on   = 0;
+			ital_real = 0;
 		}
 		
 		if(heading_on) {
@@ -381,8 +403,9 @@ void copris_printerset(unsigned char *source, int source_len, unsigned char *ret
 		}
 		
 		copy_char:
-		ret[r++] = source[s];
-		lastchar = source[s];
+		ret[r++]  = source[s];
+		lastchar2 = lastchar;
+		lastchar  = source[s];
 	}
 
 	ret[r] = '\0';
