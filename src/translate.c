@@ -16,8 +16,8 @@
 #include "printerset.h"
 
 // These two variables are used by both trfile and translate functions
-unsigned char *input;       // Chars that should be picked out
-unsigned char *replacement; // Chars that should be put in instead
+static unsigned char *input;       // Chars that should be picked out
+static unsigned char *replacement; // Chars that should be put in instead
 
 int copris_trfile(char *filename) {
 	FILE *dat;        // Translation file
@@ -246,20 +246,20 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
  * C_IOFF   italic off
  */
 
-// Text attributes, preserved over multiple printerset function calls
-int bold_on   = 0;
-int ital_on   = 0;
-int ital_real = 0;
-int bold_real = 0;
-int reset_esc = 0; /* 1 for reset sequence, 2 for char. escape */
-int heading_level = 0;
-int heading_on    = 0;
-char lastchar  = '\n'; // If last char is not newline, do not make a heading
-char lastchar2 = '\n';
-
 void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set) {
 	int r = 0;
 	set--;
+	
+	// Text attributes, preserved over multiple printerset function calls
+	static int bold_on   = 0;
+	static int ital_on   = 0;
+	static int ital_real = 0;
+	static int bold_real = 0;
+	static int reset_esc = 0; /* 1 for reset sequence, 2 for char. escape */
+	static int heading_level = 0;
+	static int heading_on    = 0;
+	static char lastchar  = '\n'; // If last char is not newline, do not make a heading
+	static char lastchar2 = '\n';
 	
 	for(int s = 0; s < source_len; s++) {
 		/* Reset sequences */
