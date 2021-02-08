@@ -174,9 +174,15 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	if(argc < 2 && log_err())
-		printf("Note: Without any arguments, COPRIS won't do much. "
+	if(argc < 2 && log_err()) {
+		if(log_info())
+				log_date();
+			else
+				printf("Note: ");
+
+		printf("Without any arguments, COPRIS won't do much. "
                "Try using the '--help' option.\n");
+	}
 	
 	if(portno < 1)
 		is_stdin = 1;

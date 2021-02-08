@@ -223,9 +223,15 @@ int copris_stdin(char *destination, int trfile, int printerset) {
 		printf("Trying to read from stdin...\n");
 	}
 
-	if(isatty(STDIN_FILENO) && log_err())
-		printf("Note: You are in text input mode (reading from "
+	if(isatty(STDIN_FILENO) && log_err()) {
+		if(log_info())
+				log_date();
+			else
+				printf("Note: ");
+
+		printf("You are in text input mode (reading from "
 		       "stdin). To stop reading, press Ctrl+D\n");
+	}
 
 	if(log_err() && !destination[0])
 		printf("; BOS\n");
