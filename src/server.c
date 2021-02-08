@@ -223,30 +223,27 @@ int copris_stdin(char *destination, int trfile, int printerset) {
 		printf("Trying to read from stdin...\n");
 	}
 
-	if(!isatty(STDIN_FILENO)) {
-		if(log_err() && !destination[0])
-			printf("; BOS\n");
-		
-		while(fgets((char *)buf, BUFSIZE, stdin) != NULL) {
-			copris_send(buf, strlen((char *)buf), destination, printerset, trfile);
-			bytenum += strlen((char *)buf);
-		}
-		
-		if(log_err() && !destination[0])
-			printf("; EOS\n");
-		
-		if(log_err()) {
-			printf("End of stream, received %d B in %d chunk(s).\n", 
-				   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
-		}
-		
-		return 0;
-	} else {
-		fprintf(stderr, "No data was found on stdin. " 
-		                "Exiting...\n");
-		return 1;
+	if(isatty(STDIN_FILENO) && log_err())
+		printf("Note: You are in text input mode (reading from "
+		       "stdin). To stop reading, press Ctrl+D\n");
+
+	if(log_err() && !destination[0])
+		printf("; BOS\n");
+
+	while(fgets((char *)buf, BUFSIZE, stdin) != NULL) {
+		copris_send(buf, strlen((char *)buf), destination, printerset, trfile);
+		bytenum += strlen((char *)buf);
 	}
-		
+
+	if(log_err() && !destination[0])
+		printf("; EOS\n");
+
+	if(log_err()) {
+		printf("End of stream, received %d B in %d chunk(s).\n",
+		       bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
+	}
+
+	return 0;
 }
 
 int copris_send(unsigned char *buffer, int buffer_size, char *destination,
