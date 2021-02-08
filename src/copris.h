@@ -1,2 +1,2 @@
-void copris_help();
+void copris_help(char *copris_location);
 void copris_version();

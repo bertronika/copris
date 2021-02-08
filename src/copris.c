@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
 				verbosity = 0;
 				break;
 			case 'h':
-				copris_help();
+				copris_help(argv[0]);
 				return 0;
 			case 'V':
 				copris_version();
@@ -174,10 +174,9 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	if(argc < 2) {
-		printf("Without any arguments, COPRIS won't do much. Try using "
-               "using the '--help' option.\n");
-	}
+	if(argc < 2 && log_err())
+		printf("Note: Without any arguments, COPRIS won't do much. "
+               "Try using the '--help' option.\n");
 	
 	if(portno < 1)
 		is_stdin = 1;
@@ -305,8 +304,8 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-void copris_help() {
-	printf("Usage: copris [arguments] <printer location>\n\n"
+void copris_help(char *copris_location) {
+	printf("Usage: %s [arguments] <printer location>\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
 	       "  -r, --printer PRSET    Printer feature set\n"
@@ -322,10 +321,14 @@ void copris_help() {
 	       "                         feature sets\n"
 	       "\n"
 	       "Printer location can either be an actual printer address, such\n"
-	       "as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n\n"
+	       "as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n"
+		   "\n"
 		   "Data can also be read from stdin. If this is desired, omit the port\n"
 		   "argument, as incoming connections are prefered over stdin.\n"
-	       );
+		   "\n"
+		   "Notes are only printed at situations where COPRIS assumes it is not\n"
+		   "invoked correctly. Be sure to omit the quiet argument when debugging.\n",
+		   copris_location);
 }
 
 void copris_version() {
