@@ -3,10 +3,11 @@
  */
 
 // Inbound message buffer size
-//   Defines, how big each received chunk will be, either from
+//   Defines how big each received chunk will be, either from
 //   a socket or from stdin.
 #define BUFSIZE 128
 
 // Maximum filename length
-//   For arguments, inputted via the command line.
-#define FNAME_LEN 36
+//   Uncomment this line only if you want to manually set the limit, as
+//   it is otherwise set automatically using your systems' default value.
+//#define FNAME_LEN 36

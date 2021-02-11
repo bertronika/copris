@@ -12,17 +12,12 @@
 
 #define COPRIS_VER "0.9"
 
-#ifndef REL
-#define COPRIS_RELEASE ""
-#else
-#define COPRIS_RELEASE ("-" REL)
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <getopt.h>
+#include <limits.h>
 
 #include "config.h"
 #include "debug.h"
@@ -30,6 +25,20 @@
 #include "server.h"
 #include "translate.h"
 #include "printerset.h"
+
+#ifndef REL
+	#define COPRIS_RELEASE ""
+#else
+	#define COPRIS_RELEASE ("-" REL)
+#endif
+
+#ifndef FNAME_LEN
+	#ifndef NAME_MAX
+		#define FNAME_LEN 64
+	#else
+		#define FNAME_LEN NAME_MAX
+	#endif
+#endif
 
 #define list_prsets() for(int p = 0; printerset[p][0][0] != '\0'; p++)\
 	printf("%s  ", printerset[p][0]);
@@ -53,9 +62,13 @@ int main(int argc, char **argv) {
 	int is_prset = 0;
 	int opt;               // Character, read by getopt
 	char *parserr;         // String to integer conversion error
-	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
 	char prsetinput[PRSET_LEN + 1]  = { 0 }; // Input printer set
+	int has_trfile = 0;
+// 	char trfile[FNAME_LEN + 1]      = { 0 }; // Input translation file
+	char *trfile;
+	int has_destination = 0;
 	char destination[FNAME_LEN + 1] = { 0 }; // Output filename
+// 	char *destination;
 
 	/* man 3 getopt_long */
 	static struct option long_options[] = {
@@ -94,6 +107,8 @@ int main(int argc, char **argv) {
 				break;
 			case 't':
 				if(strlen(optarg) <= FNAME_LEN) {
+					has_trfile = 1;
+					trfile = malloc(strlen(optarg) + 1);
 					strcpy(trfile, optarg);
 				} else {
 					fprintf(stderr, "Trfile filename too long (%s). "
@@ -103,6 +118,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'r':
 				if(strlen(optarg) <= PRSET_LEN) {
+// 					prsetinput = malloc(strlen(optarg) + 1);
 					strcpy(prsetinput, optarg);
 					is_prset = 1;
 				} else {
@@ -191,7 +207,13 @@ int main(int argc, char **argv) {
 	// Only one argument is accepted, others are discarded
 	if(argv[optind]) {
 		if(strlen(argv[optind]) <= FNAME_LEN) {
+			has_destination = 1;
+// 			destination = malloc(strlen(argv[optind]) + 1);
 			strcpy(destination, argv[optind]);
+
+			if(access(destination, W_OK) == -1)
+			log_perr(-1, "access", "Unable to write to output file/printer. "
+			                       "Does it exist?");
 		} else {
 			fprintf(stderr, "Destination filename too long (%s). " 
 			                "Exiting...\n", argv[optind]);
@@ -199,13 +221,13 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	// We are writing to a file if destination is not NULL.
-	if(destination[0]) {
-		// Are we able to write to the output file?
-		if(access(destination, W_OK) == -1)
-			log_perr(-1, "access", "Unable to write to output file/printer. " 
-			                       "Does it exist?");
-	}
+// 	// We are writing to a file if destination is not NULL.
+// 	if(destination[0]) {
+// 		// Are we able to write to the output file?
+// 		if(access(destination, W_OK) == -1)
+// 			log_perr(-1, "access", "Unable to write to output file/printer. "
+// 			                       "Does it exist?");
+// 	}
 	
 	// Check if printer set exists and set it to its index + 1
 	if(is_prset) {
@@ -228,7 +250,7 @@ int main(int argc, char **argv) {
 	// Read the translation file. The function populates global variables *input
 	// and *replacement, defined in translate.c
 	// copris_trfile returns 1 if a failure is detected
-	if(trfile[0] && copris_trfile(trfile)) {
+	if(has_trfile && copris_trfile(trfile)) {
 		if(verbosity) {
 			// Error in trfile. We are not quiet, so notify and exit
 			fprintf(stderr, "Exiting...\n");
@@ -281,7 +303,7 @@ int main(int argc, char **argv) {
 	if(log_info()) {
 		log_date();
 		printf("Data stream will be sent to ");
-		if(destination[0])
+		if(has_destination)
 			printf("%s.\n", destination);
 		else
 			printf("stdout.\n");
@@ -294,10 +316,10 @@ int main(int argc, char **argv) {
 	do {
 		if(!is_stdin) {
 			// Accept incoming connections, process data and send it out
-			copris_read(&parentfd, destination, daemon, trfile[0], prsetinput[0],
+			copris_read(&parentfd, destination, daemon, has_trfile, prsetinput[0],
 			            limitnum, limit_cutoff);
 		} else {
-			if(copris_stdin(destination, trfile[0], prsetinput[0]))
+			if(copris_stdin(destination, has_trfile, prsetinput[0]))
 				return 1;
 		}
 	} while(daemon);

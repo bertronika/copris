@@ -160,6 +160,8 @@ int copris_trfile(char *filename) {
 	
 	ferr = fclose(dat);
 	log_perr(ferr, "close", "Failed to close the translation file after reading.");
+
+	free(filename);
 	
 	input[lines < 0 ? 0 : i]       = '\0';
 	replacement[lines < 0 ? 0 : j] = '\0';
