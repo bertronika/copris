@@ -139,7 +139,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 	
 	if(log_err()) {
 		printf("Inbound connection from %s (%s).\n", host, hostaddrp);
-		if(!destination->has)
+		if(!destination->exists)
 			printf("; BOS\n");
 	}
 
@@ -187,7 +187,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 	fderr = close(childfd);
 	log_perr(fderr, "close", "Failed to close the child connection.");
 	
-	if(log_err() && !destination->has)
+	if(log_err() && !destination->exists)
 		printf("; EOS\n");
 	
 	if(log_info())
@@ -234,7 +234,7 @@ int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 		       "stdin). To stop reading, press Ctrl+D\n");
 	}
 
-	if(log_err() && !destination->has)
+	if(log_err() && !destination->exists)
 		printf("; BOS\n");
 
 	while(fgets((char *)buf, BUFSIZE, stdin) != NULL) {
@@ -242,7 +242,7 @@ int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 		bytenum += strlen((char *)buf);
 	}
 
-	if(log_err() && !destination->has)
+	if(log_err() && !destination->exists)
 		printf("; EOS\n");
 
 	if(log_err()) {
@@ -266,15 +266,15 @@ int copris_send(unsigned char *buffer, int buffer_size, attrib **destination,
 
 	if(printerset) {
 		copris_printerset(buffer, buffer_size, to_print, printerset);
-		if((*trfile)->has) {
+		if((*trfile)->exists) {
 			copris_translate(to_print, buffer_size, to_print);
 		}
-	} else if((*trfile)->has) {
+	} else if((*trfile)->exists) {
 		copris_translate(buffer, buffer_size, to_print);
 	}
 	
 	// Destination can be either stdout or a file
-	if(!(*destination)->has) {
+	if(!(*destination)->exists) {
 		printf("%s", to_print);              // Print received text to stdout
 	} else {
 		copris_write((*destination)->text, to_print); // Write to the output file/printer

@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 				break;
 			case 't':
 				if(strlen(optarg) <= FNAME_LEN) {
-					trfile.has = 1;
+					trfile.exists = 1;
 					trfile.text = malloc(strlen(optarg) + 1);
 					strcpy(trfile.text, optarg);
 				} else {
@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
 	// Only one argument is accepted, others are discarded
 	if(argv[optind]) {
 		if(strlen(argv[optind]) <= FNAME_LEN) {
-			destination.has = 1;
+			destination.exists = 1;
 			destination.text = malloc(strlen(argv[optind]) + 1);
 			strcpy(destination.text, argv[optind]);
 
@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
 	// Read the translation file. The function populates global variables *input
 	// and *replacement, defined in translate.c
 	// copris_trfile returns 1 if a failure is detected
-	if(trfile.has && copris_trfile(trfile.text)) {
+	if(trfile.exists && copris_trfile(trfile.text)) {
 		if(verbosity) {
 			// Error in trfile. We are not quiet, so notify and exit
 			fprintf(stderr, "Exiting...\n");
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
 		} else {
 			// Error in trfile. We are quiet, so disable, notify and continue
 // 			trfile.text[0] = '\0';
-			trfile.has = 0;
+			trfile.exists = 0;
 			fprintf(stderr, "Continuing without trfile.\n");
 		}
 	}
@@ -304,7 +304,7 @@ int main(int argc, char **argv) {
 	if(log_info()) {
 		log_date();
 		printf("Data stream will be sent to ");
-		if(destination.has)
+		if(destination.exists)
 			printf("%s.\n", destination.text);
 		else
 			printf("stdout.\n");
