@@ -106,7 +106,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 
 	// Get the struct size
 	clientlen = sizeof(clientaddr);
-	
+
 	// Wait for a connection request and accept it
 	childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
 	log_perr(childfd, "accept", "Failed to accept the connection.");
@@ -114,16 +114,16 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 		log_date();
 		printf("Connection to socket accepted.\n");
 	}
-	
+
 	// Prevent more than one connection if not a daemon
 	if(!daemon) {
 		fderr = close(*parentfd);
 		log_perr(fderr, "close", "Failed to close the parent connection.");
 	}
-	
+
 	// Get the hostname of the client
 	fderr = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr), 
-						host, sizeof(host), NULL, 0, 0);
+	                    host, sizeof(host), NULL, 0, 0);
 	if(fderr != 0){
 		fprintf(stderr, "getnameinfo: Failed getting hostname from address.\n");
 	}
@@ -136,7 +136,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 
 	if(log_info())
 		log_date();
-	
+
 	if(log_err()) {
 		printf("Inbound connection from %s (%s).\n", host, hostaddrp);
 		if(!destination->exists)
@@ -154,30 +154,30 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 				buf[limitnum] = '\0';
 				discarded = bytenum - limitnum;
 				limit_cutoff = 2;
-				
+
 				fderr = write(childfd, limit_message, strlen(limit_message));
 				log_perr(fderr, "write", "Error sending termination text to socket.");
 			} else {
 				if(log_err())
 					printf("Client exceeded send size limit (%d B/%d B), discarding and "
 					       "terminating connection.\n", bytenum, limitnum);
-				
+
 				discarded = fderr;
-				
+
 				fderr = write(childfd, limit_message, strlen(limit_message));
 				log_perr(fderr, "write", "Error sending termination text to socket.");
-				
+
 				break;
 			}
 		}
-		
+
 		copris_send(buf, fderr, &destination, printerset, &trfile);
-		
+
 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
 		if(limit_cutoff == 2) {
 			if(log_err())
 				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
-					   "terminating connection.\n", bytenum, limitnum);
+				       "terminating connection.\n", bytenum, limitnum);
 			break;
 		}
 	}
@@ -186,25 +186,25 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 	// Close the current connection 
 	fderr = close(childfd);
 	log_perr(fderr, "close", "Failed to close the child connection.");
-	
+
 	if(log_err() && !destination->exists)
 		printf("; EOS\n");
-	
+
 	if(log_info())
 		log_date();
-	
+
 	if(log_err()) {
 		printf("End of stream, received %d B in %d chunk(s)", 
 			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
-		
+
 		if(discarded) {
 			printf(", %d B %s.\n", discarded,
-				   (limit_cutoff == 2) ? "cut off" : "discarded");
+			      (limit_cutoff == 2) ? "cut off" : "discarded");
 		} else {
 			printf(".\n");
 		}
 	}
-	
+
 	if(log_info()) {
 		log_date();
 		printf("Connection from %s (%s) closed.\n", host, hostaddrp);
@@ -216,9 +216,9 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 	int bytenum = 0; // Nr. of read bytes
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
-	
+
 	memset(buf, '\0', BUFSIZE + 1);
-	
+
 	if(log_info()) {
 		log_date();
 		printf("Trying to read from stdin...\n");
@@ -256,7 +256,7 @@ int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 int copris_send(unsigned char *buffer, int buffer_size, attrib **destination,
                 int printerset, attrib **trfile) {
 	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
-	
+
 	int z;
 	// Only for prset/trfile magic
 	for(z = 0; z <= BUFSIZE; z++) {
@@ -272,13 +272,15 @@ int copris_send(unsigned char *buffer, int buffer_size, attrib **destination,
 	} else if((*trfile)->exists) {
 		copris_translate(buffer, buffer_size, to_print);
 	}
-	
+
 	// Destination can be either stdout or a file
-	if(!(*destination)->exists) {
-		printf("%s", to_print);              // Print received text to stdout
+	if((*destination)->exists) {
+		// Write to the output file/printer
+		copris_write((*destination)->text, to_print);
 	} else {
-		copris_write((*destination)->text, to_print); // Write to the output file/printer
+		// Write to stdout
+		printf("%s", to_print);
 	}
-	
+
 	return 0;
 }
