@@ -60,14 +60,12 @@ int main(int argc, char **argv) {
 	int limitnum = 0;      // Limit received number of bytes
 	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
 	int is_stdin = 0;
-	int is_prset = 0;
 	int opt;               // Character, read by getopt
 	char *parserr;         // String to integer conversion error
 
-	char prsetinput[PRSET_LEN + 1]  = { 0 }; // Input printer set
-
-	attrib trfile, destination;
+	attrib trfile, prset, destination;
 	trfile      = (attrib) { 0 };
+	prset       = trfile;
 	destination = trfile;
 
 	/* man 3 getopt_long */
@@ -118,9 +116,9 @@ int main(int argc, char **argv) {
 				break;
 			case 'r':
 				if(strlen(optarg) <= PRSET_LEN) {
-// 					prsetinput = malloc(strlen(optarg) + 1);
-					strcpy(prsetinput, optarg);
-					is_prset = 1;
+					prset.exists = 1;
+					prset.text = malloc(strlen(optarg) + 1);
+					strcpy(prset.text, optarg);
 				} else {
 					// Excessive length already makes it wrong
 					fprintf(stderr, "Selected printer feature set does not exist (%s). "
@@ -160,7 +158,7 @@ int main(int argc, char **argv) {
 				return 0;
 			case ':':
 				if(optopt == 'p')
-					fprintf(stderr, "Port number is missing. " 
+					fprintf(stderr, "Port number is missing. "
 					                "Exiting...\n");
 				else if(optopt == 't')
 					fprintf(stderr, "Translation file is missing. "
@@ -180,7 +178,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "Option '%s' not recognised. "
 					                "Exiting...\n", argv[optind - 1]);
 				else
-					fprintf(stderr, "Option '-%c' not recognised. " 
+					fprintf(stderr, "Option '-%c' not recognised. "
 					                "Exiting...\n" , optopt);
 				return 1;
 			default:
@@ -203,8 +201,7 @@ int main(int argc, char **argv) {
 	if(portno < 1)
 		is_stdin = 1;
 	
-	// If the last argument is present, copy it to destination[]
-	// Only one argument is accepted, others are discarded
+	// Only one destination argument is accepted, others are discarded
 	if(argv[optind]) {
 		if(strlen(argv[optind]) <= FNAME_LEN) {
 			destination.exists = 1;
@@ -221,29 +218,24 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-// 	// We are writing to a file if destination is not NULL.
-// 	if(destination[0]) {
-// 		// Are we able to write to the output file?
-// 		if(access(destination, W_OK) == -1)
-// 			log_perr(-1, "access", "Unable to write to output file/printer. "
-// 			                       "Does it exist?");
-// 	}
-	
 	// Check if printer set exists and set it to its index + 1
-	if(is_prset) {
+	if(prset.exists) {
 		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
-			if(strcmp(prsetinput, printerset[p][0]) == 0) {
-				prsetinput[0] = p + 1;
-				is_prset = 2;
-				
+			if(strcmp(prset.text, printerset[p][0]) == 0) {
+				prset.exists = p + 1;
 				break;
 			}
+			prset.exists = 0;
 		}
-		
-		if(is_prset != 2){
-			fprintf(stderr, "Selected printer feature set does not exist. " 
-			                "Exiting...\n");
-			return 1;
+
+		if(prset.exists < 1) {
+			fprintf(stderr, "Selected printer feature set does not exist. ");
+			if(verbosity) {
+                fprintf(stderr, "Exiting...\n");
+				return 1;
+			} else {
+				fprintf(stderr, "Continuing without.\n");
+			}
 		}
 	}
 	
@@ -257,7 +249,6 @@ int main(int argc, char **argv) {
 			return 1;
 		} else {
 			// Error in trfile. We are quiet, so disable, notify and continue
-// 			trfile.text[0] = '\0';
 			trfile.exists = 0;
 			fprintf(stderr, "Continuing without trfile.\n");
 		}
@@ -285,10 +276,10 @@ int main(int argc, char **argv) {
 		printf("Daemon mode enabled.\n");
 	}
 	
-	if(is_prset && log_info()) {
+	if(prset.exists && log_info()) {
 		log_date();
-		printf("Selected printer feature set %s.\n", 
-		       printerset[(int)prsetinput[0] - 1][0]);
+		printf("Selected printer feature set %s.\n",
+		       printerset[prset.exists - 1][0]);
 	}
 	
 	if(limitnum > 0 && log_debug()) {
@@ -317,10 +308,10 @@ int main(int argc, char **argv) {
 	do {
 		if(!is_stdin) {
 			// Accept incoming connections, process data and send it out
-			copris_read(&parentfd, daemon, &destination, &trfile, prsetinput[0],
+			copris_read(&parentfd, daemon, &destination, &trfile, prset.exists,
 			            limitnum, limit_cutoff);
 		} else {
-			if(copris_stdin(&destination, &trfile, prsetinput[0]))
+			if(copris_stdin(&destination, &trfile, prset.exists))
 				return 1;
 		}
 	} while(daemon);
