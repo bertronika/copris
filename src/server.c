@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#include "common.h"
 #include "config.h"
 #include "debug.h"
 #include "server.h"
@@ -90,7 +91,7 @@ int copris_listen(int *parentfd, int portno) {
     return 0;
 }
 
-int copris_read(int *parentfd, char *destination, int daemon, int trfile, int printerset,
+int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, int printerset,
                 int limitnum, int limit_cutoff) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
@@ -138,7 +139,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	
 	if(log_err()) {
 		printf("Inbound connection from %s (%s).\n", host, hostaddrp);
-		if(!destination[0])
+		if(!destination->has)
 			printf("; BOS\n");
 	}
 
@@ -170,7 +171,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 			}
 		}
 		
-		copris_send(buf, fderr, destination, printerset, trfile);
+		copris_send(buf, fderr, &destination, printerset, &trfile);
 		
 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
 		if(limit_cutoff == 2) {
@@ -186,7 +187,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	fderr = close(childfd);
 	log_perr(fderr, "close", "Failed to close the child connection.");
 	
-	if(log_err() && !destination[0])
+	if(log_err() && !destination->has)
 		printf("; EOS\n");
 	
 	if(log_info())
@@ -212,7 +213,7 @@ int copris_read(int *parentfd, char *destination, int daemon, int trfile, int pr
 	return 0;
 }
 
-int copris_stdin(char *destination, int trfile, int printerset) {
+int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 	int bytenum = 0; // Nr. of read bytes
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
 	
@@ -233,15 +234,15 @@ int copris_stdin(char *destination, int trfile, int printerset) {
 		       "stdin). To stop reading, press Ctrl+D\n");
 	}
 
-	if(log_err() && !destination[0])
+	if(log_err() && !destination->has)
 		printf("; BOS\n");
 
 	while(fgets((char *)buf, BUFSIZE, stdin) != NULL) {
-		copris_send(buf, strlen((char *)buf), destination, printerset, trfile);
+		copris_send(buf, strlen((char *)buf), &destination, printerset, &trfile);
 		bytenum += strlen((char *)buf);
 	}
 
-	if(log_err() && !destination[0])
+	if(log_err() && !destination->has)
 		printf("; EOS\n");
 
 	if(log_err()) {
@@ -252,8 +253,8 @@ int copris_stdin(char *destination, int trfile, int printerset) {
 	return 0;
 }
 
-int copris_send(unsigned char *buffer, int buffer_size, char *destination,
-                int printerset, int trfile) {
+int copris_send(unsigned char *buffer, int buffer_size, attrib **destination,
+                int printerset, attrib **trfile) {
 	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
 	
 	int z;
@@ -262,21 +263,21 @@ int copris_send(unsigned char *buffer, int buffer_size, char *destination,
 		to_print[z] = buffer[z];
 	}
 	to_print[z] = '\0';
-	
+
 	if(printerset) {
 		copris_printerset(buffer, buffer_size, to_print, printerset);
-		if(trfile) {
+		if((*trfile)->has) {
 			copris_translate(to_print, buffer_size, to_print);
 		}
-	} else if(trfile) {
+	} else if((*trfile)->has) {
 		copris_translate(buffer, buffer_size, to_print);
 	}
 	
 	// Destination can be either stdout or a file
-	if(!destination[0]) {
+	if(!(*destination)->has) {
 		printf("%s", to_print);              // Print received text to stdout
 	} else {
-		copris_write(destination, to_print); // Write to the output file/printer
+		copris_write((*destination)->text, to_print); // Write to the output file/printer
 	}
 	
 	return 0;
