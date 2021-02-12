@@ -228,6 +228,8 @@ int main(int argc, char **argv) {
 			prset.exists = 0;
 		}
 
+		free(prset.text);
+
 		if(prset.exists < 1) {
 			fprintf(stderr, "Selected printer feature set does not exist. ");
 			if(verbosity) {
@@ -304,7 +306,7 @@ int main(int argc, char **argv) {
 	// Open socket and listen
 	if(!is_stdin)
 		copris_listen(&parentfd, portno);
-	
+
 	do {
 		if(!is_stdin) {
 			// Accept incoming connections, process data and send it out
