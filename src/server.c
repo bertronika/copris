@@ -226,9 +226,9 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile,
 
 int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 	int bytenum = 0; // Nr. of read bytes
-	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
+	char buf[BUFSIZE + 1]; // Inbound message buffer
 
-	memset(buf, '\0', BUFSIZE + 1);
+//	memset(buf, '\0', BUFSIZE + 1); TODO ???
 
 	if(log_info()) {
 		log_date();
@@ -248,9 +248,10 @@ int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 	if(log_err() && !destination->exists)
 		printf("; BOS\n");
 
-	while(fgets((char *)buf, BUFSIZE, stdin) != NULL) {
-		copris_send(buf, strlen((char *)buf), &destination, printerset, &trfile);
-		bytenum += strlen((char *)buf);
+	while(fgets(buf, BUFSIZE, stdin) != NULL) {
+		copris_send((unsigned char *)buf, strlen(buf), &destination,
+		            printerset, &trfile);
+		bytenum += strlen(buf);
 	}
 
 	if(log_err() && !destination->exists)
