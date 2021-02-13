@@ -250,17 +250,21 @@ int main(int argc, char **argv) {
 			prset.exists = 0;
 		}
 
-		free(prset.text);
-
 		if(prset.exists < 1) {
-			fprintf(stderr, "Selected printer feature set does not exist. ");
+			fprintf(stderr, "Selected printer feature set does not exist "
+			                "(%s). ", prset.text);
 			if(verbosity) {
                 fprintf(stderr, "Exiting...\n");
-				return 1;
+				terminate = 1;
 			} else {
 				fprintf(stderr, "Continuing without.\n");
 			}
 		}
+
+		free(prset.text);
+
+		if(terminate)
+			return terminate;
 	}
 	
 	// Read the translation file. The function populates global variables *input
