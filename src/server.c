@@ -44,7 +44,9 @@ int copris_listen(int *parentfd, int portno) {
 	 *   IPPROTO_IP   IP protocol
 	 */
 	fderr = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
-	log_perr(fderr, "socket", "Failed to create socket endpoint.");
+	if(log_perr(fderr, "socket", "Failed to create socket endpoint."))
+		return 1;
+
 	if(log_debug()) {
 		log_date();
 		printf("Socket endpoint created.\n");
@@ -69,8 +71,10 @@ int copris_listen(int *parentfd, int portno) {
 	
 	// Associate the parent socket with a port
 	fderr = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-	log_perr(fderr, "bind", "Failed to bind socket to address. " 
-	                        "Non-root users should set it >1023.");
+	if(log_perr(fderr, "bind", "Failed to bind socket to address. "
+	                           "Non-root users should set it >1023."))
+		return 1;
+
 	if(log_debug()) {
 		log_date();
 		printf("Socket bound to address.\n");
@@ -79,7 +83,9 @@ int copris_listen(int *parentfd, int portno) {
 	// Make the parent socket passive - accept incoming connections.
 	// Also limit the number of connections to BACKLOG
 	fderr = listen(*parentfd, BACKLOG);
-	log_perr(fderr, "listen", "Failed to make socket passive.");
+	if(log_perr(fderr, "listen", "Failed to make socket passive."))
+		return 1;
+
 	if(log_info()) {
 		log_date();
 		if(log_debug()) {
@@ -87,8 +93,8 @@ int copris_listen(int *parentfd, int portno) {
 		}
 		printf("Now we listen...\n");
 	}
-    
-    return 0;
+
+	return 0;
 }
 
 int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, int printerset,
