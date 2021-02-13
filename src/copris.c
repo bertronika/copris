@@ -59,7 +59,8 @@ int main(int argc, char **argv) {
 	int portno   = -1;     // Listening port of this server
 	int limitnum = 0;      // Limit received number of bytes
 	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
-	int is_stdin = 0;
+	int is_stdin = 0;      // Don't open a socket if true
+	int terminate = 0;     // Whether to free pointers if getopt gets terminated
 	int opt;               // Character, read by getopt
 	char *parserr;         // String to integer conversion error
 
@@ -84,20 +85,23 @@ int main(int argc, char **argv) {
 	};
 	
 	// int argc, char* argv[], char* optstring, struct* long_options, int* longindex
-	while((opt = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
+	while((opt = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1 &&
+		  !terminate) {
 		switch(opt) {
 			case 'p':
 				portno = strtol(optarg, &parserr, 10);
 				if(*parserr) {
 					fprintf(stderr, "Unrecognised characters in port number (%s). " 
 					                "Exiting...\n", parserr);
-					return 1;
+					terminate = 1;
+					break;
 				}
 				
 				if(portno > 65535 || portno < 1) {
 					fprintf(stderr, "Port number out of range. " 
 					                "Exiting...\n");
-					return 1;
+					terminate = 1;
+					break;
 				}
 				break;
 			case 'd':
@@ -111,7 +115,8 @@ int main(int argc, char **argv) {
 				} else {
 					fprintf(stderr, "Trfile filename too long (%s). "
 					                "Exiting...\n", optarg);
-					return 1;
+					terminate = 1;
+					break;
 				}
 				break;
 			case 'r':
@@ -123,7 +128,8 @@ int main(int argc, char **argv) {
 					// Excessive length already makes it wrong
 					fprintf(stderr, "Selected printer feature set does not exist (%s). "
 					                "Exiting...\n", optarg);
-					return 1;
+					terminate = 1;
+					break;
 				}
 				break;
 			case 'l':
@@ -131,13 +137,15 @@ int main(int argc, char **argv) {
 				if(*parserr) {
 					fprintf(stderr, "Unrecognised characters in limit number (%s). " 
 					                "Exiting...\n", parserr);
-					return 1;
+					terminate = 1;
+					break;
 				}
 				
 				if(limitnum > 4096 || limitnum < 0) {
 					fprintf(stderr, "Limit number out of range. " 
 					                "Exiting...\n");
-					return 1;
+					terminate = 1;
+					break;
 				}
 				break;
 			case 'D':
@@ -172,7 +180,8 @@ int main(int argc, char **argv) {
 				else
 					fprintf(stderr, "Option '-%c' is missing an argument. "
 					                "Exiting...\n", optopt);
-				return 1;
+				terminate = 1;
+				break;
 			case '?':
 				if(optopt == 0)
 					fprintf(stderr, "Option '%s' not recognised. "
@@ -180,12 +189,25 @@ int main(int argc, char **argv) {
 				else
 					fprintf(stderr, "Option '-%c' not recognised. "
 					                "Exiting...\n" , optopt);
-				return 1;
+				terminate = 1;
+				break;
 			default:
 				fprintf(stderr, "Undefined problem while parsing options. "
 				                "Exiting... \n");
-				return 2;
+				terminate = 2;
+				break;
 		}
+	}
+
+	// If an erroneous argument is passed after allocations, free them
+	if(terminate) {
+		if(trfile.exists)
+			free(trfile.text);
+
+		if(prset.exists)
+			free(prset.text);
+
+		return terminate;
 	}
 	
 	if(argc < 2 && log_err()) {
