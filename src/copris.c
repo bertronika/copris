@@ -363,7 +363,7 @@ int store_argument(char *optarg, struct attrib *attribute) {
 }
 
 void copris_help(char *copris_location) {
-	printf("Usage: %s [arguments] <printer location>\n\n"
+	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
 	       "  -r, --printer PRSET    Printer feature set\n"
@@ -378,14 +378,11 @@ void copris_help(char *copris_location) {
 	       "  -V, --version          Show program version and included printer\n"
 	       "                         feature sets\n"
 	       "\n"
-	       "Printer location can either be an actual printer address, such\n"
-	       "as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n"
+	       "To read from stdin, omit the port argument. To echo data to stdout\n"
+	       "(console/terminal), omit the output file.\n"
 	       "\n"
-	       "Data can also be read from stdin. If this is desired, omit the port\n"
-	       "argument, as incoming connections are prefered over stdin.\n"
-	       "\n"
-	       "Notes are only printed at situations where COPRIS assumes it is not\n"
-	       "invoked correctly. Be sure to omit the quiet argument when debugging.\n",
+	       "Warning notes will be printed if COPRIS assumes it is not invoked\n"
+	       "correctly, but never when the quiet argument is present.\n",
 	       copris_location);
 }
 
