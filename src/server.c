@@ -97,8 +97,8 @@ int copris_listen(int *parentfd, int portno) {
 	return 0;
 }
 
-int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, int printerset,
-                int limitnum, int limit_cutoff) {
+int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile,
+                int printerset, int limitnum, int limit_cutoff) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum   = 0;     // Received/sent message (byte) size
@@ -115,7 +115,9 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 
 	// Wait for a connection request and accept it
 	childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
-	log_perr(childfd, "accept", "Failed to accept the connection.");
+	if(log_perr(childfd, "accept", "Failed to accept the connection."))
+		return 1;
+
 	if(log_info()) {
 		log_date();
 		printf("Connection to socket accepted.\n");
@@ -124,7 +126,8 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 	// Prevent more than one connection if not a daemon
 	if(!daemon) {
 		fderr = close(*parentfd);
-		log_perr(fderr, "close", "Failed to close the parent connection.");
+		if(log_perr(fderr, "close", "Failed to close the parent connection."))
+			return 1;
 	}
 
 	// Get the hostname of the client
@@ -179,7 +182,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 
 		copris_send(buf, fderr, &destination, printerset, &trfile);
 
-		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read.
+//		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read. TODO ???
 		if(limit_cutoff == 2) {
 			if(log_err())
 				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
@@ -187,11 +190,13 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 			break;
 		}
 	}
-	log_perr(fderr, "read", "Error reading from socket.");
+	if(log_perr(fderr, "read", "Error reading from socket."))
+		return 1;
 
 	// Close the current connection 
 	fderr = close(childfd);
-	log_perr(fderr, "close", "Failed to close the child connection.");
+	if(log_perr(fderr, "close", "Failed to close the child connection."))
+		return 1;
 
 	if(log_err() && !destination->exists)
 		printf("; EOS\n");
@@ -215,7 +220,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile, 
 		log_date();
 		printf("Connection from %s (%s) closed.\n", host, hostaddrp);
 	}
-    
+
 	return 0;
 }
 
