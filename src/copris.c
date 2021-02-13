@@ -370,21 +370,22 @@ void copris_help(char *copris_location) {
 	       "\n"
 	       "Printer location can either be an actual printer address, such\n"
 	       "as /dev/ttyS0, or a file. If left empty, output is printed to stdout.\n"
-		   "\n"
-		   "Data can also be read from stdin. If this is desired, omit the port\n"
-		   "argument, as incoming connections are prefered over stdin.\n"
-		   "\n"
-		   "Notes are only printed at situations where COPRIS assumes it is not\n"
-		   "invoked correctly. Be sure to omit the quiet argument when debugging.\n",
-		   copris_location);
+	       "\n"
+	       "Data can also be read from stdin. If this is desired, omit the port\n"
+	       "argument, as incoming connections are prefered over stdin.\n"
+	       "\n"
+	       "Notes are only printed at situations where COPRIS assumes it is not\n"
+	       "invoked correctly. Be sure to omit the quiet argument when debugging.\n",
+	       copris_location);
 }
 
 void copris_version() {
-	printf("COPRIS version %s%s\n", COPRIS_VER, COPRIS_RELEASE);
-	printf("(C) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n");
-	printf("Compiled options:\n");
-	printf("  Buffer size:          %4d bytes\n", BUFSIZE);
-	printf("  Max. filename length: %4d characters\n", FNAME_LEN);
+	printf("COPRIS version %s%s\n"
+	       "(C) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
+	       "Compiled options:\n"
+	       "  Buffer size:          %4d bytes\n"
+	       "  Max. filename length: %4d characters\n",
+	       COPRIS_VER, COPRIS_RELEASE, BUFSIZE, FNAME_LEN);
 	printf("Included printer feature sets:\n  ");
 	list_prsets();
 	printf("\n");
