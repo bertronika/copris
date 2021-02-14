@@ -42,7 +42,8 @@ int verbosity = 1;
 int main(int argc, char **argv) {
 	int opt;               // Character, read by getopt
 	char *parserr;         // String to integer conversion error
-	int terminate = 0;     // Whether to free pointers if getopt gets terminated
+	int terminate = 0;     // 1 -> free pointers, terminate
+	                       // 2 -> free pointers, display help (3 -> version)
 	int daemon    = 0;     // Is the daemon option set?
 	int is_stdin  = 0;     // Don't open a socket if true
 
@@ -99,25 +100,31 @@ int main(int argc, char **argv) {
 			if(strlen(optarg) <= FNAME_LEN) {
 				trfile.exists = 1;
 				trfile.text = malloc(strlen(optarg) + 1);
-				strcpy(trfile.text, optarg);
+				if(!trfile.text) {
+					log_perr(-1, "malloc", "Memory allocation error.");
+					terminate = 1;
+				} else
+					strcpy(trfile.text, optarg);
 			} else {
 				fprintf(stderr, "Trfile filename too long (%s). "
 				                "Exiting...\n", optarg);
 				terminate = 1;
-				break;
 			}
 			break;
 		case 'r':
 			if(strlen(optarg) <= PRSET_LEN) {
 				prset.exists = 1;
 				prset.text = malloc(strlen(optarg) + 1);
-				strcpy(prset.text, optarg);
+				if(!prset.text) {
+					log_perr(-1, "malloc", "Memory allocation error.");
+					terminate = 1;
+				} else
+					strcpy(prset.text, optarg);
 			} else {
 				// Excessive length already makes it wrong
 				fprintf(stderr, "Selected printer feature set does not exist (%s). "
 				                "Exiting...\n", optarg);
 				terminate = 1;
-				break;
 			}
 			break;
 		case 'l':
@@ -147,11 +154,11 @@ int main(int argc, char **argv) {
 			verbosity = 0;
 			break;
 		case 'h':
-			copris_help(argv[0]);
-			return 0;
+			terminate = 2;
+			break;
 		case 'V':
-			copris_version();
-			return 0;
+			terminate = 3;
+			break;
 		case ':':
 			if(optopt == 'p')
 				fprintf(stderr, "Port number is missing. "
@@ -186,53 +193,33 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
-
-	// If an erroneous argument is passed after allocations, free them
-	if(terminate) {
-		if(trfile.exists)
-			free(trfile.text);
-
-		if(prset.exists)
-			free(prset.text);
-
-		return terminate;
-	}
-	
-	if(argc < 2 && log_err()) {
-		if(log_info())
-			log_date();
-		else
-			printf("Note: ");
-
-		printf("Without any arguments, COPRIS won't do much. "
-               "Try using the '--help' option.\n");
-	}
-	
-	if(portno < 1)
-		is_stdin = 1;
 	
 	// Only one destination argument is accepted, others are discarded
-	if(argv[optind]) {
+	if(!terminate && argv[optind]) {
 		if(strlen(argv[optind]) <= FNAME_LEN) {
-			destination.exists = 1;
 			destination.text = malloc(strlen(argv[optind]) + 1);
-			strcpy(destination.text, argv[optind]);
+			if(!destination.text) {
+				log_perr(-1, "malloc", "Memory allocation error.");
+				terminate = 1;
+			} else {
+				destination.exists = 1;
+				strcpy(destination.text, argv[optind]);
+			}
 		} else {
 			fprintf(stderr, "Destination filename too long (%s). " 
 			                "Exiting...\n", argv[optind]);
-			return 1;
+			terminate = 1;
 		}
 
 		if(access(destination.text, W_OK) == -1) {
 			log_perr(-1, "access", "Unable to write to output file/printer. Does "
 			                       "it exist, with appropriate permissions?");
 
-			free(destination.text);
-			return 1;
+			terminate = 1;
 		}
 	}
 	
-	if(prset.exists) {
+	if(!terminate && prset.exists) {
 		prset.exists = 0;
 		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
 			if(strcmp(prset.text, printerset[p][0]) == 0) {
@@ -246,30 +233,58 @@ int main(int argc, char **argv) {
 			                "(%s). ", prset.text);
 			if(verbosity) {
                 fprintf(stderr, "Exiting...\n");
+				prset.exists = 1;  // So it'll be free'd
 				terminate = 1;
 			} else {
 				fprintf(stderr, "Disabling it.\n");
 			}
 		}
-
-		free(prset.text);
-
-		if(terminate)
-			return terminate;
 	}
 
 	// Check and load translation definitions
-	if(trfile.exists && copris_trfile(trfile.text)) {
+	if(!terminate && trfile.exists && copris_trfile(trfile.text)) {
+		trfile.exists = 0; // trfile is free'd in copris_trfile
 		if(verbosity) {
 			// Error in trfile. We are not quiet, so notify and exit
 			fprintf(stderr, "Exiting...\n");
-			return 1;
+			terminate = 1;
 		} else {
 			// Error in trfile. We are quiet, so disable, notify and continue
-			trfile.exists = 0;
 			fprintf(stderr, "Disabling translation.\n");
 		}
 	}
+
+	// If an erroneous argument is passed after allocations, free them
+	if(terminate) {
+		if(trfile.exists)
+			free(trfile.text);
+
+		if(prset.exists)
+			free(prset.text);
+
+		if(destination.exists)
+			free(destination.text);
+
+		if(terminate == 2)
+			copris_help(argv[0]);
+		else if(terminate == 3)
+			copris_version();
+
+		return terminate > 1 ? 0 : terminate;
+	}
+
+	if(argc < 2 && log_err()) {
+		if(log_info())
+			log_date();
+		else
+			printf("Note: ");
+
+		printf("Without any arguments, COPRIS won't do much. "
+               "Try using the '--help' option.\n");
+	}
+
+	if(portno < 1)
+		is_stdin = 1;
 
 	if(log_info()) {
 		log_date();
@@ -333,6 +348,9 @@ int main(int argc, char **argv) {
 			terminate = copris_stdin(&destination, &trfile, prset.exists);
 		}
 	} while(daemon && !terminate);
+
+	if(destination.exists)
+		free(destination.text);
 
 	if(terminate)
 		return terminate;
