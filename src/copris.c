@@ -47,27 +47,29 @@
 /* 
  * Verbosity levels:
  * 0  silent/fatal
- * 1  err
+ * 1  error
  * 2  info
  * 3  debug
  */
 int verbosity = 1;
 
 int main(int argc, char **argv) {
-	int parentfd = 0;      // Parent file descriptor to hold a socket
-	int daemon   = 0;      // Is the daemon option set?
-	int portno   = -1;     // Listening port of this server
-	int limitnum = 0;      // Limit received number of bytes
-	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
-	int is_stdin = 0;      // Don't open a socket if true
-	int terminate = 0;     // Whether to free pointers if getopt gets terminated
 	int opt;               // Character, read by getopt
 	char *parserr;         // String to integer conversion error
+	int terminate = 0;     // Whether to free pointers if getopt gets terminated
+	int daemon    = 0;     // Is the daemon option set?
+	int is_stdin  = 0;     // Don't open a socket if true
+
+	int parentfd  = 0;     // Parent file descriptor to hold a socket
+	int portno    = -1;    // Listening port of this server
+
+	int limitnum     = 0;  // Limit received number of bytes
+	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
 
 	attrib trfile, prset, destination;
-	trfile      = (attrib) { 0 };
-	prset       = trfile;
-	destination = trfile;
+	trfile      = (attrib) { 0 };  // Translation file (user-supplied)
+	prset       = trfile;          // Printer set (compiled in)
+	destination = trfile;          // Destination filename
 
 	/* man 3 getopt_long */
 	static struct option long_options[] = {
@@ -88,114 +90,114 @@ int main(int argc, char **argv) {
 	while((opt = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1 &&
 		  !terminate) {
 		switch(opt) {
-			case 'p':
-				portno = strtol(optarg, &parserr, 10);
-				if(*parserr) {
-					fprintf(stderr, "Unrecognised characters in port number (%s). " 
-					                "Exiting...\n", parserr);
-					terminate = 1;
-					break;
-				}
-				
-				if(portno > 65535 || portno < 1) {
-					fprintf(stderr, "Port number out of range. " 
-					                "Exiting...\n");
-					terminate = 1;
-					break;
-				}
-				break;
-			case 'd':
-				daemon = 1;
-				break;
-			case 't':
-				if(strlen(optarg) <= FNAME_LEN) {
-					trfile.exists = 1;
-					trfile.text = malloc(strlen(optarg) + 1);
-					strcpy(trfile.text, optarg);
-				} else {
-					fprintf(stderr, "Trfile filename too long (%s). "
-					                "Exiting...\n", optarg);
-					terminate = 1;
-					break;
-				}
-				break;
-			case 'r':
-				if(strlen(optarg) <= PRSET_LEN) {
-					prset.exists = 1;
-					prset.text = malloc(strlen(optarg) + 1);
-					strcpy(prset.text, optarg);
-				} else {
-					// Excessive length already makes it wrong
-					fprintf(stderr, "Selected printer feature set does not exist (%s). "
-					                "Exiting...\n", optarg);
-					terminate = 1;
-					break;
-				}
-				break;
-			case 'l':
-				limitnum = strtol(optarg, &parserr, 10);
-				if(*parserr) {
-					fprintf(stderr, "Unrecognised characters in limit number (%s). " 
-					                "Exiting...\n", parserr);
-					terminate = 1;
-					break;
-				}
-				
-				if(limitnum > 4096 || limitnum < 0) {
-					fprintf(stderr, "Limit number out of range. " 
-					                "Exiting...\n");
-					terminate = 1;
-					break;
-				}
-				break;
-			case 'D':
-				limit_cutoff = 1;
-				break;
-			case 'v':
-				if(verbosity < 3)
-					verbosity++;
-				break;
-			case 'q':
-				verbosity = 0;
-				break;
-			case 'h':
-				copris_help(argv[0]);
-				return 0;
-			case 'V':
-				copris_version();
-				return 0;
-			case ':':
-				if(optopt == 'p')
-					fprintf(stderr, "Port number is missing. "
-					                "Exiting...\n");
-				else if(optopt == 't')
-					fprintf(stderr, "Translation file is missing. "
-					                "Exiting...\n");
-				else if(optopt == 'r')
-					fprintf(stderr, "Printer set is missing. "
-					                "Exiting...\n");
-				else if(optopt == 'l')
-					fprintf(stderr, "Limit number is missing. "
-					                "Exiting...\n");
-				else
-					fprintf(stderr, "Option '-%c' is missing an argument. "
-					                "Exiting...\n", optopt);
+		case 'p':
+			portno = strtol(optarg, &parserr, 10);
+			if(*parserr) {
+				fprintf(stderr, "Unrecognised characters in port number (%s). "
+				                "Exiting...\n", parserr);
 				terminate = 1;
 				break;
-			case '?':
-				if(optopt == 0)
-					fprintf(stderr, "Option '%s' not recognised. "
-					                "Exiting...\n", argv[optind - 1]);
-				else
-					fprintf(stderr, "Option '-%c' not recognised. "
-					                "Exiting...\n" , optopt);
+			}
+
+			if(portno > 65535 || portno < 1) {
+				fprintf(stderr, "Port number out of range. "
+				                "Exiting...\n");
 				terminate = 1;
 				break;
-			default:
-				fprintf(stderr, "Undefined problem while parsing options. "
-				                "Exiting... \n");
-				terminate = 2;
+			}
+			break;
+		case 'd':
+			daemon = 1;
+			break;
+		case 't':
+			if(strlen(optarg) <= FNAME_LEN) {
+				trfile.exists = 1;
+				trfile.text = malloc(strlen(optarg) + 1);
+				strcpy(trfile.text, optarg);
+			} else {
+				fprintf(stderr, "Trfile filename too long (%s). "
+				                "Exiting...\n", optarg);
+				terminate = 1;
 				break;
+			}
+			break;
+		case 'r':
+			if(strlen(optarg) <= PRSET_LEN) {
+				prset.exists = 1;
+				prset.text = malloc(strlen(optarg) + 1);
+				strcpy(prset.text, optarg);
+			} else {
+				// Excessive length already makes it wrong
+				fprintf(stderr, "Selected printer feature set does not exist (%s). "
+				                "Exiting...\n", optarg);
+				terminate = 1;
+				break;
+			}
+			break;
+		case 'l':
+			limitnum = strtol(optarg, &parserr, 10);
+			if(*parserr) {
+				fprintf(stderr, "Unrecognised characters in limit number (%s). "
+				                "Exiting...\n", parserr);
+				terminate = 1;
+				break;
+			}
+
+			if(limitnum > 4096 || limitnum < 0) {
+				fprintf(stderr, "Limit number out of range. "
+				                "Exiting...\n");
+				terminate = 1;
+				break;
+			}
+			break;
+		case 'D':
+			limit_cutoff = 1;
+			break;
+		case 'v':
+			if(verbosity < 3)
+				verbosity++;
+			break;
+		case 'q':
+			verbosity = 0;
+			break;
+		case 'h':
+			copris_help(argv[0]);
+			return 0;
+		case 'V':
+			copris_version();
+			return 0;
+		case ':':
+			if(optopt == 'p')
+				fprintf(stderr, "Port number is missing. "
+				                "Exiting...\n");
+			else if(optopt == 't')
+				fprintf(stderr, "Translation file is missing. "
+				                "Exiting...\n");
+			else if(optopt == 'r')
+				fprintf(stderr, "Printer set is missing. "
+				                "Exiting...\n");
+			else if(optopt == 'l')
+				fprintf(stderr, "Limit number is missing. "
+				                "Exiting...\n");
+			else
+				fprintf(stderr, "Option '-%c' is missing an argument. "
+				                "Exiting...\n", optopt);
+			terminate = 1;
+			break;
+		case '?':
+			if(optopt == 0)
+				fprintf(stderr, "Option '%s' not recognised. "
+				                "Exiting...\n", argv[optind - 1]);
+			else
+				fprintf(stderr, "Option '-%c' not recognised. "
+				                "Exiting...\n" , optopt);
+			terminate = 1;
+			break;
+		default:
+			fprintf(stderr, "Undefined problem while parsing options. "
+			                "Exiting... \n");
+			terminate = 2;
+			break;
 		}
 	}
 
@@ -212,9 +214,9 @@ int main(int argc, char **argv) {
 	
 	if(argc < 2 && log_err()) {
 		if(log_info())
-				log_date();
-			else
-				printf("Note: ");
+			log_date();
+		else
+			printf("Note: ");
 
 		printf("Without any arguments, COPRIS won't do much. "
                "Try using the '--help' option.\n");
@@ -238,18 +240,19 @@ int main(int argc, char **argv) {
 		if(access(destination.text, W_OK) == -1) {
 			log_perr(-1, "access", "Unable to write to output file/printer. Does "
 			                       "it exist, with appropriate permissions?");
+
+			free(destination.text);
 			return 1;
 		}
 	}
 	
-	// Check if printer set exists and set it to its index + 1
 	if(prset.exists) {
+		prset.exists = 0;
 		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
 			if(strcmp(prset.text, printerset[p][0]) == 0) {
 				prset.exists = p + 1;
 				break;
 			}
-			prset.exists = 0;
 		}
 
 		if(prset.exists < 1) {
@@ -259,7 +262,7 @@ int main(int argc, char **argv) {
                 fprintf(stderr, "Exiting...\n");
 				terminate = 1;
 			} else {
-				fprintf(stderr, "Continuing without.\n");
+				fprintf(stderr, "Disabling it.\n");
 			}
 		}
 
@@ -268,10 +271,8 @@ int main(int argc, char **argv) {
 		if(terminate)
 			return terminate;
 	}
-	
-	// Read the translation file. The function populates global variables *input
-	// and *replacement, defined in translate.c
-	// copris_trfile returns 1 if a failure is detected
+
+	// Check and load translation definitions
 	if(trfile.exists && copris_trfile(trfile.text)) {
 		if(verbosity) {
 			// Error in trfile. We are not quiet, so notify and exit
@@ -280,15 +281,15 @@ int main(int argc, char **argv) {
 		} else {
 			// Error in trfile. We are quiet, so disable, notify and continue
 			trfile.exists = 0;
-			fprintf(stderr, "Continuing without trfile.\n");
+			fprintf(stderr, "Disabling translation.\n");
 		}
 	}
-	
+
 	if(log_info()) {
 		log_date();
 		printf("Verbosity level set to %d.\n", verbosity);
 	}
-	
+
 	if(daemon && is_stdin) {
 		daemon = 0;
 		if(log_err()){
@@ -300,7 +301,7 @@ int main(int argc, char **argv) {
 			printf("Daemon mode not available while reading from stdin.\n");
 		}
 	}
-	
+
 	if(daemon && log_debug()) {
 		log_date();
 		printf("Daemon mode enabled.\n");
@@ -349,12 +350,12 @@ int main(int argc, char **argv) {
 
 	if(terminate)
 		return terminate;
-	
+
 	if(log_debug() && !is_stdin) {
 		log_date();
 		printf("Daemon mode is not set, exiting.\n");
 	}
-	
+
 	return 0;
 }
 
