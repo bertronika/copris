@@ -229,13 +229,15 @@ int main(int argc, char **argv) {
 			destination.exists = 1;
 			destination.text = malloc(strlen(argv[optind]) + 1);
 			strcpy(destination.text, argv[optind]);
-
-			if(access(destination.text, W_OK) == -1)
-			log_perr(-1, "access", "Unable to write to output file/printer. Does "
-			                       "it exist, with appropriate permissions?");
 		} else {
 			fprintf(stderr, "Destination filename too long (%s). " 
 			                "Exiting...\n", argv[optind]);
+			return 1;
+		}
+
+		if(access(destination.text, W_OK) == -1) {
+			log_perr(-1, "access", "Unable to write to output file/printer. Does "
+			                       "it exist, with appropriate permissions?");
 			return 1;
 		}
 	}
@@ -331,18 +333,22 @@ int main(int argc, char **argv) {
 	
 	// Open socket and listen
 	if(!is_stdin)
-		copris_listen(&parentfd, portno);
+		if((terminate = copris_listen(&parentfd, portno)))
+			return terminate;
 
 	do {
 		if(!is_stdin) {
-			// Accept incoming connections, process data and send it out
-			copris_read(&parentfd, daemon, &destination, &trfile, prset.exists,
-			            limitnum, limit_cutoff);
+			// Read from socket
+			terminate = copris_read(&parentfd, daemon, &destination, &trfile,
+			                        prset.exists, limitnum, limit_cutoff);
 		} else {
-			if(copris_stdin(&destination, &trfile, prset.exists))
-				return 1;
+			// Read from stdin
+			terminate = copris_stdin(&destination, &trfile, prset.exists);
 		}
-	} while(daemon);
+	} while(daemon && !terminate);
+
+	if(terminate)
+		return terminate;
 	
 	if(log_debug() && !is_stdin) {
 		log_date();
