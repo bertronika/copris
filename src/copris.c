@@ -232,13 +232,14 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Selected printer feature set does not exist "
 			                "(%s). ", prset.text);
 			if(verbosity) {
-                fprintf(stderr, "Exiting...\n");
-				prset.exists = 1;  // So it'll be free'd
+				fprintf(stderr, "Exiting...\n");
 				terminate = 1;
 			} else {
 				fprintf(stderr, "Disabling it.\n");
 			}
 		}
+
+		free(prset.text);
 	}
 
 	// Check and load translation definitions
