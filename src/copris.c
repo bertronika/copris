@@ -98,13 +98,7 @@ int main(int argc, char **argv) {
 			break;
 		case 't':
 			if(strlen(optarg) <= FNAME_LEN) {
-				trfile.exists = 1;
-				trfile.text = malloc(strlen(optarg) + 1);
-				if(!trfile.text) {
-					log_perr(-1, "malloc", "Memory allocation error.");
-					terminate = 1;
-				} else
-					strcpy(trfile.text, optarg);
+				terminate = store_argument(optarg, &trfile);
 			} else {
 				fprintf(stderr, "Trfile filename too long (%s). "
 				                "Exiting...\n", optarg);
@@ -113,13 +107,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'r':
 			if(strlen(optarg) <= PRSET_LEN) {
-				prset.exists = 1;
-				prset.text = malloc(strlen(optarg) + 1);
-				if(!prset.text) {
-					log_perr(-1, "malloc", "Memory allocation error.");
-					terminate = 1;
-				} else
-					strcpy(prset.text, optarg);
+				terminate = store_argument(optarg, &prset);
 			} else {
 				// Excessive length already makes it wrong
 				fprintf(stderr, "Selected printer feature set does not exist (%s). "
@@ -197,14 +185,7 @@ int main(int argc, char **argv) {
 	// Only one destination argument is accepted, others are discarded
 	if(!terminate && argv[optind]) {
 		if(strlen(argv[optind]) <= FNAME_LEN) {
-			destination.text = malloc(strlen(argv[optind]) + 1);
-			if(!destination.text) {
-				log_perr(-1, "malloc", "Memory allocation error.");
-				terminate = 1;
-			} else {
-				destination.exists = 1;
-				strcpy(destination.text, argv[optind]);
-			}
+			terminate = store_argument(argv[optind], &destination);
 		} else {
 			fprintf(stderr, "Destination filename too long (%s). " 
 			                "Exiting...\n", argv[optind]);
@@ -359,6 +340,20 @@ int main(int argc, char **argv) {
 	if(log_debug() && !is_stdin) {
 		log_date();
 		printf("Daemon mode is not set, exiting.\n");
+	}
+
+	return 0;
+}
+
+int store_argument(char *optarg, attrib *attribute) {
+	attribute->text = malloc(strlen(optarg) + 1);
+
+	if(!attribute->text) {
+		log_perr(-1, "malloc", "Memory allocation error.");
+		return 1;
+	} else {
+		attribute->exists = 1;
+		strcpy(attribute->text, optarg);
 	}
 
 	return 0;

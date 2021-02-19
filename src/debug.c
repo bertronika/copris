@@ -32,7 +32,8 @@ int log_perr(int retnum, char *errnum, char *message) {
 	return 0;
 }
 
-/* Verbosity levels:
+/*
+ * Verbosity levels:
  * 0  silent/fatal
  * 1  error       (default)
  * 2  info
