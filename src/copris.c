@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
 		default:
 			fprintf(stderr, "Undefined problem while parsing options. "
 			                "Exiting... \n");
-			terminate = 2;
+			terminate = 10;
 			break;
 		}
 	}
@@ -247,12 +247,15 @@ int main(int argc, char **argv) {
 		if(destination.exists)
 			free(destination.text);
 
-		if(terminate == 2)
+		if(terminate == 2) {
 			copris_help(argv[0]);
-		else if(terminate == 3)
+			return 0;
+		} else if(terminate == 3) {
 			copris_version();
+			return 0;
+		}
 
-		return terminate > 1 ? 0 : terminate;
+		return terminate;
 	}
 
 	if(argc < 2 && log_err()) {
