@@ -12,6 +12,6 @@
 	#endif
 #endif
 
-int store_argument(char *optarg, attrib *attribute);
+int store_argument(char *optarg, struct attrib *attribute);
 void copris_help(char *copris_location);
 void copris_version();

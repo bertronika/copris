@@ -1,4 +1,4 @@
-typedef struct Attribs {
+struct attrib {
 	int exists;
 	char *text;
-} attrib;
+};

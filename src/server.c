@@ -97,8 +97,8 @@ int copris_listen(int *parentfd, int portno) {
 	return 0;
 }
 
-int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile,
-                int printerset, int limitnum, int limit_cutoff) {
+int copris_read(int *parentfd, int daemon, int limitnum, int limit_cutoff,
+                struct attrib *trfile, int printerset, struct attrib *destination) {
 	int fderr;             // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum   = 0;     // Received/sent message (byte) size
@@ -180,7 +180,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile,
 			}
 		}
 
-		copris_send(buf, fderr, &destination, printerset, &trfile);
+		copris_send(buf, fderr, &trfile, printerset, &destination);
 
 //		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read. TODO ???
 		if(limit_cutoff == 2) {
@@ -224,7 +224,7 @@ int copris_read(int *parentfd, int daemon, attrib *destination, attrib *trfile,
 	return 0;
 }
 
-int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
+int copris_stdin(struct attrib *trfile, int printerset, struct attrib *destination) {
 	int bytenum = 0; // Nr. of read bytes
 	char buf[BUFSIZE + 1]; // Inbound message buffer
 
@@ -249,8 +249,8 @@ int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 		printf("; BOS\n");
 
 	while(fgets(buf, BUFSIZE, stdin) != NULL) {
-		copris_send((unsigned char *)buf, strlen(buf), &destination,
-		            printerset, &trfile);
+		copris_send((unsigned char *)buf, strlen(buf),
+		            &trfile, printerset, &destination);
 		bytenum += strlen(buf);
 	}
 
@@ -265,8 +265,8 @@ int copris_stdin(attrib *destination, attrib *trfile, int printerset) {
 	return 0;
 }
 
-int copris_send(unsigned char *buffer, int buffer_size, attrib **destination,
-                int printerset, attrib **trfile) {
+int copris_send(unsigned char *buffer, int buffer_size,
+                struct attrib **trfile, int printerset, struct attrib **destination) {
 	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
 
 	int z;

@@ -53,10 +53,10 @@ int main(int argc, char **argv) {
 	int limitnum     = 0;  // Limit received number of bytes
 	int limit_cutoff = 0;  // Cut text off at limit instead of discarding it
 
-	attrib trfile, prset, destination;
-	trfile      = (attrib) { 0 };  // Translation file (user-supplied)
-	prset       = trfile;          // Printer set (compiled in)
-	destination = trfile;          // Destination filename
+	struct attrib trfile, prset, destination;
+	trfile      = (struct attrib) { 0 };  // Translation file (user-supplied)
+	prset       = trfile;                 // Printer set (compiled in)
+	destination = trfile;                 // Destination filename
 
 	/* man 3 getopt_long */
 	static struct option long_options[] = {
@@ -326,11 +326,11 @@ int main(int argc, char **argv) {
 	do {
 		if(!is_stdin) {
 			// Read from socket
-			terminate = copris_read(&parentfd, daemon, &destination, &trfile,
-			                        prset.exists, limitnum, limit_cutoff);
+			terminate = copris_read(&parentfd, daemon, limitnum, limit_cutoff,
+			                        &trfile, prset.exists, &destination);
 		} else {
 			// Read from stdin
-			terminate = copris_stdin(&destination, &trfile, prset.exists);
+			terminate = copris_stdin(&trfile, prset.exists, &destination);
 		}
 	} while(daemon && !terminate);
 
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-int store_argument(char *optarg, attrib *attribute) {
+int store_argument(char *optarg, struct attrib *attribute) {
 	attribute->text = malloc(strlen(optarg) + 1);
 
 	if(!attribute->text) {
