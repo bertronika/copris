@@ -35,6 +35,7 @@ int copris_trfile(char *filename) {
 	dat = fopen(filename, "r");
 	if(!dat) {
 		log_perr(-1, "fopen", "Failed to open translation file for reading.");
+		return 1;
 	} else {
 		log_debug("Opened translation file %s\n", dat);
 	}
@@ -108,7 +109,7 @@ int copris_trfile(char *filename) {
 			
 			// Exit if character not in ASCII range [0-9]
 			if(c < 48 || c > 57) {
-				fprintf(stderr, "One of integers in translation file is errorneous. ");
+				fprintf(stderr, "One of integers in translation file is erroneous. ");
 				lines = -1;
 				break;
 			}
@@ -159,7 +160,8 @@ int copris_trfile(char *filename) {
 	}
 	
 	ferr = fclose(dat);
-	log_perr(ferr, "close", "Failed to close the translation file after reading.");
+	if(log_perr(ferr, "close", "Failed to close the translation file after reading."))
+		lines = -1;
 
 	free(filename);
 	
