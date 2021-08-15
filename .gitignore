@@ -1,4 +1,5 @@
 *.o
+*.d
 *.kate-swp
 old/
 tests/
