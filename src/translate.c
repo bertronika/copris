@@ -2,8 +2,10 @@
  * translate.c
  * Text and markdown translation/conversion for printers
  * 
- * Part of COPRIS - a converting printer server
- * (c) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020-2021 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ *
+ * This file is part of COPRIS, a converting printer server, licensed under the
+ * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
  * 
  * Strings in C are a bit challenging... Multibyte characters are a PITA
  */
