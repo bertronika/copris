@@ -1,3 +1,6 @@
+#ifndef PRINTERSET_H
+#define PRINTERSET_H
+
 #define PRSET_LEN 12
 #define INSTRUC_LEN 5
 
@@ -12,3 +15,5 @@
 #define C_IOFF  9
 
 extern char printerset[][10][INSTRUC_LEN + 1];
+
+#endif /* PRINTERSET_H */
