@@ -6,8 +6,6 @@
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
- * 
- * - https://epson.ru/upload/iblock/057/esc-p.pdf
  */
 
 #include "printerset.h"

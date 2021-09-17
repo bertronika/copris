@@ -17,8 +17,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
- * - https://azrael.digipen.edu/~mmead/www/Courses/CS180/getopt.html
  */
 
 #define COPRIS_VER "0.9"

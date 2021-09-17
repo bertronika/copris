@@ -6,11 +6,6 @@
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
- * 
- * - https://beej.us/guide/bgnet/html/
- * - https://ops.tips/blog/a-tcp-server-in-c/
- * - https://www.binarytides.com/socket-programming-c-linux-tutorial/
- * - tcpserver.c from https://www.cs.cmu.edu/afs/cs/academic/class/15213-f99/www/class26/
  */
 
 #include <stdio.h>
