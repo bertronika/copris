@@ -21,7 +21,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#include "common.h"
+#include "Copris.h"
 #include "config.h"
 #include "debug.h"
 #include "server.h"

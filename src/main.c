@@ -30,10 +30,10 @@
 #include <getopt.h>
 #include <limits.h>
 
-#include "common.h"
-#include "config.h"
 #include "debug.h"
-#include "copris.h"
+#include "config.h"
+#include "Copris.h"
+
 #include "server.h"
 #include "translate.h"
 #include "printerset.h"
@@ -41,7 +41,25 @@
 #define list_prsets() for(int p = 0; printerset[p][0][0] != '\0'; p++)\
 	printf("%s  ", printerset[p][0]);
 
-/* 
+#ifndef FNAME_LEN
+#	ifndef NAME_MAX
+#		define FNAME_LEN 64
+#	else
+#		define FNAME_LEN NAME_MAX
+#	endif
+#endif
+
+#ifndef REL
+#	define COPRIS_RELEASE ""
+#else
+#	define COPRIS_RELEASE ("-" REL)
+#endif
+
+int store_argument(char *optarg, struct attrib *attribute);
+void copris_help(char *copris_location);
+void copris_version();
+
+/*
  * Verbosity levels:
  * 0  silent/fatal
  * 1  error

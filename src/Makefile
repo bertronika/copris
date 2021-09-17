@@ -25,7 +25,7 @@ HASH := $(shell git rev-parse --short HEAD)
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 # Input source files, objects, dependencies
-SRC  = debug.c server.c writer.c translate.c printerset.c copris.c
+SRC  = debug.c server.c writer.c translate.c printerset.c main.c
 OBJ := $(SRC:.c=.o)
 DEP := $(SRC:.c=.d)
 
