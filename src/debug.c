@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef REL
+#ifdef DEBUG
 #include <unistd.h> /* getpid() */
 #include <time.h>
 #endif
@@ -55,7 +55,7 @@ int log_debug() {
 }
 
 void log_date() {
-#ifdef REL
+#ifdef DEBUG
 	time_t t = time(NULL);
 	struct tm cur_time = *localtime(&t);
 	printf("%02d.%02d.%d %02d:%02d:%02d copris[%d]: ",
