@@ -1,8 +1,8 @@
 # Build system for COPRIS
 # Possible targets:
 #	- all/no arg  build the default target (`copris')
-#	- copris      build the standard release
-#	- debug       build the debugging release with extra symbols
+#	- release     build the release build
+#	- debug       build the debugging build with extra symbols
 #	- clean       clean object, dependency and binary files
 
 # The build system utilises automatic dependency tracking. If a header file
@@ -30,12 +30,15 @@ OBJ := $(SRC:.c=.o)
 DEP := $(SRC:.c=.d)
 
 # C compiler flags
-CFLAGS := -Wall -Wextra -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
+CFLAGS := -Wall -Wextra -Wconversion -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
 
-.PHONY: all debug clean
+.PHONY: all release debug clean
 
-# all: debug
-all: $(BIN)
+all: debug
+# all: release
+
+release: CFLAGS += -O2 -s
+release: $(BIN)
 
 # debug: CFLAGS += -g -DREL=\"$(HASH)-$(BRANCH)\"
 # *** Do not forget to recompile the whole project if switching to/from debug ***
