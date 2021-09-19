@@ -149,7 +149,10 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	// Read the data sent by the client into the buffer
 	while((fderror = read(childfd, buf, BUFSIZE)) > 0) {
 		bytenum += fderror; // Append read bytes to the total byte counter
+
+		// Byte limit handling
 		if(attrib->limitnum && bytenum > attrib->limitnum) {
+			// Cut-off mid-text and terminate later
 			if(attrib->limit_cutoff) {
 				buf[attrib->limitnum] = '\0';
 				discarded = bytenum - attrib->limitnum;
@@ -157,6 +160,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 				fderror = write(childfd, limit_message, strlen(limit_message));
 				log_perr(fderror, "write", "Error sending termination text to socket.");
+			// Discard whole line and terminate
 			} else {
 				if(log_err())
 					printf("Client exceeded send size limit (%d B/%d B), discarding remaining "
@@ -169,19 +173,25 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 				break;
 			}
-		}
+		} /* end of byte limit handling */
+
+		// Terminate the buffer after reading completed
+		buf[fderror] = '\0';
 
 // 		copris_send(buf, fderror, &trfile, printerset, &destination);
 		copris_process(buf, fderror, attrib);
 
-//		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read. TODO ???
+// 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read. TODO ???
+
+		// Terminate connection if cut-off set
 		if(attrib->limit_cutoff == 2) {
 			if(log_err())
 				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
 				       "terminating connection.\n", bytenum, attrib->limitnum);
 			break;
 		}
-	}
+	} /* end of socket reading loop */
+
 	if(log_perr(fderror, "read", "Error reading from socket."))
 		return 1;
 
@@ -195,7 +205,6 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 	if(log_info())
 		log_date();
-
 	if(log_err()) {
 		printf("End of stream, received %d byte(s) in %d chunk(s)",
 			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
