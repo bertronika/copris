@@ -134,15 +134,11 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 	if(log_info())
 		log_date();
-
 	if(log_err()) {
 		printf("Inbound connection from %s (%s).\n", host_info, host_address);
 		if(!(attrib->copris_flags & HAS_DESTINATION))
 			printf("; BOS\n");
 	}
-
-	// Empty out the inbound buffer
-	memset(buf, '\0', BUFSIZE + 1);
 
 	// Read the data sent by the client into the buffer
 	while((fderror = read(childfd, buf, BUFSIZE)) > 0) {
@@ -178,8 +174,6 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 // 		copris_send(buf, fderror, &trfile, printerset, &destination);
 		copris_process(buf, fderror, attrib);
-
-// 		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read. TODO ???
 
 		// Terminate connection if cut-off set
 		if(attrib->limit_cutoff == 2) {
