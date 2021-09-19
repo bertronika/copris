@@ -123,10 +123,8 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	fderror = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr),
 	                       host_info, sizeof(host_info), NULL, 0, 0);
 	if(fderror != 0) {
-		fprintf(stderr, "getnameinfo: Failed getting hostname from address.\n");
-// 		perror(fderror);
+		log_perr(-1, "getnameinfo", "Failed getting hostname from address.");
 	}
-// 	log_perr(fderror, "getnameinfo", "Failed getting hostname from address.");
 
 	// Convert client's address from network byte order to a dotted-decimal form
 	host_address = inet_ntoa(clientaddr.sin_addr);
