@@ -15,20 +15,20 @@
 #include "debug.h"
 #include "writer.h"
 
-int copris_write(char *dest, unsigned char *data) {
+int copris_write_file(char *dest, unsigned char *data) {
 	FILE *file_ptr;  // File stream pointer
 	int buf_num;     // Number of bytes in buffer
 	int buf_written; // Number of written bytes to file
-	int ferr;        // Error code of a file operation
+	int ferror;      // Error code of a file operation
+	int fatal = 0;   // Fatal error, close the file if possible
 	
 	// Count the buffer
 	//for(buf_num = 0; data[buf_num] != '\0'; buf_num++);
 	buf_num = strlen((char *)data);
 	
 	file_ptr = fopen(dest, "a"); // rEAD, wRITE, aPPEND, man 3 fopen
-	
 	if(file_ptr == NULL)
-		if(log_perr(-1, "fopen", "Failed to open output file for writing/appending."))
+		if(log_perr(-1, "fopen", "Failed to open output file."))
 			return 1;
 		
 	if(log_debug()) {
@@ -37,19 +37,18 @@ int copris_write(char *dest, unsigned char *data) {
 	}
 	
 	buf_written = fwrite(data, sizeof(data[0]), buf_num, file_ptr);
-	if(log_debug()) {
+	if(buf_written < buf_num) {
+		fprintf(stderr, "fwrite: Failure while appending to output file; "
+		                "not enough bytes transferred.\n");
+		fatal = 1;
+// 		return 1;
+	} else if(log_debug()) {
 		log_date();
-		printf("Finished writing %d B.\n", buf_written);
+		printf("Finished appending %d B.\n", buf_written);
 	}
 
-	if(buf_written < buf_num) {
-		fprintf(stderr, "fwrite: Failure while writing to output file; " 
-		                "not enough bytes transferred.\n");
-		return 1;
-	}
-	
-	ferr = fclose(file_ptr);
-	if(log_perr(ferr, "close", "Failed to close the output file after writing."))
+	ferror = fclose(file_ptr);
+	if(log_perr(ferror, "fclose", "Failed to close the output file."))
 		return 1;
 
 	if(log_debug()) {
@@ -57,5 +56,5 @@ int copris_write(char *dest, unsigned char *data) {
 		printf("Output file closed.\n");
 	}
 	
-	return 0;
+	return fatal;
 }

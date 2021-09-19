@@ -21,7 +21,7 @@
 static unsigned char *input;       // Chars that should be picked out
 static unsigned char *replacement; // Chars that should be put in instead
 
-int copris_trfile(char *filename) {
+int copris_loadtrfile(char *filename) {
 	FILE *dat;        // Translation file
 	int c;            // Character, read from *dat
 	int lines    = 0; // Number of lines in *dat
@@ -197,9 +197,9 @@ int copris_trfile(char *filename) {
 	if(lines < 0) {
 		free(input);
 		free(replacement);
-		return 1;
-	} else
 		return 0;
+	} else
+		return 1;
 }
 
 void copris_translate(unsigned char *source, int source_len, unsigned char *ret) {

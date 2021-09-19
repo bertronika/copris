@@ -24,15 +24,9 @@
 #include "translate.h"
 #include "printerset.h"
 
-/*
- * Round backlog to a power of 2.
- * https://stackoverflow.com/a/5111841
- */
-#define BACKLOG 2
-
-int copris_listen(int *parentfd, int portno) {
-	int fderr; // Error code of a socket operation
-	struct sockaddr_in serveraddr; // Server's address
+int copris_socket_listen(int *parentfd, int portno) {
+	int fderror;
+	struct sockaddr_in serveraddr; // Server's own address
 
 	/*
 	 * Create a system socket using the following:
@@ -40,8 +34,8 @@ int copris_listen(int *parentfd, int portno) {
 	 *   SOCK_STREAM  TCP protocol
 	 *   IPPROTO_IP   IP protocol
 	 */
-	fderr = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
-	if(log_perr(fderr, "socket", "Failed to create socket endpoint."))
+	fderror = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
+	if(log_perr(fderror, "socket", "Failed to create socket endpoint."))
 		return 1;
 
 	if(log_debug()) {
@@ -67,8 +61,8 @@ int copris_listen(int *parentfd, int portno) {
 	serveraddr.sin_port        = htons((unsigned short)portno);
 	
 	// Associate the parent socket with a port
-	fderr = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-	if(log_perr(fderr, "bind", "Failed to bind socket to address. "
+	fderror = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
+	if(log_perr(fderror, "bind", "Failed to bind socket to address. "
 	                           "Non-root users should set it >1023."))
 		return 1;
 
@@ -79,8 +73,8 @@ int copris_listen(int *parentfd, int portno) {
 
 	// Make the parent socket passive - accept incoming connections.
 	// Also limit the number of connections to BACKLOG
-	fderr = listen(*parentfd, BACKLOG);
-	if(log_perr(fderr, "listen", "Failed to make socket passive."))
+	fderror = listen(*parentfd, BACKLOG);
+	if(log_perr(fderror, "listen", "Failed to make socket passive."))
 		return 1;
 
 	if(log_info()) {
@@ -94,20 +88,18 @@ int copris_listen(int *parentfd, int portno) {
 	return 0;
 }
 
-int copris_read(int *parentfd, int daemon, int limitnum, int limit_cutoff,
-                struct attrib *trfile, int printerset, struct attrib *destination) {
-	int fderr;             // Error code of a socket operation
+int copris_read_socket(int *parentfd, struct Attribs *attrib) {
+	int fderror;           // Error code of a socket operation
 	int childfd;           // Child socket, which processes one client at a time
 	int bytenum   = 0;     // Received/sent message (byte) size
 	int discarded = 0;     // Discarded number of bytes, if limit is set
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
-	char *hostaddrp;                // Host address string
-	char host[NI_MAXHOST];          // Host info (IP, hostname). NI_MAXHOST is built in
+	char *host_address;             // Host address string
+	char host_info[NI_MAXHOST];     // Host info (IP, hostname). NI_MAXHOST is built in
 	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
 	char limit_message[] = "Send size limit exceeded, terminating connection.\n";
 
-	// Get the struct size
 	clientlen = sizeof(clientaddr);
 
 	// Wait for a connection request and accept it
@@ -121,31 +113,33 @@ int copris_read(int *parentfd, int daemon, int limitnum, int limit_cutoff,
 	}
 
 	// Prevent more than one connection if not a daemon
-	if(!daemon) {
-		fderr = close(*parentfd);
-		if(log_perr(fderr, "close", "Failed to close the parent connection."))
+	if(!attrib->daemon) {
+		fderror = close(*parentfd);
+		if(log_perr(fderror, "close", "Failed to close the parent connection."))
 			return 1;
 	}
 
 	// Get the hostname of the client
-	fderr = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr), 
-	                    host, sizeof(host), NULL, 0, 0);
-	if(fderr != 0){
+	fderror = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr),
+	                       host_info, sizeof(host_info), NULL, 0, 0);
+	if(fderror != 0) {
 		fprintf(stderr, "getnameinfo: Failed getting hostname from address.\n");
+// 		perror(fderror);
 	}
+// 	log_perr(fderror, "getnameinfo", "Failed getting hostname from address.");
 
 	// Convert client's address from network byte order to a dotted-decimal form
-	hostaddrp = inet_ntoa(clientaddr.sin_addr);
-	if(hostaddrp == NULL) {
-		fprintf(stderr, "inet_ntoa: Failed converting host's address.\n");
+	host_address = inet_ntoa(clientaddr.sin_addr);
+	if(host_address == NULL) {
+		fprintf(stderr, "inet_ntoa: Failed converting host's address to dotted decimal.\n");
 	}
 
 	if(log_info())
 		log_date();
 
 	if(log_err()) {
-		printf("Inbound connection from %s (%s).\n", host, hostaddrp);
-		if(!destination->exists)
+		printf("Inbound connection from %s (%s).\n", host_info, host_address);
+		if(!(attrib->copris_flags & HAS_DESTINATION))
 			printf("; BOS\n");
 	}
 
@@ -153,61 +147,62 @@ int copris_read(int *parentfd, int daemon, int limitnum, int limit_cutoff,
 	memset(buf, '\0', BUFSIZE + 1);
 
 	// Read the data sent by the client into the buffer
-	while((fderr = read(childfd, buf, BUFSIZE)) > 0) {
-		bytenum += fderr; // Append read bytes to the total byte counter
-		if(limitnum && bytenum > limitnum) {
-			if(limit_cutoff) {
-				buf[limitnum] = '\0';
-				discarded = bytenum - limitnum;
-				limit_cutoff = 2;
+	while((fderror = read(childfd, buf, BUFSIZE)) > 0) {
+		bytenum += fderror; // Append read bytes to the total byte counter
+		if(attrib->limitnum && bytenum > attrib->limitnum) {
+			if(attrib->limit_cutoff) {
+				buf[attrib->limitnum] = '\0';
+				discarded = bytenum - attrib->limitnum;
+				attrib->limit_cutoff = 2;
 
-				fderr = write(childfd, limit_message, strlen(limit_message));
-				log_perr(fderr, "write", "Error sending termination text to socket.");
+				fderror = write(childfd, limit_message, strlen(limit_message));
+				log_perr(fderror, "write", "Error sending termination text to socket.");
 			} else {
 				if(log_err())
-					printf("Client exceeded send size limit (%d B/%d B), discarding and "
-					       "terminating connection.\n", bytenum, limitnum);
+					printf("Client exceeded send size limit (%d B/%d B), discarding remaining "
+					       "data and terminating connection.\n", bytenum, attrib->limitnum);
 
-				discarded = fderr;
+				discarded = fderror;
 
-				fderr = write(childfd, limit_message, strlen(limit_message));
-				log_perr(fderr, "write", "Error sending termination text to socket.");
+				fderror = write(childfd, limit_message, strlen(limit_message));
+				log_perr(fderror, "write", "Error sending termination text to socket.");
 
 				break;
 			}
 		}
 
-		copris_send(buf, fderr, &trfile, printerset, &destination);
+// 		copris_send(buf, fderror, &trfile, printerset, &destination);
+		copris_process(buf, fderror, attrib);
 
 //		memset(buf, '\0', BUFSIZE + 1); // Clear the buffer for next read. TODO ???
-		if(limit_cutoff == 2) {
+		if(attrib->limit_cutoff == 2) {
 			if(log_err())
 				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
-				       "terminating connection.\n", bytenum, limitnum);
+				       "terminating connection.\n", bytenum, attrib->limitnum);
 			break;
 		}
 	}
-	if(log_perr(fderr, "read", "Error reading from socket."))
+	if(log_perr(fderror, "read", "Error reading from socket."))
 		return 1;
 
 	// Close the current connection 
-	fderr = close(childfd);
-	if(log_perr(fderr, "close", "Failed to close the child connection."))
+	fderror = close(childfd);
+	if(log_perr(fderror, "close", "Failed to close the child connection."))
 		return 1;
 
-	if(log_err() && !destination->exists)
+	if(log_err() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
 	if(log_info())
 		log_date();
 
 	if(log_err()) {
-		printf("End of stream, received %d B in %d chunk(s)", 
+		printf("End of stream, received %d byte(s) in %d chunk(s)",
 			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
 
 		if(discarded) {
 			printf(", %d B %s.\n", discarded,
-			      (limit_cutoff == 2) ? "cut off" : "discarded");
+			      (attrib->limit_cutoff == 2) ? "cut off" : "discarded");
 		} else {
 			printf(".\n");
 		}
@@ -215,13 +210,13 @@ int copris_read(int *parentfd, int daemon, int limitnum, int limit_cutoff,
 
 	if(log_info()) {
 		log_date();
-		printf("Connection from %s (%s) closed.\n", host, hostaddrp);
+		printf("Connection from %s (%s) closed.\n", host_info, host_address);
 	}
 
 	return 0;
 }
 
-int copris_stdin(struct attrib *trfile, int printerset, struct attrib *destination) {
+int copris_read_stdin(struct Attribs *attrib) {
 	int bytenum = 0; // Nr. of read bytes
 	char buf[BUFSIZE + 1]; // Inbound message buffer
 
@@ -242,28 +237,30 @@ int copris_stdin(struct attrib *trfile, int printerset, struct attrib *destinati
 		       "stdin). To stop reading, press Ctrl+D\n");
 	}
 
-	if(log_err() && !destination->exists)
+	if(log_err() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
 	while(fgets(buf, BUFSIZE, stdin) != NULL) {
-		copris_send((unsigned char *)buf, strlen(buf),
-		            &trfile, printerset, &destination);
+// 		copris_send((unsigned char *)buf, strlen(buf),
+// 		            &trfile, printerset, &destination);
+		copris_process((unsigned char *)buf, strlen(buf), attrib);
 		bytenum += strlen(buf);
 	}
 
-	if(log_err() && !destination->exists)
+	if(log_err() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
 	if(log_err()) {
-		printf("End of stream, received %d B in %d chunk(s).\n",
+		printf("End of stream, received %d byte(s) in %d chunk(s).\n",
 		       bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
 	}
 
 	return 0;
 }
 
-int copris_send(unsigned char *buffer, int buffer_size,
-                struct attrib **trfile, int printerset, struct attrib **destination) {
+// int copris_send(unsigned char *buffer, int buffer_size,
+//                 struct attrib **trfile, int printerset, struct attrib **destination) {
+int copris_process(unsigned char *buffer, int buffer_size, struct Attribs *attrib) {
 	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
 
 	int z;
@@ -273,19 +270,19 @@ int copris_send(unsigned char *buffer, int buffer_size,
 	}
 	to_print[z] = '\0';
 
-	if(printerset) {
-		copris_printerset(buffer, buffer_size, to_print, printerset);
-		if((*trfile)->exists) {
+	if(attrib->copris_flags & HAS_PRSET) {
+		copris_printerset(buffer, buffer_size, to_print, attrib->prset);
+		if(attrib->copris_flags & HAS_TRFILE) {
 			copris_translate(to_print, buffer_size, to_print);
 		}
-	} else if((*trfile)->exists) {
+	} else if(attrib->copris_flags & HAS_TRFILE) {
 		copris_translate(buffer, buffer_size, to_print);
 	}
 
 	// Destination can be either stdout or a file
-	if((*destination)->exists) {
+	if(attrib->copris_flags & HAS_DESTINATION) {
 		// Write to the output file/printer
-		copris_write((*destination)->text, to_print);
+		copris_write_file(attrib->destination, to_print);
 	} else {
 		// Write to stdout
 		printf("%s", to_print);

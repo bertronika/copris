@@ -30,7 +30,8 @@ OBJ := $(SRC:.c=.o)
 DEP := $(SRC:.c=.d)
 
 # C compiler flags
-CFLAGS := -Wall -Wextra -Wconversion -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
+# CFLAGS := -Wall -Wextra -Wconversion -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
+CFLAGS := -Wall -Wextra -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
 
 .PHONY: all release debug clean
 
