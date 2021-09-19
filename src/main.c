@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
 	struct Attribs attrib;
 
 	attrib.portno       = -1;
-	attrib.prset        = 0;
+	attrib.prset        = -1;
 	attrib.daemon       = 0;
 	attrib.limitnum     = 0;
 	attrib.limit_cutoff = 0;
@@ -298,7 +298,7 @@ int main(int argc, char **argv) {
 		}
 
 		// Missing printer sets are not a fatal error in quiet mode
-		if(attrib.prset == 0) {
+		if(attrib.prset == -1) {
 			fprintf(stderr, "Selected printer feature set does not exist "
 			                "(%s). ", attrib.prsetname);
 			if(verbosity) {
@@ -361,7 +361,7 @@ int main(int argc, char **argv) {
 		printf("Daemon mode enabled.\n");
 	}
 	
-	if(attrib.prset && log_info()) {
+	if((attrib.copris_flags & HAS_PRSET) && log_info()) {
 		log_date();
 		printf("Selected printer feature set %s.\n",
 		       printerset[attrib.prset][0]);

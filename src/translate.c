@@ -254,7 +254,6 @@ void copris_translate(unsigned char *source, int source_len, unsigned char *ret)
 
 void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set) {
 	int r = 0;
-	set--;
 	
 	// Text attributes, preserved over multiple printerset function calls
 	static int bold_on   = 0;
