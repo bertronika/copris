@@ -26,16 +26,15 @@
 
 struct Attribs {
 	int portno;        /* Listening port of this server                  */
-	char *trfile;      /* Translation file location                      */
-	char *prsetname;   /* User-specified printer feature set name        */
 	int prset;         /* Parsed printer set index number                */
 	int daemon;        /* Run continuously                               */
 	int limitnum;      /* Limit received number of bytes                 */
 	int limit_cutoff;  /* Cut text off at limit instead of discarding it */
 
+	int copris_flags;  /* Flags regarding user-specified arguments:      */
+	char *prsetname;   /* Printer feature set name                       */
+	char *trfile;      /* Translation file location                      */
 	char *destination; /* Output file (printer)                          */
-
-	int copris_flags;  /* Flags regarding user-specified arguments       */
 // 	int verbosity;
 };
 

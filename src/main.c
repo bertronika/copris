@@ -270,6 +270,7 @@ int main(int argc, char **argv) {
 	attrib.daemon       = 0;
 	attrib.limitnum     = 0;
 	attrib.limit_cutoff = 0;
+	attrib.copris_flags = 0x00;
 
 // 	int terminate = 0;     // 1 -> free pointers, terminate
 	                       // 2 -> free pointers, display help (3 -> version)
