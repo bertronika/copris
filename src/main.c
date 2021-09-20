@@ -45,8 +45,6 @@
 #	define COPRIS_RELEASE ("-" REL)
 #endif
 
-// int store_argument(char *optarg, struct attrib *attribute);
-
 void copris_help(char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
@@ -114,16 +112,12 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			if(*parserr) {
 				fprintf(stderr, "Unrecognised characters in port number (%s). "
 				                "Exiting...\n", parserr);
-// 				terminate = 1;
-// 				break;
 				return 1;
 			}
 
 			if(attrib->portno > 65535 || attrib->portno < 1) {
 				fprintf(stderr, "Port number out of range. "
 				                "Exiting...\n");
-// 				terminate = 1;
-// 				break;
 				return 1;
 			}
 			break;
@@ -132,26 +126,22 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case 't':
 			if(strlen(optarg) <= FNAME_LEN) {
-// 				terminate = store_argument(optarg, &trfile);
 				attrib->trfile = optarg;
 				attrib->copris_flags |= HAS_TRFILE;
 			} else {
 				fprintf(stderr, "Trfile filename too long (%s). "
 				                "Exiting...\n", optarg);
-// 				terminate = 1;
 				return 1;
 			}
 			break;
 		case 'r':
 			if(strlen(optarg) <= PRSET_LEN) {
-// 				terminate = store_argument(optarg, &prset);
 				attrib->prsetname = optarg;
 				attrib->copris_flags |= HAS_PRSET;
 			} else {
 				// Excessive length already makes it wrong
 				fprintf(stderr, "Selected printer feature set does not exist (%s). "
 				                "Exiting...\n", optarg);
-// 				terminate = 1;
 				return 1;
 			}
 			break;
@@ -160,16 +150,12 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			if(*parserr) {
 				fprintf(stderr, "Unrecognised characters in limit number (%s). "
 				                "Exiting...\n", parserr);
-// 				terminate = 1;
-// 				break;
 				return 1;
 			}
 
 			if(attrib->limitnum > 4096 || attrib->limitnum < 0) {
 				fprintf(stderr, "Limit number out of range. "
 				                "Exiting...\n");
-// 				terminate = 1;
-// 				break;
 				return 1;
 			}
 			break;
@@ -205,8 +191,6 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			else
 				fprintf(stderr, "Option '-%c' is missing an argument. "
 				                "Exiting...\n", optopt);
-// 			terminate = 1;
-// 			break;
 			return 1;
 		case '?':
 			if(optopt == 0)
@@ -215,14 +199,10 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			else
 				fprintf(stderr, "Option '-%c' not recognised. "
 				                "Exiting...\n" , optopt);
-// 			terminate = 1;
-// 			break;
 			return 1;
 		default:
 			fprintf(stderr, "Getopt returned an unknown character code 0x%x. "
 			                "Exiting... \n", c);
-// 			terminate = 10;
-// 			break;
 			return 2;
 		}
 	} /* end of getopt */
@@ -231,20 +211,16 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Note that only the first argument is accepted.
 	if(argv[optind]) {
 		if(strlen(argv[optind]) <= FNAME_LEN) {
-// 			terminate = store_argument(argv[optind], &destination);
 			attrib->destination = argv[optind];
 		} else {
 			fprintf(stderr, "Destination filename too long (%s). "
 			                "Exiting...\n", argv[optind]);
-// 			terminate = 1;
 			return 1;
 		}
 
 		if(access(attrib->destination, W_OK) == -1) {
 			log_perr(-1, "access", "Unable to write to output file/printer. Does "
 			                       "it exist, with appropriate permissions?");
-
-// 			terminate = 1;
 			return 1;
 		}
 	}
@@ -272,16 +248,9 @@ int main(int argc, char **argv) {
 	attrib.limit_cutoff = 0;
 	attrib.copris_flags = 0x00;
 
-// 	int terminate = 0;     // 1 -> free pointers, terminate
-	                       // 2 -> free pointers, display help (3 -> version)
 	int is_stdin  = 0;     // Determine if text is coming via the standard input
 	int parentfd  = 0;     // Parent file descriptor to hold a socket
 	int error     = 0;
-
-// 	struct attrib trfile, prset, destination;
-// 	trfile      = (struct attrib) { 0 };  // Translation file (user-supplied)
-// 	prset       = trfile;                 // Printer set (compiled in)
-// 	destination = trfile;                 // Destination filename
 
 	// Parsing arguments
 	error = parse_arguments(argc, argv, &attrib);
@@ -396,12 +365,9 @@ int main(int argc, char **argv) {
 
 	do {
 		if(is_stdin) {
-// 			error = copris_stdin(&trfile, prset.exists, &destination);
 			error = copris_read_stdin(&attrib);
 		} else {
 			// Read from socket
-// 			error = copris_read(&parentfd, attrib.daemon, attrib.limitnum, attrib.limit_cutoff,
-// 			                        &trfile, prset.exists, attrib.destination);
 			error = copris_read_socket(&parentfd, &attrib);
 		}
 	} while(attrib.daemon && !error);
@@ -416,17 +382,3 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
-
-// int store_argument(char *optarg, struct attrib *attribute) {
-// 	attribute->text = malloc(strlen(optarg) + 1);
-//
-// 	if(!attribute->text) {
-// 		log_perr(-1, "malloc", "Memory allocation error.");
-// 		return 1;
-// 	} else {
-// 		attribute->exists = 1;
-// 		strcpy(attribute->text, optarg);
-// 	}
-//
-// 	return 0;
-// }

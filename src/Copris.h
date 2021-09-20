@@ -19,11 +19,6 @@
 #define HAS_TRFILE      0x02
 #define HAS_PRSET       0x04
 
-// struct attrib {
-// 	int exists;
-// 	char *text;
-// };
-
 struct Attribs {
 	int portno;        /* Listening port of this server                  */
 	int prset;         /* Parsed printer set index number                */
