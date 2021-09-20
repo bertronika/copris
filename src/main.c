@@ -27,6 +27,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <limits.h>
+#include <errno.h>
 
 #include "debug.h"
 #include "config.h"
@@ -117,18 +118,32 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	while((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch(c) {
 		case 'p':
-			attrib->portno = strtol(optarg, &parserr, 10);
+			errno = 0; // To distinguish success/failure after call
+			unsigned long temp_port = strtoul(optarg, &parserr, 10);
+
+			// strtoul sets a positive errno on error
+			if(log_perr(-errno, "strtoul", "Error parsing port number."))
+				return 1;
+
+// 			if(errno != 0) {
+// 				perror("strtoul");
+// 				return 1;
+// 			}
+
 			if(*parserr) {
 				fprintf(stderr, "Unrecognised characters in port number (%s). "
 				                "Exiting...\n", parserr);
 				return 1;
 			}
 
-			if(attrib->portno > 65535 || attrib->portno < 1) {
-				fprintf(stderr, "Port number out of range. "
-				                "Exiting...\n");
+			if(temp_port > 65535 || temp_port < 1) {
+				fprintf(stderr, "Port number %s out of reasonable range. "
+				                "Exiting...\n", optarg);
 				return 1;
 			}
+
+			attrib->portno = (unsigned int)temp_port;
+
 			break;
 		case 'd':
 			attrib->daemon = 1;
@@ -241,7 +256,7 @@ int main(int argc, char **argv) {
 	// The main attributes struct which holds most of the run-time options
 	struct Attribs attrib;
 
-	attrib.portno       = -1;
+	attrib.portno       = 0;  // 0 -> input from stdin, >0 -> actual port number
 	attrib.prset        = -1;
 	attrib.daemon       = 0;
 	attrib.limitnum     = 0;
@@ -306,7 +321,7 @@ int main(int argc, char **argv) {
                "Try using the '--help' option.\n");
 	}
 
-	if(attrib.portno < 1)
+	if(attrib.portno == 0)
 		is_stdin = 1;
 
 	if(log_info()) {
