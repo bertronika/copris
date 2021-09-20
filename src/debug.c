@@ -27,8 +27,8 @@
 // int log_perror_fatal(int retnum, char *errnum, char *message) {
 int log_perr(int retnum, char *errnum, char *message) {
 	if(retnum < 0) {
-		fprintf(stderr, "%s\n", message);
 		perror(errnum);
+		fprintf(stderr, "%s Exiting...\n", message);
 		return 1;
 	}
 
