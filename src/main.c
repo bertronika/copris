@@ -143,7 +143,6 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			}
 
 			attrib->portno = (unsigned int)temp_port;
-
 			break;
 		case 'd':
 			attrib->daemon = 1;
@@ -170,18 +169,26 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			}
 			break;
 		case 'l':
-			attrib->limitnum = strtol(optarg, &parserr, 10);
+			errno = 0; // To distinguish success/failure after call
+			unsigned long temp_limitnum = strtoul(optarg, &parserr, 10);
+
+			// strtoul sets a positive errno on error
+			if(log_perr(-errno, "strtoul", "Error parsing limit number."))
+				return 1;
+
 			if(*parserr) {
 				fprintf(stderr, "Unrecognised characters in limit number (%s). "
 				                "Exiting...\n", parserr);
 				return 1;
 			}
 
-			if(attrib->limitnum > 4096 || attrib->limitnum < 0) {
-				fprintf(stderr, "Limit number out of range. "
-				                "Exiting...\n");
+			if(temp_limitnum > 4096) {
+				fprintf(stderr, "Limit number %s out of range. "
+				                "Exiting...\n", optarg);
 				return 1;
 			}
+
+			attrib->limitnum = (int)temp_limitnum;
 			break;
 		case 'D':
 			attrib->limit_cutoff = 1;
