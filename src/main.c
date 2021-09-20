@@ -45,6 +45,15 @@
 #	define COPRIS_RELEASE ("-" REL)
 #endif
 
+/*
+ * Verbosity levels:
+ * 0  silent/only fatal
+ * 1  error
+ * 2  info
+ * 3  debug
+ */
+int verbosity = 1;
+
 void copris_help(char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
@@ -163,7 +172,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->limit_cutoff = 1;
 			break;
 		case 'v':
-			if(verbosity < 3)
+			if(verbosity != 0 && verbosity < 3)
 				verbosity++;
 			break;
 		case 'q':
@@ -198,7 +207,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				                "Exiting...\n", argv[optind - 1]);
 			else
 				fprintf(stderr, "Option '-%c' not recognised. "
-				                "Exiting...\n" , optopt);
+				                "Exiting...\n", optopt);
 			return 1;
 		default:
 			fprintf(stderr, "Getopt returned an unknown character code 0x%x. "
@@ -227,15 +236,6 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 	return 0;
 }
-
-/*
- * Verbosity levels:
- * 0  silent/only fatal
- * 1  error
- * 2  info
- * 3  debug
- */
-int verbosity = 1;
 
 int main(int argc, char **argv) {
 	// The main attributes struct which holds most of the run-time options
