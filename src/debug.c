@@ -18,16 +18,9 @@
 
 #include "debug.h"
 
-/* 
- * Fatal errors that go to stderr. Arguments:
- *  retnum  function return number
- *  errnum  system error number (errno)
- *  mesg    custom error message
- */
-// int log_perror_fatal(int retnum, char *errnum, char *message) {
-int log_perr(int retnum, char *errnum, char *message) {
-	if(retnum < 0) {
-		perror(errnum);
+int log_perr(int return_value, char *function_name, char *message) {
+	if(return_value < 0) {
+		perror(function_name);
 		fprintf(stderr, "%s Exiting...\n", message);
 		return 1;
 	}
@@ -35,9 +28,16 @@ int log_perr(int retnum, char *errnum, char *message) {
 	return 0;
 }
 
+int log_errno_perror(int received_errno, char *function_name, char *message) {
+	if(received_errno != 0)
+		return log_perr(-1, function_name, message);
+
+	return 0;
+}
+
 /*
  * Verbosity levels:
- * 0  silent/fatal
+ * 0  silent/fatal only
  * 1  error       (default)
  * 2  info
  * 3  debug

@@ -95,6 +95,7 @@ void copris_version() {
 int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	int c;          // Current Getopt argument
 	char *parserr;  // String to integer conversion error
+	int ferror;     // Error code of a file operation
 
 	unsigned long temp_long;  // A temporary long integer
 	long max_path_len;
@@ -122,13 +123,8 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			temp_long = strtoul(optarg, &parserr, 10);
 
 			// strtoul sets a positive errno on error
-			if(log_perr(-errno, "strtoul", "Error parsing port number."))
+			if(log_errno_perror(errno, "strtoul", "Error parsing port number."))
 				return 1;
-
-// 			if(errno != 0) {
-// 				perror("strtoul");
-// 				return 1;
-// 			}
 
 			if(*parserr) {
 				fprintf(stderr, "Unrecognised characters in port number (%s). "
@@ -150,9 +146,10 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 't':
 			// Get the maximum path name length on the filesystem where
 			// the trfile resides.
+			errno = 0;
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
-			if(log_perr(errno, "pathconf", "Error querying your chosen translation file."))
+			if(log_errno_perror(errno, "pathconf", "Error querying translation file."))
 				return 1;
 
 			// TODO: is this check necessary after checking pathconf for errors?
@@ -181,7 +178,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			temp_long = strtoul(optarg, &parserr, 10);
 
 			// strtoul sets a positive errno on error
-			if(log_perr(-errno, "strtoul", "Error parsing limit number."))
+			if(log_errno_perror(errno, "strtoul", "Error parsing limit number."))
 				return 1;
 
 			if(*parserr) {
@@ -251,9 +248,10 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	if(argv[optind]) {
 		// Get the maximum path name length on the filesystem where
 		// the output file resides.
+		errno = 0;
 		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
 
-		if(log_perr(errno, "pathconf", "Error querying your chosen destination."))
+		if(log_errno_perror(errno, "pathconf", "Error querying your chosen destination."))
 			return 1;
 
 		// TODO: is this check necessary after checking pathconf for errors?
@@ -263,11 +261,10 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			return 1;
 		}
 
-		if(access(argv[optind], W_OK) == -1) {
-			log_perr(-1, "access", "Unable to write to output file/printer. Does "
-			                       "it exist, with appropriate permissions?");
+		ferror = access(argv[optind], W_OK);
+		if(log_perr(ferror, "access", "Unable to write to output file/printer. Does "
+		                              "it exist, with appropriate permissions?"))
 			return 1;
-		}
 
 		attrib->destination = argv[optind];
 		attrib->copris_flags |= HAS_DESTINATION;
