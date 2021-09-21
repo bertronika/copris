@@ -20,8 +20,8 @@
 
 int raise_perror(int return_value, char *function_name, char *message) {
 	if(return_value < 0) {
+		fprintf(stderr, "%s\n", message);
 		perror(function_name);
-		fprintf(stderr, "%s Exiting...\n", message);
 		return 1;
 	}
 

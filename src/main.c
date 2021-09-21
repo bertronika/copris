@@ -396,20 +396,22 @@ int main(int argc, char **argv) {
 	if(!is_stdin) {
 		error = copris_socket_listen(&parentfd, attrib.portno);
 		if(error)
-			return EXIT_FAILURE;
+			goto exit_on_error;
 	}
 
 	do {
 		if(is_stdin) {
 			error = copris_read_stdin(&attrib);
 		} else {
-			// Read from socket
 			error = copris_read_socket(&parentfd, &attrib);
 		}
 	} while(attrib.daemon && !error);
 
-	if(error)
+	exit_on_error:
+	if(error) {
+		fprintf(stderr, "Exiting...\n");
 		return EXIT_FAILURE;
+	}
 
 	if(log_debug() && !is_stdin) {
 		log_date();
