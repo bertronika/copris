@@ -26,7 +26,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <getopt.h>
-#include <limits.h>
 #include <errno.h>
 
 #include "debug.h"
