@@ -270,6 +270,18 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		attrib->copris_flags |= HAS_DESTINATION;
 	}
 
+	// Check for multiple destination arguments
+	if((attrib->copris_flags & HAS_DESTINATION) && argv[++optind]) {
+		if(log_err()){
+			if(log_info())
+				log_date();
+			else
+				printf("Note: ");
+
+			printf("Only the first destination file name will be used.\n");
+		}
+	}
+
 	return 0;
 }
 
