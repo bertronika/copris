@@ -1,7 +1,6 @@
 /*
- * copris.c
- * Parses arguments, trfile and printerset selections and runs the server
- * 
+ * main.c
+ *
  * COPRIS - a converting printer server
  * Copyright (C) 2020-2021 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  * 
