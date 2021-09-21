@@ -147,14 +147,15 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 		// Byte limit handling
 		if(attrib->limitnum && bytenum > attrib->limitnum) {
+			fderror = write(childfd, limit_message, strlen(limit_message));
+			raise_perror(fderror, "write", "Error sending termination text to socket.");
+
 			// Cut-off mid-text and terminate later
 			if(attrib->limit_cutoff) {
 				buf[attrib->limitnum] = '\0';
 				discarded = bytenum - attrib->limitnum;
 				attrib->limit_cutoff = 2;
 
-				fderror = write(childfd, limit_message, strlen(limit_message));
-				raise_perror(fderror, "write", "Error sending termination text to socket.");
 			// Discard whole line and terminate
 			} else {
 				if(log_err())
@@ -162,10 +163,6 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 					       "data and terminating connection.\n", bytenum, attrib->limitnum);
 
 				discarded = fderror;
-
-				fderror = write(childfd, limit_message, strlen(limit_message));
-				raise_perror(fderror, "write", "Error sending termination text to socket.");
-
 				break;
 			}
 		} /* end of byte limit handling */
