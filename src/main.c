@@ -83,9 +83,8 @@ void copris_version() {
 	printf("COPRIS version %s%s\n"
 	       "(C) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Compiled options:\n"
-	       "  Buffer size:          %4d bytes\n"
-	       "  Max. filename length: %4d characters\n",
-	       COPRIS_VER, COPRIS_RELEASE, BUFSIZE, FNAME_LEN);
+	       "  Buffer size:          %4d bytes\n",
+	       COPRIS_VER, COPRIS_RELEASE, BUFSIZE);
 	printf("Included printer feature sets:\n  ");
 	list_prsets();
 	printf("\n");
@@ -96,6 +95,9 @@ void copris_version() {
 int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	int c;          // Current Getopt argument
 	char *parserr;  // String to integer conversion error
+
+	unsigned long temp_long;  // A temporary long integer
+	long max_path_len;
 
 	/* man 3 getopt_long */
 	static struct option long_options[] = {
@@ -117,7 +119,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		switch(c) {
 		case 'p':
 			errno = 0; // To distinguish success/failure after call
-			unsigned long temp_port = strtoul(optarg, &parserr, 10);
+			temp_long = strtoul(optarg, &parserr, 10);
 
 			// strtoul sets a positive errno on error
 			if(log_perr(-errno, "strtoul", "Error parsing port number."))
@@ -134,26 +136,34 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 			}
 
-			if(temp_port > 65535 || temp_port < 1) {
+			if(temp_long > 65535 || temp_long < 1) {
 				fprintf(stderr, "Port number %s out of reasonable range. "
 				                "Exiting...\n", optarg);
 				return 1;
 			}
 
-			attrib->portno = (unsigned int)temp_port;
+			attrib->portno = (unsigned int)temp_long;
 			break;
 		case 'd':
 			attrib->daemon = 1;
 			break;
 		case 't':
-			if(strlen(optarg) <= FNAME_LEN) {
-				attrib->trfile = optarg;
-				attrib->copris_flags |= HAS_TRFILE;
-			} else {
-				fprintf(stderr, "Trfile filename too long (%s). "
-				                "Exiting...\n", optarg);
+			// Get the maximum path name length on the filesystem where
+			// the trfile resides.
+			max_path_len = pathconf(optarg, _PC_PATH_MAX);
+
+			if(log_perr(errno, "pathconf", "Error querying your chosen translation file."))
+				return 1;
+
+			// TODO: is this check necessary after checking pathconf for errors?
+			if(strlen(optarg) >= (size_t)max_path_len) {
+				fprintf(stderr, "Translation file's name is too long. "
+								"Exiting...\n");
 				return 1;
 			}
+
+			attrib->trfile = optarg;
+			attrib->copris_flags |= HAS_TRFILE;
 			break;
 		case 'r':
 			if(strlen(optarg) <= PRSET_LEN) {
@@ -168,7 +178,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case 'l':
 			errno = 0; // To distinguish success/failure after call
-			unsigned long temp_limitnum = strtoul(optarg, &parserr, 10);
+			temp_long = strtoul(optarg, &parserr, 10);
 
 			// strtoul sets a positive errno on error
 			if(log_perr(-errno, "strtoul", "Error parsing limit number."))
@@ -180,13 +190,13 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 			}
 
-			if(temp_limitnum > 4096) {
+			if(temp_long > 4096) {
 				fprintf(stderr, "Limit number %s out of range. "
 				                "Exiting...\n", optarg);
 				return 1;
 			}
 
-			attrib->limitnum = (int)temp_limitnum;
+			attrib->limitnum = (int)temp_long;
 			break;
 		case 'D':
 			attrib->limit_cutoff = 1;
@@ -239,19 +249,28 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Parse the last argument, destination (or lack thereof).
 	// Note that only the first argument is accepted.
 	if(argv[optind]) {
-		if(strlen(argv[optind]) <= FNAME_LEN) {
-			attrib->destination = argv[optind];
-		} else {
-			fprintf(stderr, "Destination filename too long (%s). "
-			                "Exiting...\n", argv[optind]);
+		// Get the maximum path name length on the filesystem where
+		// the output file resides.
+		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
+
+		if(log_perr(errno, "pathconf", "Error querying your chosen destination."))
+			return 1;
+
+		// TODO: is this check necessary after checking pathconf for errors?
+		if(strlen(argv[optind]) >= (size_t)max_path_len) {
+			fprintf(stderr, "Destination filename is too long. "
+			                "Exiting...\n");
 			return 1;
 		}
 
-		if(access(attrib->destination, W_OK) == -1) {
+		if(access(argv[optind], W_OK) == -1) {
 			log_perr(-1, "access", "Unable to write to output file/printer. Does "
 			                       "it exist, with appropriate permissions?");
 			return 1;
 		}
+
+		attrib->destination = argv[optind];
+		attrib->copris_flags |= HAS_DESTINATION;
 	}
 
 	return 0;
