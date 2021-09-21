@@ -24,7 +24,7 @@
 #include "translate.h"
 #include "printerset.h"
 
-int copris_socket_listen(int *parentfd, int portno) {
+int copris_socket_listen(int *parentfd, unsigned int portno) {
 	int fderror;
 	struct sockaddr_in serveraddr; // Server's own address
 

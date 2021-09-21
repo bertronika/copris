@@ -364,7 +364,7 @@ int main(int argc, char **argv) {
 	
 	if(log_debug() && !is_stdin) {
 		log_date();
-		printf("Server is listening to port %d.\n", attrib.portno);
+		printf("Server is listening to port %u.\n", attrib.portno);
 	}
 	
 	if(log_info()) {
