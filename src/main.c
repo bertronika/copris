@@ -123,7 +123,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			temp_long = strtoul(optarg, &parserr, 10);
 
 			// strtoul sets a positive errno on error
-			if(log_errno_perror(errno, "strtoul", "Error parsing port number."))
+			if(raise_errno_perror(errno, "strtoul", "Error parsing port number."))
 				return 1;
 
 			if(*parserr) {
@@ -149,7 +149,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			errno = 0;
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
-			if(log_errno_perror(errno, "pathconf", "Error querying translation file."))
+			if(raise_errno_perror(errno, "pathconf", "Error querying translation file."))
 				return 1;
 
 			// TODO: is this check necessary after checking pathconf for errors?
@@ -178,7 +178,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			temp_long = strtoul(optarg, &parserr, 10);
 
 			// strtoul sets a positive errno on error
-			if(log_errno_perror(errno, "strtoul", "Error parsing limit number."))
+			if(raise_errno_perror(errno, "strtoul", "Error parsing limit number."))
 				return 1;
 
 			if(*parserr) {
@@ -251,7 +251,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		errno = 0;
 		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
 
-		if(log_errno_perror(errno, "pathconf", "Error querying your chosen destination."))
+		if(raise_errno_perror(errno, "pathconf", "Error querying your chosen destination."))
 			return 1;
 
 		// TODO: is this check necessary after checking pathconf for errors?
@@ -262,8 +262,8 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		}
 
 		ferror = access(argv[optind], W_OK);
-		if(log_perr(ferror, "access", "Unable to write to output file/printer. Does "
-		                              "it exist, with appropriate permissions?"))
+		if(raise_perror(ferror, "access", "Unable to write to output file/printer. Does "
+		                                  "it exist, with appropriate permissions?"))
 			return 1;
 
 		attrib->destination = argv[optind];

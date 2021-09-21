@@ -18,7 +18,7 @@
 
 #include "debug.h"
 
-int log_perr(int return_value, char *function_name, char *message) {
+int raise_perror(int return_value, char *function_name, char *message) {
 	if(return_value < 0) {
 		perror(function_name);
 		fprintf(stderr, "%s Exiting...\n", message);
@@ -28,9 +28,9 @@ int log_perr(int return_value, char *function_name, char *message) {
 	return 0;
 }
 
-int log_errno_perror(int received_errno, char *function_name, char *message) {
+int raise_errno_perror(int received_errno, char *function_name, char *message) {
 	if(received_errno != 0)
-		return log_perr(-1, function_name, message);
+		return raise_perror(-1, function_name, message);
 
 	return 0;
 }

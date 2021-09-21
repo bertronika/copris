@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "debug.h"
 #include "translate.h"
@@ -35,12 +36,11 @@ int copris_loadtrfile(char *filename) {
 	int ferr;         // Error code of a file operation
 
 	dat = fopen(filename, "r");
-	if(!dat) {
-		log_perr(-1, "fopen", "Failed to open translation file for reading.");
-		return 1;
-	} else {
-		log_debug("Opened translation file %s\n", dat);
-	}
+	if(dat == NULL)
+		return raise_errno_perror(errno, "fopen",
+		                          "Failed to open translation file for reading.");
+
+	log_debug("Opened translation file %s\n", dat);
 	
 	// Determine the number of lines/definitions
 	while((c = fgetc(dat)) != EOF) {
@@ -162,7 +162,7 @@ int copris_loadtrfile(char *filename) {
 	}
 	
 	ferr = fclose(dat);
-	if(log_perr(ferr, "close", "Failed to close the translation file after reading."))
+	if(raise_perror(ferr, "close", "Failed to close the translation file after reading."))
 		lines = -1;
 
 	free(filename);

@@ -35,7 +35,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	 *   IPPROTO_IP   IP protocol
 	 */
 	fderror = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
-	if(log_perr(fderror, "socket", "Failed to create socket endpoint."))
+	if(raise_perror(fderror, "socket", "Failed to create socket endpoint."))
 		return 1;
 
 	if(log_debug()) {
@@ -62,8 +62,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	
 	// Associate the parent socket with a port
 	fderror = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-	if(log_perr(fderror, "bind", "Failed to bind socket to address. "
-	                           "Non-root users should set it >1023."))
+	if(raise_perror(fderror, "bind", "Failed to bind socket to address. "
+	                                 "Non-root users should set it >1023."))
 		return 1;
 
 	if(log_debug()) {
@@ -74,7 +74,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	// Make the parent socket passive - accept incoming connections.
 	// Also limit the number of connections to BACKLOG
 	fderror = listen(*parentfd, BACKLOG);
-	if(log_perr(fderror, "listen", "Failed to make socket passive."))
+	if(raise_perror(fderror, "listen", "Failed to make socket passive."))
 		return 1;
 
 	if(log_info()) {
@@ -104,7 +104,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 	// Wait for a connection request and accept it
 	childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
-	if(log_perr(childfd, "accept", "Failed to accept the connection."))
+	if(raise_perror(childfd, "accept", "Failed to accept the connection."))
 		return 1;
 
 	if(log_info()) {
@@ -115,21 +115,22 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	// Prevent more than one connection if not a daemon
 	if(!attrib->daemon) {
 		fderror = close(*parentfd);
-		if(log_perr(fderror, "close", "Failed to close the parent connection."))
+		if(raise_perror(fderror, "close", "Failed to close the parent connection."))
 			return 1;
 	}
 
-	// Get the hostname of the client
+	// Get the hostname of the client TODO gai_strerror
 	fderror = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr),
 	                       host_info, sizeof(host_info), NULL, 0, 0);
-	if(fderror != 0) {
-		log_perr(-1, "getnameinfo", "Failed getting hostname from address.");
-	}
+// 	if(fderror != 0) {
+// 		log_perr(-1, "getnameinfo", "Failed getting hostname from address.");
+// 	}
 
 	// Convert client's address from network byte order to a dotted-decimal form
 	host_address = inet_ntoa(clientaddr.sin_addr);
 	if(host_address == NULL) {
 		fprintf(stderr, "inet_ntoa: Failed converting host's address to dotted decimal.\n");
+		host_address = "<addr unknown>";
 	}
 
 	if(log_info())
@@ -153,7 +154,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 				attrib->limit_cutoff = 2;
 
 				fderror = write(childfd, limit_message, strlen(limit_message));
-				log_perr(fderror, "write", "Error sending termination text to socket.");
+				raise_perror(fderror, "write", "Error sending termination text to socket.");
 			// Discard whole line and terminate
 			} else {
 				if(log_err())
@@ -163,7 +164,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 				discarded = fderror;
 
 				fderror = write(childfd, limit_message, strlen(limit_message));
-				log_perr(fderror, "write", "Error sending termination text to socket.");
+				raise_perror(fderror, "write", "Error sending termination text to socket.");
 
 				break;
 			}
@@ -184,12 +185,12 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 		}
 	} /* end of socket reading loop */
 
-	if(log_perr(fderror, "read", "Error reading from socket."))
+	if(raise_perror(fderror, "read", "Error reading from socket."))
 		return 1;
 
 	// Close the current connection 
 	fderror = close(childfd);
-	if(log_perr(fderror, "close", "Failed to close the child connection."))
+	if(raise_perror(fderror, "close", "Failed to close the child connection."))
 		return 1;
 
 	if(log_err() && !(attrib->copris_flags & HAS_DESTINATION))

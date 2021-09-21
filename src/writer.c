@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "debug.h"
 #include "writer.h"
@@ -28,8 +29,7 @@ int copris_write_file(char *dest, unsigned char *data) {
 	
 	file_ptr = fopen(dest, "a"); // rEAD, wRITE, aPPEND, man 3 fopen
 	if(file_ptr == NULL)
-		if(log_perr(-1, "fopen", "Failed to open output file."))
-			return 1;
+		return raise_errno_perror(errno, "fopen", "Failed to open output file.");
 		
 	if(log_debug()) {
 		log_date();
@@ -48,7 +48,7 @@ int copris_write_file(char *dest, unsigned char *data) {
 	}
 
 	ferror = fclose(file_ptr);
-	if(log_perr(ferror, "fclose", "Failed to close the output file."))
+	if(raise_perror(ferror, "fclose", "Failed to close the output file."))
 		return 1;
 
 	if(log_debug()) {
