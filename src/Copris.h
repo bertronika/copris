@@ -1,17 +1,7 @@
 #ifndef COPRIS_H
 #define COPRIS_H
 
-#include <limits.h>
-
 #include "config.h"
-
-#ifndef FNAME_LEN
-#	ifndef NAME_MAX
-#		define FNAME_LEN 64
-#	else
-#		define FNAME_LEN NAME_MAX
-#	endif
-#endif
 
 /*
  * Round backlog to a power of 2.
