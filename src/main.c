@@ -119,10 +119,10 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	while((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch(c) {
 		case 'p':
-			errno = 0; // To distinguish success/failure after call
+			// Reset errno to distinguish between success/failure after call
+			errno = 0;
 			temp_long = strtoul(optarg, &parserr, 10);
 
-			// strtoul sets a positive errno on error
 			if(raise_errno_perror(errno, "strtoul", "Error parsing port number."))
 				return 1;
 
@@ -132,6 +132,8 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 			}
 
+			// If user specifies a negative port number, it overflows the unsigned long.
+			// To prevent displaying a big number, display the entered string instead.
 			if(temp_long > 65535 || temp_long < 1) {
 				fprintf(stderr, "Port number %s out of reasonable range. "
 				                "Exiting...\n", optarg);
@@ -155,7 +157,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			// TODO: is this check necessary after checking pathconf for errors?
 			if(strlen(optarg) >= (size_t)max_path_len) {
 				fprintf(stderr, "Translation file's name is too long. "
-								"Exiting...\n");
+				                "Exiting...\n");
 				return 1;
 			}
 
@@ -174,10 +176,10 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			}
 			break;
 		case 'l':
-			errno = 0; // To distinguish success/failure after call
+			// Reset errno to distinguish between success/failure after call
+			errno = 0;
 			temp_long = strtoul(optarg, &parserr, 10);
 
-			// strtoul sets a positive errno on error
 			if(raise_errno_perror(errno, "strtoul", "Error parsing limit number."))
 				return 1;
 
