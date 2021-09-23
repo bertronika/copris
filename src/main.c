@@ -100,22 +100,23 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	unsigned long temp_long;  // A temporary long integer
 	long max_path_len;
 
-	/* man 3 getopt_long */
 	static struct option long_options[] = {
-		{"port",          1, NULL, 'p'},
-		{"daemon",        0, NULL, 'd'},
-		{"trfile",        1, NULL, 't'},
-		{"printer",       1, NULL, 'r'},
-		{"limit",         1, NULL, 'l'},
-		{"cutoff-limit",  0, NULL, 'D'},
-		{"verbose",       2, NULL, 'v'},
-		{"quiet",         0, NULL, 'q'},
-		{"help",          0, NULL, 'h'},
-		{"version",       0, NULL, 'V'},
-		{NULL,            0, NULL,   0} /* end-of-list */
+		{"port",          required_argument, NULL, 'p'},
+		{"daemon",        no_argument,       NULL, 'd'},
+		{"trfile",        required_argument, NULL, 't'},
+		{"printer",       required_argument, NULL, 'r'},
+		{"limit",         required_argument, NULL, 'l'},
+		{"cutoff-limit",  no_argument,       NULL, 'D'},
+		{"verbose",       no_argument,       NULL, 'v'},
+		{"quiet",         no_argument,       NULL, 'q'},
+		{"help",          no_argument,       NULL, 'h'},
+		{"version",       no_argument,       NULL, 'V'},
+		{NULL,            0,                 NULL, 0  }
 	};
 
-	// int argc, char* argv[], char* optstring, struct* long_options, int* longindex
+	// Putting a colon in front of the options disables the built-in error reporting
+	// of getopt_long(3) and allows us to specify more appropriate errors (ie. `Printer
+	// set is missing.' instead of `option requires an argument -- 'r')
 	while((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch(c) {
 		case 'p':
