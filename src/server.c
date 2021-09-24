@@ -225,6 +225,7 @@ int copris_read_stdin(struct Attribs *attrib) {
 		printf("Trying to read from stdin...\n");
 	}
 
+	errno = 0;
 	if(isatty(STDIN_FILENO) && log_error()) {
 		raise_errno_perror(errno, "isatty", "Error determining input terminal");
 		if(log_info())
