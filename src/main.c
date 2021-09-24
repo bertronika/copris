@@ -150,6 +150,13 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->daemon = 1;
 			break;
 		case 't':
+			if(*optarg == '-') {
+				fprintf(stderr, "Unrecognised character found in translation file name (-). "
+				                "Perhaps you forgot to specify the file? "
+				                "Exiting...\n");
+				return 1;
+			}
+
 			// Get the maximum path name length on the filesystem where
 			// the trfile resides.
 			errno = 0;
@@ -169,6 +176,13 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
 		case 'r':
+			if(*optarg == '-') {
+				fprintf(stderr, "Unrecognised character found in printer set name (-). "
+				                "Perhaps you forgot to specify the set? "
+				                "Exiting...\n");
+				return 1;
+			}
+
 			if(strlen(optarg) <= PRSET_LEN) {
 				attrib->prsetname = optarg;
 				attrib->copris_flags |= HAS_PRSET;
