@@ -97,7 +97,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
 	char *host_address;             // Host address string
 	char host_info[NI_MAXHOST];     // Host info (IP, hostname). NI_MAXHOST is built in
-	unsigned char buf[BUFSIZE + 1]; // Inbound message buffer
+	unsigned char buf[BUFSIZE];     // Inbound message buffer
 	char limit_message[] = "Send size limit exceeded, terminating connection.\n";
 
 	clientlen = sizeof(clientaddr);
@@ -142,7 +142,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	}
 
 	// Read the data sent by the client into the buffer
-	while((fderror = read(childfd, buf, BUFSIZE)) > 0) {
+	while((fderror = read(childfd, buf, BUFSIZE - 1)) > 0) {
 		bytenum += fderror; // Append read bytes to the total byte counter
 
 		// Byte limit handling
@@ -168,10 +168,10 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 		} /* end of byte limit handling */
 
 		// Terminate the buffer after reading completed
-		buf[fderror] = '\0';
+		buf[fderror + 1] = '\0';
 
 // 		copris_send(buf, fderror, &trfile, printerset, &destination);
-		copris_process(buf, fderror, attrib);
+		copris_process(buf, fderror + 1, attrib);
 
 		// Terminate connection if cut-off set
 		if(attrib->limit_cutoff == 2) {
@@ -217,9 +217,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 int copris_read_stdin(struct Attribs *attrib) {
 	int bytenum = 0; // Nr. of read bytes
-	char buf[BUFSIZE + 1]; // Inbound message buffer
-
-//	memset(buf, '\0', BUFSIZE + 1); TODO ???
+	char buf[BUFSIZE]; // Inbound message buffer
 
 	if(log_info()) {
 		log_date();
@@ -240,10 +238,8 @@ int copris_read_stdin(struct Attribs *attrib) {
 		printf("; BOS\n");
 
 	while(fgets(buf, BUFSIZE, stdin) != NULL) {
-// 		copris_send((unsigned char *)buf, strlen(buf),
-// 		            &trfile, printerset, &destination);
 		copris_process((unsigned char *)buf, strlen(buf), attrib);
-		bytenum += strlen(buf);
+		bytenum += strlen(buf); // TODO when it overflows...
 	}
 
 	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
@@ -260,11 +256,11 @@ int copris_read_stdin(struct Attribs *attrib) {
 // int copris_send(unsigned char *buffer, int buffer_size,
 //                 struct attrib **trfile, int printerset, struct attrib **destination) {
 int copris_process(unsigned char *buffer, int buffer_size, struct Attribs *attrib) {
-	unsigned char to_print[INSTRUC_LEN * BUFSIZE + 1]; // Final, converted stream
+	unsigned char to_print[INSTRUC_LEN * BUFSIZE]; // Final, converted stream
 
 	int z;
 	// Only for prset/trfile magic
-	for(z = 0; z <= BUFSIZE; z++) {
+	for(z = 0; z < BUFSIZE; z++) {
 		to_print[z] = buffer[z];
 	}
 	to_print[z] = '\0';

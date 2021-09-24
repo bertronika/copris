@@ -7,7 +7,7 @@
 
 // Inbound message buffer size
 //   Defines how big each received chunk will be, either from
-//   a socket or from stdin.
+//   a socket or from stdin. Number includes the NUL terminator.
 #define BUFSIZE 128
 
 // Maximum filename length
