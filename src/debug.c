@@ -36,15 +36,15 @@ int raise_errno_perror(int received_errno, char *function_name, char *message) {
 }
 
 int log_error() {
-	return (verbosity > 0) ? 1 : 0;
+	return verbosity > 0;
 }
 
 int log_info() {
-	return (verbosity > 1) ? 1 : 0;
+	return verbosity > 1;
 }
 
 int log_debug() {
-	return (verbosity > 2) ? 1 : 0;
+	return verbosity > 2;
 }
 
 void log_date() {
