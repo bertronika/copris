@@ -135,7 +135,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 	if(log_info())
 		log_date();
-	if(log_err()) {
+	if(log_error()) {
 		printf("Inbound connection from %s (%s).\n", host_info, host_address);
 		if(!(attrib->copris_flags & HAS_DESTINATION))
 			printf("; BOS\n");
@@ -158,7 +158,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 			// Discard whole line and terminate
 			} else {
-				if(log_err())
+				if(log_error())
 					printf("Client exceeded send size limit (%d B/%d B), discarding remaining "
 					       "data and terminating connection.\n", bytenum, attrib->limitnum);
 
@@ -175,7 +175,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 
 		// Terminate connection if cut-off set
 		if(attrib->limit_cutoff == 2) {
-			if(log_err())
+			if(log_error())
 				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
 				       "terminating connection.\n", bytenum, attrib->limitnum);
 			break;
@@ -190,12 +190,12 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	if(raise_perror(fderror, "close", "Failed to close the child connection."))
 		return 1;
 
-	if(log_err() && !(attrib->copris_flags & HAS_DESTINATION))
+	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
 	if(log_info())
 		log_date();
-	if(log_err()) {
+	if(log_error()) {
 		printf("End of stream, received %d byte(s) in %d chunk(s)",
 			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
 
@@ -226,7 +226,7 @@ int copris_read_stdin(struct Attribs *attrib) {
 		printf("Trying to read from stdin...\n");
 	}
 
-	if(isatty(STDIN_FILENO) && log_err()) {
+	if(isatty(STDIN_FILENO) && log_error()) {
 		if(log_info())
 				log_date();
 			else
@@ -236,7 +236,7 @@ int copris_read_stdin(struct Attribs *attrib) {
 		       "stdin). To stop reading, press Ctrl+D\n");
 	}
 
-	if(log_err() && !(attrib->copris_flags & HAS_DESTINATION))
+	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
 	while(fgets(buf, BUFSIZE, stdin) != NULL) {
@@ -246,10 +246,10 @@ int copris_read_stdin(struct Attribs *attrib) {
 		bytenum += strlen(buf);
 	}
 
-	if(log_err() && !(attrib->copris_flags & HAS_DESTINATION))
+	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
-	if(log_err()) {
+	if(log_error()) {
 		printf("End of stream, received %d byte(s) in %d chunk(s).\n",
 		       bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
 	}

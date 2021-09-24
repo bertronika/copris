@@ -35,15 +35,7 @@ int raise_errno_perror(int received_errno, char *function_name, char *message) {
 	return 0;
 }
 
-/*
- * Verbosity levels:
- * 0  silent/fatal only
- * 1  error       (default)
- * 2  info
- * 3  debug
- */
-
-int log_err() {
+int log_error() {
 	return (verbosity > 0) ? 1 : 0;
 }
 

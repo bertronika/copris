@@ -280,7 +280,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 	// Check for multiple destination arguments
 	if((attrib->copris_flags & HAS_DESTINATION) && argv[++optind]) {
-		if(log_err()){
+		if(log_error()){
 			if(log_info())
 				log_date();
 			else
@@ -350,7 +350,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if(argc < 2 && log_err()) {
+	if(argc < 2 && log_error()) {
 		if(log_info())
 			log_date();
 		else
@@ -370,7 +370,7 @@ int main(int argc, char **argv) {
 
 	if(attrib.daemon && is_stdin) {
 		attrib.daemon = 0;
-		if(log_err()){
+		if(log_error()){
 			if(log_info())
 				log_date();
 			else
