@@ -15,6 +15,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <errno.h>
 
 #include "Copris.h"
 #include "config.h"
@@ -225,10 +226,11 @@ int copris_read_stdin(struct Attribs *attrib) {
 	}
 
 	if(isatty(STDIN_FILENO) && log_error()) {
+		raise_errno_perror(errno, "isatty", "Error determining input terminal");
 		if(log_info())
-				log_date();
-			else
-				printf("Note: ");
+			log_date();
+		else
+			printf("Note: ");
 
 		printf("You are in text input mode (reading from "
 		       "stdin). To stop reading, press Ctrl+D\n");
