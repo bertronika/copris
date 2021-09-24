@@ -128,8 +128,11 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 
 			if(*parserr) {
-				fprintf(stderr, "Unrecognised characters in port number (%s). "
-				                "Exiting...\n", parserr);
+				fprintf(stderr, "Unrecognised characters in port number (%s). ", parserr);
+				if(*parserr == '-')
+					fprintf(stderr, "Perhaps you forgot to specify the number? ");
+
+				fprintf(stderr, "Exiting...\n");
 				return 1;
 			}
 
@@ -185,8 +188,11 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 
 			if(*parserr) {
-				fprintf(stderr, "Unrecognised characters in limit number (%s). "
-				                "Exiting...\n", parserr);
+				fprintf(stderr, "Unrecognised characters in limit number (%s). ", parserr);
+				if(*parserr == '-')
+					fprintf(stderr, "Perhaps you forgot to specify the number? ");
+
+				fprintf(stderr, "Exiting...\n");
 				return 1;
 			}
 
