@@ -26,6 +26,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "debug.h"
 #include "config.h"
@@ -210,9 +211,9 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 			}
 
-			if(temp_long > 4096) {
-				fprintf(stderr, "Limit number %s out of range. "
-				                "Exiting...\n", optarg);
+			if(temp_long > INT_MAX) {
+				fprintf(stderr, "Limit number %s out of range. Maximum possible "
+				                "value is %d (bytes). Exiting...\n", optarg, INT_MAX);
 				return 1;
 			}
 
