@@ -133,15 +133,13 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				if(*parserr == '-')
 					fprintf(stderr, "Perhaps you forgot to specify the number? ");
 
-				fprintf(stderr, "Exiting...\n");
 				return 1;
 			}
 
 			// If user specifies a negative port number, it overflows the unsigned long.
 			// To prevent displaying a big number, display the entered string instead.
 			if(temp_long > 65535 || temp_long < 1) {
-				fprintf(stderr, "Port number %s out of reasonable range. "
-				                "Exiting...\n", optarg);
+				fprintf(stderr, "Port number %s out of reasonable range.\n", optarg);
 				return 1;
 			}
 
@@ -153,8 +151,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 't':
 			if(*optarg == '-') {
 				fprintf(stderr, "Unrecognised character found in translation file name (-). "
-				                "Perhaps you forgot to specify the file? "
-				                "Exiting...\n");
+				                "Perhaps you forgot to specify the file?\n");
 				return 1;
 			}
 
@@ -168,8 +165,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 			// TODO: is this check necessary after checking pathconf for errors?
 			if(strlen(optarg) >= (size_t)max_path_len) {
-				fprintf(stderr, "Translation file's name is too long. "
-				                "Exiting...\n");
+				fprintf(stderr, "Translation file's name is too long.\n");
 				return 1;
 			}
 
@@ -179,8 +175,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 'r':
 			if(*optarg == '-') {
 				fprintf(stderr, "Unrecognised character found in printer set name (-). "
-				                "Perhaps you forgot to specify the set? "
-				                "Exiting...\n");
+				                "Perhaps you forgot to specify the set?\n");
 				return 1;
 			}
 
@@ -189,8 +184,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				attrib->copris_flags |= HAS_PRSET;
 			} else {
 				// Excessive length already makes it wrong
-				fprintf(stderr, "Selected printer feature set does not exist (%s). "
-				                "Exiting...\n", optarg);
+				fprintf(stderr, "Selected printer feature set does not exist (%s).\n", optarg);
 				return 1;
 			}
 			break;
@@ -207,13 +201,12 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				if(*parserr == '-')
 					fprintf(stderr, "Perhaps you forgot to specify the number? ");
 
-				fprintf(stderr, "Exiting...\n");
 				return 1;
 			}
 
 			if(temp_long > INT_MAX) {
 				fprintf(stderr, "Limit number %s out of range. Maximum possible "
-				                "value is %d (bytes). Exiting...\n", optarg, INT_MAX);
+				                "value is %d (bytes).\n", optarg, INT_MAX);
 				return 1;
 			}
 
@@ -237,32 +230,24 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case ':':
 			if(optopt == 'p')
-				fprintf(stderr, "Port number is missing. "
-				                "Exiting...\n");
+				fprintf(stderr, "Port number is missing.\n");
 			else if(optopt == 't')
-				fprintf(stderr, "Translation file is missing. "
-				                "Exiting...\n");
+				fprintf(stderr, "Translation file is missing.\n");
 			else if(optopt == 'r')
-				fprintf(stderr, "Printer set is missing. "
-				                "Exiting...\n");
+				fprintf(stderr, "Printer set is missing.\n");
 			else if(optopt == 'l')
-				fprintf(stderr, "Limit number is missing. "
-				                "Exiting...\n");
+				fprintf(stderr, "Limit number is missing.\n");
 			else
-				fprintf(stderr, "Option '-%c' is missing an argument. "
-				                "Exiting...\n", optopt);
+				fprintf(stderr, "Option '-%c' is missing an argument.\n", optopt);
 			return 1;
 		case '?':
 			if(optopt == 0)
-				fprintf(stderr, "Option '%s' not recognised. "
-				                "Exiting...\n", argv[optind - 1]);
+				fprintf(stderr, "Option '%s' not recognised.\n", argv[optind - 1]);
 			else
-				fprintf(stderr, "Option '-%c' not recognised. "
-				                "Exiting...\n", optopt);
+				fprintf(stderr, "Option '-%c' not recognised.\n", optopt);
 			return 1;
 		default:
-			fprintf(stderr, "Getopt returned an unknown character code 0x%x. "
-			                "Exiting... \n", c);
+			fprintf(stderr, "Getopt returned an unknown character code 0x%x.\n", c);
 			return 2;
 		}
 	} /* end of getopt */
@@ -280,8 +265,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 		// TODO: is this check necessary after checking pathconf for errors?
 		if(strlen(argv[optind]) >= (size_t)max_path_len) {
-			fprintf(stderr, "Destination filename is too long. "
-			                "Exiting...\n");
+			fprintf(stderr, "Destination filename is too long.\n");
 			return 1;
 		}
 
@@ -344,7 +328,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Selected printer feature set does not exist "
 			                "(%s). ", attrib.prsetname);
 			if(verbosity) {
-				fprintf(stderr, "Exiting...\n");
 				return EXIT_FAILURE;
 			} else {
 				fprintf(stderr, "Disabling it.\n");
@@ -359,7 +342,6 @@ int main(int argc, char **argv) {
 		if(error) {
 			// Missing translation files are as well not a fatal error when --quiet
 			if(verbosity) {
-				fprintf(stderr, "Exiting...\n");
 				return EXIT_FAILURE;
 			} else {
 				fprintf(stderr, "Disabling translation.\n");
@@ -444,10 +426,8 @@ int main(int argc, char **argv) {
 	} while(attrib.daemon && !error);
 
 	exit_on_error:
-	if(error) {
-		fprintf(stderr, "Exiting...\n");
+	if(error)
 		return EXIT_FAILURE;
-	}
 
 	if(log_debug() && !is_stdin) {
 		log_date();
