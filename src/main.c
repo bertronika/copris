@@ -313,6 +313,41 @@ int main(int argc, char **argv) {
 	if(error)
 		return EXIT_FAILURE;
 
+	if(argc < 2 && log_error()) {
+		if(log_info())
+			log_date();
+		else
+			printf("Note: ");
+
+		printf("COPRIS won't do much without any arguments. "
+               "Try using the '--help' option.\n");
+	}
+
+	if(attrib.portno == 0)
+		is_stdin = 1;
+
+	if(log_info()) {
+		log_date();
+		printf("Verbosity level set to %d.\n", verbosity);
+	}
+
+	if(attrib.daemon && is_stdin) {
+		attrib.daemon = 0;
+		if(log_error()){
+			if(log_info())
+				log_date();
+			else
+				printf("Note: ");
+			
+			printf("Daemon mode not available while reading from stdin.\n");
+		}
+	}
+
+	if(attrib.daemon && log_debug()) {
+		log_date();
+		printf("Daemon mode enabled.\n");
+	}
+
 	// Parsing the selected printer feature sets
 	if(attrib.copris_flags & HAS_PRSET) {
 		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
@@ -348,41 +383,6 @@ int main(int argc, char **argv) {
 				attrib.copris_flags &= ~HAS_TRFILE;
 			}
 		}
-	}
-
-	if(argc < 2 && log_error()) {
-		if(log_info())
-			log_date();
-		else
-			printf("Note: ");
-
-		printf("COPRIS won't do much without any arguments. "
-               "Try using the '--help' option.\n");
-	}
-
-	if(attrib.portno == 0)
-		is_stdin = 1;
-
-	if(log_info()) {
-		log_date();
-		printf("Verbosity level set to %d.\n", verbosity);
-	}
-
-	if(attrib.daemon && is_stdin) {
-		attrib.daemon = 0;
-		if(log_error()){
-			if(log_info())
-				log_date();
-			else
-				printf("Note: ");
-			
-			printf("Daemon mode not available while reading from stdin.\n");
-		}
-	}
-
-	if(attrib.daemon && log_debug()) {
-		log_date();
-		printf("Daemon mode enabled.\n");
 	}
 	
 	if((attrib.copris_flags & HAS_PRSET) && log_info()) {
