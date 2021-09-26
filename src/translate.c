@@ -22,8 +22,9 @@
 #include "printerset.h"
 #include "utf8.h"
 
-int copris_loadtrfile(char *filename) {
+int copris_loadtrfile(char *filename, struct Trfile *trfile) {
 	int parse_error = 0;
+	trfile = NULL;
 
 	if(log_debug()) {
 		log_date();
@@ -31,7 +32,7 @@ int copris_loadtrfile(char *filename) {
 	}
 
 	errno = 0;
-	parse_error = ini_parse(filename, handler, NULL);
+	parse_error = ini_parse(filename, handler, trfile);
 
 	// Negative return number - error opening file
 	if(raise_perror(parse_error, "inih: fopen", "Error opening translation file."))

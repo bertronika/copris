@@ -299,6 +299,9 @@ int main(int argc, char **argv) {
 	// The main attributes struct which holds most of the run-time options
 	struct Attribs attrib;
 
+	// Translation file hash structure
+	struct Trfile trfile;
+
 	attrib.portno       = 0;  // 0 -> input from stdin, >0 -> actual port number
 	attrib.prset        = -1;
 	attrib.daemon       = 0;
@@ -375,7 +378,7 @@ int main(int argc, char **argv) {
 
 	// Parsing and loading translation definitions
 	if(attrib.copris_flags & HAS_TRFILE) {
-		error = copris_loadtrfile(attrib.trfile);
+		error = copris_loadtrfile(attrib.trfile, &trfile);
 		if(error) {
 			// Missing translation files are as well not a fatal error when --quiet
 			if(verbosity) {
