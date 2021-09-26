@@ -29,9 +29,12 @@ SRC  = debug.c server.c writer.c translate.c printerset.c main.c
 OBJ := $(SRC:.c=.o)
 DEP := $(SRC:.c=.d)
 
+# Dynamic library linking
+LIBS := $(shell pkg-config --cflags --libs inih)
+
 # C compiler flags
 # CFLAGS := -Wall -Wextra -Wconversion -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
-CFLAGS := -Wall -Wextra -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
+CFLAGS := $(LIBS) -Wall -Wextra -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
 
 .PHONY: all release debug clean
 

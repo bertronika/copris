@@ -12,17 +12,50 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ini.h>
 #include <errno.h>
 
+#include "Copris.h"
 #include "debug.h"
 #include "translate.h"
 #include "printerset.h"
 
-// These two variables are used by both trfile and translate functions
+int copris_loadtrfile(char *filename) {
+	int parse_error = 0;
+
+	errno = 0;
+	parse_error = ini_parse(filename, handler, NULL);
+
+	// Negative return number - error opening file
+	if(raise_perror(parse_error, "inih: fopen", "Error opening translation file."))
+		return 1;
+
+	// Positive return number - error on returned line number
+	if(parse_error) {
+		fprintf(stderr, "Error parsing translation file, fault on line %d.\n", parse_error);
+		return 1;
+	}
+
+	if(log_debug()) {
+		log_date();
+		printf("Loaded translation file %s.\n", filename);
+	}
+
+	return 0;
+}
+
+// [section]
+// name = value
+static int handler(void* user, const char* section, const char* name,
+                   const char* value) {
+	printf("%s = %s\n", name, value);
+	return 1;
+}
+
 static unsigned char *input;       // Chars that should be picked out
 static unsigned char *replacement; // Chars that should be put in instead
 
-int copris_loadtrfile(char *filename) {
+int copris_loadtrfile_old(char *filename) {
 	FILE *dat;        // Translation file
 	int c;            // Character, read from *dat
 	int lines    = 0; // Number of lines in *dat
