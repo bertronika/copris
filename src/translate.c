@@ -79,6 +79,7 @@ static int handler(void *user, const char *section, const char *name,
                    const char *value) {
 	char *parserr;   // String to integer conversion error
 	long temp_long;  // A temporary long integer
+	(void)section;
 
 	// Maximum name length can be 1 Unicode character
 	if(utf8_count_codepoints(name, 2) > 1) {
