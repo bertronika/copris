@@ -1,7 +1,7 @@
 #ifndef COPRIS_H
 #define COPRIS_H
 
-#include "config.h"
+#include <uthash.h> /* uthash library */
 
 /*
  * Round backlog to a power of 2.
@@ -25,6 +25,16 @@ struct Attribs {
 	char *trfile;        /* Translation file location                      */
 	char *destination;   /* Output file (printer)                          */
 // 	int verbosity;
+};
+
+struct Trfile {
+	char in[5];        /* key (name)   */
+// 	u8char_t in;       /* key (name)   */
+	unsigned char out; /* item (value) */
+	UT_hash_handle hh;
+
+	// Input key holds at most one 4-byte Unicode
+	// character and 1 terminating NUL byte.
 };
 
 #endif /* COPRIS_H */

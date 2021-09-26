@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
 	struct Attribs attrib;
 
 	// Translation file hash structure
-	struct Trfile trfile;
+	struct Trfile *trfile;
 
 	attrib.portno       = 0;  // 0 -> input from stdin, >0 -> actual port number
 	attrib.prset        = -1;

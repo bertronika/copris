@@ -1,7 +1,7 @@
 #ifndef TRANSLATE_H
 #define TRANSLATE_H
 
-int copris_loadtrfile(char *filename, struct Trfile *trfile);
+int copris_loadtrfile(char *filename, struct Trfile **trfile);
 static int handler(void *user, const char *section, const char *name,
                    const char *value);
 

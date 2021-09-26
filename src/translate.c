@@ -22,9 +22,9 @@
 #include "printerset.h"
 #include "utf8.h"
 
-int copris_loadtrfile(char *filename, struct Trfile *trfile) {
+int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 	int parse_error = 0;
-	trfile = NULL;
+	*trfile = NULL;
 
 	if(log_debug()) {
 		log_date();
@@ -48,6 +48,24 @@ int copris_loadtrfile(char *filename, struct Trfile *trfile) {
 	if(log_debug()) {
 		log_date();
 		printf("Loaded translation file %s.\n", filename);
+	}
+
+// 	{
+// 		char *vhod = "Ž";
+// 		struct Trfile *s;
+//
+// 		HASH_FIND_STR(*trfile, vhod, s);
+// 		if(s == NULL) {
+// 			s = malloc(sizeof(struct Trfile));
+// 			strcpy(s->in, vhod);
+// 			HASH_ADD_STR(*trfile, in, s);
+// 		}
+// 		s->out = 'z';
+// 	}
+
+	struct Trfile *s;
+	for(s = *trfile; s != NULL; s = s->hh.next) {
+		printf("in = %s, out = %d\n", s->in, s->out);
 	}
 
 	return 0;
@@ -90,8 +108,24 @@ static int handler(void *user, const char *section, const char *name,
 		printf("%1s = %-4s | %-3d (%d)\n", name, value, (int)temp_long, (int)strlen(name));
 	}
 
-	// Everything looks fine, insert into table
-// 	struct Trfile* file = (struct Trfile*)user;
+	// Everything looks fine, insert into hash table.
+	// The unique parameter for the table is the name string.
+	struct Trfile **file = (struct Trfile**)user;
+	struct Trfile *s;
+
+	// Check for a duplicate key
+	HASH_FIND_STR(*file, name, s);
+	if(s == NULL) {
+		// Key doesn't exist, add it
+		s = malloc(sizeof(struct Trfile));
+		strcpy(s->in, name);
+		HASH_ADD_STR(*file, in, s);
+	}
+
+	// Item, however, can be assigned multiple times. Only the last
+	// definition will take effect!
+	s->out = (unsigned char)temp_long;
+
 
 	return 1;
 }
