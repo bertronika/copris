@@ -106,7 +106,7 @@ static int handler(void *user, const char *section, const char *name,
 
 	if(log_debug()) {
 		log_date();
-		printf("%1s = %-4s | %-3d (%d)\n", name, value, (int)temp_long, (int)strlen(name));
+		printf("%1s = %-4s | %-3ld (%zu)\n", name, value, temp_long, strlen(name));
 	}
 
 	// Everything looks fine, insert into hash table.
