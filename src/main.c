@@ -132,6 +132,8 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				fprintf(stderr, "Unrecognised characters in port number (%s). ", parserr);
 				if(*parserr == '-')
 					fprintf(stderr, "Perhaps you forgot to specify the number?\n");
+				else
+					fprintf(stderr, "\n");
 
 				return 1;
 			}
