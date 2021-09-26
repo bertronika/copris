@@ -32,7 +32,8 @@ int copris_loadtrfile(char *filename) {
 
 	// Positive return number - error on returned line number
 	if(parse_error) {
-		fprintf(stderr, "Error parsing translation file, fault on line %d.\n", parse_error);
+		fprintf(stderr, "Error parsing translation file '%s', (first) fault on "
+		                "line %d.\n", filename, parse_error);
 		return 1;
 	}
 
@@ -46,9 +47,42 @@ int copris_loadtrfile(char *filename) {
 
 // [section]
 // name = value
-static int handler(void* user, const char* section, const char* name,
-                   const char* value) {
-	printf("%s = %s\n", name, value);
+// key  = item
+// `Handler should return nonzero on success, zero on error.'
+static int handler(void *user, const char *section, const char *name,
+                   const char *value) {
+// 	 pconfig->version = atoi(value);
+	char *parserr;   // String to integer conversion error
+	long temp_long;  // A temporary long integer
+
+	// Maximum name length can be 4 bytes (Unicode char.) + NUL -- TODO
+	if(strlen(name) > 1) {
+		fprintf(stderr, "'%s': more than one character.\n", name);
+		return 0;
+	}
+
+	// Convert value to a temporary long and check for correctness
+	errno = 0;
+	temp_long = strtol(value, &parserr, 0);
+
+	if(raise_errno_perror(errno, "strtoul", "Error parsing port number."))
+		return 0;
+
+	if(*parserr) {
+		fprintf(stderr, "'%s': unrecognised character(s).\n", parserr);
+		return 0;
+	}
+
+	if(temp_long < 0 || temp_long > 255) {
+		fprintf(stderr, "'%s': value out of bounds.\n", value);
+		return 0;
+	}
+
+// 	struct Trfile* file = (struct Trfile*)user;
+
+// 	printf("%s = %s\n", name, value);
+// 	printf("IN  rOUT  vOUT    r: raw, v: validated\n");
+	printf("%2s = %-4s | %-3d\n", name, value, (int)temp_long);
 	return 1;
 }
 
