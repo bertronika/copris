@@ -12,16 +12,23 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ini.h>
 #include <errno.h>
+#include <ini.h>    /* inih library   */
+#include <uthash.h> /* uthash library */
 
 #include "Copris.h"
 #include "debug.h"
 #include "translate.h"
 #include "printerset.h"
+#include "utf8.h"
 
 int copris_loadtrfile(char *filename) {
 	int parse_error = 0;
+
+	if(log_debug()) {
+		log_date();
+		printf("Parsing '%s'.\n", filename);
+	}
 
 	errno = 0;
 	parse_error = ini_parse(filename, handler, NULL);
@@ -51,12 +58,11 @@ int copris_loadtrfile(char *filename) {
 // `Handler should return nonzero on success, zero on error.'
 static int handler(void *user, const char *section, const char *name,
                    const char *value) {
-// 	 pconfig->version = atoi(value);
 	char *parserr;   // String to integer conversion error
 	long temp_long;  // A temporary long integer
 
-	// Maximum name length can be 4 bytes (Unicode char.) + NUL -- TODO
-	if(strlen(name) > 1) {
+	// Maximum name length can be 1 Unicode character
+	if(utf8_count_codepoints(name, 2) > 1) {
 		fprintf(stderr, "'%s': more than one character.\n", name);
 		return 0;
 	}
@@ -78,11 +84,14 @@ static int handler(void *user, const char *section, const char *name,
 		return 0;
 	}
 
+	if(log_debug()) {
+		log_date();
+		printf("%1s = %-4s | %-3d (%d)\n", name, value, (int)temp_long, (int)strlen(name));
+	}
+
+	// Everything looks fine, insert into table
 // 	struct Trfile* file = (struct Trfile*)user;
 
-// 	printf("%s = %s\n", name, value);
-// 	printf("IN  rOUT  vOUT    r: raw, v: validated\n");
-	printf("%2s = %-4s | %-3d\n", name, value, (int)temp_long);
 	return 1;
 }
 
