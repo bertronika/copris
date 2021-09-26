@@ -130,6 +130,16 @@ static int handler(void *user, const char *section, const char *name,
 	return 1;
 }
 
+void copris_unload_trfile(struct Trfile **trfile) {
+	struct Trfile *definition;
+	struct Trfile *tmp;
+
+	HASH_ITER(hh, *trfile, definition, tmp) {
+		HASH_DEL(*trfile, definition);  /* delete it (users advances to next) */
+		free(definition);             /* free it */
+	}
+}
+
 static unsigned char *input;       // Chars that should be picked out
 static unsigned char *replacement; // Chars that should be put in instead
 

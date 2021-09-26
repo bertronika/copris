@@ -431,6 +431,14 @@ int main(int argc, char **argv) {
 	} while(attrib.daemon && !error);
 
 	exit_on_error:
+	if(attrib.copris_flags & HAS_TRFILE) {
+		if(log_debug()) {
+			log_date();
+			printf("Unloading translation file.\n");
+		}
+		copris_unload_trfile(&trfile);
+	}
+
 	if(error)
 		return EXIT_FAILURE;
 
