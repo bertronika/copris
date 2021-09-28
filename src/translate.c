@@ -6,8 +6,6 @@
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
- * 
- * Strings in C are a bit challenging... Multibyte characters are a PITA
  */
 
 #include <stdio.h>
@@ -114,6 +112,7 @@ static int handler(void *user, const char *section, const char *name,
 		return 0;
 	}
 
+	// Read value must fit in an unsigned char
 	if(temp_long < 0 || temp_long > 255) {
 		fprintf(stderr, "'%s': value out of bounds.\n", value);
 		return 0;
@@ -142,7 +141,6 @@ static int handler(void *user, const char *section, const char *name,
 	// definition will take effect!
 	s->out = (unsigned char)temp_long;
 
-
 	return 1;
 }
 
@@ -151,8 +149,8 @@ void copris_unload_trfile(struct Trfile **trfile) {
 	struct Trfile *tmp;
 
 	HASH_ITER(hh, *trfile, definition, tmp) {
-		HASH_DEL(*trfile, definition);  /* delete it (users advances to next) */
-		free(definition);             /* free it */
+		HASH_DEL(*trfile, definition);  // Delete definition
+		free(definition);               // Free it
 	}
 }
 
