@@ -23,20 +23,30 @@
 #include "utf8.h"
 
 int copris_loadtrfile(char *filename, struct Trfile **trfile) {
+	FILE *file;
 	int parse_error = 0;
-	*trfile = NULL;
+
+	file = fopen(filename, "r");
+	if(file == NULL)
+		return raise_errno_perror(errno, "fopen", "Error opening translation file.");
 
 	if(log_debug()) {
 		log_date();
 		printf("Parsing '%s'.\n", filename);
 	}
 
-	errno = 0;
-	parse_error = ini_parse(filename, handler, trfile);
+	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
+	*trfile = NULL;
 
-	// Negative return number - error opening file
-	if(raise_perror(parse_error, "inih: fopen", "Error opening translation file."))
-		return 1;
+	parse_error = ini_parse_file(file, handler, trfile);
+
+	// Negative return number - can be either:
+	// -1  Error opening file - we've already handled this
+	// -2  Memory allocation error - only if inih was built with INI_USE_STACK
+	if(parse_error < 0) {
+		fprintf(stderr, "inih: ini_malloc: Memory allocation error.\n");
+		return 2;
+	}
 
 	// Positive return number - error on returned line number
 	if(parse_error) {
@@ -45,10 +55,15 @@ int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 		return 1;
 	}
 
-	if(log_debug()) {
+	if(log_info()) {
 		log_date();
 		printf("Loaded translation file %s.\n", filename);
 	}
+
+	// Close the file
+	if(raise_perror(fclose(file), "close",
+	                "Failed to close the translation file after reading."))
+		return 1;
 
 // 	{
 // 		char *vhod = "Ž";
@@ -91,7 +106,7 @@ static int handler(void *user, const char *section, const char *name,
 	errno = 0;
 	temp_long = strtol(value, &parserr, 0);
 
-	if(raise_errno_perror(errno, "strtoul", "Error parsing port number."))
+	if(raise_errno_perror(errno, "strtoul", "Error parsing number."))
 		return 0;
 
 	if(*parserr) {
