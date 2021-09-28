@@ -118,11 +118,6 @@ static int handler(void *user, const char *section, const char *name,
 		return 0;
 	}
 
-	if(log_debug()) {
-		log_date();
-		printf("%1s = %-4s | %-3ld (%zu)\n", name, value, temp_long, strlen(name));
-	}
-
 	// Everything looks fine, insert into hash table.
 	// The unique parameter for the table is the name string.
 	struct Trfile **file = (struct Trfile**)user;
@@ -140,6 +135,11 @@ static int handler(void *user, const char *section, const char *name,
 	// Item, however, can be assigned multiple times. Only the last
 	// definition will take effect!
 	s->out = (unsigned char)temp_long;
+
+	if(log_debug()) {
+		log_date();
+		printf("%1s = %-4s | %-3ld (%zu)\n", name, value, temp_long, strlen(name));
+	}
 
 	return 1;
 }
