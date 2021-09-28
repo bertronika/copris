@@ -23,6 +23,7 @@
 int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 	FILE *file;
 	int parse_error = 0;
+	int definition_count;
 
 	file = fopen(filename, "r");
 	if(file == NULL)
@@ -54,8 +55,9 @@ int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 	}
 
 	if(log_info()) {
+		definition_count = HASH_COUNT(*trfile);
 		log_date();
-		printf("Loaded translation file %s.\n", filename);
+		printf("Loaded translation file %s with %d definitions.\n", filename, definition_count);
 	}
 
 	// Close the file
