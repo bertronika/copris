@@ -24,12 +24,10 @@ struct Attribs {
 	char *prsetname;     /* Printer feature set name                       */
 	char *trfile;        /* Translation file location                      */
 	char *destination;   /* Output file (printer)                          */
-// 	int verbosity;
 };
 
 struct Trfile {
 	char in[5];        /* key (name)   */
-// 	u8char_t in;       /* key (name)   */
 	unsigned char out; /* item (value) */
 	UT_hash_handle hh;
 
