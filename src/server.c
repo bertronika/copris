@@ -91,10 +91,13 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 }
 
 int copris_read_socket(int *parentfd, struct Attribs *attrib) {
-	int fderror;           // Error code of a socket operation
-	int childfd;           // Child socket, which processes one client at a time
-	int bytenum   = 0;     // Received/sent message (byte) size
-	int discarded = 0;     // Discarded number of bytes, if limit is set
+	int fderror;  // Error code of a socket operation
+	int childfd;  // Child socket, which processes one client at a time
+
+	int sum       = 0;  // Sum of all read (received) bytes
+	int chunks    = 0;  // Number of read chunks
+	int discarded = 0;  // Discarded number of bytes, if limit is set
+
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
 	char *host_address;             // Host address string
@@ -144,25 +147,27 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	}
 
 	// Read the data sent by the client into the buffer
+	// A terminating null byte is _not_ stored at the end!
 	while((fderror = read(childfd, buf, BUFSIZE - 1)) > 0) {
-		bytenum += fderror; // Append read bytes to the total byte counter
+		chunks++;
+		sum += fderror; // Append read bytes to the total byte counter
 
 		// Byte limit handling
-		if(attrib->limitnum && bytenum > attrib->limitnum) {
+		if(attrib->limitnum && sum > attrib->limitnum) {
 			fderror = write(childfd, limit_message, strlen(limit_message));
 			raise_perror(fderror, "write", "Error sending termination text to socket.");
 
 			// Cut-off mid-text and terminate later
 			if(attrib->limit_cutoff) {
 				buf[attrib->limitnum] = '\0';
-				discarded = bytenum - attrib->limitnum;
+				discarded = sum - attrib->limitnum;
 				attrib->limit_cutoff = 2;
 
 			// Discard whole line and terminate
 			} else {
 				if(log_error())
 					printf("Client exceeded send size limit (%d B/%d B), discarding remaining "
-					       "data and terminating connection.\n", bytenum, attrib->limitnum);
+					       "data and terminating connection.\n", sum, attrib->limitnum);
 
 				discarded = fderror;
 				break;
@@ -179,7 +184,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 		if(attrib->limit_cutoff == 2) {
 			if(log_error())
 				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
-				       "terminating connection.\n", bytenum, attrib->limitnum);
+				       "terminating connection.\n", sum, attrib->limitnum);
 			break;
 		}
 	} /* end of socket reading loop */
@@ -199,7 +204,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 		log_date();
 	if(log_error()) {
 		printf("End of stream, received %d byte(s) in %d chunk(s)",
-			   bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
+			   sum, chunks);
 
 		if(discarded) {
 			printf(", %d B %s.\n", discarded,
@@ -218,7 +223,9 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 }
 
 int copris_read_stdin(struct Attribs *attrib) {
-	int bytenum = 0; // Nr. of read bytes
+	int count  = 0;  // Number of read bytes in one read
+	int sum    = 0;  // Sum of all read bytes
+	int chunks = 0;  // Number of read chunks
 	char buf[BUFSIZE]; // Inbound message buffer
 
 	if(log_info()) {
@@ -241,17 +248,21 @@ int copris_read_stdin(struct Attribs *attrib) {
 	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
+	// Read the data from standard input into the buffer
+	// A terminating null byte _is_ stored at the end!
 	while(fgets(buf, BUFSIZE, stdin) != NULL) {
-		copris_process((unsigned char *)buf, strlen(buf), attrib);
-		bytenum += strlen(buf); // TODO when it overflows...
+		chunks++;
+		count = strlen(buf);
+
+		copris_process((unsigned char *)buf, count, attrib);
+		sum += count; // TODO when it overflows...
 	}
 
 	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
 	if(log_error()) {
-		printf("End of stream, received %d byte(s) in %d chunk(s).\n",
-		       bytenum, (bytenum && bytenum < BUFSIZE) ? 1 : bytenum / BUFSIZE);
+		printf("End of stream, received %d byte(s) in %d chunk(s).\n", sum, chunks);
 	}
 
 	return 0;
