@@ -90,7 +90,7 @@ int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 // name = value
 // key  = item
 // `Handler should return nonzero on success, zero on error.'
-static int handler(void *user, const char *section, const char *name,
+int handler(void *user, const char *section, const char *name,
                    const char *value) {
 	char *parserr;   // String to integer conversion error
 	long temp_long;  // A temporary long integer
