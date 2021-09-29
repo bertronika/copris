@@ -14,4 +14,3 @@ size_t utf8_count_codepoints(const char *s, size_t n) {
 
 	return count;
 }
-
