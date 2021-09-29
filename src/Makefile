@@ -46,7 +46,7 @@ release: $(BIN)
 
 # debug: CFLAGS += -g -DREL=\"$(HASH)-$(BRANCH)\"
 # *** Do not forget to recompile the whole project if switching to/from debug ***
-debug: CFLAGS += -g3 -Og -DDEBUG
+debug: CFLAGS += -g3 -O0 -DDEBUG
 debug: $(BIN)
 
 # There are no rules for object files, as GNU Make uses its
