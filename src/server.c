@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "Copris.h"
 #include "config.h"
@@ -256,15 +257,47 @@ int copris_read_stdin(struct Attribs *attrib) {
 	return 0;
 }
 
-// int copris_send(unsigned char *buffer, int buffer_size,
-//                 struct attrib **trfile, int printerset, struct attrib **destination) {
-int copris_process(unsigned char *buffer, int buffer_size, struct Attribs *attrib) {
-	unsigned char to_print[INSTRUC_LEN * BUFSIZE]; // Final, converted stream
+int copris_process(unsigned char *text, int text_length, struct Attribs *attrib) {
+// 	unsigned char to_print[INSTRUC_LEN * BUFSIZE]; // Final, converted stream
+	unsigned char *final_stream = text;
+	char combined_buffer[BUFSIZE + 5];
 
-	int z;
-	// Only for prset/trfile magic
-	for(z = 0; z < BUFSIZE; z++) {
-		to_print[z] = buffer[z];
+// 	int z;
+// 	// Only for prset/trfile magic
+// 	for(z = 0; z < BUFSIZE; z++) {
+// 		to_print[z] = buffer[z];
+// 	}
+// 	to_print[z] = '\0';
+
+	// To avoid splitting multibyte characters:
+	// If the buffer has been filled to the limit, check the last 3 characters. If
+	// any of them are not ASCII (probably multibyte Unicode), stash them into a
+	// secondary buffer. They get replaced with null bytes in the primary buffer.
+	// The secondary buffer is sent right after the primary one.
+
+	// strlen() omits null byte at the end
+	if(text_length + 1 == BUFSIZE) {
+		char on_hold[5];
+		int secondary  = 0;
+		int is_on_hold = 0;
+
+		for(int primary = 3; primary; primary--) {
+			if(!isprint(text[BUFSIZE - 1 - primary])) {
+				on_hold[secondary] = text[BUFSIZE - 1 - primary];
+				secondary++;
+				on_hold[secondary] = '\0';
+				text[BUFSIZE - 1 - primary] = '\0';
+				is_on_hold = 1;
+			}
+		}
+		on_hold[++secondary] = '\0';
+
+		if(is_on_hold) {
+			strcpy(combined_buffer, (char*)text);
+			strcat(combined_buffer, on_hold);
+
+			final_stream = (unsigned char*)combined_buffer;
+		}
 	}
 	to_print[z] = '\0';
 
@@ -279,11 +312,9 @@ int copris_process(unsigned char *buffer, int buffer_size, struct Attribs *attri
 
 	// Destination can be either stdout or a file
 	if(attrib->copris_flags & HAS_DESTINATION) {
-		// Write to the output file/printer
-		copris_write_file(attrib->destination, to_print);
+		copris_write_file(attrib->destination, final_stream);
 	} else {
-		// Write to stdout
-		printf("%s", to_print);
+		printf("%s", final_stream);
 	}
 
 	return 0;
