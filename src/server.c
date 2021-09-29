@@ -175,7 +175,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 		} /* end of byte limit handling */
 
 		// Terminate the buffer after reading completed
-		buf[fderror + 1] = '\0';
+		buf[fderror] = '\0';
 
 // 		copris_send(buf, fderror, &trfile, printerset, &destination);
 		copris_process(buf, fderror + 1, attrib);
