@@ -1,6 +1,6 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-int copris_write_file(char *dest, unsigned char *data);
+int copris_write_file(char *dest, char *data);
 
 #endif /* WRITER_H */

@@ -102,7 +102,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
 	char *host_address;             // Host address string
 	char host_info[NI_MAXHOST];     // Host info (IP, hostname). NI_MAXHOST is built in
-	unsigned char buf[BUFSIZE];     // Inbound message buffer
+	char buf[BUFSIZE];              // Inbound message buffer
 	char limit_message[] = "Send size limit exceeded, terminating connection.\n";
 
 	clientlen = sizeof(clientaddr);
@@ -253,7 +253,7 @@ int copris_read_stdin(struct Attribs *attrib) {
 		int count = strlen(buf);
 		chunks++;
 
-		copris_process((unsigned char *)buf, count, attrib);
+		copris_process(buf, count, attrib);
 		sum += count; // TODO when it overflows...
 	}
 
@@ -267,9 +267,9 @@ int copris_read_stdin(struct Attribs *attrib) {
 	return 0;
 }
 
-int copris_process(unsigned char *text, int text_length, struct Attribs *attrib) {
+int copris_process(char *text, int text_length, struct Attribs *attrib) {
 // 	unsigned char to_print[INSTRUC_LEN * BUFSIZE]; // Final, converted stream
-	unsigned char *final_stream = text;
+	char *final_stream = text;
 	char combined_buffer[BUFSIZE + 5];
 
 // 	int z;
@@ -303,10 +303,10 @@ int copris_process(unsigned char *text, int text_length, struct Attribs *attrib)
 		on_hold[++secondary] = '\0';
 
 		if(is_on_hold) {
-			strcpy(combined_buffer, (char*)text);
+			strcpy(combined_buffer, text);
 			strcat(combined_buffer, on_hold);
 
-			final_stream = (unsigned char*)combined_buffer;
+			final_stream = combined_buffer;
 		}
 	}
 	to_print[z] = '\0';
