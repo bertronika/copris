@@ -223,7 +223,6 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 }
 
 int copris_read_stdin(struct Attribs *attrib) {
-	int count  = 0;  // Number of read bytes in one read
 	int sum    = 0;  // Sum of all read bytes
 	int chunks = 0;  // Number of read chunks
 	char buf[BUFSIZE]; // Inbound message buffer
@@ -251,8 +250,8 @@ int copris_read_stdin(struct Attribs *attrib) {
 	// Read the data from standard input into the buffer
 	// A terminating null byte _is_ stored at the end!
 	while(fgets(buf, BUFSIZE, stdin) != NULL) {
+		int count = strlen(buf);
 		chunks++;
-		count = strlen(buf);
 
 		copris_process((unsigned char *)buf, count, attrib);
 		sum += count; // TODO when it overflows...
