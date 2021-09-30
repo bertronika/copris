@@ -267,8 +267,8 @@ int copris_read_stdin(struct Attribs *attrib) {
 	return 0;
 }
 
-int copris_process(char *text, int text_length, struct Attribs *attrib) {
-	char *final_stream = text;
+int copris_process(char *stream, int stream_length, struct Attribs *attrib) {
+	char *final_stream = stream;
 
 	// To avoid splitting multibyte characters:
 	// If the buffer has been filled to the limit, check the last 3 characters. If
@@ -278,36 +278,36 @@ int copris_process(char *text, int text_length, struct Attribs *attrib) {
 	char combined_buffer[BUFSIZE + 5];
 
 	// strlen() omits null byte at the end
-	if(text_length + 1 == BUFSIZE) {
+	if(stream_length + 1 == BUFSIZE) {
 		char on_hold[5];
 		int secondary  = 0;
 		int is_on_hold = 0;
 
 		for(int primary = 3; primary; primary--) {
-			if(!isprint(text[BUFSIZE - 1 - primary])) {
-				on_hold[secondary] = text[BUFSIZE - 1 - primary];
+			if(!isprint(stream[BUFSIZE - 1 - primary])) {
+				on_hold[secondary] = stream[BUFSIZE - 1 - primary];
 				secondary++;
 				on_hold[secondary] = '\0';
-				text[BUFSIZE - 1 - primary] = '\0';
+				stream[BUFSIZE - 1 - primary] = '\0';
 				is_on_hold = 1;
 			}
 		}
 		on_hold[++secondary] = '\0';
 
 		if(is_on_hold) {
-			strcpy(combined_buffer, text);
+			strcpy(combined_buffer, stream);
 			strcat(combined_buffer, on_hold);
 
 			final_stream = combined_buffer;
 		}
 	}
 
-	if(attrib->copris_flags & HAS_PRSET) {
-// 		copris_printerset();
+	if(attrib->copris_flags & HAS_TRFILE) {
+// 		copris_translate(final_stream);
 	}
 
-	if(attrib->copris_flags & HAS_TRFILE) {
-// 		copris_translate();
+	if(attrib->copris_flags & HAS_PRSET) {
+// 		copris_printerset();
 	}
 
 	// Destination can be either a file/printer or stdout
