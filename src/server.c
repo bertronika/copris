@@ -268,22 +268,14 @@ int copris_read_stdin(struct Attribs *attrib) {
 }
 
 int copris_process(char *text, int text_length, struct Attribs *attrib) {
-// 	unsigned char to_print[INSTRUC_LEN * BUFSIZE]; // Final, converted stream
 	char *final_stream = text;
-	char combined_buffer[BUFSIZE + 5];
-
-// 	int z;
-// 	// Only for prset/trfile magic
-// 	for(z = 0; z < BUFSIZE; z++) {
-// 		to_print[z] = buffer[z];
-// 	}
-// 	to_print[z] = '\0';
 
 	// To avoid splitting multibyte characters:
 	// If the buffer has been filled to the limit, check the last 3 characters. If
 	// any of them are not ASCII (probably multibyte Unicode), stash them into a
 	// secondary buffer. They get replaced with null bytes in the primary buffer.
-	// The secondary buffer is sent right after the primary one.
+	// Buffers are then combined and sent as one.
+	char combined_buffer[BUFSIZE + 5];
 
 	// strlen() omits null byte at the end
 	if(text_length + 1 == BUFSIZE) {
@@ -309,18 +301,16 @@ int copris_process(char *text, int text_length, struct Attribs *attrib) {
 			final_stream = combined_buffer;
 		}
 	}
-	to_print[z] = '\0';
 
 	if(attrib->copris_flags & HAS_PRSET) {
-		copris_printerset(buffer, buffer_size, to_print, attrib->prset);
-		if(attrib->copris_flags & HAS_TRFILE) {
-			copris_translate(to_print, buffer_size, to_print);
-		}
-	} else if(attrib->copris_flags & HAS_TRFILE) {
-		copris_translate(buffer, buffer_size, to_print);
+// 		copris_printerset();
 	}
 
-	// Destination can be either stdout or a file
+	if(attrib->copris_flags & HAS_TRFILE) {
+// 		copris_translate();
+	}
+
+	// Destination can be either a file/printer or stdout
 	if(attrib->copris_flags & HAS_DESTINATION) {
 		copris_write_file(attrib->destination, final_stream);
 	} else {
