@@ -298,6 +298,8 @@ int copris_process(char *stream, int stream_length, struct Attribs *attrib) {
 			strcpy(combined_buffer, stream);
 			strcat(combined_buffer, on_hold);
 
+// 			stream_length += strlen(on_hold);
+			stream_length += secondary - 1;
 			final_stream = combined_buffer;
 		}
 	}
