@@ -132,6 +132,12 @@ int handler(void *user, const char *section, const char *name,
 		s = malloc(sizeof(struct Trfile));
 		strcpy(s->in, name);
 		HASH_ADD_STR(*file, in, s);
+	} else {
+		if(log_error()) {
+			log_date();
+			printf("Definition for '%s' appears more than once in translation file, "
+			       "overwriting old value.\n", name);
+		}
 	}
 
 	// Item, however, can be assigned multiple times. Only the last
