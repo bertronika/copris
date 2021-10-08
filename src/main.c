@@ -152,8 +152,8 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case 't':
 			if(*optarg == '-') {
-				fprintf(stderr, "Unrecognised character found in translation file name (-). "
-				                "Perhaps you forgot to specify the file?\n");
+				fprintf(stderr, "Unrecognised characters in translation file name (%s). "
+				                "Perhaps you forgot to specify the file?\n", optarg);
 				return 1;
 			}
 
@@ -176,8 +176,8 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case 'r':
 			if(*optarg == '-') {
-				fprintf(stderr, "Unrecognised character found in printer set name (-). "
-				                "Perhaps you forgot to specify the set?\n");
+				fprintf(stderr, "Unrecognised character in printer set name (%s). "
+				                "Perhaps you forgot to specify the set?\n", optarg);
 				return 1;
 			}
 
