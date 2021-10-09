@@ -18,6 +18,9 @@
  *  10000 - 10FFFF  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
  */
 
+// Maximum length of a multibyte character
+#define UTF8_MAX_LENGTH 4
+
 #define UTF8_IS_CONTINUATION(c) ((c & 0xC0) == 0x80)
 #define UTF8_IS_MULTIBYTE(c)    ((c & 0xC0) == 0xC0)
 
