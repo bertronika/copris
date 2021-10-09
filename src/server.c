@@ -25,6 +25,7 @@
 #include "writer.h"
 #include "translate.h"
 #include "printerset.h"
+#include "utf8.h"
 
 int copris_socket_listen(int *parentfd, unsigned int portno) {
 	int fderror;
@@ -223,8 +224,10 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 }
 
 int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
-	int sum    = 0;  // Sum of all read bytes
+	int count;       // Number of read bytes in one pass (or two, if subsequent requested)
 	int chunks = 0;  // Number of read chunks
+	int sum    = 0;  // Sum of all read bytes
+	int additional;  // Number of requested bytes for a subsequent read
 	char buf[BUFSIZE]; // Inbound message buffer
 
 	if(log_info()) {
@@ -249,11 +252,21 @@ int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 
 	// Read the data from standard input into the buffer
 	// A terminating null byte _is_ stored at the end!
+	// If additional bytes are requested, read them.
 	while(fgets(buf, BUFSIZE, stdin) != NULL) {
-		int count = strlen(buf);
+		count = strlen(buf);
 		chunks++;
 
-		copris_process(buf, count, attrib);
+		additional = copris_process(buf, count, attrib, trfile);
+		if(additional) {
+			if(fgets(buf, additional, stdin) == NULL)
+				return 1;
+
+			copris_process(buf, additional, attrib, trfile);
+			sum += additional;
+			chunks++;
+		}
+
 		sum += count; // TODO when it overflows...
 	}
 
@@ -267,45 +280,58 @@ int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 	return 0;
 }
 
-int copris_process(char *stream, int stream_length, struct Attribs *attrib) {
+int copris_process(char *stream, int stream_length, struct Attribs *attrib, struct Trfile **trfile) {
 	char *final_stream = stream;
 
 	// To avoid splitting multibyte characters:
-	// If the buffer has been filled to the limit, check the last 3 characters. If
-	// any of them are not ASCII (probably multibyte Unicode), stash them into a
-	// secondary buffer. They get replaced with null bytes in the primary buffer.
-	// Buffers are then combined and sent as one.
-	char combined_buffer[BUFSIZE + 5];
+	// If the buffer has been filled to the limit, check codepoint length of the
+	// last 3 characters. If their length exceeds buffer size, stash them into a
+	// hold buffer, replace them with null bytes and return the number of missing
+	// characters, which should be additionally read from the input stream.
+	// After the missing bytes are read, an extra buffer is assembled from the hold
+	// buffer and the new stream, containing missing bytes.
+	static char hold_buffer[UTF8_MAX_LENGTH + 1];
+	static int is_on_hold = 0;
 
-	// strlen() omits null byte at the end
+	if(is_on_hold) {
+		char extra_buffer[UTF8_MAX_LENGTH + 1];
+		extra_buffer[0] = '\0';
+
+		// Merge the two buffers
+		strcpy(extra_buffer, hold_buffer);
+		strcat(extra_buffer, stream);
+
+		final_stream = extra_buffer;
+		is_on_hold = 0;
+	}
+
+	// strlen() omits ending null byte
 	if(stream_length + 1 == BUFSIZE) {
-		char on_hold[5];
-		int secondary  = 0;
-		int is_on_hold = 0;
+		int hold_i = 0;
 
-		for(int primary = 3; primary; primary--) {
-			if(!isprint(stream[BUFSIZE - 1 - primary])) {
-				on_hold[secondary] = stream[BUFSIZE - 1 - primary];
-				secondary++;
-				on_hold[secondary] = '\0';
-				stream[BUFSIZE - 1 - primary] = '\0';
-				is_on_hold = 1;
+		for(int source_i = 4; source_i > 1; source_i--) {
+			// How many bytes are needed for a complete codepoint?
+			int remaining = utf8_codepoint_length(stream[BUFSIZE - source_i]);
+
+			if(remaining == 1)
+				continue;
+
+			// More than the buffer can hold, stash them for a subsequent read
+			if(remaining >= source_i) {
+				hold_buffer[hold_i] = stream[BUFSIZE - source_i];
+				hold_i++;
+
+				stream[BUFSIZE - source_i] = '\0';
+				is_on_hold = remaining;
 			}
 		}
-		on_hold[++secondary] = '\0';
-
-		if(is_on_hold) {
-			strcpy(combined_buffer, stream);
-			strcat(combined_buffer, on_hold);
-
-// 			stream_length += strlen(on_hold);
-			stream_length += secondary - 1;
-			final_stream = combined_buffer;
-		}
+		hold_buffer[hold_i] = '\0';
 	}
 
 	if(attrib->copris_flags & HAS_TRFILE) {
-// 		copris_translate(final_stream);
+		// copris_translate() makes a copy of final_stream and returns its
+		// newly allocated position - which should be free'd.
+		final_stream = copris_translate(final_stream, stream_length, trfile);
 	}
 
 	if(attrib->copris_flags & HAS_PRSET) {
@@ -319,5 +345,8 @@ int copris_process(char *stream, int stream_length, struct Attribs *attrib) {
 		printf("%s", final_stream);
 	}
 
-	return 0;
+	if(attrib->copris_flags & (HAS_TRFILE|HAS_PRSET))
+		free(final_stream);
+
+	return is_on_hold;
 }
