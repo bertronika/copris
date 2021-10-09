@@ -305,8 +305,9 @@ int copris_process(char *stream, int stream_length, struct Attribs *attrib, stru
 	static char hold_buffer[UTF8_MAX_LENGTH + 1];
 	static int is_on_hold = 0;
 
+	char extra_buffer[UTF8_MAX_LENGTH + 1];
+
 	if(is_on_hold) {
-		char extra_buffer[UTF8_MAX_LENGTH + 1];
 		extra_buffer[0] = '\0';
 
 		// Merge the two buffers
