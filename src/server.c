@@ -97,8 +97,8 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 
 	int chunks    = 0;  // Number of read chunks
 	int sum       = 0;  // Sum of all read (received) bytes
-	int discarded;   // Discarded number of bytes, if limit is set
-	int additional;  // Number of requested bytes for a subsequent read
+	int discarded = 0;  // Discarded number of bytes, if limit is set
+	int additional;     // Number of requested bytes for a subsequent read
 
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
