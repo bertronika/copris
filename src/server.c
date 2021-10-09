@@ -95,9 +95,10 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 	int fderror;  // Error code of a socket operation
 	int childfd;  // Child socket, which processes one client at a time
 
-	int sum       = 0;  // Sum of all read (received) bytes
 	int chunks    = 0;  // Number of read chunks
-	int discarded = 0;  // Discarded number of bytes, if limit is set
+	int sum       = 0;  // Sum of all read (received) bytes
+	int discarded;   // Discarded number of bytes, if limit is set
+	int additional;  // Number of requested bytes for a subsequent read
 
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
@@ -179,7 +180,18 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 		buf[fderror] = '\0';
 
 // 		copris_send(buf, fderror, &trfile, printerset, &destination);
-		copris_process(buf, fderror + 1, attrib, trfile);
+		additional = copris_process(buf, fderror + 1, attrib, trfile);
+		if(additional) {
+			if(read(childfd, buf, additional) != additional)
+				return 1;
+
+			buf[additional] = '\0';
+
+			chunks++;
+			sum += additional;
+
+			copris_process(buf, fderror + 1, attrib, trfile);
+		}
 
 		// Terminate connection if cut-off set
 		if(attrib->limit_cutoff == 2) {
