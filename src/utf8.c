@@ -14,3 +14,14 @@ size_t utf8_count_codepoints(const char *s, size_t n) {
 
 	return count;
 }
+
+int utf8_codepoint_length(const char s) {
+	if((s & 0xF8) == 0xF0) {
+		return 4;
+	} else if((s & 0xF0) == 0xE0) {
+		return 3;
+	} else if((s & 0xE0) == 0xC0) {
+		return 2;
+	} else
+		return 1;
+}
