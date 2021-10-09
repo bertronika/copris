@@ -90,7 +90,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	return 0;
 }
 
-int copris_read_socket(int *parentfd, struct Attribs *attrib) {
+int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **trfile) {
 	int fderror;  // Error code of a socket operation
 	int childfd;  // Child socket, which processes one client at a time
 
@@ -178,7 +178,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 		buf[fderror] = '\0';
 
 // 		copris_send(buf, fderror, &trfile, printerset, &destination);
-		copris_process(buf, fderror + 1, attrib);
+		copris_process(buf, fderror + 1, attrib, trfile);
 
 		// Terminate connection if cut-off set
 		if(attrib->limit_cutoff == 2) {
@@ -222,7 +222,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib) {
 	return 0;
 }
 
-int copris_read_stdin(struct Attribs *attrib) {
+int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 	int sum    = 0;  // Sum of all read bytes
 	int chunks = 0;  // Number of read chunks
 	char buf[BUFSIZE]; // Inbound message buffer
