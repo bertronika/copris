@@ -353,7 +353,7 @@ int copris_process(char *stream, int stream_length, struct Attribs *attrib, stru
 	if(attrib->copris_flags & HAS_DESTINATION) {
 		copris_write_file(attrib->destination, final_stream);
 	} else {
-		printf("%s", final_stream);
+		fputs(final_stream, stdout);
 	}
 
 	if(attrib->copris_flags & (HAS_TRFILE|HAS_PRSET))
