@@ -30,7 +30,7 @@ OBJ := $(SRC:.c=.o)
 DEP := $(SRC:.c=.d)
 
 # Dynamic library linking
-LIBS := $(shell pkg-config --cflags --libs inih)
+LIBS := $(shell pkg-config --cflags --libs inih libcmark)
 
 # C compiler flags
 # CFLAGS := -Wall -Wextra -Wconversion -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
