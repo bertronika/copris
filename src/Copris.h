@@ -12,13 +12,13 @@
 #define HAS_DESTINATION 0x01
 #define HAS_TRFILE      0x02
 #define HAS_PRSET       0x04
+#define MUST_CUTOFF     0x08
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */
 	int prset;           /* Parsed printer set index number                */
 	int daemon;          /* Run continuously                               */
 	int limitnum;        /* Limit received number of bytes                 */
-	int limit_cutoff;    /* Cut text off at limit instead of discarding it */
 
 	int copris_flags;    /* Flags regarding user-specified arguments:      */
 	char *prsetname;     /* Printer feature set name                       */

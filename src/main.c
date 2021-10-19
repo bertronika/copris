@@ -215,7 +215,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->limitnum = (int)temp_long;
 			break;
 		case 'D':
-			attrib->limit_cutoff = 1;
+			attrib->copris_flags |= MUST_CUTOFF;
 			break;
 		case 'v':
 			if(verbosity != 0 && verbosity < 3)
@@ -306,7 +306,6 @@ int main(int argc, char **argv) {
 	attrib.prset        = -1;
 	attrib.daemon       = 0;
 	attrib.limitnum     = 0;
-	attrib.limit_cutoff = 0;
 	attrib.copris_flags = 0x00;
 
 	int is_stdin  = 0;     // Determine if text is coming via the standard input

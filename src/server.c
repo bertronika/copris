@@ -105,6 +105,8 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 	char *host_address;             // Host address string
 	char host_info[NI_MAXHOST];     // Host info (IP, hostname). NI_MAXHOST is built in
 	char buf[BUFSIZE];              // Inbound message buffer
+
+	int cutoff_terminate = 0;
 	char limit_message[] = "Send size limit exceeded, terminating connection.\n";
 
 	clientlen = sizeof(clientaddr);
@@ -160,10 +162,10 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 			raise_perror(fderror, "write", "Error sending termination text to socket.");
 
 			// Cut-off mid-text and terminate later
-			if(attrib->limit_cutoff) {
+			if(attrib->copris_flags & MUST_CUTOFF) {
 				buf[attrib->limitnum] = '\0';
 				discarded = sum - attrib->limitnum;
-				attrib->limit_cutoff = 2;
+				cutoff_terminate = 1;
 
 			// Discard whole line and terminate
 			} else {
@@ -193,7 +195,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 		}
 
 		// Terminate connection if cut-off set
-		if(attrib->limit_cutoff == 2) {
+		if(cutoff_terminate) {
 			if(log_error())
 				printf("\nClient exceeded send size limit (%d B/%d B), cutting off and "
 				       "terminating connection.\n", sum, attrib->limitnum);
@@ -220,7 +222,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 
 		if(discarded) {
 			printf(", %d B %s.\n", discarded,
-			      (attrib->limit_cutoff == 2) ? "cut off" : "discarded");
+			      cutoff_terminate ? "cut off" : "discarded");
 		} else {
 			printf(".\n");
 		}
