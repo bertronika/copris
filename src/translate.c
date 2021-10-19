@@ -221,46 +221,6 @@ char *copris_translate(char *source, int source_len, struct Trfile **trfile) {
 	return tr_string;
 }
 
-static unsigned char *input;       // Chars that should be picked out
-static unsigned char *replacement; // Chars that should be put in instead
-
-void copris_translate(unsigned char *source, int source_len, unsigned char *ret) {
-	int i; // Source array iterator
-	int j; // Return array iterator
-	int k; // Input/replacement array iterator
-	
-	for(i = 0, j = 0; source[i] != '\0'; i++, j++) { // Loop through source text
-// 		ret[j] = 0;
-		for(k = 0; input[k] != '\0'; k++) {          // Loop through input chars
-			// Source matches input, start character exchange
-			if(source[i] == input[k] && source[i] != ' ') {
-				if(replacement[k] != ' ') {
-					ret[j] = replacement[k];
-				} else {
-					// Get rid of the extra leading spaces in replacement
-					j--;
-				}
-				
-				// Get rid of the extra trailing spaces in input
-				if(input[k + 1] == ' ') {
-					ret[++j] = replacement[++k];
-				}
-				
-				break;
-			
-			// No match, return original char.
-			// If out of ASCII range, return '!'.
-			} else if(source[i] != ret[j]) {
-				ret[j] = (source[i] <= 127) ? source[i] : '!';
-			}
-		}
-		if(log_debug() && i < source_len - 1)
-			printf("%3d  %x -> %c\n", i, source[i], (j > -1) ? ret[j] : ' ');
-		
-	}
-	ret[j] = '\0'; // This odd zero looks somewhat important, I presume...
-}
-
 /*
  * Instructions in printerset[] (printerset.h):
  * C_RESET  reset
