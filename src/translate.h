@@ -6,7 +6,7 @@ int handler(void *user, const char *section, const char *name,
             const char *value);
 void copris_unload_trfile(struct Trfile **trfile);
 
-void copris_translate(unsigned char *source, int source_len, unsigned char *ret);
+char *copris_translate(char *source, int source_len, struct Trfile **trfile);
 void copris_printerset(unsigned char *source, int source_len, unsigned char *ret, int set);
 int escinsert(unsigned char *ret, int r, char *printerset);
 

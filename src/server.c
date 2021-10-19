@@ -179,18 +179,17 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 		// Terminate the buffer after reading completed
 		buf[fderror] = '\0';
 
-// 		copris_send(buf, fderror, &trfile, printerset, &destination);
-		additional = copris_process(buf, fderror + 1, attrib, trfile);
+		additional = copris_process(buf, fderror, attrib, trfile);
 		if(additional) {
-			if(read(childfd, buf, additional) != additional)
+			if(read(childfd, buf, additional - 1) != additional - 1)
 				return 1;
 
-			buf[additional] = '\0';
+			buf[additional - 1] = '\0';
 
 			chunks++;
 			sum += additional;
 
-			copris_process(buf, fderror + 1, attrib, trfile);
+			copris_process(buf, additional, attrib, trfile);
 		}
 
 		// Terminate connection if cut-off set
@@ -275,7 +274,7 @@ int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 				return 1;
 
 			copris_process(buf, additional, attrib, trfile);
-			sum += additional;
+			sum += additional - 1;
 			chunks++;
 		}
 
@@ -304,7 +303,6 @@ int copris_process(char *stream, int stream_length, struct Attribs *attrib, stru
 	// buffer and the new stream, containing missing bytes.
 	static char hold_buffer[UTF8_MAX_LENGTH + 1];
 	static int is_on_hold = 0;
-
 	char extra_buffer[UTF8_MAX_LENGTH + 1];
 
 	if(is_on_hold) {

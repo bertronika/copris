@@ -65,24 +65,6 @@ int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 	                "Failed to close the translation file after reading."))
 		return 1;
 
-// 	{
-// 		char *vhod = "Ž";
-// 		struct Trfile *s;
-//
-// 		HASH_FIND_STR(*trfile, vhod, s);
-// 		if(s == NULL) {
-// 			s = malloc(sizeof(struct Trfile));
-// 			strcpy(s->in, vhod);
-// 			HASH_ADD_STR(*trfile, in, s);
-// 		}
-// 		s->out = 'z';
-// 	}
-
-	struct Trfile *s;
-	for(s = *trfile; s != NULL; s = s->hh.next) {
-		printf("in = %s, out = %d\n", s->in, s->out);
-	}
-
 	return 0;
 }
 
@@ -160,6 +142,83 @@ void copris_unload_trfile(struct Trfile **trfile) {
 		HASH_DEL(*trfile, definition);  // Delete definition
 		free(definition);               // Free it
 	}
+}
+
+// Translate input string. Input may contain multibyte characters, translated output
+// string won't contain them - every translated character is exactly one byte long.
+// If there's a multibyte character in the input that doesn't have a definition,
+// it'll get fully copied without any modifications.
+char *copris_translate(char *source, int source_len, struct Trfile **trfile) {
+	// A duplicate copy of input string
+	errno = 0;
+	char *tr_source = strdup(source);
+	if(tr_source == NULL) {
+		raise_errno_perror(errno, "strdup", "Memory allocation error");
+		exit(EXIT_FAILURE);
+	}
+
+	// Space for a (multibyte) character to be matched with definitions
+	char inspected_char[UTF8_MAX_LENGTH + 1];
+
+	// Output string with all the translation
+	errno = 0;
+	char *tr_string = malloc(source_len + 1);
+	if(tr_string == NULL) {
+		raise_errno_perror(errno, "strdup", "Memory allocation error");
+		exit(EXIT_FAILURE);
+	}
+	tr_string[0] = '\0';
+
+	struct Trfile *s;
+
+	int src_i  = 0; // Source string iterator
+	int insp_i = 0; // Inspected char iterator
+	int tr_i   = 0; // Translated string iterator
+
+	while(src_i < source_len) {
+		inspected_char[insp_i] = tr_source[src_i];
+
+		// Check for a multibyte character
+		if(insp_i < UTF8_MAX_LENGTH && UTF8_IS_MULTIBYTE(inspected_char[insp_i])) {
+			// Multibyte char found, load its next byte
+			insp_i++;
+			src_i++;
+			continue;
+		} else {
+			// Either:
+			// - end of multibyte character
+			// - character in question was only single-byte
+			inspected_char[insp_i + 1] = '\0';
+		}
+
+		// Match the loaded char with a definition, if it exists
+		HASH_FIND_STR(*trfile, inspected_char, s);
+		if(s != NULL) {
+			// Definition found
+			tr_string[tr_i] = s->out;
+			tr_i++;
+		} else {
+			// Definition not found
+			if(insp_i > 0) {
+				// Copy multibyte character
+				strcat(tr_string, inspected_char);
+
+				tr_i += insp_i + 1;
+				//tr_i += strlen(inspected_char);
+			} else {
+				// Copy single character
+				tr_string[tr_i++] = tr_source[src_i];
+			}
+		}
+		insp_i = 0;
+		src_i++;
+	}
+
+	tr_string[tr_i] = '\0';
+
+	free(tr_source);
+
+	return tr_string;
 }
 
 static unsigned char *input;       // Chars that should be picked out
