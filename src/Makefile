@@ -49,13 +49,16 @@ release: $(BIN)
 debug: CFLAGS += -g3 -O0 -DDEBUG
 debug: $(BIN)
 
-# There are no rules for object files, as GNU Make uses its
-# own built-in catalogue of rules.
-# The implicit rule executed here is: $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
-# https://www.gnu.org/software/make/manual/html_node/Catalogue-of-Rules.html
-
+# Automatic variables of GNU Make:
 # $@  The file name of the target of the rule.
+# $<  The name of the first prerequisite.
 # $^  The names of all the prerequisites, with spaces between them.
+
+# Compile each object file, specified in $(OBJ)
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Compile the final binary
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
