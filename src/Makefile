@@ -41,12 +41,12 @@ CFLAGS := $(LIBS) -Wall -Wextra -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
 all: debug
 # all: release
 
-release: CFLAGS += -O2 -s
+release: CFLAGS += -O2 -s -DNDEBUG
 release: $(BIN)
 
 # debug: CFLAGS += -g -DREL=\"$(HASH)-$(BRANCH)\"
 # *** Do not forget to recompile the whole project if switching to/from debug ***
-debug: CFLAGS += -g3 -O0 -DDEBUG
+debug: CFLAGS += -g3 -ggdb -gdwarf -Og -DDEBUG
 debug: $(BIN)
 
 # Automatic variables of GNU Make:
