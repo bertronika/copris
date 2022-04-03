@@ -2,13 +2,32 @@
  * printerset.c
  * Printer feature sets
  * 
- * Copyright (C) 2020-2021 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
  */
 
+#include <stdio.h>
+#include <errno.h>
+#include <uthash.h>
+
+#include "Copris.h"
+#include "debug.h"
 #include "printerset.h"
+
+// void copris_initprset(struct Prset **prset) {
+// 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
+// 	*prset = NULL;
+// 	struct Trfile *s;
+//
+// 	for(prset_code_t code; code <= PRSET_OVER; code++) {
+//
+// 		HASH_ADD_STR(*prset, in, s);
+//
+// 	}
+//
+// }
 
 /*
  * Instructions in printerset[] (printerset.h):

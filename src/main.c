@@ -302,6 +302,9 @@ int main(int argc, char **argv) {
 	// Translation file hash structure
 	struct Trfile *trfile;
 
+	// Printer set hash structure
+	struct Trfile *prset;
+
 	attrib.portno       = 0;  // 0 -> input from stdin, >0 -> actual port number
 	attrib.prset        = -1;
 	attrib.daemon       = 0;
@@ -352,28 +355,43 @@ int main(int argc, char **argv) {
 		printf("Daemon mode enabled.\n");
 	}
 
-	// Parsing the selected printer feature sets
-	if(attrib.copris_flags & HAS_PRSET) {
-		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
-			if(strcmp(attrib.prsetname, printerset[p][0]) == 0) {
-				//prset.exists = p + 1;
-				attrib.prset = p;
-				break;
-			}
-		}
+// 	// Parsing the selected printer feature sets
+// 	if(attrib.copris_flags & HAS_PRSET) {
+// 		for(int p = 0; printerset[p][0][0] != '\0'; p++) {
+// 			if(strcmp(attrib.prsetname, printerset[p][0]) == 0) {
+// 				//prset.exists = p + 1;
+// 				attrib.prset = p;
+// 				break;
+// 			}
+// 		}
+//
+// 		// Missing printer sets are not a fatal error in quiet mode
+// 		if(attrib.prset == -1) {
+// 			fprintf(stderr, "Selected printer feature set does not exist "
+// 			                "(%s). ", attrib.prsetname);
+// 			if(verbosity) {
+// 				return EXIT_FAILURE;
+// 			} else {
+// 				fprintf(stderr, "Disabling it.\n");
+// 				attrib.copris_flags &= ~HAS_PRSET;
+// 			}
+// 		}
+// 	}
 
-		// Missing printer sets are not a fatal error in quiet mode
-		if(attrib.prset == -1) {
-			fprintf(stderr, "Selected printer feature set does not exist "
-			                "(%s). ", attrib.prsetname);
-			if(verbosity) {
-				return EXIT_FAILURE;
-			} else {
-				fprintf(stderr, "Disabling it.\n");
-				attrib.copris_flags &= ~HAS_PRSET;
-			}
-		}
-	}
+// 	// Parsing and loading printer feature definitions
+// 	if(attrib.copris_flags & HAS_PRSET) {
+// 		copris_initprset(&prset);
+// 		error = copris_loadprset(attrib.prsetfile, &prset);
+// 		if(error) {
+// 			// Missing printer sets are not a fatal error in quiet mode
+// 			if(verbosity) {
+// 				return EXIT_FAILURE;
+// 			} else {
+// 				fprintf(stderr, "Disabling printer feature set.\n");
+// 				attrib.copris_flags &= ~HAS_PRSET;
+// 			}
+// 		}
+// 	}
 
 	// Parsing and loading translation definitions
 	if(attrib.copris_flags & HAS_TRFILE) {
@@ -389,11 +407,11 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	if((attrib.copris_flags & HAS_PRSET) && log_info()) {
-		log_date();
-		printf("Selected printer feature set %s.\n",
-		       printerset[attrib.prset][0]);
-	}
+// 	if((attrib.copris_flags & HAS_PRSET) && log_info()) {
+// 		log_date();
+// 		printf("Selected printer feature set %s.\n",
+// 		       printerset[attrib.prset][0]);
+// 	}
 	
 	if(attrib.limitnum > 0 && log_debug()) {
 		log_date();

@@ -35,4 +35,23 @@ struct Trfile {
 	// character and 1 terminating NUL byte.
 };
 
+typedef enum {
+	C_RESET,
+	C_BELL,
+	C_DBLW,
+	C_ULON,
+	C_ULOFF,
+	C_BON,
+	C_BOFF,
+	C_ION,
+	C_IOFF,
+	PRSET_OVER /* The last element! */
+} prset_code_t;
+
+struct Prset {
+	prset_code_t code;
+	char *command;
+	UT_hash_handle hh;
+};
+
 #endif /* COPRIS_H */
