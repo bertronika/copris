@@ -9,10 +9,10 @@
  */
 #define BACKLOG 2
 
-#define HAS_DESTINATION 0x01
-#define HAS_TRFILE      0x02
-#define HAS_PRSET       0x04
-#define MUST_CUTOFF     0x08
+#define HAS_DESTINATION (1 << 0)
+#define HAS_TRFILE      (1 << 1)
+#define HAS_PRSET       (1 << 2)
+#define MUST_CUTOFF     (1 << 3)
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */
