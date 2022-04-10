@@ -14,6 +14,8 @@
 #define C_ION   8
 #define C_IOFF  9
 
+void copris_initprset(struct Prset **prset);
+
 extern char printerset[][10][INSTRUC_LEN + 1];
 
 #endif /* PRINTERSET_H */

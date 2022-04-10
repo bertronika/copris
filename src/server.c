@@ -358,7 +358,7 @@ int copris_process(char *stream, int stream_length, struct Attribs *attrib, stru
 		fputs(final_stream, stdout);
 	}
 
-	if(attrib->copris_flags & (HAS_TRFILE|HAS_PRSET))
+	if(attrib->copris_flags & (HAS_TRFILE/*|HAS_PRSET*/))
 		free(final_stream);
 
 	return is_on_hold;

@@ -20,6 +20,9 @@
 #include "printerset.h"
 #include "utf8.h"
 
+static int handler(void *user, const char *section, const char *name,
+                   const char *value);
+
 int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 	FILE *file;
 	int parse_error = 0;
@@ -72,7 +75,7 @@ int copris_loadtrfile(char *filename, struct Trfile **trfile) {
 // name = value
 // key  = item
 // `Handler should return nonzero on success, zero on error.'
-int handler(void *user, const char *section, const char *name,
+static int handler(void *user, const char *section, const char *name,
                    const char *value) {
 	char *parserr;   // String to integer conversion error
 	long temp_long;  // A temporary long integer

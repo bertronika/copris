@@ -303,7 +303,7 @@ int main(int argc, char **argv) {
 	struct Trfile *trfile;
 
 	// Printer set hash structure
-	struct Trfile *prset;
+	struct Prset *prset;
 
 	attrib.portno       = 0;  // 0 -> input from stdin, >0 -> actual port number
 	attrib.prset        = -1;
@@ -378,9 +378,9 @@ int main(int argc, char **argv) {
 // 		}
 // 	}
 
-// 	// Parsing and loading printer feature definitions
-// 	if(attrib.copris_flags & HAS_PRSET) {
-// 		copris_initprset(&prset);
+	// Parsing and loading printer feature definitions
+	if(attrib.copris_flags & HAS_PRSET) {
+		copris_initprset(&prset);
 // 		error = copris_loadprset(attrib.prsetfile, &prset);
 // 		if(error) {
 // 			// Missing printer sets are not a fatal error in quiet mode
@@ -391,7 +391,7 @@ int main(int argc, char **argv) {
 // 				attrib.copris_flags &= ~HAS_PRSET;
 // 			}
 // 		}
-// 	}
+	}
 
 	// Parsing and loading translation definitions
 	if(attrib.copris_flags & HAS_TRFILE) {
