@@ -35,11 +35,11 @@ size_t utf8_calculate_needed_bytes(const char *str, size_t len)
 	// At most 3 characters can be missing from the string, as an UTF-8 encoded character
 	// can be up to 4 bytes long
 	for (size_t i = len - 3; i < len; i++) {
-		// Subtract 1; we are interested in multibyte characters
-		size_t needed_bytes = utf8_codepoint_length(str[i]) - 1;
+		size_t needed_bytes = utf8_codepoint_length(str[i]);
 
+		// Subtract 1; we are interested only in multibyte characters
 		if (i + needed_bytes > len)
-			return needed_bytes;
+			return needed_bytes - 1;
 	}
 
 	return 0;
