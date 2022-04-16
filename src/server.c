@@ -16,7 +16,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <errno.h>
-#include <ctype.h>
+#include <assert.h>
 
 #include "Copris.h"
 #include "config.h"
@@ -237,63 +237,98 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 }
 
 int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
-	int count;       // Number of read bytes in one pass (or two, if subsequent requested)
-	int chunks = 0;  // Number of read chunks
-	int sum    = 0;  // Sum of all read bytes
-	int additional;  // Number of requested bytes for a subsequent read
-	char buf[BUFSIZE]; // Inbound message buffer
-
-	if(log_info()) {
+	if (log_info()) {
 		log_date();
 		printf("Trying to read from stdin...\n");
 	}
 
 	errno = 0;
-	if(isatty(STDIN_FILENO) && log_error()) {
-		raise_errno_perror(errno, "isatty", "Error determining input terminal");
-		if(log_info())
+	if (log_error() && isatty(STDIN_FILENO)) {
+		raise_errno_perror(errno, "isatty", "Error determining input terminal.");
+		if (log_info()) {
 			log_date();
-		else
+		} else {
 			printf("Note: ");
+		}
 
 		printf("You are in text input mode (reading from "
 		       "stdin). To stop reading, press Ctrl+D\n");
 	}
 
+	// Print a Beginning-Of-Stream marker if output isn't a file
 	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
-	// Read the data from standard input into the buffer
-	// A terminating null byte _is_ stored at the end!
-	// If additional bytes are requested, read them.
-	while(fgets(buf, BUFSIZE, stdin) != NULL) {
-		count = strlen(buf);
+	/*
+	 * Read data from the standard input into the buffer. Exit on error or at EOF.
+	 * fgets() stores a terminating null byte at the end of the buffer.
+	 * 3 bytes are subtracted from BUFSIZE to provide place for a multibyte charecter,
+	 * which, when encoded in UTF-8, needs at most 4 bytes. If we detect such character
+	 * at the buffer's end, we request an additional read to make the character complete.
+	*/
+	int chunks = 0;    // Number of read chunks
+	size_t sum = 0;    // Sum of all read bytes
+	char buf[BUFSIZE]; // Inbound message buffer
+
+	while (fgets(buf, BUFSIZE-3, stdin) != NULL) {
 		chunks++;
 
-		additional = copris_process(buf, count, attrib, trfile);
-		if(additional) {
-			if(fgets(buf, additional, stdin) == NULL)
+		size_t buffer_length = strlen(buf);
+		size_t needed_bytes  = utf8_calculate_needed_bytes(buf, buffer_length);
+
+		if (needed_bytes > 0) {
+			char buf2[4]; // Maximum of 3 remaining bytes + ending null
+			assert(needed_bytes < 4);
+
+			char *error = fgets(buf2, needed_bytes + 1, stdin);
+			chunks++;
+
+			// If a read error occures
+			if (error == NULL)
 				return 1;
 
-			copris_process(buf, additional, attrib, trfile);
-			sum += additional - 1;
-			chunks++;
+			// Concatenate both buffers to a maximum of BUFSIZE bytes
+			strcat(buf, buf2);
 		}
 
-		sum += count; // TODO when it overflows...
+		copris_process(buf, buffer_length + needed_bytes + 1, attrib, trfile);
+		sum += buffer_length + needed_bytes; // TODO when it overflows...
 	}
 
+	// Print a End-Of-Stream marker if output isn't a file
 	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
-	if(log_error()) {
-		printf("End of stream, received %d byte(s) in %d chunk(s).\n", sum, chunks);
-	}
+	if(log_error())
+		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", sum, chunks);
 
 	return 0;
 }
 
 int copris_process(char *stream, int stream_length, struct Attribs *attrib, struct Trfile **trfile) {
+// 	if(attrib->copris_flags & HAS_TRFILE) {
+		// copris_translate() makes a copy of final_stream and returns its
+		// newly allocated position - which should be free'd.
+// 		final_stream = copris_translate(final_stream, stream_length, trfile);
+// 	}
+
+// 	if(attrib->copris_flags & HAS_PRSET) {
+// 		copris_printerset();
+// 	}
+
+	// Destination can be either a file/printer or stdout
+	if(attrib->copris_flags & HAS_DESTINATION) {
+		copris_write_file(attrib->destination, stream);
+	} else {
+		fputs(stream, stdout);
+	}
+
+// 	if(attrib->copris_flags & (HAS_TRFILE/*|HAS_PRSET*/))
+// 		free(final_stream);
+
+	return 0;
+}
+int copris_process1(char *stream, int stream_length, struct Attribs *attrib, struct Trfile **trfile) {
 	char *final_stream = stream;
 
 	// To avoid splitting multibyte characters:

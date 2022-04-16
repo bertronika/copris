@@ -1,6 +1,8 @@
 #ifndef UTF8_H
 #define UTF8_H
 
+#include <stddef.h>
+
 /*
  * UTF-8 Encoding
  *
@@ -25,6 +27,7 @@
 #define UTF8_IS_MULTIBYTE(c)    ((c & 0xC0) == 0xC0)
 
 size_t utf8_count_codepoints(const char *s, size_t n);
-int utf8_codepoint_length(const char s);
+size_t utf8_codepoint_length(const char s);
+size_t utf8_calculate_needed_bytes(const char *str, size_t len);
 
 #endif /* UTF8_H */
