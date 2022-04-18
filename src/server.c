@@ -179,12 +179,12 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **
 }
 
 static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *attrib) {
-	int fderror;        // Return value of a socket operation
-	char buf[BUFSIZE];  // Inbound message buffer
+	int fderror;            // Return value of a socket operation
+	char buf[BUFSIZE + 3];  // Inbound message buffer
 
 	// Read the data sent by the client into the buffer
 	// A terminating null byte is _not_ stored at the end!
-	while ((fderror = read(childfd, buf, BUFSIZE - 3 - 1)) > 0) {
+	while ((fderror = read(childfd, buf, BUFSIZE - 1)) > 0) {
 		buf[fderror] = '\0';
 		stats->chunks++;
 
@@ -197,16 +197,16 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 			assert(needed_bytes < 4);
 
 			additional = read(childfd, buf2, needed_bytes);
-			buf2[needed_bytes + 1] = '\0';
+			buf2[needed_bytes] = '\0';
 			stats->chunks++;
-
-			assert(additional == needed_bytes);
 
 			// If a read error occures
 			if (raise_perror(additional, "read", "Error reading from socket."))
 				return 1;
 
-			// Concatenate both buffers to a maximum of BUFSIZE bytes
+			// Concatenate both buffers to a maximum of BUFSIZE + 2 bytes (leaving space
+			// for null termination)
+			assert(strlen(buf) + strlen(buf2) < BUFSIZE + 3);
 			strcat(buf, buf2);
 		}
 
