@@ -1,6 +1,7 @@
 #ifndef COPRIS_H
 #define COPRIS_H
 
+#include <stddef.h> /* size_t */
 #include <uthash.h> /* uthash library */
 
 /*
@@ -18,7 +19,7 @@ struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */
 	int prset;           /* Parsed printer set index number                */
 	int daemon;          /* Run continuously                               */
-	int limitnum;        /* Limit received number of bytes                 */
+	size_t limitnum;     /* Limit received number of bytes                 */
 
 	int copris_flags;    /* Flags regarding user-specified arguments:      */
 	char *prsetname;     /* Printer feature set name                       */

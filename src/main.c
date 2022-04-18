@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <string.h>
 #include <getopt.h>
@@ -206,7 +207,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 			}
 
-			attrib->limitnum = (int)temp_long;
+			attrib->limitnum = (size_t)temp_long;
 			break;
 		case 'D':
 			attrib->copris_flags |= MUST_CUTOFF;
@@ -380,7 +381,7 @@ int main(int argc, char **argv) {
 	
 	if(attrib.limitnum > 0 && log_debug()) {
 		log_date();
-		printf("Limiting incoming data to %d bytes.\n", attrib.limitnum);
+		printf("Limiting incoming data to %zu bytes.\n", attrib.limitnum);
 	}
 	
 	if(log_debug() && !is_stdin) {
