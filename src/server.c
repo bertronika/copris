@@ -47,10 +47,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	if (raise_perror(fderror, "socket", "Failed to create socket endpoint."))
 		return 1;
 
-	if (log_debug()) {
-		log_date();
-		printf("Socket endpoint created.\n");
-	}
+	if (LOG_DEBUG)
+		LOG_STRING("Socket endpoint created.");
 
 	/*
 	 * A hack from tcpserver.c:87
@@ -75,10 +73,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	                                  "Non-root users should set it >1023."))
 		return 1;
 
-	if (log_debug()) {
-		log_date();
-		printf("Socket bound to address.\n");
-	}
+	if (LOG_DEBUG)
+		LOG_STRING("Socket bound to address.");
 
 	// Make the parent socket passive - accept incoming connections.
 	// Limit number of connections to the value of BACKLOG.
@@ -86,9 +82,9 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	if (raise_perror(fderror, "listen", "Failed to make socket passive."))
 		return 1;
 
-	if (log_info()) {
-		log_date();
-		if (log_debug()) {
+	if (LOG_INFO) {
+		LOG_LOCATION();
+		if (LOG_DEBUG) {
 			printf("Socket made passive. ");
 		}
 		printf("Now we listen...\n");
@@ -108,10 +104,8 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **
 	if (raise_perror(childfd, "accept", "Failed to accept the connection."))
 		return 1;
 
-	if (log_info()) {
-		log_date();
-		printf("Connection to socket accepted.\n");
-	}
+	if (LOG_INFO)
+		LOG_STRING("Connection to socket accepted.");
 
 	// Prevent more than one connection if not a daemon
 	if (!attrib->daemon) {
@@ -135,9 +129,10 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **
 		host_address = "<addr unknown>";
 	}
 
-	if (log_info())
-		log_date();
-	if (log_error()) {
+	if (LOG_INFO)
+		LOG_LOCATION();
+
+	if (LOG_ERROR) {
 		printf("Inbound connection from %s (%s).\n", host_info, host_address);
 
 		// Print a Beginning-Of-Stream marker if output isn't a file
@@ -157,12 +152,13 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **
 		return 1;
 
 	// Print a End-Of-Stream marker if output isn't a file
-	if (log_error() && !(attrib->copris_flags & HAS_DESTINATION))
+	if (LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
-	if (log_info())
-		log_date();
-	if (log_error()) {
+	if (LOG_INFO)
+		LOG_LOCATION();
+
+	if (LOG_ERROR) {
 		printf("End of stream, received %zu byte(s) in %d chunk(s)",
 			   stats.sum, stats.chunks);
 
@@ -174,8 +170,8 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **
 		}
 	}
 
-	if (log_info()) {
-		log_date();
+	if (LOG_INFO) {
+		LOG_LOCATION();
 		printf("Connection from %s (%s) closed.\n", host_info, host_address);
 	}
 
@@ -249,7 +245,7 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 
 		if (stats->size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
 			stats->discarded = stats->sum - attrib->limitnum;
-			if (log_error())
+			if (LOG_ERROR)
 				printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off and "
 				       "terminating connection.\n", stats->sum, attrib->limitnum);
 
@@ -264,16 +260,15 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 }
 
 int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile) {
-	if (log_info()) {
-		log_date();
-		printf("Trying to read from stdin...\n");
+	if (LOG_INFO) {
+		LOG_STRING("Trying to read from stdin...\n");
 	}
 
 	errno = 0;
 	if (log_error() && isatty(STDIN_FILENO)) {
 		raise_errno_perror(errno, "isatty", "Error determining input terminal.");
-		if (log_info()) {
-			log_date();
+		if (LOG_INFO) {
+			LOG_LOCATION();
 		} else {
 			printf("Note: ");
 		}
@@ -283,7 +278,7 @@ int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 	}
 
 	// Print a Beginning-Of-Stream marker if output isn't a file
-	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
+	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
 	// Read text from standard input and process it
@@ -293,10 +288,10 @@ int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 		return read_error;
 
 	// Print a End-Of-Stream marker if output isn't a file
-	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
+	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
-	if(log_error())
+	if(LOG_ERROR)
 		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", stats.sum, stats.chunks);
 
 	return 0;
