@@ -261,7 +261,7 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 
 int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 	if (LOG_INFO) {
-		LOG_STRING("Trying to read from stdin...\n");
+		LOG_STRING("Trying to read from stdin...");
 	}
 
 	errno = 0;
@@ -298,16 +298,16 @@ int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 }
 
 static int read_from_stdin(struct Stats *stats, struct Attribs *attrib) {
-	char buf[BUFSIZE]; // Inbound message buffer
+	char buf[BUFSIZE + 3]; // Inbound message buffer
 
 	/*
 	 * Read data from the standard input into the buffer. Exit on error or at EOF.
 	 * fgets() stores a terminating null byte at the end of the buffer.
-	 * 3 bytes are subtracted from BUFSIZE to provide place for a multibyte charecter,
+	 * Space for 3 additional bytes is reserved in the buffer for a multibyte character,
 	 * which, when encoded in UTF-8, needs at most 4 bytes. If we detect such character
 	 * at the buffer's end, we request an additional read to make the character complete.
 	*/
-	while (fgets(buf, BUFSIZE-3, stdin) != NULL) {
+	while (fgets(buf, BUFSIZE, stdin) != NULL) {
 		stats->chunks++;
 
 		size_t buffer_length = strlen(buf);
@@ -324,7 +324,9 @@ static int read_from_stdin(struct Stats *stats, struct Attribs *attrib) {
 			if (error == NULL)
 				return 1;
 
-			// Concatenate both buffers to a maximum of BUFSIZE bytes
+			// Concatenate both buffers to a maximum of BUFSIZE + 2 bytes (leaving space
+			// for null termination)
+			assert(strlen(buf) + strlen(buf2) < BUFSIZE + 3);
 			strcat(buf, buf2);
 		}
 
