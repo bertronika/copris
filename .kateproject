@@ -1,0 +1,14 @@
+{
+	"name": "copris",
+	"files": [ { "git": 1 } ],
+	"build": {
+		"directory": "src",
+		"targets": [
+			{"name": "debug",   "build_cmd": "make debug"},
+			{"name": "release", "build_cmd": "make release"},
+			{"name": "clean",   "build_cmd": "make clean"}
+		],
+		"default_target": "debug",
+		"clean_target": "clean"
+	}
+}
