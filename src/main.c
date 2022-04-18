@@ -277,9 +277,9 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 	// Check for multiple destination arguments
 	if((attrib->copris_flags & HAS_DESTINATION) && argv[++optind]) {
-		if(log_error()){
-			if(log_info())
-				log_date();
+		if(LOG_ERROR){
+			if(LOG_INFO)
+				LOG_LOCATION();
 			else
 				printf("Note: ");
 
@@ -315,9 +315,14 @@ int main(int argc, char **argv) {
 	if(error)
 		return EXIT_FAILURE;
 
-	if(argc < 2 && log_error()) {
-		if(log_info())
-			log_date();
+	if (LOG_DEBUG) {
+		LOG_LOCATION();
+		printf("COPRIS started with PID %d\n", getpid());
+	}
+
+	if(argc < 2 && LOG_ERROR) {
+		if(LOG_INFO)
+			LOG_LOCATION();
 		else
 			printf("Note: ");
 
@@ -328,16 +333,16 @@ int main(int argc, char **argv) {
 	if(attrib.portno == 0)
 		is_stdin = 1;
 
-	if(log_info()) {
-		log_date();
+	if(LOG_INFO) {
+		LOG_LOCATION();
 		printf("Verbosity level set to %d.\n", verbosity);
 	}
 
 	if(attrib.daemon && is_stdin) {
 		attrib.daemon = 0;
-		if(log_error()){
-			if(log_info())
-				log_date();
+		if(LOG_ERROR){
+			if(LOG_INFO)
+				LOG_LOCATION();
 			else
 				printf("Note: ");
 			
@@ -345,10 +350,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if(attrib.daemon && log_debug()) {
-		log_date();
-		printf("Daemon mode enabled.\n");
-	}
+	if(attrib.daemon && LOG_DEBUG)
+		LOG_STRING("Daemon mode enabled.");
 
 	// Parsing and loading printer feature definitions
 	if(attrib.copris_flags & HAS_PRSET) {
@@ -379,18 +382,18 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	if(attrib.limitnum > 0 && log_debug()) {
-		log_date();
+	if(attrib.limitnum > 0 && LOG_DEBUG) {
+		LOG_LOCATION();
 		printf("Limiting incoming data to %zu bytes.\n", attrib.limitnum);
 	}
 	
-	if(log_debug() && !is_stdin) {
-		log_date();
+	if(LOG_DEBUG && !is_stdin) {
+		LOG_LOCATION();
 		printf("Server is listening to port %u.\n", attrib.portno);
 	}
 	
-	if(log_info()) {
-		log_date();
+	if(LOG_INFO) {
+		LOG_LOCATION();
 		printf("Data stream will be sent to ");
 		if(attrib.copris_flags & HAS_DESTINATION)
 			printf("%s.\n", attrib.destination);
@@ -415,9 +418,8 @@ int main(int argc, char **argv) {
 
 	exit_on_error:
 	if(attrib.copris_flags & HAS_TRFILE) {
-		if(log_debug()) {
-			log_date();
-			printf("Unloading translation file.\n");
+		if(LOG_DEBUG) {
+			LOG_STRING("Unloading translation file.");
 		}
 		copris_unload_trfile(&trfile);
 	}
@@ -425,9 +427,8 @@ int main(int argc, char **argv) {
 	if(error)
 		return EXIT_FAILURE;
 
-	if(log_debug() && !is_stdin) {
-		log_date();
-		printf("Not running as a daemon, exiting.\n");
+	if(LOG_DEBUG && !is_stdin) {
+		LOG_STRING("Not running as a daemon, exiting.");
 	}
 
 	return 0;
