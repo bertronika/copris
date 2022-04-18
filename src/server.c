@@ -104,7 +104,7 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **
 	if (raise_perror(childfd, "accept", "Failed to accept the connection."))
 		return 1;
 
-	if (LOG_INFO)
+	if (LOG_DEBUG)
 		LOG_STRING("Connection to socket accepted.");
 
 	// Prevent more than one connection if not a daemon
