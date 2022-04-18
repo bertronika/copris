@@ -1,6 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#define MAX_FILENAME_LENGTH 12
+
 extern int verbosity;
 
 // ***** Error reporting *****
@@ -36,6 +38,19 @@ int raise_errno_perror(int received_errno, char *function_name, char *message);
 int log_error();
 int log_info();
 int log_debug();
+
+#define LOG_ERROR (verbosity > 0)
+#define LOG_INFO  (verbosity > 1)
+#define LOG_DEBUG (verbosity > 2)
+
+
+#ifdef DEBUG
+#	define LOG_LOCATION()  (printf("%*s:%3d: ",     MAX_FILENAME_LENGTH, __FILE__, __LINE__     ))
+#	define LOG_STRING(str) (printf("%*s:%3d: %s\n", MAX_FILENAME_LENGTH, __FILE__, __LINE__, str))
+#else
+#	define LOG_LOCATION()  (0)
+#	define LOG_STRING(str) (fputs(str, stdout))
+#endif
 
 /*
  * Print current date and time in a custom format, without a newline character at the end.
