@@ -407,9 +407,9 @@ int main(int argc, char **argv) {
 
 	do {
 		if(is_stdin) {
-			error = copris_read_stdin(&attrib, &trfile);
+			error = copris_handle_stdin(&attrib, &trfile);
 		} else {
-			error = copris_read_socket(&parentfd, &attrib, &trfile);
+			error = copris_handle_socket(&parentfd, &attrib, &trfile);
 		}
 	} while(attrib.daemon && !error);
 

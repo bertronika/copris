@@ -28,6 +28,12 @@
 #include "printerset.h"
 #include "utf8.h"
 
+const struct Stats STATS_INIT = {
+	0, 0, false, 0
+};
+static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *attrib);
+static int read_from_stdin(struct Stats *stats, struct Attribs *attrib);
+
 int copris_socket_listen(int *parentfd, unsigned int portno) {
 	int fderror;  // Return value of a socket operation
 
@@ -46,11 +52,10 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 		printf("Socket endpoint created.\n");
 	}
 
-	/* 
-	 * A hack from tcpserver.c: (line 87)
-	 * setsockopt: Handy debugging trick that lets
-	 * us rerun the server immediately after we kill it;
-	 * otherwise we have to wait about 20 secs.
+	/*
+	 * A hack from tcpserver.c:87
+	 * setsockopt: Handy debugging trick that lets us rerun the server
+	 * immediately after we kill it; otherwise we have to wait about 20 secs.
 	 * Eliminates "ERROR on binding: Address already in use" error.
 	 */
 	int optval = 1;
@@ -92,7 +97,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	return 0;
 }
 
-int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **trfile) {
+int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **trfile) {
 	int fderror;                    // Return value of a socket operation
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
@@ -118,7 +123,7 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 	// Get host info (IP, hostname) of the client (TODO gai_strerror)
 	char host_info[NI_MAXHOST];
 	fderror = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr),
-	                       host_info, sizeof(host_info), NULL, 0, 0);
+	                      host_info, sizeof(host_info), NULL, 0, 0);
 // 	if(fderror != 0) {
 // 		log_perr(-1, "getnameinfo", "Failed getting hostname from address.");
 // 	}
@@ -140,91 +145,18 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 			printf("; BOS\n");
 	}
 
-	int chunks    = 0;  // Number of read chunks
-	size_t sum    = 0;  // Sum of all read (received) bytes
-	char buf[BUFSIZE];  // Inbound message buffer
-	bool size_limit_active = false;
-
-	size_t discarded        = 0;  // Discarded number of bytes, if limit is set
-
-	// Read the data sent by the client into the buffer
-	// A terminating null byte is _not_ stored at the end!
-	while ((fderror = read(childfd, buf, BUFSIZE - 3 - 1)) > 0) {
-		buf[fderror] = '\0';
-		chunks++;
-
-		// Check if additional bytes need to be read (to complete a multibyte character)
-		size_t needed_bytes = utf8_calculate_needed_bytes(buf, fderror);
-		size_t additional   = 0;
-
-		if (needed_bytes > 0) {
-			char buf2[4]; // Maximum of 3 remaining bytes + ending null
-			assert(needed_bytes < 4);
-
-			additional = read(childfd, buf2, needed_bytes);
-			buf2[needed_bytes + 1] = '\0';
-			chunks++;
-
-			assert(additional == needed_bytes);
-
-			// If a read error occures
-			if (raise_perror(additional, "read", "Error reading from socket."))
-				return 1;
-
-			// Concatenate both buffers to a maximum of BUFSIZE bytes
-			strcat(buf, buf2);
-		}
-
-		sum += fderror + additional;
-
-		// Check if length of received text went over the limit (if limit is active)
-		if (attrib->limitnum && sum > attrib->limitnum) {
-			const char limit_message[] = "Send size limit exceeded, terminating connection.\n";
-			int tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
-			raise_perror(tmperr, "write", "Error sending termination text to socket.");
-			size_limit_active = true;
-		}
-
-		// Terminate before processing excessive data - discard whole chunk
-		if (size_limit_active && !(attrib->copris_flags & MUST_CUTOFF)) {
-			discarded = fderror + additional;
-			if (log_error())
-				printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
-				       "data and terminating connection.\n", sum, attrib->limitnum);
-
-			break;
-		}
-
-		// Terminate after processing excessive data - cut off buffer at limit
-		if (size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
-			if (sum == fderror + additional) {
-				// First buffer read already bigger than limit
-				buf[attrib->limitnum] = '\0';
-			} else {
-				buf[attrib->limitnum - (sum - fderror - additional)] = '\0';
-			}
-		}
-
-		copris_process(buf, fderror + additional, attrib, trfile);
-
-		if (size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
-			discarded = sum - attrib->limitnum;
-			if (log_error())
-				printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off and "
-				       "terminating connection.\n", sum, attrib->limitnum);
-
-			break;
-		}
-	} /* end of socket reading loop */
-
-	if (raise_perror(fderror, "read", "Error reading from socket."))
-		return 1;
+	// Read text from socket and process it
+	struct Stats stats = STATS_INIT;
+	int read_error = read_from_socket(childfd, &stats, attrib);
+	if (read_error)
+		return read_error;
 
 	// Close the current connection
 	fderror = close(childfd);
 	if (raise_perror(fderror, "close", "Failed to close the child connection."))
 		return 1;
 
+	// Print a End-Of-Stream marker if output isn't a file
 	if (log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; EOS\n");
 
@@ -232,18 +164,11 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 		log_date();
 	if (log_error()) {
 		printf("End of stream, received %zu byte(s) in %d chunk(s)",
-			   sum, chunks);
+			   stats.sum, stats.chunks);
 
-		if (size_limit_active) {
-			printf(", %zu byte(s) %s.\n", discarded,
-			      (attrib->copris_flags & MUST_CUTOFF) ? "cut off" : "discarded");
-// 			printf(", %zu byte(s) %s.\n", sum-attrib->limitnum,
-// 			      (attrib->copris_flags & MUST_CUTOFF) ? "cut off" : "discarded");
-// 			if (attrib->copris_flags & MUST_CUTOFF) {
-// 				printf(", %zu byte(s) cut off.\n", sum - attrib->limitnum);
-// 			} else {
-// 				printf(", %zu byte(s) discarded.\n", discarded);
-// 			}
+		if (stats.size_limit_active) {
+			printf(", %zu byte(s) %s.\n", stats.discarded,
+			       (attrib->copris_flags & MUST_CUTOFF) ? "cut off" : "discarded");
 		} else {
 			printf(".\n");
 		}
@@ -257,7 +182,88 @@ int copris_read_socket(int *parentfd, struct Attribs *attrib, struct Trfile **tr
 	return 0;
 }
 
-int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
+static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *attrib) {
+	int fderror;        // Return value of a socket operation
+	char buf[BUFSIZE];  // Inbound message buffer
+
+	// Read the data sent by the client into the buffer
+	// A terminating null byte is _not_ stored at the end!
+	while ((fderror = read(childfd, buf, BUFSIZE - 3 - 1)) > 0) {
+		buf[fderror] = '\0';
+		stats->chunks++;
+
+		// Check if additional bytes need to be read (to complete a multibyte character)
+		size_t needed_bytes = utf8_calculate_needed_bytes(buf, fderror);
+		size_t additional   = 0;
+
+		if (needed_bytes > 0) {
+			char buf2[4]; // Maximum of 3 remaining bytes + ending null
+			assert(needed_bytes < 4);
+
+			additional = read(childfd, buf2, needed_bytes);
+			buf2[needed_bytes + 1] = '\0';
+			stats->chunks++;
+
+			assert(additional == needed_bytes);
+
+			// If a read error occures
+			if (raise_perror(additional, "read", "Error reading from socket."))
+				return 1;
+
+			// Concatenate both buffers to a maximum of BUFSIZE bytes
+			strcat(buf, buf2);
+		}
+
+		stats->sum += fderror + additional;
+
+		// Check if length of received text went over the limit (if limit is active)
+		if (attrib->limitnum && stats->sum > attrib->limitnum) {
+			const char limit_message[] = "Send size limit exceeded, terminating connection.\n";
+			int tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
+			raise_perror(tmperr, "write", "Error sending termination text to socket.");
+			stats->size_limit_active = true;
+		}
+
+		// Terminate before processing excessive data - discard whole chunk
+		if (stats->size_limit_active && !(attrib->copris_flags & MUST_CUTOFF)) {
+			stats->discarded = fderror + additional;
+			if (log_error())
+				printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
+				       "data and terminating connection.\n", stats->sum, attrib->limitnum);
+
+			break;
+		}
+
+		// Terminate after processing excessive data - cut off buffer at limit
+		if (stats->size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
+			if (stats->sum == fderror + additional) {
+				// First buffer read already bigger than limit
+				buf[attrib->limitnum] = '\0';
+			} else {
+				buf[attrib->limitnum - (stats->sum - fderror - additional)] = '\0';
+			}
+		}
+
+// 		copris_process(buf, fderror + additional, attrib, trfile); TODO
+		copris_process(buf, fderror + additional, attrib, NULL);
+
+		if (stats->size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
+			stats->discarded = stats->sum - attrib->limitnum;
+			if (log_error())
+				printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off and "
+				       "terminating connection.\n", stats->sum, attrib->limitnum);
+
+			break;
+		}
+	} /* end of socket reading loop */
+
+	if (raise_perror(fderror, "read", "Error reading from socket."))
+		return 1;
+
+	return 0;
+}
+
+int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 	if (log_info()) {
 		log_date();
 		printf("Trying to read from stdin...\n");
@@ -280,6 +286,25 @@ int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
+	// Read text from standard input and process it
+	struct Stats stats = STATS_INIT;
+	int read_error = read_from_stdin(&stats, attrib);
+	if (read_error)
+		return read_error;
+
+	// Print a End-Of-Stream marker if output isn't a file
+	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
+		printf("; EOS\n");
+
+	if(log_error())
+		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", stats.sum, stats.chunks);
+
+	return 0;
+}
+
+static int read_from_stdin(struct Stats *stats, struct Attribs *attrib) {
+	char buf[BUFSIZE]; // Inbound message buffer
+
 	/*
 	 * Read data from the standard input into the buffer. Exit on error or at EOF.
 	 * fgets() stores a terminating null byte at the end of the buffer.
@@ -287,12 +312,8 @@ int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 	 * which, when encoded in UTF-8, needs at most 4 bytes. If we detect such character
 	 * at the buffer's end, we request an additional read to make the character complete.
 	*/
-	int chunks = 0;    // Number of read chunks
-	size_t sum = 0;    // Sum of all read bytes
-	char buf[BUFSIZE]; // Inbound message buffer
-
 	while (fgets(buf, BUFSIZE-3, stdin) != NULL) {
-		chunks++;
+		stats->chunks++;
 
 		size_t buffer_length = strlen(buf);
 		size_t needed_bytes  = utf8_calculate_needed_bytes(buf, buffer_length);
@@ -302,7 +323,7 @@ int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 			assert(needed_bytes < 4);
 
 			char *error = fgets(buf2, needed_bytes + 1, stdin);
-			chunks++;
+			stats->chunks++;
 
 			// If a read error occures
 			if (error == NULL)
@@ -312,16 +333,10 @@ int copris_read_stdin(struct Attribs *attrib, struct Trfile **trfile) {
 			strcat(buf, buf2);
 		}
 
-		copris_process(buf, buffer_length + needed_bytes + 1, attrib, trfile);
-		sum += buffer_length + needed_bytes; // TODO when it overflows...
+// 		copris_process(buf, buffer_length + needed_bytes + 1, attrib, trfile); TODO
+		copris_process(buf, buffer_length + needed_bytes + 1, attrib, NULL);
+		stats->sum += buffer_length + needed_bytes; // TODO when it overflows...
 	}
-
-	// Print a End-Of-Stream marker if output isn't a file
-	if(log_error() && !(attrib->copris_flags & HAS_DESTINATION))
-		printf("; EOS\n");
-
-	if(log_error())
-		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", sum, chunks);
 
 	return 0;
 }
