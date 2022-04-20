@@ -40,8 +40,8 @@ LIBS := $(shell pkg-config --cflags --libs inih libcmark)
 
 # C compiler flags for release/debug builds and tests
 COMMON  := -Wall -Wextra -pedantic -DREL="$(HASH)-$(BRANCH)"
-CFLAGS  := $(LIBS) $(COMMON) -MMD -MP
-TCFLAGS := $(shell pkg-config --cflags --libs cmocka) $(LIBS) $(COMMON) -DDEBUG
+CFLAGS  := $(LIBS) $(COMMON) -MMD -MP -O2 -s -DNDEBUG
+TCFLAGS := $(shell pkg-config --cflags --libs cmocka) $(LIBS) $(COMMON) -Og -DDEBUG
 # -Wconversion
 
 .PHONY: all release debug unit-tests clean help
@@ -49,12 +49,9 @@ TCFLAGS := $(shell pkg-config --cflags --libs cmocka) $(LIBS) $(COMMON) -DDEBUG
 all: release
 # all: debug
 
-release: CFLAGS += -O2 -s -DNDEBUG
 release: $(BIN)
 
-# debug: CFLAGS += -g -DREL=\"$(HASH)-$(BRANCH)\"
-# *** Do not forget to recompile the whole project if switching to/from debug ***
-debug: CFLAGS += -g3 -ggdb -gdwarf -Og -DDEBUG
+debug: CFLAGS = $(LIBS) $(COMMON) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG
 debug: $(BIN)
 
 # Automatic variables of GNU Make:
@@ -74,6 +71,7 @@ $(BIN): $(OBJ)
 $(TESTS): $(SRC_T)
 	$(CC) $(TCFLAGS) -o $@ $^
 
+# Run tests
 unit-tests: $(TESTS)
 	for utest in $(TESTS); do ./$$utest; done
 
