@@ -17,8 +17,14 @@
 # https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html
 # https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
 
+# Source directory
+SRCDIR = src
+
 # Binary name
-BIN = copris
+BIN = $(SRCDIR)/copris
+
+# Tests directory
+TESTDIR = tests_cmocka
 
 # Last git commit hash
 HASH := $(shell git rev-parse --short HEAD)
@@ -28,18 +34,19 @@ BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 # Input source files, objects, dependencies
 SRC  = debug.c server.c writer.c translate.c printerset.c utf8.c main.c
-OBJ := $(SRC:.c=.o)
-DEP := $(SRC:.c=.d)
+OBJ := $(SRC:%.c=$(SRCDIR)/%.o)
+DEP := $(SRC:%.c=$(SRCDIR)/%.d)
 
 # Unit test files
 TESTS  = test_server
-SRC_T := $(addsuffix .c, $(TESTS))
+BIN_T := $(TESTS:%=$(TESTDIR)/%)
+SRC_T := $(BIN_T:%=%.c)
 
 # Dynamic library linking
 LIBS := $(shell pkg-config --cflags --libs inih libcmark)
 
 # C compiler flags for release/debug builds and tests
-COMMON  := -Wall -Wextra -pedantic -DREL="$(HASH)-$(BRANCH)"
+COMMON  := -Wall -Wextra -pedantic -DREL=\"$(HASH)-$(BRANCH)\"
 CFLAGS  := $(LIBS) $(COMMON) -MMD -MP -O2 -s -DNDEBUG
 TCFLAGS := $(shell pkg-config --cflags --libs cmocka) $(LIBS) $(COMMON) -Og -DDEBUG
 # -Wconversion
@@ -68,12 +75,12 @@ $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Compile tests
-$(TESTS): $(SRC_T)
+$(BIN_T): $(SRC_T)
 	$(CC) $(TCFLAGS) -o $@ $^
 
 # Run tests
-unit-tests: $(TESTS)
-	for utest in $(TESTS); do ./$$utest; done
+unit-tests: $(BIN_T)
+	for utest in $(BIN_T); do ./$$utest; done
 
 # Automatic dependency tracking
 -include $(DEP)
