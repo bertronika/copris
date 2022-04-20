@@ -1,9 +1,11 @@
 # Build system for COPRIS
 # Possible targets:
-#	- all/no arg  build the default target (`copris')
-#	- release     build the release build
-#	- debug       build the debugging build with extra symbols
-#	- clean       clean object, dependency and binary files
+#	- all [no args]  synonym for `release'
+#	- release        build the release build
+#	- debug          build the debugging build with extra symbols
+#	- unit-tests     build and run unit tests
+#	- clean          clean object, dependency, binary and test files
+#	- help           print this text
 
 # The build system utilises automatic dependency tracking. If a header file
 # is changed, only the files #include-ing it will be recompiled.
@@ -29,17 +31,23 @@ SRC  = debug.c server.c writer.c translate.c printerset.c utf8.c main.c
 OBJ := $(SRC:.c=.o)
 DEP := $(SRC:.c=.d)
 
+# Unit test files
+TESTS  = test_server
+SRC_T := $(addsuffix .c, $(TESTS))
+
 # Dynamic library linking
 LIBS := $(shell pkg-config --cflags --libs inih libcmark)
 
-# C compiler flags
-# CFLAGS := -Wall -Wextra -Wconversion -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
-CFLAGS := $(LIBS) -Wall -Wextra -pedantic -MMD -MP -DREL=\"$(HASH)-$(BRANCH)\"
+# C compiler flags for release/debug builds and tests
+COMMON  := -Wall -Wextra -pedantic -DREL="$(HASH)-$(BRANCH)"
+CFLAGS  := $(LIBS) $(COMMON) -MMD -MP
+TCFLAGS := $(shell pkg-config --cflags --libs cmocka) $(LIBS) $(COMMON) -DDEBUG
+# -Wconversion
 
-.PHONY: all release debug clean
+.PHONY: all release debug unit-tests clean help
 
-all: debug
-# all: release
+all: release
+# all: debug
 
 release: CFLAGS += -O2 -s -DNDEBUG
 release: $(BIN)
@@ -62,8 +70,18 @@ debug: $(BIN)
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
+# Compile tests
+$(TESTS): $(SRC_T)
+	$(CC) $(TCFLAGS) -o $@ $^
+
+unit-tests: $(TESTS)
+	for utest in $(TESTS); do ./$$utest; done
+
 # Automatic dependency tracking
 -include $(DEP)
 
 clean:
-	$(RM) $(OBJ) $(DEP) $(BIN)
+	$(RM) $(OBJ) $(DEP) $(BIN) $(TESTS)
+
+help:
+	head -n 16 $(firstword $(MAKEFILE_LIST))
