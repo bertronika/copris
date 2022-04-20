@@ -48,7 +48,7 @@ int log_debug();
 #	define LOG_LOCATION()  (printf("%*s:%3d: ",     MAX_FILENAME_LENGTH, __FILE__, __LINE__     ))
 #	define LOG_STRING(str) (printf("%*s:%3d: %s\n", MAX_FILENAME_LENGTH, __FILE__, __LINE__, str))
 #else
-#	define LOG_LOCATION()  (0)
+#	define LOG_LOCATION()  ((void)0)
 #	define LOG_STRING(str) (fputs(str, stdout))
 #endif
 
