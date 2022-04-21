@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#define MAX_FILENAME_LENGTH 12
+#define MAX_FILENAME_LENGTH 16
 
 extern int verbosity;
 
