@@ -1,6 +1,9 @@
+# Object files (compiler)
 *.o
+
+# Dependency files (compiler)
 *.d
-*.kate-swp
-old/
-tests/
+
+# Release and debug executables
 copris
+copris_dbg
