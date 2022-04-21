@@ -1,92 +1,98 @@
 # Build system for COPRIS
-# Possible targets:
-#	- all [no args]  synonym for `release'
-#	- release        build the release build
-#	- debug          build the debugging build with extra symbols
-#	- unit-tests     build and run unit tests
-#	- clean          clean object, dependency, binary and test files
-#	- help           print this text
+# Possible targets (you don't need to specify one for a regular release build):
+#	- all          synonym for `release'
+#	- release      build the release build (executable name `copris')
+#	- debug        build the debugging build (executable name `copris_dbg')
+#	- unit-tests   build and run unit tests
+#	- clean        clean object, dependency, binary and test files
+#	- help         print this text
 
-# The build system utilises automatic dependency tracking. If a header file
-# is changed, only the files #include-ing it will be recompiled.
+# Run `make' with `WITHOUT_CMARK=1' to omit Markdown support.
+# GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
-# *** Do not forget to recompile the whole project if switching to/from debug target.
-#     You could mix debug and non-debug object files and get unexpected results in
-#     program behaviour.
+# Release and debug binary names
+BIN_REL = copris
+BIN_DBG = copris_dbg
 
-# https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html
-# https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
-
-# Source directory
-SRCDIR = src
-
-# Binary name
-BIN = $(SRCDIR)/copris
-
-# Tests directory
+# Source and tests directories
+SRCDIR  = src
 TESTDIR = tests_cmocka
 
-# Last git commit hash
-HASH := $(shell git rev-parse --short HEAD)
-
-# Current git branch name
+# Last git commit hash and current branch name
+HASH   := $(shell git rev-parse --short HEAD)
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
-# Input source files, objects, dependencies
-SRC  = debug.c server.c writer.c translate.c printerset.c utf8.c main.c
-OBJ := $(SRC:%.c=$(SRCDIR)/%.o)
-DEP := $(SRC:%.c=$(SRCDIR)/%.d)
+# Source, object and dependency files for release and debug builds
+SRC = debug.c server.c writer.c translate.c printerset.c utf8.c main.c
+OBJ_REL := $(SRC:%.c=$(SRCDIR)/%_rel.o)
+DEP_REL := $(SRC:%.c=$(SRCDIR)/%_rel.d)
+OBJ_DBG := $(SRC:%.c=$(SRCDIR)/%_dbg.o)
+DEP_DBG := $(SRC:%.c=$(SRCDIR)/%_dbg.d)
 
 # Unit test files
-TESTS  = test_server
-BIN_T := $(TESTS:%=$(TESTDIR)/%)
-SRC_T := $(BIN_T:%=%.c)
+TESTS = test_server.c
+SRC_TEST := $(TESTS:%=$(TESTDIR)/%)
+BIN_TEST := $(TESTS:%.c=$(TESTDIR)/%)
 
-# Dynamic library linking
-LIBS := $(shell pkg-config --cflags --libs inih libcmark)
+# Dynamic libraries to be linked
+LIBS = inih
 
-# C compiler flags for release/debug builds and tests
-COMMON  := -Wall -Wextra -pedantic -DREL=\"$(HASH)-$(BRANCH)\"
-CFLAGS  := $(LIBS) $(COMMON) -MMD -MP -O2 -s -DNDEBUG
-TCFLAGS := $(shell pkg-config --cflags --libs cmocka) $(LIBS) $(COMMON) -Og -DDEBUG
+# Check if Markdown support was explicitly disabled
+WITHOUT_CMARK ?= 0
+EXTRADEF =
+ifeq ($(WITHOUT_CMARK), 0)
+	LIBS += libcmark
+else
+	EXTRADEF = -DWITHOUT_CMARK
+endif
+
+# Common, release, debug and test build C compiler flags
+CFLAGS    := $(shell pkg-config --cflags --libs $(LIBS)) -Wall -Wextra -pedantic $(EXTRADEF)
+RELFLAGS  := $(CFLAGS) -MMD -MP -O2 -DNDEBUG -s
+DBGFLAGS  := $(CFLAGS) -MMD -MP -Og -DDEBUG -g3 -ggdb -gdwarf -DREL=\"$(HASH)-$(BRANCH)\"
+TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) -Og -DDEBUG
 # -Wconversion
 
+# Targets that do not produce an eponyomus file
 .PHONY: all release debug unit-tests clean help
 
-all: release
-# all: debug
-
-release: $(BIN)
-
-debug: CFLAGS = $(LIBS) $(COMMON) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG
-debug: $(BIN)
+# all:     debug
+all:     release
+release: $(BIN_REL)
+debug:   $(BIN_DBG)
 
 # Automatic variables of GNU Make:
 # $@  The file name of the target of the rule.
 # $<  The name of the first prerequisite.
 # $^  The names of all the prerequisites, with spaces between them.
 
-# Compile each object file, specified in $(OBJ)
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+# Compile the release binary (`copris')
+$(BIN_REL): $(OBJ_REL)
+	$(CC) $(RELFLAGS) -o $@ $^
 
-# Compile the final binary
-$(BIN): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+%_rel.o: %.c
+	$(CC) $(RELFLAGS) -c -o $@ $<
 
-# Compile tests
-$(BIN_T): $(SRC_T)
-	$(CC) $(TCFLAGS) -o $@ $^
+# Compile the debug binary (`copris_dbg')
+$(BIN_DBG): $(OBJ_DBG)
+	$(CC) $(DBGFLAGS) -o $@ $^
 
-# Run tests
-unit-tests: $(BIN_T)
-	for utest in $(BIN_T); do ./$$utest; done
+%_dbg.o: %.c
+	$(CC) $(DBGFLAGS) -c -o $@ $<
 
-# Automatic dependency tracking
--include $(DEP)
+# Compile and run tests
+$(BIN_TEST): $(SRC_TEST)
+	$(CC) $(TESTFLAGS) -o $@ $^
+
+unit-tests: $(BIN_TEST)
+	for utest in $(BIN_TEST); do ./$$utest; done
+
+# Automatic dependency tracking (-MMD -MP). If a header file is
+# changed, only the files including it will be recompiled.
+-include $(DEP_REL) $(DEP_DBG)
 
 clean:
-	$(RM) $(OBJ) $(DEP) $(BIN) $(TESTS)
+	$(RM) $(OBJ_REL) $(DEP_REL) $(OBJ_DBG) $(DEP_DBG) $(BIN_REL) $(BIN_DBG) $(BIN_TEST)
 
 help:
-	head -n 16 $(firstword $(MAKEFILE_LIST))
+	head -n 10 $(firstword $(MAKEFILE_LIST))
