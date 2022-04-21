@@ -54,7 +54,9 @@ void copris_help(char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
+#ifndef WITHOUT_CMARK
 	       "  -r, --printer PRSET    Printer feature set\n"
+#endif
 	       "  -d, --daemon           Run as a daemon\n"
 	       "  -l, --limit NUMBER     Limit number of received bytes\n"
 	       "      --cutoff-limit     Cut text off at limit instead of\n"
@@ -170,6 +172,7 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
 		case 'r':
+#ifndef WITHOUT_CMARK
 			if (*optarg == '-') {
 				fprintf(stderr, "Unrecognised character in printer set name (%s). "
 				                "Perhaps you forgot to specify the set?\n", optarg);
@@ -184,6 +187,13 @@ int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				fprintf(stderr, "Selected printer feature set does not exist (%s).\n", optarg);
 				return 1;
 			}
+#else
+			fprintf(stderr, "Option `-r|--printerset' isn't available in this "
+			                "release of COPRIS\n"
+			                "(printer feature sets were omitted with `-DWITHOUT_CMARK' "
+			                "at build time).\n");
+			return 1;
+#endif
 			break;
 		case 'l':
 			// Reset errno to distinguish between success/failure after call
@@ -352,6 +362,7 @@ int main(int argc, char **argv) {
 	if (attrib.daemon && LOG_DEBUG)
 		LOG_STRING("Daemon mode enabled.");
 
+#ifndef WITHOUT_CMARK
 	// Parsing and loading printer feature definitions
 	if (attrib.copris_flags & HAS_PRSET) {
 		copris_initprset(&prset);
@@ -366,6 +377,9 @@ int main(int argc, char **argv) {
 // 			}
 // 		}
 	}
+#else
+	(void)prset;
+#endif
 
 	// Parsing and loading translation definitions
 	if (attrib.copris_flags & HAS_TRFILE) {
