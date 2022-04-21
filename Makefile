@@ -48,9 +48,9 @@ endif
 
 # Common, release, debug and test build C compiler flags
 CFLAGS    := $(shell pkg-config --cflags --libs $(LIBS)) -Wall -Wextra -pedantic $(EXTRADEF)
-RELFLAGS  := $(CFLAGS) -MMD -MP -O2 -DNDEBUG -s
-DBGFLAGS  := $(CFLAGS) -MMD -MP -Og -DDEBUG -g3 -ggdb -gdwarf -DREL=\"$(HASH)-$(BRANCH)\"
-TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) -Og -DDEBUG
+RELFLAGS  := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
+DBGFLAGS  := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
+TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) -Og -DDEBUG="$(HASH)-$(BRANCH)"
 # -Wconversion
 
 # Targets that do not produce an eponyomus file

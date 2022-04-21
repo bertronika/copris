@@ -37,11 +37,9 @@
 #include "translate.h"
 #include "printerset.h"
 
-#ifndef DEBUG
-#	define COPRIS_RELEASE ""
-#else
-#	define COPRIS_RELEASE ("-" REL)
-#endif
+// Expand parameter to a literal string
+#define _STRINGIFY(str) #str
+#define STRINGIFY(str) _STRINGIFY(str)
 
 /*
  * Verbosity levels:
@@ -79,11 +77,15 @@ void copris_help(char *copris_location) {
 }
 
 void copris_version() {
-	printf("COPRIS version %s%s\n"
-	       "(C) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
+#ifdef DEBUG
+	printf("COPRIS version %s-%s\n", COPRIS_VER, STRINGIFY(DEBUG));
+#else
+	printf("COPRIS version %s\n", COPRIS_VER);
+#endif
+	printf("(C) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Compiled options:\n"
 		   "  Buffer size:          %4d bytes\n\n",
-	       COPRIS_VER, COPRIS_RELEASE, BUFSIZE);
+	       BUFSIZE);
 
 	exit(EXIT_SUCCESS);
 }
