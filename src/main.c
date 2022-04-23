@@ -52,7 +52,7 @@
  */
 int verbosity = 1;
 
-void copris_help(char *copris_location) {
+static void copris_help(char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
@@ -80,7 +80,7 @@ void copris_help(char *copris_location) {
 	exit(EXIT_SUCCESS);
 }
 
-void copris_version() {
+static void copris_version() {
 #ifdef DEBUG
 	printf("COPRIS version %s-%s\n", COPRIS_VER, STRINGIFY(DEBUG));
 #else
@@ -94,7 +94,7 @@ void copris_version() {
 	exit(EXIT_SUCCESS);
 }
 
-int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
+static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
 		{"port",          required_argument, NULL, 'p'},
 		{"daemon",        no_argument,       NULL, 'd'},
@@ -327,7 +327,7 @@ int main(int argc, char **argv) {
 	// Parsing arguments
 	int error = parse_arguments(argc, argv, &attrib);
 	if (error)
-		return EXIT_FAILURE;
+		return error;
 
 	if (LOG_DEBUG) {
 		LOG_LOCATION();
@@ -423,7 +423,7 @@ int main(int argc, char **argv) {
 	if (!is_stdin) {
 		error = copris_socket_listen(&parentfd, attrib.portno);
 		if (error)
-			goto exit_on_error;
+			return EXIT_FAILURE;
 	}
 
 	// Allocate initial space input text
@@ -437,7 +437,7 @@ int main(int argc, char **argv) {
 		} else {
 			error = copris_handle_socket(copris_text, &parentfd, &attrib);
 			if (error)
-				break;
+				return EXIT_FAILURE;
 		}
 
 		// Stage 2: Translate selected characters in text with a translation file
@@ -469,9 +469,6 @@ int main(int argc, char **argv) {
 
 	} while (attrib.daemon);
 
-	utstring_free(copris_text);
-
-	exit_on_error:
 // 	if (attrib.copris_flags & HAS_TRFILE) {
 // 		if (LOG_DEBUG) {
 // 			LOG_STRING("Unloading translation file.");
@@ -479,12 +476,10 @@ int main(int argc, char **argv) {
 // 		copris_unload_trfile(&trfile);
 // 	}
 
-	if (error)
-		return EXIT_FAILURE;
+	utstring_free(copris_text);
 
-	if (LOG_DEBUG && !is_stdin) {
+	if (LOG_DEBUG && !is_stdin)
 		LOG_STRING("Not running as a daemon, exiting.");
-	}
 
 	return 0;
 }
