@@ -7,3 +7,6 @@
 # Release and debug executables
 copris
 copris_dbg
+
+# Cppcheck's report directory
+cppcheck_report/

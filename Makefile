@@ -1,13 +1,18 @@
 # Build system for COPRIS
 # Possible targets (you don't need to specify one for a regular release build):
-#	- all          synonym for `release'
-#	- release      build the release build (executable name `copris')
-#	- debug        build the debugging build (executable name `copris_dbg')
-#	- unit-tests   build and run unit tests
-#	- clean        clean object, dependency, binary and test files
-#	- help         print this text
+#	- all       synonym for `release'
+#	- release   build the release build (executable name `copris')
+#	- debug     build the debugging build (executable name `copris_dbg')
+#	- clean     clean object, dependency, binary and test files
+#	- help      print this text
 
 # Run `make' with `WITHOUT_CMARK=1' to omit Markdown support.
+
+# For code analysis purposes run:
+#	- unit-tests              build and run unit tests
+#	- analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
+#	- analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
+
 # GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
 # Release and debug binary names
@@ -18,16 +23,21 @@ BIN_DBG = copris_dbg
 SRCDIR  = src
 TESTDIR = tests_cmocka
 
+# Cppcheck's output locations
+CPPCHECK_DIR = cppcheck_report
+CPPCHECK_XML = $(CPPCHECK_DIR)/report.xml
+
 # Last git commit hash and current branch name
 HASH   := $(shell git rev-parse --short HEAD)
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 # Source, object and dependency files for release and debug builds
-SRC = debug.c server.c writer.c translate.c printerset.c utf8.c main.c
-OBJ_REL := $(SRC:%.c=$(SRCDIR)/%_rel.o)
-DEP_REL := $(SRC:%.c=$(SRCDIR)/%_rel.d)
-OBJ_DBG := $(SRC:%.c=$(SRCDIR)/%_dbg.o)
-DEP_DBG := $(SRC:%.c=$(SRCDIR)/%_dbg.d)
+SOURCES = debug.c server.c writer.c translate.c printerset.c utf8.c main.c
+SRC := $(addprefix $(SRCDIR)/, $(SOURCES))
+OBJ_REL := $(SRC:%.c=%_rel.o)
+DEP_REL := $(SRC:%.c=%_rel.d)
+OBJ_DBG := $(SRC:%.c=%_dbg.o)
+DEP_DBG := $(SRC:%.c=%_dbg.d)
 
 # Unit test files
 TESTS = test_server.c
@@ -39,22 +49,25 @@ LIBS = inih
 
 # Check if Markdown support was explicitly disabled
 WITHOUT_CMARK ?= 0
-EXTRADEF =
+EXTRAFLAGS =
 ifeq ($(WITHOUT_CMARK), 0)
 	LIBS += libcmark
 else
-	EXTRADEF = -DWITHOUT_CMARK
+	EXTRAFLAGS = -DWITHOUT_CMARK
 endif
 
 # Common, release, debug and test build C compiler flags
-CFLAGS    := $(shell pkg-config --cflags --libs $(LIBS)) -Wall -Wextra -pedantic $(EXTRADEF)
+CFLAGS    := $(shell pkg-config --cflags --libs $(LIBS)) -Wall -Wextra -pedantic $(EXTRAFLAGS)
 RELFLAGS  := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
 DBGFLAGS  := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
 TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) -Og -DDEBUG="$(HASH)-$(BRANCH)"
 # -Wconversion
 
-# Targets that do not produce an eponyomus file
-.PHONY: all release debug unit-tests clean help
+# Cppcheck's flags. Note that 'style' includes 'warning', 'performance' and 'portability'.
+CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
+
+# Targets that do not produce an eponymous file
+.PHONY: all release debug unit-tests analyse-cppcheck analyse-cppcheck-html clean help
 
 # all:     debug
 all:     release
@@ -87,12 +100,25 @@ $(BIN_TEST): $(SRC_TEST)
 unit-tests: $(BIN_TEST)
 	for utest in $(BIN_TEST); do ./$$utest; done
 
+# Run Cppcheck code analysis (first recipe prints to stdout, second generates a HTML report)
+analyse-cppcheck:
+	mkdir -p $(CPPCHECK_DIR)
+	cppcheck $(CPPCHECK_FLAGS) $(SRCDIR)
+
+analyse-cppcheck-html: $(CPPCHECK_DIR)/index.html
+$(CPPCHECK_DIR)/index.html: $(SRC)
+	mkdir -p $(CPPCHECK_DIR)
+	cppcheck $(CPPCHECK_FLAGS) --xml $(SRCDIR) 2>$(CPPCHECK_XML)
+	cppcheck-htmlreport --file=$(CPPCHECK_XML) --report-dir=$(CPPCHECK_DIR)
+
 # Automatic dependency tracking (-MMD -MP). If a header file is
 # changed, only the files including it will be recompiled.
 -include $(DEP_REL) $(DEP_DBG)
 
 clean:
-	$(RM) $(OBJ_REL) $(DEP_REL) $(OBJ_DBG) $(DEP_DBG) $(BIN_REL) $(BIN_DBG) $(BIN_TEST)
+	$(RM) $(OBJ_REL) $(DEP_REL) $(BIN_REL)
+	$(RM) $(OBJ_DBG) $(DEP_DBG) $(BIN_DBG) $(BIN_TEST)
+	$(RM) -r $(CPPCHECK_DIR)
 
 help:
-	head -n 10 $(firstword $(MAKEFILE_LIST))
+	head -n 15 $(firstword $(MAKEFILE_LIST))
