@@ -429,14 +429,18 @@ int main(int argc, char **argv) {
 	utstring_new(copris_text);
 
 	do {
-		if (is_stdin)
+		if (is_stdin) {
 			copris_handle_stdin(copris_text, &attrib);
-		else
-			error = copris_handle_socket(&parentfd, &attrib);
+		} else {
+			error = copris_handle_socket(copris_text, &parentfd, &attrib);
+			if (error)
+				break;
+		}
 
+		fputs(utstring_body(copris_text), stdout);
 	// Follow with text processing
 
-	} while (attrib.daemon && !error);
+	} while (attrib.daemon);
 
 	utstring_free(copris_text);
 

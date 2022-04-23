@@ -8,6 +8,9 @@
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
  */
 
+#define utstring_cut(s,n) (s)->d[n]='\0'; \
+                          (s)->i=n
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -31,7 +34,10 @@
 const struct Stats STATS_INIT = {
 	0, 0, false, 0
 };
-static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *attrib);
+static bool read_from_socket(UT_string *copris_text, int childfd,
+                             struct Stats *stats, struct Attribs *attrib);
+static void apply_byte_limit(UT_string *copris_text, int childfd,
+                             struct Stats *stats, struct Attribs *attrib);
 static bool read_from_stdin(UT_string *copris_text, struct Stats *stats);
 
 int copris_socket_listen(int *parentfd, unsigned int portno) {
@@ -93,7 +99,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	return 0;
 }
 
-int copris_handle_socket(int *parentfd, struct Attribs *attrib) {
+bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib) {
 	int fderror;                    // Return value of a socket operation
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
@@ -102,7 +108,7 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib) {
 	// Wait for a connection request, accept it and pass it on as a child socket
 	int childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
 	if (raise_perror(childfd, "accept", "Failed to accept the connection."))
-		return 1;
+		return true;
 
 	if (LOG_DEBUG)
 		LOG_STRING("Connection to socket accepted.");
@@ -111,7 +117,7 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib) {
 	if (!attrib->daemon) {
 		fderror = close(*parentfd);
 		if (raise_perror(fderror, "close", "Failed to close the parent connection."))
-			return 1;
+			return true;
 	}
 
 	// Get host info (IP, hostname) of the client (TODO gai_strerror)
@@ -142,14 +148,14 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib) {
 
 	// Read text from socket and process it
 	struct Stats stats = STATS_INIT;
-	int read_error = read_from_socket(childfd, &stats, attrib);
+	bool read_error = read_from_socket(copris_text, childfd, &stats, attrib);
 	if (read_error)
-		return read_error;
+		return true;
 
 	// Close the current connection
 	fderror = close(childfd);
 	if (raise_perror(fderror, "close", "Failed to close the child connection."))
-		return 1;
+		return true;
 
 	// Print a End-Of-Stream marker if output isn't a file
 	if (LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
@@ -175,88 +181,68 @@ int copris_handle_socket(int *parentfd, struct Attribs *attrib) {
 		printf("Connection from %s (%s) closed.\n", host_info, host_address);
 	}
 
-	return 0;
+	return false;
 }
 
-static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *attrib) {
-	int fderror;            // Return value of a socket operation
-	char buf[BUFSIZE + 3];  // Inbound message buffer
+static bool read_from_socket(UT_string *copris_text, int childfd,
+                             struct Stats *stats, struct Attribs *attrib) {
+	char buffer[BUFSIZE];  // Inbound message buffer
+	int buffer_length;     // Return value of a socket operation - number of
+	                       // read bytes if successful
 
-	// Read the data sent by the client into the buffer
-	// A terminating null byte is _not_ stored at the end!
-	while ((fderror = read(childfd, buf, BUFSIZE - 1)) > 0) {
-		buf[fderror] = '\0';
+	// read() returns number of read bytes, or -1 on error (and sets errno), and puts
+	// _no_ termination at the end of the buffer.
+	while ((buffer_length = read(childfd, buffer, BUFSIZE)) > 0) {
+		//buffer[buffer_length] = '\0';
+
+		// Note that the ending null byte is omitted from the count. This isn't
+		// a problem, since utstring_bincpy() terminates its internal string
+		// after appending to it.
+		utstring_bincpy(copris_text, buffer, buffer_length);
+
 		stats->chunks++;
-
-		// Check if additional bytes need to be read (to complete a multibyte character)
-		size_t needed_bytes = utf8_calculate_needed_bytes(buf, fderror);
-		size_t additional   = 0;
-
-		if (needed_bytes > 0) {
-			char buf2[4]; // Maximum of 3 remaining bytes + ending null
-			assert(needed_bytes < 4);
-
-			additional = read(childfd, buf2, needed_bytes);
-			buf2[needed_bytes] = '\0';
-			stats->chunks++;
-
-			// If a read error occures
-			if (raise_perror(additional, "read", "Error reading from socket."))
-				return 1;
-
-			// Concatenate both buffers to a maximum of BUFSIZE + 2 bytes (leaving space
-			// for null termination)
-			assert(strlen(buf) + strlen(buf2) < BUFSIZE + 3);
-			strcat(buf, buf2);
-		}
-
-		stats->sum += fderror + additional;
+		stats->sum += buffer_length;
 
 		// Check if length of received text went over the limit (if limit is active)
 		if (attrib->limitnum && stats->sum > attrib->limitnum) {
-			const char limit_message[] = "Send size limit exceeded, terminating connection.\n";
-			int tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
-			raise_perror(tmperr, "write", "Error sending termination text to socket.");
-			stats->size_limit_active = true;
-		}
-
-		// Terminate before processing excessive data - discard whole chunk
-		if (stats->size_limit_active && !(attrib->copris_flags & MUST_CUTOFF)) {
-			stats->discarded = fderror + additional;
-			if (log_error())
-				printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
-				       "data and terminating connection.\n", stats->sum, attrib->limitnum);
-
+			apply_byte_limit(copris_text, childfd, stats, attrib);
 			break;
 		}
+	}
 
-		// Terminate after processing excessive data - cut off buffer at limit
-		if (stats->size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
-			if (stats->sum == fderror + additional) {
-				// First buffer read already bigger than limit
-				buf[attrib->limitnum] = '\0';
-			} else {
-				buf[attrib->limitnum - (stats->sum - fderror - additional)] = '\0';
-			}
-		}
+	if (raise_perror(buffer_length, "read", "Error reading from socket."))
+		return true;
 
-// 		copris_process(buf, fderror + additional, attrib, trfile); TODO
-		copris_process(buf, fderror + additional, attrib);
+	return false;
+}
 
-		if (stats->size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
-			stats->discarded = stats->sum - attrib->limitnum;
-			if (LOG_ERROR)
-				printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off and "
-				       "terminating connection.\n", stats->sum, attrib->limitnum);
+static void apply_byte_limit(UT_string *copris_text, int childfd,
+                             struct Stats *stats, struct Attribs *attrib) {
+	const char limit_message[] = "You have sent too much data. Terminating connection.\n";
 
-			break;
-		}
-	} /* end of socket reading loop */
+	int werror = write(childfd, limit_message, (sizeof limit_message) - 1);
+	raise_perror(werror, "write", "Error sending termination text to socket.");
 
-	if (raise_perror(fderror, "read", "Error reading from socket."))
-		return 1;
+	stats->size_limit_active = true;
 
-	return 0;
+	// Terminate before processing excessive text - discard whole chunk
+	if (!(attrib->copris_flags & MUST_CUTOFF)) {
+		stats->discarded = stats->sum;
+		utstring_cut(copris_text, stats->discarded);
+
+		if (LOG_ERROR)
+			printf("\nClient exceeded send size limit (%zu B/%zu B), discarding remaining "
+			       "text and terminating connection.\n", stats->sum, attrib->limitnum);
+
+	// Terminate after processing excessive text - cut off buffer at limit
+	} else {
+		stats->discarded = stats->sum - attrib->limitnum;
+		utstring_cut(copris_text, attrib->limitnum);
+
+		if (LOG_ERROR)
+			printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off text and "
+			       "terminating connection.\n", stats->sum, attrib->limitnum);
+	}
 }
 
 bool copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
@@ -265,7 +251,7 @@ bool copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
 
 	// Check if Copris is invoked standalone, outside of a pipe. That is usually
 	// unwanted, since the user has specified reading from stdin, and the only
-	// remaining way to enter data is to type it in interactively.
+	// remaining way to enter text is to type it in interactively.
 	errno = 0;
 	if (LOG_ERROR && isatty(STDIN_FILENO)) {
 		raise_errno_perror(errno, "isatty", "Error determining input terminal.");
@@ -284,10 +270,10 @@ bool copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
 
 	// Read text from standard input, print a note if only EOF has been received
 	struct Stats stats = STATS_INIT;
-	bool no_data_read = read_from_stdin(copris_text, &stats);
+	bool no_text_read = read_from_stdin(copris_text, &stats);
 
-	if (no_data_read)
-		printf("; NOTE: no data has been read.\n");
+	if (no_text_read)
+		printf("; NOTE: no text has been read.\n");
 
 	// Print a End-Of-Stream marker if output isn't a file
 	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
@@ -296,8 +282,8 @@ bool copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
 	if(LOG_ERROR)
 		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", stats.sum, stats.chunks);
 
-	// Return true if no data has been read
-	return no_data_read;
+	// Return true if no text has been read
+	return no_text_read;
 }
 
 static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
@@ -305,20 +291,20 @@ static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
 	size_t buffer_length = 0;
 
 	// fgets() terminates on error or at EOF (triggered with Ctrl-D),
-	// reads up to BUFSIZE bytes of data and terminates it.
+	// reads up to BUFSIZE bytes of text and terminates it.
 	while (fgets(buffer, BUFSIZE, stdin) != NULL) {
 		buffer_length = strlen(buffer);
 
-		// Note that strlen() doesn't count the ending null byte. That is
-		// fine in this case, since utstring_bincpy() does the same, after
-		// appending data to its internal string.
+		// Note that strlen() doesn't count the ending null byte. This isn't
+		// a problem, since utstring_bincpy() terminates its internal string
+		// after appending to it.
 		utstring_bincpy(copris_text, buffer, buffer_length);
 
 		stats->chunks++;
 		stats->sum += buffer_length; // TODO - possible overflow?
 	}
 
-	// Return true if no data has been read
+	// Return true if no text has been read
 	return (buffer_length == 0);
 }
 
