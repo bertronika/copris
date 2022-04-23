@@ -423,18 +423,18 @@ int main(int argc, char **argv) {
 
 	do {
 		if (is_stdin)
-			error = copris_handle_stdin(&attrib, &trfile);
+			error = copris_handle_stdin(&attrib);
 		else
-			error = copris_handle_socket(&parentfd, &attrib, &trfile);
+			error = copris_handle_socket(&parentfd, &attrib);
 	} while (attrib.daemon && !error);
 
 	exit_on_error:
-	if (attrib.copris_flags & HAS_TRFILE) {
-		if (LOG_DEBUG) {
-			LOG_STRING("Unloading translation file.");
-		}
-		copris_unload_trfile(&trfile);
-	}
+// 	if (attrib.copris_flags & HAS_TRFILE) {
+// 		if (LOG_DEBUG) {
+// 			LOG_STRING("Unloading translation file.");
+// 		}
+// 		copris_unload_trfile(&trfile);
+// 	}
 
 	if (error)
 		return EXIT_FAILURE;

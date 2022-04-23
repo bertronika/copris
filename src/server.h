@@ -12,8 +12,8 @@ struct Stats {
 };
 
 int copris_socket_listen(int *parentfd, unsigned int portno);
-int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **trfile);
-int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile);
-int copris_process(char *stream, int stream_length, struct Attribs *attrib, struct Trfile **trfile);
+int copris_handle_socket(int *parentfd, struct Attribs *attrib);
+int copris_handle_stdin(struct Attribs *attrib);
+int copris_process(char *stream, int stream_length, struct Attribs *attrib);
 
 #endif /* SERVER_H */

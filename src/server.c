@@ -93,7 +93,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	return 0;
 }
 
-int copris_handle_socket(int *parentfd, struct Attribs *attrib, struct Trfile **trfile) {
+int copris_handle_socket(int *parentfd, struct Attribs *attrib) {
 	int fderror;                    // Return value of a socket operation
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
@@ -241,7 +241,7 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 		}
 
 // 		copris_process(buf, fderror + additional, attrib, trfile); TODO
-		copris_process(buf, fderror + additional, attrib, NULL);
+		copris_process(buf, fderror + additional, attrib);
 
 		if (stats->size_limit_active && attrib->copris_flags & MUST_CUTOFF) {
 			stats->discarded = stats->sum - attrib->limitnum;
@@ -259,7 +259,7 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 	return 0;
 }
 
-int copris_handle_stdin(struct Attribs *attrib, struct Trfile **trfile) {
+int copris_handle_stdin(struct Attribs *attrib) {
 	if (LOG_INFO) {
 		LOG_STRING("Trying to read from stdin...");
 	}
@@ -331,14 +331,14 @@ static int read_from_stdin(struct Stats *stats, struct Attribs *attrib) {
 		}
 
 // 		copris_process(buf, buffer_length + needed_bytes + 1, attrib, trfile); TODO
-		copris_process(buf, buffer_length + needed_bytes + 1, attrib, NULL);
+		copris_process(buf, buffer_length + needed_bytes + 1, attrib);
 		stats->sum += buffer_length + needed_bytes; // TODO when it overflows...
 	}
 
 	return 0;
 }
 
-int copris_process(char *stream, int stream_length, struct Attribs *attrib, struct Trfile **trfile) {
+int copris_process(char *stream, int stream_length, struct Attribs *attrib) {
 // 	if(attrib->copris_flags & HAS_TRFILE) {
 		// copris_translate() makes a copy of final_stream and returns its
 		// newly allocated position - which should be free'd.
@@ -351,7 +351,6 @@ int copris_process(char *stream, int stream_length, struct Attribs *attrib, stru
 
 	(void)stream_length;
 	(void)attrib;
-	(void)trfile;
 
 	// Destination can be either a file/printer or stdout
 	if(attrib->copris_flags & HAS_DESTINATION) {
