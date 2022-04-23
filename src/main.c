@@ -447,17 +447,24 @@ int main(int argc, char **argv) {
 		// Stage 4: Handle Markdown in text with a printer set file
 
 		// Stage 5: Write text to the output destination
+		char *processed_text = utstring_body(copris_text);
+
 		if (attrib.copris_flags & HAS_DESTINATION) {
-			copris_write_file(attrib.destination, utstring_body(copris_text));
+			copris_write_file(attrib.destination, processed_text);
 		} else {
 			// Print Beginning-/End-Of-Stream markers if output isn't a file
 			if (LOG_ERROR)
 				puts("; BOS");
 
-			fputs(utstring_body(copris_text), stdout);
+			fputs(processed_text, stdout);
 
-			if (LOG_ERROR)
+			if (LOG_ERROR) {
+				// Print a new line if one's missing in the final text
+				if(processed_text[utstring_len(copris_text) - 1] != '\n')
+					puts("");
+
 				puts("; EOS");
+			}
 		}
 
 	} while (attrib.daemon);
