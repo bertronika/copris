@@ -37,6 +37,7 @@
 #include "server.h"
 #include "translate.h"
 #include "printerset.h"
+#include "writer.h"
 
 // Expand parameter to a literal string
 #define _STRINGIFY(str) #str
@@ -437,8 +438,18 @@ int main(int argc, char **argv) {
 				break;
 		}
 
-		fputs(utstring_body(copris_text), stdout);
-	// Follow with text processing
+		if (attrib.copris_flags & HAS_DESTINATION) {
+			copris_write_file(attrib.destination, utstring_body(copris_text));
+		} else {
+			// Print Beginning-/End-Of-Stream markers if output isn't a file
+			if (LOG_ERROR)
+				puts("; BOS");
+
+			fputs(utstring_body(copris_text), stdout);
+
+			if (LOG_ERROR)
+				puts("; EOS");
+		}
 
 	} while (attrib.daemon);
 

@@ -143,13 +143,8 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 	if (LOG_INFO)
 		LOG_LOCATION();
 
-	if (LOG_ERROR) {
+	if (LOG_ERROR)
 		printf("Inbound connection from %s (%s).\n", host_info, host_address);
-
-		// Print a Beginning-Of-Stream marker if output isn't a file
-		if (!(attrib->copris_flags & HAS_DESTINATION))
-			printf("; BOS\n");
-	}
 
 	// Read text from socket and process it
 	struct Stats stats = STATS_INIT;
@@ -161,10 +156,6 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 	fderror = close(childfd);
 	if (raise_perror(fderror, "close", "Failed to close the child connection."))
 		return true;
-
-	// Print a End-Of-Stream marker if output isn't a file
-	if (LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
-		printf("; EOS\n");
 
 	if (LOG_INFO)
 		LOG_LOCATION();
@@ -269,20 +260,12 @@ bool copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
 		       "stdin). To stop reading, press Ctrl+D.\n");
 	}
 
-	// Print a Beginning-Of-Stream marker if output isn't a file
-	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
-		printf("; BOS\n");
-
 	// Read text from standard input, print a note if only EOF has been received
 	struct Stats stats = STATS_INIT;
 	bool no_text_read = read_from_stdin(copris_text, &stats);
 
 	if (no_text_read)
-		printf("; NOTE: no text has been read.\n");
-
-	// Print a End-Of-Stream marker if output isn't a file
-	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
-		printf("; EOS\n");
+		LOG_STRING("Note: no text has been read.");
 
 	if(LOG_ERROR)
 		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", stats.sum, stats.chunks);
