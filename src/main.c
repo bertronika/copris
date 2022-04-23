@@ -28,6 +28,7 @@
 #include <getopt.h>
 #include <errno.h>
 #include <limits.h>
+#include <utstring.h> /* Dynamic strings */
 
 #include "debug.h"
 #include "config.h"
@@ -310,6 +311,9 @@ int main(int argc, char **argv) {
 	// Printer set hash structure
 	struct Prset *prset;
 
+	// Input text, passed between functions
+	UT_string *copris_text;
+
 	attrib.portno       = 0;  // 0 -> input from stdin, >0 -> actual port number
 	attrib.prset        = -1;
 	attrib.daemon       = 0;
@@ -421,12 +425,18 @@ int main(int argc, char **argv) {
 			goto exit_on_error;
 	}
 
+	// Allocate initial space input text
+	utstring_new(copris_text);
+
 	do {
-		if (is_stdin)
-			error = copris_handle_stdin(&attrib);
-		else
+		if (is_stdin) {
+			error = copris_handle_stdin(copris_text, &attrib);
+		} else {
 			error = copris_handle_socket(&parentfd, &attrib);
+		}
 	} while (attrib.daemon && !error);
+
+	utstring_free(copris_text);
 
 	exit_on_error:
 // 	if (attrib.copris_flags & HAS_TRFILE) {

@@ -32,7 +32,7 @@ const struct Stats STATS_INIT = {
 	0, 0, false, 0
 };
 static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *attrib);
-static int read_from_stdin(struct Stats *stats, struct Attribs *attrib);
+static bool read_from_stdin(UT_string *copris_text, struct Stats *stats);
 
 int copris_socket_listen(int *parentfd, unsigned int portno) {
 	int fderror;  // Return value of a socket operation
@@ -259,33 +259,34 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 	return 0;
 }
 
-int copris_handle_stdin(struct Attribs *attrib) {
-	if (LOG_INFO) {
+int copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
+	if (LOG_INFO)
 		LOG_STRING("Trying to read from stdin...");
-	}
 
+	// Check if Copris is invoked standalone, outside of a pipe. That is usually
+	// unwanted, since the user has specified reading from stdin, and the only
+	// remaining way to enter data is to type it in interactively.
 	errno = 0;
-	if (log_error() && isatty(STDIN_FILENO)) {
+	if (LOG_ERROR && isatty(STDIN_FILENO)) {
 		raise_errno_perror(errno, "isatty", "Error determining input terminal.");
-		if (LOG_INFO) {
+		if (LOG_INFO)
 			LOG_LOCATION();
-		} else {
+		else
 			printf("Note: ");
-		}
 
 		printf("You are in text input mode (reading from "
-		       "stdin). To stop reading, press Ctrl+D\n");
+		       "stdin). To stop reading, press Ctrl+D.\n");
 	}
 
 	// Print a Beginning-Of-Stream marker if output isn't a file
 	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
-	// Read text from standard input and process it
+	// Read text from standard input, note if only EOF has been received
 	struct Stats stats = STATS_INIT;
-	int read_error = read_from_stdin(&stats, attrib);
-	if (read_error)
-		return read_error;
+	bool no_data_read = read_from_stdin(copris_text, &stats);
+	if (no_data_read)
+		printf("; NOTE: no data has been read.\n");
 
 	// Print a End-Of-Stream marker if output isn't a file
 	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
@@ -297,45 +298,26 @@ int copris_handle_stdin(struct Attribs *attrib) {
 	return 0;
 }
 
-static int read_from_stdin(struct Stats *stats, struct Attribs *attrib) {
-	char buf[BUFSIZE + 3]; // Inbound message buffer
+static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
+	char buffer[BUFSIZE];
+	size_t buffer_length = 0;
 
-	/*
-	 * Read data from the standard input into the buffer. Exit on error or at EOF.
-	 * fgets() stores a terminating null byte at the end of the buffer.
-	 * Space for 3 additional bytes is reserved in the buffer for a multibyte character,
-	 * which, when encoded in UTF-8, needs at most 4 bytes. If we detect such character
-	 * at the buffer's end, we request an additional read to make the character complete.
-	*/
-	while (fgets(buf, BUFSIZE, stdin) != NULL) {
+	// fgets() terminates on error or at EOF (triggered with Ctrl-D),
+	// reads up to BUFSIZE bytes of data and terminates it.
+	while (fgets(buffer, BUFSIZE, stdin) != NULL) {
+		buffer_length = strlen(buffer);
+
+		// Note that strlen() doesn't count the ending null byte. That is
+		// fine in this case, since utstring_bincpy() does the same, after
+		// appending data to its internal string.
+		utstring_bincpy(copris_text, buffer, buffer_length);
+
 		stats->chunks++;
-
-		size_t buffer_length = strlen(buf);
-		size_t needed_bytes  = utf8_calculate_needed_bytes(buf, buffer_length);
-
-		if (needed_bytes > 0) {
-			char buf2[4]; // Maximum of 3 remaining bytes + ending null
-			assert(needed_bytes < 4);
-
-			char *error = fgets(buf2, needed_bytes + 1, stdin);
-			stats->chunks++;
-
-			// If a read error occures
-			if (error == NULL)
-				return 1;
-
-			// Concatenate both buffers to a maximum of BUFSIZE + 2 bytes (leaving space
-			// for null termination)
-			assert(strlen(buf) + strlen(buf2) < BUFSIZE + 3);
-			strcat(buf, buf2);
-		}
-
-// 		copris_process(buf, buffer_length + needed_bytes + 1, attrib, trfile); TODO
-		copris_process(buf, buffer_length + needed_bytes + 1, attrib);
-		stats->sum += buffer_length + needed_bytes; // TODO when it overflows...
+		stats->sum += buffer_length; // TODO - possible overflow?
 	}
 
-	return 0;
+	// Return true if no data has been read
+	return (buffer_length == 0);
 }
 
 int copris_process(char *stream, int stream_length, struct Attribs *attrib) {
