@@ -429,7 +429,9 @@ int main(int argc, char **argv) {
 	// Allocate initial space input text
 	utstring_new(copris_text);
 
+	// Main program loop
 	do {
+		// Stage 1: Read input text
 		if (is_stdin) {
 			copris_handle_stdin(copris_text, &attrib);
 		} else {
@@ -438,6 +440,13 @@ int main(int argc, char **argv) {
 				break;
 		}
 
+		// Stage 2: Translate selected characters in text with a translation file
+
+		// Stage 3: Normalise text
+
+		// Stage 4: Handle Markdown in text with a printer set file
+
+		// Stage 5: Write text to the output destination
 		if (attrib.copris_flags & HAS_DESTINATION) {
 			copris_write_file(attrib.destination, utstring_body(copris_text));
 		} else {
