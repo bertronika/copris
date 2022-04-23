@@ -8,8 +8,12 @@
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
  */
 
-#define utstring_cut(s,n) (s)->d[n]='\0'; \
-                          (s)->i=n
+// An addition to utstring.h that terminates the string at given index
+#define utstring_cut(s,n)  \
+	do {                   \
+		(s)->i=(n);        \
+		(s)->d[(n)]='\0';  \
+	} while (0)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +25,7 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <assert.h>
+#include <utstring.h>
 
 #include "Copris.h"
 #include "config.h"
@@ -218,7 +223,7 @@ static bool read_from_socket(UT_string *copris_text, int childfd,
 
 static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib) {
-	const char limit_message[] = "You have sent too much data. Terminating connection.\n";
+	const char limit_message[] = "You have sent too much text. Terminating connection.\n";
 
 	int werror = write(childfd, limit_message, (sizeof limit_message) - 1);
 	raise_perror(werror, "write", "Error sending termination text to socket.");
@@ -228,7 +233,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 	// Terminate before processing excessive text - discard whole chunk
 	if (!(attrib->copris_flags & MUST_CUTOFF)) {
 		stats->discarded = stats->sum;
-		utstring_cut(copris_text, stats->discarded);
+		utstring_clear(copris_text);
 
 		if (LOG_ERROR)
 			printf("\nClient exceeded send size limit (%zu B/%zu B), discarding remaining "
