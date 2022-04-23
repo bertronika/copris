@@ -1,9 +1,9 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <stddef.h>  /* size_t */
-#include <stdbool.h> /* bool */
-#include <utstring.h>
+#include <stddef.h>   /* size_t    */
+#include <stdbool.h>  /* bool      */
+#include <utstring.h> /* UT_string */
 
 struct Stats {
 	int chunks;             // Number of read chunks
@@ -14,7 +14,7 @@ struct Stats {
 
 int copris_socket_listen(int *parentfd, unsigned int portno);
 int copris_handle_socket(int *parentfd, struct Attribs *attrib);
-int copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib);
+bool copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib);
 int copris_process(char *stream, int stream_length, struct Attribs *attrib);
 
 #endif /* SERVER_H */

@@ -429,11 +429,13 @@ int main(int argc, char **argv) {
 	utstring_new(copris_text);
 
 	do {
-		if (is_stdin) {
-			error = copris_handle_stdin(copris_text, &attrib);
-		} else {
+		if (is_stdin)
+			copris_handle_stdin(copris_text, &attrib);
+		else
 			error = copris_handle_socket(&parentfd, &attrib);
-		}
+
+	// Follow with text processing
+
 	} while (attrib.daemon && !error);
 
 	utstring_free(copris_text);

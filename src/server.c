@@ -259,7 +259,7 @@ static int read_from_socket(int childfd, struct Stats *stats, struct Attribs *at
 	return 0;
 }
 
-int copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
+bool copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
 	if (LOG_INFO)
 		LOG_STRING("Trying to read from stdin...");
 
@@ -282,9 +282,10 @@ int copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
 	if(LOG_ERROR && !(attrib->copris_flags & HAS_DESTINATION))
 		printf("; BOS\n");
 
-	// Read text from standard input, note if only EOF has been received
+	// Read text from standard input, print a note if only EOF has been received
 	struct Stats stats = STATS_INIT;
 	bool no_data_read = read_from_stdin(copris_text, &stats);
+
 	if (no_data_read)
 		printf("; NOTE: no data has been read.\n");
 
@@ -295,7 +296,8 @@ int copris_handle_stdin(UT_string *copris_text, struct Attribs *attrib) {
 	if(LOG_ERROR)
 		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", stats.sum, stats.chunks);
 
-	return 0;
+	// Return true if no data has been read
+	return no_data_read;
 }
 
 static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
