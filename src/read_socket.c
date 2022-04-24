@@ -237,35 +237,6 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 	}
 }
 
-
-int copris_process(char *stream, int stream_length, struct Attribs *attrib) {
-// 	if(attrib->copris_flags & HAS_TRFILE) {
-		// copris_translate() makes a copy of final_stream and returns its
-		// newly allocated position - which should be free'd.
-// 		final_stream = copris_translate(final_stream, stream_length, trfile);
-// 	}
-
-// 	if(attrib->copris_flags & HAS_PRSET) {
-// 		copris_printerset();
-// 	}
-
-	(void)stream_length;
-	(void)attrib;
-
-	// Destination can be either a file/printer or stdout
-	if(attrib->copris_flags & HAS_DESTINATION) {
-		copris_write_file(attrib->destination, stream);
-	} else {
-// 		fputs(stream, stdout);
-// 		fflush(stdout);
-		printf("OUT: \"%s\"\n", stream);
-	}
-
-// 	if(attrib->copris_flags & (HAS_TRFILE/*|HAS_PRSET*/))
-// 		free(final_stream);
-
-	return 0;
-}
 int copris_process1(char *stream, int stream_length, struct Attribs *attrib, struct Trfile **trfile) {
 	char *final_stream = stream;
 

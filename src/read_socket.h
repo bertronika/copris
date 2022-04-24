@@ -7,6 +7,5 @@
 
 int copris_socket_listen(int *parentfd, unsigned int portno);
 bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib);
-int copris_process(char *stream, int stream_length, struct Attribs *attrib);
 
 #endif /* SERVER_H */
