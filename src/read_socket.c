@@ -128,9 +128,10 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 
 	// Convert client's address from network byte order to a dotted-decimal form
 	char *host_address = inet_ntoa(clientaddr.sin_addr);
+	char addr_unknown[] = "<address unknown>";
 	if (host_address == NULL) {
 		fprintf(stderr, "inet_ntoa: Failed converting host's address to dotted decimal.\n");
-		host_address = "<addr unknown>";
+		host_address = addr_unknown;
 	}
 
 	if (LOG_INFO)
