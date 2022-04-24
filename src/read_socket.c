@@ -41,7 +41,7 @@ static bool read_from_socket(UT_string *copris_text, int childfd,
 static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
 
-int copris_socket_listen(int *parentfd, unsigned int portno) {
+bool copris_socket_listen(int *parentfd, unsigned int portno) {
 	int fderror;  // Return value of a socket operation
 
 	/*
@@ -52,7 +52,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	 */
 	fderror = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
 	if (raise_perror(fderror, "socket", "Failed to create socket endpoint."))
-		return 1;
+		return true;
 
 	if (LOG_DEBUG)
 		LOG_STRING("Socket endpoint created.");
@@ -78,7 +78,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	fderror = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
 	if (raise_perror(fderror, "bind", "Failed to bind socket to address. "
 	                                  "Non-root users should set it >1023."))
-		return 1;
+		return true;
 
 	if (LOG_DEBUG)
 		LOG_STRING("Socket bound to address.");
@@ -87,7 +87,7 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	// Limit number of connections to the value of BACKLOG.
 	fderror = listen(*parentfd, BACKLOG);
 	if (raise_perror(fderror, "listen", "Failed to make socket passive."))
-		return 1;
+		return true;
 
 	if (LOG_INFO) {
 		LOG_LOCATION();
@@ -97,7 +97,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 		printf("Now we listen...\n");
 	}
 
-	return 0;
+	// No error reported.
+	return false;
 }
 
 bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib) {
@@ -173,6 +174,7 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 		printf("Connection from %s (%s) closed.\n", host_info, host_address);
 	}
 
+	// No error reported.
 	return false;
 }
 
