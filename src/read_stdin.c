@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
-#include <assert.h>
 #include <utstring.h>
 
 #include "Copris.h"
@@ -61,7 +60,7 @@ static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
 	char buffer[BUFSIZE];
 	size_t buffer_length = 0;
 
-	// fgets() terminates on error or at EOF (triggered with Ctrl-D),
+	// fgets() stops on error or at EOF (triggered with Ctrl-D),
 	// reads up to BUFSIZE bytes of text and terminates it.
 	while (fgets(buffer, BUFSIZE, stdin) != NULL) {
 		buffer_length = strlen(buffer);
