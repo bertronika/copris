@@ -229,6 +229,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 	} else {
 		stats->discarded = stats->sum - attrib->limitnum;
 		utstring_cut(copris_text, attrib->limitnum);
+		assert(strlen(utstring_body(copris_text)) == attrib->limitnum);
 
 		if (LOG_ERROR)
 			printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off text and "
