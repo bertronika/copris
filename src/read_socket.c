@@ -31,10 +31,6 @@
 #include "config.h"
 #include "debug.h"
 #include "read_socket.h"
-#include "writer.h"
-#include "translate.h"
-#include "printerset.h"
-#include "utf8.h"
 
 static bool read_from_socket(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
@@ -237,75 +233,4 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 			printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off text and "
 			       "terminating connection.\n", stats->sum, attrib->limitnum);
 	}
-}
-
-int copris_process1(char *stream, int stream_length, struct Attribs *attrib, struct Trfile **trfile) {
-	char *final_stream = stream;
-
-	// To avoid splitting multibyte characters:
-	// If the buffer has been filled to the limit, check codepoint length of the
-	// last 3 characters. If their length exceeds buffer size, stash them into a
-	// hold buffer, replace them with null bytes and return the number of missing
-	// characters, which should be additionally read from the input stream.
-	// After the missing bytes are read, an extra buffer is assembled from the hold
-	// buffer and the new stream, containing missing bytes.
-	static char hold_buffer[UTF8_MAX_LENGTH + 1];
-	static int is_on_hold = 0;
-	char extra_buffer[UTF8_MAX_LENGTH + 1];
-
-	if(is_on_hold) {
-		extra_buffer[0] = '\0';
-
-		// Merge the two buffers
-		strcpy(extra_buffer, hold_buffer);
-		strcat(extra_buffer, stream);
-
-		final_stream = extra_buffer;
-		is_on_hold = 0;
-	}
-
-	// strlen() omits ending null byte
-	if(stream_length + 1 == BUFSIZE) {
-		int hold_i = 0;
-
-		for(int source_i = 4; source_i > 1; source_i--) {
-			// How many bytes are needed for a complete codepoint?
-			int remaining = utf8_codepoint_length(stream[BUFSIZE - source_i]);
-
-			if(remaining == 1)
-				continue;
-
-			// More than the buffer can hold, stash them for a subsequent read
-			if(remaining >= source_i) {
-				hold_buffer[hold_i] = stream[BUFSIZE - source_i];
-				hold_i++;
-
-				stream[BUFSIZE - source_i] = '\0';
-				is_on_hold = remaining;
-			}
-		}
-		hold_buffer[hold_i] = '\0';
-	}
-
-	if(attrib->copris_flags & HAS_TRFILE) {
-		// copris_translate() makes a copy of final_stream and returns its
-		// newly allocated position - which should be free'd.
-		final_stream = copris_translate(final_stream, stream_length, trfile);
-	}
-
-	if(attrib->copris_flags & HAS_PRSET) {
-// 		copris_printerset();
-	}
-
-	// Destination can be either a file/printer or stdout
-	if(attrib->copris_flags & HAS_DESTINATION) {
-		copris_write_file(attrib->destination, final_stream);
-	} else {
-		fputs(final_stream, stdout);
-	}
-
-	if(attrib->copris_flags & (HAS_TRFILE/*|HAS_PRSET*/))
-		free(final_stream);
-
-	return is_on_hold;
 }
