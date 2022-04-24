@@ -46,8 +46,12 @@ bool copris_handle_stdin(UT_string *copris_text) {
 	if (no_text_read)
 		LOG_STRING("Note: no text has been read.");
 
-	if(LOG_ERROR)
-		printf("End of stream, received %zu byte(s) in %u chunk(s).\n", stats.sum, stats.chunks);
+	if (LOG_ERROR) {
+		if (LOG_INFO)
+			LOG_LOCATION();
+
+		printf("Received %zu byte(s) in %u chunk(s) from stdin.\n", stats.sum, stats.chunks);
+	}
 
 	// Return true if no text has been read
 	return no_text_read;
