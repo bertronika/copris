@@ -49,7 +49,7 @@ bool copris_handle_stdin(UT_string *copris_text) {
 		if (LOG_INFO)
 			LOG_LOCATION();
 
-		printf("Received %zu byte(s) in %u chunk(s) from stdin.\n", stats.sum, stats.chunks);
+		printf("Received %zu byte(s) in %d chunk(s) from stdin.\n", stats.sum, stats.chunks);
 	}
 
 	// Return true if no text has been read
