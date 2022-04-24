@@ -34,7 +34,7 @@
 #include "config.h"
 #include "Copris.h"
 
-#include "server.h"
+#include "read_socket.h"
 #include "read_stdin.h"
 #include "translate.h"
 #include "printerset.h"

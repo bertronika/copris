@@ -30,7 +30,7 @@
 #include "Copris.h"
 #include "config.h"
 #include "debug.h"
-#include "server.h"
+#include "read_socket.h"
 #include "writer.h"
 #include "translate.h"
 #include "printerset.h"
