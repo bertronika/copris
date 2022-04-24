@@ -16,6 +16,7 @@
 #include "Copris.h"
 #include "config.h"
 #include "debug.h"
+#include "read_stdin.h"
 
 static bool read_from_stdin(UT_string *copris_text, struct Stats *stats);
 
