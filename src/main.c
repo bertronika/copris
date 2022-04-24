@@ -35,6 +35,7 @@
 #include "Copris.h"
 
 #include "server.h"
+#include "read_stdin.h"
 #include "translate.h"
 #include "printerset.h"
 #include "writer.h"
@@ -433,7 +434,7 @@ int main(int argc, char **argv) {
 	do {
 		// Stage 1: Read input text
 		if (is_stdin) {
-			copris_handle_stdin(copris_text, &attrib);
+			copris_handle_stdin(copris_text);
 		} else {
 			error = copris_handle_socket(copris_text, &parentfd, &attrib);
 			if (error)

@@ -1,8 +1,9 @@
 #ifndef COPRIS_H
 #define COPRIS_H
 
-#include <stddef.h> /* size_t */
-#include <uthash.h> /* uthash library */
+#include <stddef.h>   /* size_t         */
+#include <stdbool.h>  /* bool           */
+#include <uthash.h>   /* UT_hash_handle */
 
 /*
  * Round backlog to a power of 2.
@@ -25,6 +26,17 @@ struct Attribs {
 	char *prsetname;     /* Printer feature set name                       */
 	char *trfile;        /* Translation file location                      */
 	char *destination;   /* Output file (printer)                          */
+};
+
+struct Stats {
+	int chunks;             // Number of read chunks
+	size_t sum;             // Sum of all read (received) bytes
+	bool size_limit_active;
+	size_t discarded;       // Discarded number of bytes, if limit is set
+};
+
+static const struct Stats STATS_INIT = {
+	0, 0, false, 0
 };
 
 struct Trfile {
