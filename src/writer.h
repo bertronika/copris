@@ -1,6 +1,8 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-int copris_write_file(char *dest, char *data);
+#include <stdbool.h> /* bool */
+
+bool copris_write_file(const char *dest, const char *text);
 
 #endif /* WRITER_H */
