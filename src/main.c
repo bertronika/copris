@@ -1,9 +1,7 @@
 /*
- * main.c
- *
  * COPRIS - a converting printer server
- * Copyright (C) 2020-2021 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
- * 
+ * Copyright (C) 2020-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -304,7 +302,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 }
 
 int main(int argc, char **argv) {
-	// The main attributes struct which holds most of the run-time options
+	// Run-time options (program attributes)
 	struct Attribs attrib;
 
 	// Translation file hash structure
@@ -325,7 +323,7 @@ int main(int argc, char **argv) {
 	int is_stdin = 0;     // Determine if text is coming via the standard input
 	int parentfd = 0;     // Parent file descriptor to hold a socket
 
-	// Parsing arguments
+	// Parse command line arguments
 	int error = parse_arguments(argc, argv, &attrib);
 	if (error)
 		return error;
@@ -345,17 +343,19 @@ int main(int argc, char **argv) {
                "Try using the '--help' option.\n");
 	}
 
-	if (attrib.portno == 0)
-		is_stdin = 1;
-
 	if (LOG_INFO) {
 		LOG_LOCATION();
 		printf("Verbosity level set to %d.\n", verbosity);
 	}
 
+	// If no port number was specified by the user, assume input from stdin
+	if (attrib.portno == 0)
+		is_stdin = 1;
+
+	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
 		attrib.daemon = 0;
-		if (LOG_ERROR){
+		if (LOG_ERROR) {
 			if (LOG_INFO)
 				LOG_LOCATION();
 			else
@@ -420,17 +420,17 @@ int main(int argc, char **argv) {
 			printf("stdout.\n");
 	}
 	
-	// Open socket and listen
+	// Open socket and listen if not reading from stdin
 	if (!is_stdin) {
 		error = copris_socket_listen(&parentfd, attrib.portno);
 		if (error)
 			return EXIT_FAILURE;
 	}
 
-	// Allocate initial space input text
+	// Create a string for the input text
 	utstring_new(copris_text);
 
-	// Main program loop
+	// Run the main program loop
 	do {
 		// Stage 1: Read input text
 		if (is_stdin) {
@@ -468,7 +468,7 @@ int main(int argc, char **argv) {
 			}
 		}
 
-	} while (attrib.daemon);
+	} while (attrib.daemon); /* end of main program loop */
 
 // 	if (attrib.copris_flags & HAS_TRFILE) {
 // 		if (LOG_DEBUG) {
