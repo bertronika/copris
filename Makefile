@@ -10,6 +10,7 @@
 
 # For code analysis purposes run:
 #	- unit-tests              build and run unit tests
+#	- analyse                 same as `debug', but compile with GCC's static analyser
 #	- analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
 #	- analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
 
@@ -67,12 +68,14 @@ TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) -Og -DDEBUG="$
 CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
 
 # Targets that do not produce an eponymous file
-.PHONY: all release debug unit-tests analyse-cppcheck analyse-cppcheck-html clean help
+.PHONY: all release debug analyse unit-tests analyse-cppcheck analyse-cppcheck-html clean help
 
 # all:     debug
 all:     release
 release: $(BIN_REL)
 debug:   $(BIN_DBG)
+analyse: DBGFLAGS += -fanalyzer
+analyse: $(BIN_DBG)
 
 # Automatic variables of GNU Make:
 # $@  The file name of the target of the rule.
@@ -121,4 +124,4 @@ clean:
 	$(RM) -r $(CPPCHECK_DIR)
 
 help:
-	head -n 15 $(firstword $(MAKEFILE_LIST))
+	head -n 16 $(firstword $(MAKEFILE_LIST))
