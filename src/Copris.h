@@ -19,7 +19,7 @@
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */
 	int prset;           /* Parsed printer set index number                */
-	int daemon;          /* Run continuously                               */
+	bool daemon;         /* Run continuously                               */
 	size_t limitnum;     /* Limit received number of bytes                 */
 
 	int copris_flags;    /* Flags regarding user-specified arguments:      */

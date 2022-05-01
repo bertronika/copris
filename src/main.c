@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <getopt.h>
@@ -320,9 +321,6 @@ int main(int argc, char **argv) {
 	attrib.limitnum     = 0;
 	attrib.copris_flags = 0x00;
 
-	int is_stdin = 0;     // Determine if text is coming via the standard input
-	int parentfd = 0;     // Parent file descriptor to hold a socket
-
 	// Parse command line arguments
 	int error = parse_arguments(argc, argv, &attrib);
 	if (error)
@@ -349,8 +347,9 @@ int main(int argc, char **argv) {
 	}
 
 	// If no port number was specified by the user, assume input from stdin
+	bool is_stdin = false;
 	if (attrib.portno == 0)
-		is_stdin = 1;
+		is_stdin = true;
 
 	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
@@ -419,8 +418,9 @@ int main(int argc, char **argv) {
 		else
 			printf("stdout.\n");
 	}
-	
+
 	// Open socket and listen if not reading from stdin
+	int parentfd = 0;
 	if (!is_stdin) {
 		error = copris_socket_listen(&parentfd, attrib.portno);
 		if (error)
