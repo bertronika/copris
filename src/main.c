@@ -406,7 +406,7 @@ int main(int argc, char **argv) {
 		printf("Limiting incoming data to %zu bytes.\n", attrib.limitnum);
 	}
 	
-	if (LOG_DEBUG && !is_stdin) {
+	if (!is_stdin && LOG_DEBUG) {
 		LOG_LOCATION();
 		printf("Server is listening to port %u.\n", attrib.portno);
 	}
@@ -479,7 +479,7 @@ int main(int argc, char **argv) {
 
 	utstring_free(copris_text);
 
-	if (LOG_DEBUG && !is_stdin)
+	if (!is_stdin && LOG_DEBUG)
 		LOG_STRING("Not running as a daemon, exiting.");
 
 	return 0;
