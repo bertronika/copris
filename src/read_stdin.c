@@ -62,7 +62,7 @@ static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
 	size_t buffer_length = 0;
 
 	// fgets() stops on error or at EOF (triggered with Ctrl-D),
-	// reads up to BUFSIZE bytes of text and terminates it.
+	// reads up to BUFSIZE - 1 bytes of text and terminates it.
 	while (fgets(buffer, BUFSIZE, stdin) != NULL) {
 		buffer_length = strlen(buffer);
 
