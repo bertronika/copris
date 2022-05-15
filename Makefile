@@ -127,10 +127,10 @@ $(CPPCHECK_DIR)/index.html: $(SRC)
 -include $(DEP_REL) $(DEP_DBG)
 
 clean:
-	$(RM) $(OBJ_REL) $(DEP_REL) $(BIN_REL)
-	$(RM) $(OBJ_DBG) $(DEP_DBG) $(BIN_DBG)
-	$(RM) $(OBJ_TEST) $(BIN_TEST)
-	$(RM) -r $(CPPCHECK_DIR)
+	rm -f $(OBJ_REL) $(DEP_REL) $(BIN_REL)
+	rm -f $(OBJ_DBG) $(DEP_DBG) $(BIN_DBG)
+	rm -f $(OBJ_TEST) $(BIN_TEST)
+	rm -fr $(CPPCHECK_DIR)
 
 help:
 	head -n 16 $(firstword $(MAKEFILE_LIST))
