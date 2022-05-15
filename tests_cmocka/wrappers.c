@@ -32,3 +32,11 @@ char *__wrap_fgets(char *buffer, int buffer_size, FILE *stream)
 
 	return buffer;
 }
+
+int __real_isatty(int fd);
+int __wrap_isatty(int fd) {
+	(void)fd;
+
+	// Pretend we're always running non-interactively
+	return 0;
+}

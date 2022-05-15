@@ -63,7 +63,7 @@ RELFLAGS := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
 DBGFLAGS := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
 
 # Compiler flags for unit tests
-MOCKS      = fgets
+MOCKS      = fgets isatty
 TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) \
              -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)" -DBUFSIZE=10 \
              $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK) )
