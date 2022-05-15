@@ -38,6 +38,8 @@ static void stdin_no_text(void **state)
 
 	assert_true(no_text_read);
 	assert_string_equal(utstring_body(copris_text), "");
+
+	utstring_free(copris_text);
 }
 
 
@@ -61,6 +63,8 @@ static void stdin_two_chunks(void **state)
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
+
+	utstring_free(copris_text);
 }
 
 // Read a string with a 2-byte multibyte character split between two reads
@@ -83,6 +87,8 @@ static void stdin_multibyte_char2(void **state)
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
+
+	utstring_free(copris_text);
 }
 
 // Read a string with a 3-byte multibyte character split between two reads
@@ -105,6 +111,8 @@ static void stdin_multibyte_char3a(void **state)
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
+
+	utstring_free(copris_text);
 }
 
 // Read a string with a 3-byte multibyte character split between two reads
@@ -127,6 +135,8 @@ static void stdin_multibyte_char3b(void **state)
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
+
+	utstring_free(copris_text);
 }
 
 // Read a string with a 4-byte multibyte character split between two reads
@@ -149,6 +159,8 @@ static void stdin_multibyte_char4(void **state)
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
+
+	utstring_free(copris_text);
 }
 
 int main(int argc, char **argv)
