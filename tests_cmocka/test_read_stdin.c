@@ -9,6 +9,7 @@
 
 #include "../src/config.h"
 #include "../src/read_stdin.h"
+#include "wrappers.h"
 
 // Test expect the following buffer size:
 #if BUFSIZE != 10

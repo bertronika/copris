@@ -40,10 +40,9 @@ DEP_REL := $(SRC:%.c=%_rel.d)
 OBJ_DBG := $(SRC:%.c=%_dbg.o)
 DEP_DBG := $(SRC:%.c=%_dbg.d)
 
-# Unit test files
+# Unit test files (executables are prefixed with 'run_')
 TESTS = test_read_stdin.c
-OBJ_TEST := $(TESTDIR)/wrappers_test.o $(SRC:%.c=%_test.o) $(TESTS:%.c=$(TESTDIR)/%_test.o)
-BIN_TEST := $(TESTS:%.c=$(TESTDIR)/run_%)
+BIN_TESTS := $(TESTS:%.c=$(TESTDIR)/run_%)
 
 # Dynamic libraries to be linked
 LIBS = inih
@@ -62,10 +61,11 @@ CFLAGS   := $(shell pkg-config --cflags --libs $(LIBS)) -Wall -Wextra -pedantic 
 RELFLAGS := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
 DBGFLAGS := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
 
+# List of mocked functions for unit tests
+MOCKS = fgets isatty
+
 # Compiler flags for unit tests
-MOCKS      = fgets isatty
-TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) \
-             -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)" -DBUFSIZE=10 \
+TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(DBGFLAGS) -DBUFSIZE=10 \
              $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK) )
 # -Wconversion
 
@@ -102,14 +102,11 @@ $(BIN_DBG): $(OBJ_DBG)
 	$(CC) $(DBGFLAGS) -c -o $@ $<
 
 # Compile and run tests
-$(BIN_TEST): $(filter-out src/main_test.o, $(OBJ_TEST))
+$(BIN_TESTS): $(filter-out $(SRCDIR)/main_dbg.o, $(OBJ_DBG)) $(addprefix $(TESTDIR)/, $(TESTS))
 	$(CC) $(TESTFLAGS) -o $@ $^
 
-%_test.o: %.c
-	$(CC) $(TESTFLAGS) -c -o $@ $<
-
-unit-tests: $(BIN_TEST)
-	for utest in $(BIN_TEST); do ./$$utest; done
+unit-tests: $(BIN_TESTS)
+	for utest in $(BIN_TESTS); do ./$$utest; done
 
 # Run Cppcheck code analysis (first recipe prints to stdout, second generates a HTML report)
 analyse-cppcheck:
@@ -129,7 +126,7 @@ $(CPPCHECK_DIR)/index.html: $(SRC)
 clean:
 	rm -f $(OBJ_REL) $(DEP_REL) $(BIN_REL)
 	rm -f $(OBJ_DBG) $(DEP_DBG) $(BIN_DBG)
-	rm -f $(OBJ_TEST) $(BIN_TEST)
+	rm -f $(BIN_TESTS) $(addsuffix .d, $(BIN_TESTS))
 	rm -fr $(CPPCHECK_DIR)
 
 help:
