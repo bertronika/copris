@@ -461,7 +461,9 @@ int main(int argc, char **argv) {
 
 			if (LOG_ERROR) {
 				// Print a new line if one's missing in the final text
-				if(processed_text[utstring_len(copris_text) - 1] != '\n')
+				size_t text_length = utstring_len(copris_text);
+
+				if(text_length > 0 && processed_text[text_length - 1] != '\n')
 					puts("");
 
 				puts("; EOS");
