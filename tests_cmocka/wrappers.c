@@ -28,7 +28,7 @@ char *__wrap_fgets(char *buffer, int buffer_size, FILE *stream)
 	// Check if the test value fits into the buffer
 	assert_in_range(strlen(read_data), 0, buffer_size - 1);
 
-	memccpy(buffer, read_data, '\0', buffer_size - 1);
+	memccpy(buffer, read_data, '\0', buffer_size);
 
 	return buffer;
 }
