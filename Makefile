@@ -41,8 +41,8 @@ OBJ_DBG := $(SRC:%.c=%_dbg.o)
 DEP_DBG := $(SRC:%.c=%_dbg.d)
 
 # Unit test files
-TESTS = test_server.c
-SRC_TEST := $(TESTS:%=$(TESTDIR)/%)
+TESTS = test_read_stdin.c
+OBJ_TEST := $(TESTDIR)/wrappers_test.o $(SRC:%.c=%_test.o) $(TESTS:%.c=$(TESTDIR)/%_test.o)
 BIN_TEST := $(TESTS:%.c=$(TESTDIR)/%)
 
 # Dynamic libraries to be linked
@@ -57,11 +57,16 @@ else
 	EXTRAFLAGS = -DWITHOUT_CMARK
 endif
 
-# Common, release, debug and test build C compiler flags
-CFLAGS    := $(shell pkg-config --cflags --libs $(LIBS)) -Wall -Wextra -pedantic $(EXTRAFLAGS)
-RELFLAGS  := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
-DBGFLAGS  := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
-TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) -Og -DDEBUG="$(HASH)-$(BRANCH)"
+# Common, release and debug build compiler flags
+CFLAGS   := $(shell pkg-config --cflags --libs $(LIBS)) -Wall -Wextra -pedantic $(EXTRAFLAGS)
+RELFLAGS := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
+DBGFLAGS := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
+
+# Compiler flags for unit tests
+MOCKS      = fgets
+TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(CFLAGS) \
+             -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)" -DBUFSIZE=10 \
+             $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK) )
 # -Wconversion
 
 # Cppcheck's flags. Note that 'style' includes 'warning', 'performance' and 'portability'.
@@ -97,8 +102,11 @@ $(BIN_DBG): $(OBJ_DBG)
 	$(CC) $(DBGFLAGS) -c -o $@ $<
 
 # Compile and run tests
-$(BIN_TEST): $(SRC_TEST)
+$(BIN_TEST): $(filter-out src/main_test.o, $(OBJ_TEST))
 	$(CC) $(TESTFLAGS) -o $@ $^
+
+%_test.o: %.c
+	$(CC) $(TESTFLAGS) -c -o $@ $<
 
 unit-tests: $(BIN_TEST)
 	for utest in $(BIN_TEST); do ./$$utest; done
@@ -120,7 +128,8 @@ $(CPPCHECK_DIR)/index.html: $(SRC)
 
 clean:
 	$(RM) $(OBJ_REL) $(DEP_REL) $(BIN_REL)
-	$(RM) $(OBJ_DBG) $(DEP_DBG) $(BIN_DBG) $(BIN_TEST)
+	$(RM) $(OBJ_DBG) $(DEP_DBG) $(BIN_DBG)
+	$(RM) $(OBJ_TEST) $(BIN_TEST)
 	$(RM) -r $(CPPCHECK_DIR)
 
 help:
