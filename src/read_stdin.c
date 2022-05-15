@@ -43,8 +43,14 @@ bool copris_handle_stdin(UT_string *copris_text) {
 	struct Stats stats = STATS_INIT;
 	bool no_text_read = read_from_stdin(copris_text, &stats);
 
-	if (no_text_read && LOG_ERROR)
-		LOG_STRING("Note: no text has been read.");
+	if (no_text_read && LOG_ERROR) {
+		if (LOG_INFO)
+			LOG_LOCATION();
+		else
+			printf("Note: ");
+
+		printf("No text has been read!\n");
+	}
 
 	if (LOG_ERROR) {
 		if (LOG_INFO)
