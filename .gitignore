@@ -1,8 +1,5 @@
-# Object files (compiler)
-*.o
-
-# Dependency files (compiler)
-*.d
+# Object and dependency files
+*.[od]
 
 # Release and debug executables
 copris
@@ -11,7 +8,5 @@ copris_dbg
 # Cppcheck's report directory
 cppcheck_report/
 
-# Ignore test executables, permit source 
-# files with an extension
-tests_cmocka/*
-!tests_cmocka/*.*
+# Ignore test executables
+tests_cmocka/run_*

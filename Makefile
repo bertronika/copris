@@ -43,7 +43,7 @@ DEP_DBG := $(SRC:%.c=%_dbg.d)
 # Unit test files
 TESTS = test_read_stdin.c
 OBJ_TEST := $(TESTDIR)/wrappers_test.o $(SRC:%.c=%_test.o) $(TESTS:%.c=$(TESTDIR)/%_test.o)
-BIN_TEST := $(TESTS:%.c=$(TESTDIR)/%)
+BIN_TEST := $(TESTS:%.c=$(TESTDIR)/run_%)
 
 # Dynamic libraries to be linked
 LIBS = inih
