@@ -17,6 +17,12 @@
 
 int verbosity = 0;
 
+static void expected_stats(size_t sizeof_bytes, int chunks)
+{
+	if (verbosity)
+		printf("Expected %zu byte(s) in %d chunk(s) from stdin\n", sizeof_bytes - 1, chunks);
+}
+
 // Read no text from stdin
 static void stdin_no_text(void **state)
 {
@@ -28,6 +34,7 @@ static void stdin_no_text(void **state)
 	will_return(__wrap_fgets, NULL); /* Signal an EOF */
 
 	bool no_text_read = copris_handle_stdin(copris_text);
+	expected_stats(1, 0);
 
 	assert_true(no_text_read);
 	assert_string_equal(utstring_body(copris_text), "");
@@ -50,6 +57,7 @@ static void stdin_two_chunks(void **state)
 	will_return(__wrap_fgets, NULL); /* Signal an EOF */
 
 	bool no_text_read = copris_handle_stdin(copris_text);
+	expected_stats(sizeof result, 2);
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
@@ -71,6 +79,7 @@ static void stdin_multibyte_char2(void **state)
 	will_return(__wrap_fgets, NULL); /* Signal an EOF */
 
 	bool no_text_read = copris_handle_stdin(copris_text);
+	expected_stats(sizeof result, 2);
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
@@ -92,6 +101,7 @@ static void stdin_multibyte_char3a(void **state)
 	will_return(__wrap_fgets, NULL); /* Signal an EOF */
 
 	bool no_text_read = copris_handle_stdin(copris_text);
+	expected_stats(sizeof result, 2);
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
@@ -113,6 +123,7 @@ static void stdin_multibyte_char3b(void **state)
 	will_return(__wrap_fgets, NULL); /* Signal an EOF */
 
 	bool no_text_read = copris_handle_stdin(copris_text);
+	expected_stats(sizeof result, 2);
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
@@ -134,6 +145,7 @@ static void stdin_multibyte_char4(void **state)
 	will_return(__wrap_fgets, NULL); /* Signal an EOF */
 
 	bool no_text_read = copris_handle_stdin(copris_text);
+	expected_stats(sizeof result, 2);
 
 	assert_false(no_text_read);
 	assert_string_equal(utstring_body(copris_text), result);
