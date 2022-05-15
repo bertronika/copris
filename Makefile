@@ -40,8 +40,9 @@ DEP_REL := $(SRC:%.c=%_rel.d)
 OBJ_DBG := $(SRC:%.c=%_dbg.o)
 DEP_DBG := $(SRC:%.c=%_dbg.d)
 
-# Unit test files (executables are prefixed with 'run_')
+# Unit test files (executables will be prefixed with 'run_')
 TESTS = test_read_stdin.c
+TEST_SOURCES = $(addprefix $(TESTDIR)/, wrappers.c $(TESTS))
 BIN_TESTS := $(TESTS:%.c=$(TESTDIR)/run_%)
 
 # Dynamic libraries to be linked
@@ -102,7 +103,7 @@ $(BIN_DBG): $(OBJ_DBG)
 	$(CC) $(DBGFLAGS) -c -o $@ $<
 
 # Compile and run tests
-$(BIN_TESTS): $(filter-out $(SRCDIR)/main_dbg.o, $(OBJ_DBG)) $(addprefix $(TESTDIR)/, $(TESTS))
+$(BIN_TESTS): $(filter-out $(SRCDIR)/main_dbg.o, $(OBJ_DBG)) $(TEST_SOURCES)
 	$(CC) $(TESTFLAGS) -o $@ $^
 
 unit-tests: $(BIN_TESTS)
