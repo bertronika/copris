@@ -44,6 +44,7 @@ DEP_DBG := $(SRC:%.c=%_dbg.d)
 TESTS = test_read_stdin.c
 TEST_SOURCES = $(addprefix $(TESTDIR)/, wrappers.c $(TESTS))
 BIN_TESTS := $(TESTS:%.c=$(TESTDIR)/run_%)
+OBJ_TESTS := $(filter-out $(SRCDIR)/main_dbg.o, $(OBJ_DBG)) $(TESTDIR)/wrappers.c
 
 # Dynamic libraries to be linked
 LIBS = inih
@@ -103,11 +104,11 @@ $(BIN_DBG): $(OBJ_DBG)
 	$(CC) $(DBGFLAGS) -c -o $@ $<
 
 # Compile and run tests
-$(BIN_TESTS): $(filter-out $(SRCDIR)/main_dbg.o, $(OBJ_DBG)) $(TEST_SOURCES)
+$(TESTDIR)/run_%: $(TESTDIR)/%.c $(OBJ_TESTS)
 	$(CC) $(TESTFLAGS) -o $@ $^
 
 unit-tests: $(BIN_TESTS)
-	for utest in $(BIN_TESTS); do ./$$utest; done
+	for utest in $(BIN_TESTS); do ./$$utest; echo; done
 
 # Run Cppcheck code analysis (first recipe prints to stdout, second generates a HTML report)
 analyse-cppcheck:
