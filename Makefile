@@ -41,8 +41,7 @@ OBJ_DBG := $(SOURCES:%.c=%_dbg.o)
 DEP_DBG := $(SOURCES:%.c=%_dbg.d)
 
 # Unit test files (executables will be prefixed with 'run_')
-TESTS = test_read_stdin.c
-TEST_SOURCES = $(addprefix $(TESTDIR)/, wrappers.c $(TESTS))
+TESTS = test_read_socket_stdin.c
 BIN_TESTS := $(TESTS:%.c=$(TESTDIR)/run_%)
 OBJ_TESTS := $(filter-out $(SRCDIR)/main_dbg.o, $(OBJ_DBG)) $(TESTDIR)/wrappers.c
 
@@ -64,7 +63,7 @@ RELFLAGS := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
 DBGFLAGS := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
 
 # List of mocked functions for unit tests
-MOCKS = fgets isatty
+MOCKS = fgets isatty accept close getnameinfo inet_ntoa read
 
 # Compiler flags for unit tests
 TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(DBGFLAGS) -DBUFSIZE=10 \
