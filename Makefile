@@ -33,12 +33,12 @@ HASH   := $(shell git rev-parse --short HEAD)
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 # Source, object and dependency files for release and debug builds
-SOURCES = debug.c read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c main.c
-SRC := $(addprefix $(SRCDIR)/, $(SOURCES))
-OBJ_REL := $(SRC:%.c=%_rel.o)
-DEP_REL := $(SRC:%.c=%_rel.d)
-OBJ_DBG := $(SRC:%.c=%_dbg.o)
-DEP_DBG := $(SRC:%.c=%_dbg.d)
+SRC = debug.c read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c main.c
+SOURCES := $(addprefix $(SRCDIR)/, $(SRC))
+OBJ_REL := $(SOURCES:%.c=%_rel.o)
+DEP_REL := $(SOURCES:%.c=%_rel.d)
+OBJ_DBG := $(SOURCES:%.c=%_dbg.o)
+DEP_DBG := $(SOURCES:%.c=%_dbg.d)
 
 # Unit test files (executables will be prefixed with 'run_')
 TESTS = test_read_stdin.c
@@ -116,7 +116,7 @@ analyse-cppcheck:
 	cppcheck $(CPPCHECK_FLAGS) $(SRCDIR)
 
 analyse-cppcheck-html: $(CPPCHECK_DIR)/index.html
-$(CPPCHECK_DIR)/index.html: $(SRC)
+$(CPPCHECK_DIR)/index.html: $(SOURCES)
 	mkdir -p $(CPPCHECK_DIR)
 	cppcheck $(CPPCHECK_FLAGS) --xml $(SRCDIR) 2>$(CPPCHECK_XML)
 	cppcheck-htmlreport --file=$(CPPCHECK_XML) --report-dir=$(CPPCHECK_DIR)
