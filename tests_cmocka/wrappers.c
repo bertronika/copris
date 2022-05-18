@@ -60,9 +60,22 @@ int __wrap_close(int fd)
 	return 0;
 }
 
-int __real_getnameinfo(void);
-int __wrap_getnameinfo(void)
+int __real_getnameinfo(const struct sockaddr addr, socklen_t addrlen,
+                       char *host, socklen_t hostlen, char serv, socklen_t servlen, int flags);
+int __wrap_getnameinfo(const struct sockaddr addr, socklen_t addrlen,
+                       char *host, socklen_t hostlen, char serv, socklen_t servlen, int flags)
 {
+	(void)addr;
+	(void)addrlen;
+	(void)serv;
+	(void)servlen;
+	(void)flags;
+
+	// TODO Figure out how to fill this buffer
+	(void)host;
+	(void)hostlen;
+	//memccpy(host, "localhost", '\0', hostlen);
+
 	return 0;
 }
 
