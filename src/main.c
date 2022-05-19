@@ -351,6 +351,15 @@ int main(int argc, char **argv) {
 	if (attrib.portno == 0)
 		is_stdin = true;
 
+	if (attrib.limitnum && is_stdin && LOG_ERROR) {
+		if (LOG_INFO)
+			LOG_LOCATION();
+		else
+			printf("Note: ");
+
+		printf("Limit number not used while reading from stdin.\n");
+	}
+
 	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
 		attrib.daemon = 0;
