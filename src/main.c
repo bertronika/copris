@@ -289,14 +289,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 	// Check for multiple destination arguments
 	if ((attrib->copris_flags & HAS_DESTINATION) && argv[++optind]) {
-		if (LOG_ERROR){
-			if (LOG_INFO)
-				LOG_LOCATION();
-			else
-				printf("Note: ");
-
-			printf("Only the first destination file name will be used.\n");
-		}
+		if (LOG_ERROR)
+			LOG_NOTE("Only the first destination file name will be used.");
 	}
 
 	return 0;
@@ -331,15 +325,9 @@ int main(int argc, char **argv) {
 		printf("COPRIS started with PID %d\n", getpid());
 	}
 
-	if (argc < 2 && LOG_ERROR) {
-		if (LOG_INFO)
-			LOG_LOCATION();
-		else
-			printf("Note: ");
-
-		printf("COPRIS won't do much without any arguments. "
-               "Try using the '--help' option.\n");
-	}
+	if (argc < 2 && LOG_ERROR)
+		LOG_NOTE("COPRIS won't do much without any arguments. "
+                 "Try using the '--help' option.");
 
 	if (LOG_INFO) {
 		LOG_LOCATION();
@@ -351,26 +339,14 @@ int main(int argc, char **argv) {
 	if (attrib.portno == 0)
 		is_stdin = true;
 
-	if (attrib.limitnum && is_stdin && LOG_ERROR) {
-		if (LOG_INFO)
-			LOG_LOCATION();
-		else
-			printf("Note: ");
-
-		printf("Limit number not used while reading from stdin.\n");
-	}
+	if (attrib.limitnum && is_stdin && LOG_ERROR)
+		LOG_NOTE("Limit number not used while reading from stdin.");
 
 	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
 		attrib.daemon = 0;
-		if (LOG_ERROR) {
-			if (LOG_INFO)
-				LOG_LOCATION();
-			else
-				printf("Note: ");
-			
-			printf("Daemon mode not available while reading from stdin.\n");
-		}
+		if (LOG_ERROR)
+			LOG_NOTE("Daemon mode not available while reading from stdin.");
 	}
 
 	if (attrib.daemon && LOG_DEBUG)

@@ -30,27 +30,16 @@ bool copris_handle_stdin(UT_string *copris_text) {
 	errno = 0;
 	if (LOG_ERROR && isatty(STDIN_FILENO)) {
 		raise_errno_perror(errno, "isatty", "Error determining input terminal.");
-		if (LOG_INFO)
-			LOG_LOCATION();
-		else
-			printf("Note: ");
-
-		printf("You are in text input mode (reading from "
-		       "stdin). To stop reading, press Ctrl+D.\n");
+		LOG_NOTE("You are in text input mode (reading from "
+		         "stdin). To stop reading, press Ctrl+D.");
 	}
 
 	// Read text from standard input, print a note if only EOF has been received
 	struct Stats stats = STATS_INIT;
 	bool no_text_read = read_from_stdin(copris_text, &stats);
 
-	if (no_text_read && LOG_ERROR) {
-		if (LOG_INFO)
-			LOG_LOCATION();
-		else
-			printf("Note: ");
-
-		printf("No text has been read!\n");
-	}
+	if (no_text_read && LOG_ERROR)
+		LOG_NOTE("No text has been read!");
 
 	if (LOG_ERROR) {
 		if (LOG_INFO)
