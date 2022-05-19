@@ -222,7 +222,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 		utstring_clear(copris_text);
 
 		if (LOG_ERROR)
-			printf("\nClient exceeded send size limit (%zu B/%zu B), discarding remaining "
+			printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
 			       "text and terminating connection.\n", stats->sum, attrib->limitnum);
 
 	// Terminate after processing excessive text - cut off buffer at limit
@@ -232,7 +232,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 		assert(strlen(utstring_body(copris_text)) == attrib->limitnum);
 
 		if (LOG_ERROR)
-			printf("\nClient exceeded send size limit (%zu B/%zu B), cutting off text and "
+			printf("Client exceeded send size limit (%zu B/%zu B), cutting off text and "
 			       "terminating connection.\n", stats->sum, attrib->limitnum);
 	}
 }
