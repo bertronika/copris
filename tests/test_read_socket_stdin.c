@@ -30,7 +30,6 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
 		int parentfd = 0;                                        \
 		                                                         \
 		struct Attribs attrib;                                   \
-		                                                         \
 		attrib.daemon = false;                                   \
 		attrib.limitnum = 0;                                     \
 		attrib.copris_flags = 0x00;                              \
@@ -44,11 +43,34 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
 		will_return(__wrap_read, (sizeof input_2) - 1);          \
 		will_return(__wrap_read, NULL); /* Signal an EOF */      \
 		                                                         \
-		bool status = copris_handle_socket(copris_text, &parentfd, &attrib); \
+		bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
 		                                                         \
-		assert_false(status);                                    \
+		assert_false(error);                                     \
 		assert_string_equal(utstring_body(copris_text), result); \
 		                                                         \
+		utstring_free(copris_text);                              \
+	} while (0);
+
+#define TEST_WRAPPED_READ_LIMITED(input, result, limit, flags)   \
+	do {                                                         \
+		int parentfd = 0;                                        \
+                                                                 \
+		struct Attribs attrib;                                   \
+		attrib.daemon = false;                                   \
+		attrib.limitnum = limit;                                 \
+		attrib.copris_flags = flags;                             \
+                                                                 \
+		UT_string *copris_text;                                  \
+		utstring_new(copris_text);                               \
+                                                                 \
+		will_return(__wrap_read, input);                         \
+		will_return(__wrap_read, (sizeof input) - 1);            \
+                                                                 \
+		bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
+                                                                 \
+		assert_false(error);                                     \
+		assert_string_equal(utstring_body(copris_text), result); \
+                                                                 \
 		utstring_free(copris_text);                              \
 	} while (0);
 
@@ -149,6 +171,30 @@ static void read_multibyte_char4(void **state)
 	TEST_WRAPPED_FGETS(input_1, input_2, result);
 }
 
+// Check if text limit gets applied properly
+static void byte_limit_discard_and_cutoff(void **state)
+{
+	(void)state;
+	const char input[]  = "aaaBBBccc";
+	const char result[] = "aaaBB";
+
+	TEST_WRAPPED_READ_LIMITED(input, "", 1, 0x00);
+	TEST_WRAPPED_READ_LIMITED(input, result, 5, MUST_CUTOFF);
+}
+
+// Check if multibyte characters are stripped instead of being partially send through
+static void byte_limit_discard_and_cutoff2(void **state)
+{
+	(void)state;
+	const char input[] = "abcč"; // strlen("abcč") == 5
+	const char result[] = "abc";
+
+	skip(); // TODO: Multibyte character stripping not yet implemented
+
+	TEST_WRAPPED_READ_LIMITED(input, "", 1, 0x00);
+	TEST_WRAPPED_READ_LIMITED(input, result, 4, MUST_CUTOFF);
+}
+
 int main(int argc, char **argv)
 {
 	// Number of (arbitrary) arguments sets the verbosity level
@@ -161,8 +207,11 @@ int main(int argc, char **argv)
 		cmocka_unit_test(read_multibyte_char2),
 		cmocka_unit_test(read_multibyte_char3a),
 		cmocka_unit_test(read_multibyte_char3b),
-		cmocka_unit_test(read_multibyte_char4)
+		cmocka_unit_test(read_multibyte_char4),
+		cmocka_unit_test(byte_limit_discard_and_cutoff),
+		cmocka_unit_test(byte_limit_discard_and_cutoff2),
 	};
 
+	puts("Test read_stdin.c and read_socket.c");
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

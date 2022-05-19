@@ -108,3 +108,13 @@ ssize_t __wrap_read(int fd, void *buffer, size_t count)
 
 	return data_len;
 }
+
+ssize_t __real_write(int fd, const void *buf, size_t count);
+ssize_t __wrap_write(int fd, const void *buf, size_t count)
+{
+	(void)fd;
+	(void)buf;
+
+	// Pretend everything has been written successfully
+	return count;
+}

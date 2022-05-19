@@ -63,11 +63,11 @@ RELFLAGS := $(CFLAGS) -MMD -MP -O2 -s -DNDEBUG
 DBGFLAGS := $(CFLAGS) -MMD -MP -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
 
 # List of mocked functions for unit tests
-MOCKS = fgets isatty accept close getnameinfo inet_ntoa read
+MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write
 
 # Compiler flags for unit tests
 TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(DBGFLAGS) -DBUFSIZE=10 \
-             $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK) )
+             $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK))
 # -Wconversion
 
 # Cppcheck's flags. Note that 'style' includes 'warning', 'performance' and 'portability'.
