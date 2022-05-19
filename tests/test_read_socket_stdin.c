@@ -26,71 +26,71 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
 }
 
 #define TEST_WRAPPED_READ(input_1, input_2, result)              \
-	do {                                                         \
-		int parentfd = 0;                                        \
-		                                                         \
-		struct Attribs attrib;                                   \
-		attrib.daemon = false;                                   \
-		attrib.limitnum = 0;                                     \
-		attrib.copris_flags = 0x00;                              \
-		                                                         \
-		UT_string *copris_text;                                  \
-		utstring_new(copris_text);                               \
-		                                                         \
-		will_return(__wrap_read, input_1);                       \
-		will_return(__wrap_read, (sizeof input_1) - 1);          \
-		will_return(__wrap_read, input_2);                       \
-		will_return(__wrap_read, (sizeof input_2) - 1);          \
-		will_return(__wrap_read, NULL); /* Signal an EOF */      \
-		                                                         \
-		bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
-		                                                         \
-		assert_false(error);                                     \
-		assert_string_equal(utstring_body(copris_text), result); \
-		                                                         \
-		utstring_free(copris_text);                              \
-	} while (0);
+    do {                                                         \
+        int parentfd = 0;                                        \
+                                                                 \
+        struct Attribs attrib;                                   \
+        attrib.daemon = false;                                   \
+        attrib.limitnum = 0;                                     \
+        attrib.copris_flags = 0x00;                              \
+                                                                 \
+        UT_string *copris_text;                                  \
+        utstring_new(copris_text);                               \
+                                                                 \
+        will_return(__wrap_read, input_1);                       \
+        will_return(__wrap_read, (sizeof input_1) - 1);          \
+        will_return(__wrap_read, input_2);                       \
+        will_return(__wrap_read, (sizeof input_2) - 1);          \
+        will_return(__wrap_read, NULL); /* Signal an EOF */      \
+                                                                 \
+        bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
+                                                                 \
+        assert_false(error);                                     \
+        assert_string_equal(utstring_body(copris_text), result); \
+                                                                 \
+        utstring_free(copris_text);                              \
+    } while (0);
 
 #define TEST_WRAPPED_READ_LIMITED(input, result, limit, flags)   \
-	do {                                                         \
-		int parentfd = 0;                                        \
+    do {                                                         \
+        int parentfd = 0;                                        \
                                                                  \
-		struct Attribs attrib;                                   \
-		attrib.daemon = false;                                   \
-		attrib.limitnum = limit;                                 \
-		attrib.copris_flags = flags;                             \
+        struct Attribs attrib;                                   \
+        attrib.daemon = false;                                   \
+        attrib.limitnum = limit;                                 \
+        attrib.copris_flags = flags;                             \
                                                                  \
-		UT_string *copris_text;                                  \
-		utstring_new(copris_text);                               \
+        UT_string *copris_text;                                  \
+        utstring_new(copris_text);                               \
                                                                  \
-		will_return(__wrap_read, input);                         \
-		will_return(__wrap_read, (sizeof input) - 1);            \
+        will_return(__wrap_read, input);                         \
+        will_return(__wrap_read, (sizeof input) - 1);            \
                                                                  \
-		bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
+        bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
                                                                  \
-		assert_false(error);                                     \
-		assert_string_equal(utstring_body(copris_text), result); \
+        assert_false(error);                                     \
+        assert_string_equal(utstring_body(copris_text), result); \
                                                                  \
-		utstring_free(copris_text);                              \
-	} while (0);
+        utstring_free(copris_text);                              \
+    } while (0);
 
 #define TEST_WRAPPED_FGETS(input_1, input_2, result)             \
-	do {                                                         \
-		UT_string *copris_text;                                  \
-		utstring_new(copris_text);                               \
-		                                                         \
-		will_return(__wrap_fgets, input_1);                      \
-		will_return(__wrap_fgets, input_2);                      \
-		will_return(__wrap_fgets, NULL); /* Signal an EOF */     \
-		                                                         \
-		bool no_text_read = copris_handle_stdin(copris_text);    \
-		expected_stats(sizeof result, 2);                        \
-		                                                         \
-		assert_false(no_text_read);                              \
-		assert_string_equal(utstring_body(copris_text), result); \
-		                                                         \
-		utstring_free(copris_text);                              \
-	} while (0);
+    do {                                                         \
+        UT_string *copris_text;                                  \
+        utstring_new(copris_text);                               \
+                                                                 \
+        will_return(__wrap_fgets, input_1);                      \
+        will_return(__wrap_fgets, input_2);                      \
+        will_return(__wrap_fgets, NULL); /* Signal an EOF */     \
+                                                                 \
+        bool no_text_read = copris_handle_stdin(copris_text);    \
+        expected_stats(sizeof result, 2);                        \
+                                                                 \
+        assert_false(no_text_read);                              \
+        assert_string_equal(utstring_body(copris_text), result); \
+                                                                 \
+        utstring_free(copris_text);                              \
+    } while (0);
 
 // Read no text from stdin
 static void stdin_read_no_text(void **state)
