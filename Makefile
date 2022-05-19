@@ -22,7 +22,7 @@ BIN_DBG = copris_dbg
 
 # Source and tests directories
 SRCDIR  = src
-TESTDIR = tests_cmocka
+TESTDIR = tests
 
 # Cppcheck's output locations
 CPPCHECK_DIR = cppcheck_report

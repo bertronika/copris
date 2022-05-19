@@ -9,4 +9,4 @@ copris_dbg
 cppcheck_report/
 
 # Ignore test executables
-tests_cmocka/run_*
+tests/run_*
