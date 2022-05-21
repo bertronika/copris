@@ -13,11 +13,14 @@
 #include <string.h>
 #include <errno.h>
 
+#include <utstring.h> /* uthash library - dynamic strings */
+
 #include "debug.h"
 #include "writer.h"
 
-bool copris_write_file(const char *dest, const char *text, size_t text_length) {
+bool copris_write_file(const char *dest, UT_string *copris_text) {
 	bool error = false;
+	size_t text_length = utstring_len(copris_text);
 	
 	// Open destination file, set for (a)ppending text to it
 	FILE *file_ptr = fopen(dest, "a");
@@ -27,7 +30,7 @@ bool copris_write_file(const char *dest, const char *text, size_t text_length) {
 	if (LOG_DEBUG)
 		LOG_STRING("Output file opened.");
 
-	size_t written_text_length = fwrite(text, 1, text_length, file_ptr);
+	size_t written_text_length = fwrite(utstring_body(copris_text), 1, text_length, file_ptr);
 
 	if (written_text_length < text_length) {
 		fprintf(stderr, "fwrite: Failure while appending to output file; "
