@@ -43,6 +43,12 @@
 #define _STRINGIFY(str) #str
 #define STRINGIFY(str) _STRINGIFY(str)
 
+#ifndef WITHOUT_CMARK
+#	define MARKDOWN_SUPPORT "yes"
+#else
+#	define MARKDOWN_SUPPORT "no"
+#endif
+
 /*
  * Verbosity levels:
  * 0  silent/only fatal
@@ -86,10 +92,12 @@ static void copris_version() {
 #else
 	printf("COPRIS version %s\n", COPRIS_VER);
 #endif
-	printf("(C) 2020-21 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
-	       "Compiled options:\n"
-		   "  Buffer size:          %4d bytes\n\n",
-	       BUFSIZE);
+	printf("(C) 2020-22 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
+	       "Build-time options\n"
+	       "  Text buffer size: %6d bytes\n"
+	       "  Markdown support: %6s\n"
+	       "\n",
+	       BUFSIZE, MARKDOWN_SUPPORT);
 
 	exit(EXIT_SUCCESS);
 }
