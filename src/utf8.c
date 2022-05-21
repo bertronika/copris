@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "utf8.h"
 
@@ -40,7 +41,7 @@ size_t utf8_codepoint_length(const char s)
  * Check for incomplete multibyte characters in input string. If found, terminate the string
  * instead of letting them (and any following text) through.
  */
-void utf8_terminate_incomplete_buffer(char *str, size_t len)
+bool utf8_terminate_incomplete_buffer(char *str, size_t len)
 {
 	size_t check_start = 0;
 
@@ -50,7 +51,11 @@ void utf8_terminate_incomplete_buffer(char *str, size_t len)
 	for (size_t i = check_start; i < len; i++) {
 		size_t needed_bytes = utf8_codepoint_length(str[i]);
 
-		if (i + needed_bytes > len)
+		if (i + needed_bytes > len) {
 			str[i] = '\0';
+			return true;
+		}
 	}
+
+	return false;
 }

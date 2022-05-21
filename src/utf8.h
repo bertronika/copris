@@ -1,7 +1,8 @@
 #ifndef UTF8_H
 #define UTF8_H
 
-#include <stddef.h> /* size_t */
+#include <stdbool.h>  /* bool      */
+#include <stddef.h>   /* size_t    */
 
 /*
  * UTF-8 Encoding
@@ -28,6 +29,6 @@
 
 size_t utf8_count_codepoints(const char *s, size_t n);
 size_t utf8_codepoint_length(const char s);
-void utf8_terminate_incomplete_buffer(char *str, size_t len);
+bool utf8_terminate_incomplete_buffer(char *str, size_t len);
 
 #endif /* UTF8_H */
