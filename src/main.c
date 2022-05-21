@@ -27,7 +27,8 @@
 #include <getopt.h>
 #include <errno.h>
 #include <limits.h>
-#include <utstring.h> /* Dynamic strings */
+
+#include <utstring.h> /* uthash library - dynamic strings */
 
 #include "debug.h"
 #include "config.h"

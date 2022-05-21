@@ -24,7 +24,8 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <assert.h>
-#include <utstring.h>
+
+#include <utstring.h> /* uthash library - dynamic strings */
 
 #include "Copris.h"
 #include "config.h"

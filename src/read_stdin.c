@@ -11,7 +11,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
-#include <utstring.h>
+
+#include <utstring.h> /* uthash library - dynamic strings */
 
 #include "Copris.h"
 #include "config.h"

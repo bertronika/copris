@@ -5,7 +5,8 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <utstring.h>
+
+#include <utstring.h> /* uthash library - dynamic strings */
 
 #include "../src/config.h"
 #include "../src/Copris.h"

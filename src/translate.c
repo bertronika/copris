@@ -11,8 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <ini.h>    /* inih library   */
-#include <uthash.h> /* uthash library */
+
+#include <ini.h>    /* inih library - .ini file parser */
+#include <uthash.h> /* uthash library - hash table     */
 
 #include "Copris.h"
 #include "debug.h"
