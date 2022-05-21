@@ -455,6 +455,9 @@ int main(int argc, char **argv) {
 			}
 		}
 
+		// Current session's text has been processed, clear it for a new read
+		utstring_clear(copris_text);
+
 	} while (attrib.daemon); /* end of main program loop */
 
 // 	if (attrib.copris_flags & HAS_TRFILE) {
