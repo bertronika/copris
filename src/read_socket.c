@@ -223,6 +223,9 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 		stats->discarded = stats->sum;
 		utstring_clear(copris_text);
 
+		if (LOG_INFO)
+			LOG_LOCATION();
+
 		if (LOG_ERROR)
 			printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
 			       "text and terminating connection.\n", stats->sum, attrib->limitnum);
@@ -230,15 +233,22 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 	} else {
 		// Cut off text at limit and remove any possible remains of multibyte characters,
 		// possibly split at the limit
+		char *text = utstring_body(copris_text);
 
 		stats->discarded = stats->sum - attrib->limitnum;
 		utstring_cut(copris_text, attrib->limitnum);
-		assert(strlen(utstring_body(copris_text)) == attrib->limitnum);
+		assert(strlen(text) == attrib->limitnum);
 
-		utf8_terminate_incomplete_buffer(utstring_body(copris_text), utstring_len(copris_text));
+		bool terminated = utf8_terminate_incomplete_buffer(text, utstring_len(copris_text));
+
+		if (LOG_INFO)
+			LOG_LOCATION();
 
 		if (LOG_ERROR)
 			printf("Client exceeded send size limit (%zu B/%zu B), cutting off text and "
 			       "terminating connection.\n", stats->sum, attrib->limitnum);
+
+		if (terminated && LOG_DEBUG)
+			LOG_STRING("Additional multibyte characters were omitted from the output.");
 	}
 }
