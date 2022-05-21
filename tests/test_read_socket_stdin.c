@@ -176,13 +176,15 @@ static void byte_limit_discard_and_cutoff(void **state)
 static void byte_limit_discard_and_cutoff2(void **state)
 {
 	(void)state;
-	const char input[] = "abcč"; // strlen("abcč") == 5
-	const char result[] = "abc";
+	const char input1[] = "abcč"; // strlen("abcč") == 5
+	const char result1[] = "abc";
 
-	skip(); // TODO: Multibyte character stripping not yet implemented
+	const char input2[] = "aaaBBBccc€";
+	const char result2[] = "aaaBBBccc";
 
-	TEST_WRAPPED_READ_LIMITED(input, "", 1, 0x00);
-	TEST_WRAPPED_READ_LIMITED(input, result, 4, MUST_CUTOFF);
+	TEST_WRAPPED_READ_LIMITED(input1, "", 1, 0x00);
+	TEST_WRAPPED_READ_LIMITED(input1, result1, 4, MUST_CUTOFF);
+	TEST_WRAPPED_READ_LIMITED(input2, result2, 11, MUST_CUTOFF);
 }
 
 int main(int argc, char **argv)
