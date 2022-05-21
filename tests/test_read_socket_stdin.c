@@ -1,15 +1,4 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
-
-#include <stdio.h>
-#include <stdbool.h>
-
-#include <utstring.h> /* uthash library - dynamic strings */
-
-#include "../src/config.h"
-#include "../src/Copris.h"
+#include "cmocka-boilerplate.h"
 #include "../src/read_stdin.h"
 #include "../src/read_socket.h"
 
