@@ -434,9 +434,10 @@ int main(int argc, char **argv) {
 
 		// Stage 5: Write text to the output destination
 		char *processed_text = utstring_body(copris_text);
+		size_t text_length   = utstring_len(copris_text);
 
 		if (attrib.copris_flags & HAS_DESTINATION) {
-			copris_write_file(attrib.destination, processed_text);
+			copris_write_file(attrib.destination, processed_text, text_length);
 		} else {
 			// Print Beginning-/End-Of-Stream markers if output isn't a file
 			if (LOG_ERROR)
@@ -446,7 +447,6 @@ int main(int argc, char **argv) {
 
 			if (LOG_ERROR) {
 				// Print a new line if one's missing in the final text
-				size_t text_length = utstring_len(copris_text);
 
 				if(text_length > 0 && processed_text[text_length - 1] != '\n')
 					puts("");

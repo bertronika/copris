@@ -16,7 +16,7 @@
 #include "debug.h"
 #include "writer.h"
 
-bool copris_write_file(const char *dest, const char *text) {
+bool copris_write_file(const char *dest, const char *text, size_t text_length) {
 	bool error = false;
 	
 	// Open destination file, set for (a)ppending text to it
@@ -27,7 +27,6 @@ bool copris_write_file(const char *dest, const char *text) {
 	if (LOG_DEBUG)
 		LOG_STRING("Output file opened.");
 
-	size_t text_length = strlen(text);
 	size_t written_text_length = fwrite(text, 1, text_length, file_ptr);
 
 	if (written_text_length < text_length) {
