@@ -3,44 +3,54 @@
 
 #include "utf8.h"
 
-size_t utf8_count_codepoints(const char *s, size_t n) {
+/*
+ * Count the number of "characters" in string, where any "character" can be
+ * from 1 to 4 bytes long.
+ */
+size_t utf8_count_codepoints(const char *s, size_t n)
+{
 	size_t count = 0;
 
-	while(*s && count <= n) {
+	while (*s && count <= n) {
 		// Count every character, except Unicode continuation bytes
-		if(!UTF8_IS_CONTINUATION(*s++))
+		if (!UTF8_IS_CONTINUATION(*s++))
 			count++;
 	}
 
 	return count;
 }
 
-size_t utf8_codepoint_length(const char s) {
-	if((s & 0xF8) == 0xF0) {
+/*
+ * Determine the byte length of a (multibyte) character (by analysing its first byte).
+ */
+size_t utf8_codepoint_length(const char s)
+{
+	if ((s & 0xF8) == 0xF0)
 		return 4;
-	} else if((s & 0xF0) == 0xE0) {
+	else if ((s & 0xF0) == 0xE0)
 		return 3;
-	} else if((s & 0xE0) == 0xC0) {
+	else if ((s & 0xE0) == 0xC0)
 		return 2;
-	} else
-		return 1;
+
+	// Only ASCII characters left
+	return 1;
 }
 
 /*
- * Return number of remaining bytes to be read into the input string for a complete multibyte
- * character, if one is found incomplete at the end
+ * Check for incomplete multibyte characters in input string. If found, terminate the string
+ * instead of letting them (and any following text) through.
  */
-size_t utf8_calculate_needed_bytes(const char *str, size_t len)
+void utf8_terminate_incomplete_buffer(char *str, size_t len)
 {
-	// At most 3 characters can be missing from the string, as an UTF-8 encoded character
-	// can be up to 4 bytes long
-	for (size_t i = len - 3; i < len; i++) {
+	size_t check_start = 0;
+
+	if (len > 3)
+		check_start = len - 3;
+
+	for (size_t i = check_start; i < len; i++) {
 		size_t needed_bytes = utf8_codepoint_length(str[i]);
 
-		// Subtract 1; we are interested only in multibyte characters
 		if (i + needed_bytes > len)
-			return needed_bytes - 1;
+			str[i] = '\0';
 	}
-
-	return 0;
 }

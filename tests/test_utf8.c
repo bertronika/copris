@@ -32,22 +32,31 @@ static void utf8_test_codepoint_length(void **state)
 	assert_int_equal(result4, 4);
 }
 
-// Check if remaining bytes of a multibyte character are counted properly
-static void utf8_test_needed_bytes(void **state)
+static void utf8_test_incomplete_buffer(void **state)
 {
 	(void)state;
-	const char example2[] = {'\xC4', '\0'}; // beginning of č
-	const char example3[] = {'\xE2', '\0'}; // beginning of €
-	const char example4[] = {'\xF0', '\0'}; // beginning of 🄌
+	char example2[] = {'\xC4', '\0'}; // first byte of č
+	char example3[] = {'\xE2', '\x82', '\xAC', '\0'}; // complete €
+	char example4[] = {'\xF0', '\x9f', '\0'}; // first and second bytes of 🄌
 
-	size_t result2 = utf8_calculate_needed_bytes(example2, (sizeof example2) - 1);
-	assert_int_equal(result2, 1);
+	// Missing last byte
+	char example5[] = {'h', 'r', 'o', '\xC5', '\xA1', '\xC4', '\0'}; // "hrošč"
+	char example6[] = {'5', '0', '\xE2', '\x82', '\0'}; // "50€"
 
-	size_t result3 = utf8_calculate_needed_bytes(example3, (sizeof example3) - 1);
-	assert_int_equal(result3, 2);
+	utf8_terminate_incomplete_buffer(example2, (sizeof example2) - 1);
+	assert_string_equal(example2, "");
 
-	size_t result4 = utf8_calculate_needed_bytes(example4, (sizeof example4) - 1);
-	assert_int_equal(result4, 3);
+	utf8_terminate_incomplete_buffer(example3, (sizeof example3) - 1);
+	assert_string_equal(example3, "€");
+
+	utf8_terminate_incomplete_buffer(example4, (sizeof example4) - 1);
+	assert_string_equal(example4, "");
+
+	utf8_terminate_incomplete_buffer(example5, (sizeof example5) - 1);
+	assert_string_equal(example5, "hroš");
+
+	utf8_terminate_incomplete_buffer(example6, (sizeof example6) - 1);
+	assert_string_equal(example6, "50");
 }
 
 int main(int argc, char **argv)
@@ -59,7 +68,7 @@ int main(int argc, char **argv)
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(utf8_test_multibyte_string_length),
 		cmocka_unit_test(utf8_test_codepoint_length),
-		cmocka_unit_test(utf8_test_needed_bytes),
+		cmocka_unit_test(utf8_test_incomplete_buffer)
 	};
 
 	puts("Test utf8.c");
