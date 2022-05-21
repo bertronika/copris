@@ -31,6 +31,7 @@
 #include "config.h"
 #include "debug.h"
 #include "read_socket.h"
+#include "utf8.h"
 
 static bool read_from_socket(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
@@ -216,8 +217,9 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 
 	stats->size_limit_active = true;
 
-	// Terminate before processing excessive text - discard whole chunk
 	if (!(attrib->copris_flags & MUST_CUTOFF)) {
+		// Discard whole chunk of text, if over the limit
+
 		stats->discarded = stats->sum;
 		utstring_clear(copris_text);
 
@@ -225,11 +227,15 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 			printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
 			       "text and terminating connection.\n", stats->sum, attrib->limitnum);
 
-	// Terminate after processing excessive text - cut off buffer at limit
 	} else {
+		// Cut off text at limit and remove any possible remains of multibyte characters,
+		// possibly split at the limit
+
 		stats->discarded = stats->sum - attrib->limitnum;
 		utstring_cut(copris_text, attrib->limitnum);
 		assert(strlen(utstring_body(copris_text)) == attrib->limitnum);
+
+		utf8_terminate_incomplete_buffer(utstring_body(copris_text), utstring_len(copris_text));
 
 		if (LOG_ERROR)
 			printf("Client exceeded send size limit (%zu B/%zu B), cutting off text and "
