@@ -5,6 +5,8 @@
 #include <stdbool.h>  /* bool           */
 #include <uthash.h>   /* UT_hash_handle */
 
+#include "config.h"
+
 /*
  * Round backlog to a power of 2.
  * https://stackoverflow.com/a/5111841
@@ -40,12 +42,15 @@ static const struct Stats STATS_INIT = {
 };
 
 struct Trfile {
-	char in[5];        /* key (name)   */
-	unsigned char out; /* item (value) */
+// 	char in[5];        /* key (name)   */
+// 	unsigned char out; /* item (value) */
 	UT_hash_handle hh;
 
 	// Input key holds at most one 4-byte Unicode
 	// character and 1 terminating NUL byte.
+
+	char in[MAX_INIFILE_ELEMENT_LENGTH];
+	char out[MAX_INIFILE_ELEMENT_LENGTH];
 };
 
 struct Prset {

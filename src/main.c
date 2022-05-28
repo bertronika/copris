@@ -95,10 +95,11 @@ static void copris_version() {
 #endif
 	printf("(C) 2020-22 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Build-time options\n"
-	       "  Text buffer size: %6d bytes\n"
-	       "  Markdown support: %6s\n"
+	       "  Text buffer size:                 %5d bytes\n"
+	       "  Maximum .ini file element length: %5d bytes\n"
+	       "  Markdown support:                 %5s\n"
 	       "\n",
-	       BUFSIZE, MARKDOWN_SUPPORT);
+	       BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, MARKDOWN_SUPPORT);
 
 	exit(EXIT_SUCCESS);
 }
@@ -382,10 +383,11 @@ int main(int argc, char **argv) {
 
 	// Parsing and loading translation definitions
 	if (attrib.copris_flags & HAS_TRFILE) {
-		error = copris_loadtrfile(attrib.trfile, &trfile);
+		error = load_translation_file(attrib.trfile, &trfile);
 		if (error) {
 			// Missing translation files are as well not a fatal error when --quiet
 			if (verbosity) {
+				unload_translation_file(&trfile);
 				return EXIT_FAILURE;
 			} else {
 				fprintf(stderr, "Disabling translation.\n");
@@ -470,12 +472,8 @@ int main(int argc, char **argv) {
 
 	} while (attrib.daemon); /* end of main program loop */
 
-// 	if (attrib.copris_flags & HAS_TRFILE) {
-// 		if (LOG_DEBUG) {
-// 			LOG_STRING("Unloading translation file.");
-// 		}
-// 		copris_unload_trfile(&trfile);
-// 	}
+	if (attrib.copris_flags & HAS_TRFILE)
+		unload_translation_file(&trfile);
 
 	utstring_free(copris_text);
 

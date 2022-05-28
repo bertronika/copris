@@ -12,9 +12,7 @@
 #	define BUFSIZE 16
 #endif
 
-// Maximum filename length
-//   Uncomment this line only if you want to manually set the limit, as
-//   it is otherwise set automatically using your systems' default value.
-//#define FNAME_LEN 36
+// Maximum lengths of name and value strings in .ini files
+#define MAX_INIFILE_ELEMENT_LENGTH 32
 
 #endif /* CONFIG_H */

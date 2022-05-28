@@ -1,8 +1,7 @@
 /*
- * translate.c
- * Text and markdown translation/conversion for printers
- * 
- * Copyright (C) 2020-2021 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Translation file handling and text conversion
+ *
+ * Copyright (C) 2020-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
@@ -10,10 +9,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <limits.h>
 #include <errno.h>
+#include <assert.h>
 
-#include <ini.h>    /* inih library - .ini file parser */
-#include <uthash.h> /* uthash library - hash table     */
+#include <ini.h>      /* inih library - .ini file parser  */
+#include <uthash.h>   /* uthash library - hash table      */
+#include <utstring.h> /* uthash library - dynamic strings */
 
 #include "Copris.h"
 #include "debug.h"
@@ -21,130 +24,184 @@
 #include "printerset.h"
 #include "utf8.h"
 
-static int handler(void *user, const char *section, const char *name,
-                   const char *value);
+static int inih_handler(void *, const char *, const char *, const char *);
+static int parse_value_to_binary(const char *, char *, int);
 
-int copris_loadtrfile(char *filename, struct Trfile **trfile) {
-	FILE *file;
-	int parse_error = 0;
-	int definition_count;
-
-	file = fopen(filename, "r");
-	if(file == NULL)
+bool load_translation_file(char *filename, struct Trfile **trfile) {
+	FILE *file = fopen(filename, "r");
+	if (file == NULL)
 		return raise_errno_perror(errno, "fopen", "Error opening translation file.");
 
-	if(log_debug()) {
-		log_date();
-		printf("Parsing '%s'.\n", filename);
+	if (LOG_DEBUG) {
+		LOG_LOCATION();
+		printf("Parsing translation file '%s':\n", filename);
 	}
 
 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*trfile = NULL;
 
-	parse_error = ini_parse_file(file, handler, trfile);
+	int parse_error = ini_parse_file(file, inih_handler, trfile);
 
-	// Negative return number - can be either:
-	// -1  Error opening file - we've already handled this
-	// -2  Memory allocation error - only if inih was built with INI_USE_STACK
-	if(parse_error < 0) {
-		fprintf(stderr, "inih: ini_malloc: Memory allocation error.\n");
-		return 2;
-	}
+	// If there's a parse error, break the one-time do-while loop and properly close the file
+	bool error = true;
+	do {
+		// Negative return number - can be either:
+		// -1  Error opening file - we've already handled this
+		// -2  Memory allocation error - only if inih was built with INI_USE_STACK
+		if (parse_error < 0) {
+			fprintf(stderr, "inih: ini_malloc: Memory allocation error.\n");
+			break;
+		}
 
-	// Positive return number - error on returned line number
-	if(parse_error) {
-		fprintf(stderr, "Error parsing translation file '%s', (first) fault on "
-		                "line %d.\n", filename, parse_error);
-		return 1;
-	}
+		// Positive return number - returned error is a line number
+		if (parse_error > 0) {
+			fprintf(stderr, "Error parsing translation file '%s', fault on line %d.\n",
+			                filename, parse_error);
+			break;
+		}
 
-	if(log_info()) {
-		definition_count = HASH_COUNT(*trfile);
-		log_date();
-		printf("Loaded translation file %s with %d definitions.\n", filename, definition_count);
-	}
+		if (LOG_INFO) {
+			int definition_count = HASH_COUNT(*trfile);
+			LOG_LOCATION();
+			printf("Loaded translation file '%s' with %d definitions.\n",
+			       filename, definition_count);
+		}
 
-	// Close the file
-	if(raise_perror(fclose(file), "close",
-	                "Failed to close the translation file after reading."))
-		return 1;
+		error = false;
+	} while (0);
 
-	return 0;
+	int tmperr = fclose(file);
+	if (raise_perror(tmperr, "close", "Failed to close the translation file."))
+		return true;
+
+	return error;
 }
 
-// [section]
-// name = value
-// key  = item
-// `Handler should return nonzero on success, zero on error.'
-static int handler(void *user, const char *section, const char *name,
-                   const char *value) {
-	char *parserr;   // String to integer conversion error
-	long temp_long;  // A temporary long integer
+/*
+ * [section]
+ * name = value  (inih library)
+ * key  = item   (uthash)
+ *
+ * `Handler should return nonzero on success, zero on error.'
+ */
+static int inih_handler(void *user, const char *section, const char *name,
+                   const char *value)
+{
+	struct Trfile **file = (struct Trfile**)user;  // Passed from caller
+	struct Trfile *s;                              // Local to this function
 	(void)section;
 
-	// Maximum name length can be 1 Unicode character
-	if(utf8_count_codepoints(name, 2) > 1) {
-		fprintf(stderr, "'%s': more than one character.\n", name);
-		return 0;
+	size_t name_len  = strlen(name);
+	size_t value_len = strlen(value);
+
+	if (name_len > MAX_INIFILE_ELEMENT_LENGTH || value_len > MAX_INIFILE_ELEMENT_LENGTH) {
+		fprintf(stderr, "Name or value length exceeds maximum of %zu bytes.\n",
+		        (size_t)MAX_INIFILE_ELEMENT_LENGTH);
+		return COPRIS_PARSE_FAILURE;
 	}
 
-	// Convert value to a temporary long and check for correctness
-	errno = 0;
-	temp_long = strtol(value, &parserr, 0);
-
-	if(raise_errno_perror(errno, "strtoul", "Error parsing number."))
-		return 0;
-
-	if(*parserr) {
-		fprintf(stderr, "'%s': unrecognised character(s).\n", parserr);
-		return 0;
+	if (name_len == 0 || value_len == 0) {
+		fprintf(stderr, "Found an entry with either no name or no value.\n");
+		return COPRIS_PARSE_FAILURE;
 	}
-
-	// Read value must fit in an unsigned char
-	if(temp_long < 0 || temp_long > 255) {
-		fprintf(stderr, "'%s': value out of bounds.\n", value);
-		return 0;
-	}
-
-	// Everything looks fine, insert into hash table.
-	// The unique parameter for the table is the name string.
-	struct Trfile **file = (struct Trfile**)user;
-	struct Trfile *s;
 
 	// Check for a duplicate key
 	HASH_FIND_STR(*file, name, s);
-	if(s == NULL) {
-		// Key doesn't exist, add it
-		s = malloc(sizeof(struct Trfile));
-		strcpy(s->in, name);
-		HASH_ADD_STR(*file, in, s);
-	} else {
-		if(log_error()) {
-			log_date();
+	if (s != NULL) {
+		if (LOG_ERROR) {
+			if (LOG_INFO)
+				LOG_LOCATION();
+
 			printf("Definition for '%s' appears more than once in translation file, "
-			       "overwriting old value.\n", name);
+			       "skipping new value.\n", name);
 		}
+		return COPRIS_PARSE_DUPLICATE;
 	}
 
-	// Item, however, can be assigned multiple times. Only the last
-	// definition will take effect!
-	s->out = (unsigned char)temp_long;
-
-	if(log_debug()) {
-		log_date();
-		printf("%1s = %-4s | %-3ld (%zu)\n", name, value, temp_long, strlen(name));
+	// Key doesn't exist, add it
+	s = malloc(sizeof *s);
+	if (s == NULL) {
+		fprintf(stderr, "Memory allocation error.\n");
+		return COPRIS_PARSE_FAILURE;
 	}
 
-	return 1;
+	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
+	int element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
+
+	// Check for a parse error
+	if (element_count == -1) {
+		free(s);
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	memccpy(s->in,  name, '\0', name_len + 1);
+	memcpy(s->out, parsed_value, element_count);
+	HASH_ADD_STR(*file, in, s);
+
+	if (LOG_DEBUG) {
+		LOG_LOCATION();
+		printf("parse:  %s (%zu) =>", s->in, name_len);
+
+		for (int i = 0; i < element_count; i++)
+			printf(" 0x%X", s->out[i]);
+
+		printf(" (%d)\n", element_count);
+	}
+
+	return COPRIS_PARSE_SUCCESS;
 }
 
-void copris_unload_trfile(struct Trfile **trfile) {
+static int parse_value_to_binary(const char *value, char *parsed_value, int length)
+{
+	const char *valuepos = value;
+	char *endptr;   // Remaining text to be converted
+	int i = 0;      // Parsed value iterator
+
+	while (*valuepos) {
+		errno = 0;
+		long temp_value = strtol(valuepos, &endptr, 0);
+
+		if (raise_errno_perror(errno, "strtol", "Error parsing number."))
+			return -1;
+
+		// Check if no conversion has been done
+		if (valuepos == endptr) {
+			if (LOG_DEBUG)
+				LOG_STRING("Found unrecognised characters.");
+			return -1;
+		}
+
+		// Check if characters are still remaining
+		if (*endptr && LOG_DEBUG) {
+			LOG_LOCATION();
+			printf("strtol: remaining: '%s'.\n", endptr);
+		}
+
+		// Check if value fits
+		if (temp_value < CHAR_MIN || temp_value > CHAR_MAX) {
+			fprintf(stderr, "'%s': value out of bounds.\n", value);
+			return -1;
+		}
+
+		parsed_value[i++] = temp_value;
+		valuepos = endptr;
+		assert(i <= length);
+	}
+	parsed_value[i] = '\0';
+
+	return i;
+}
+
+void unload_translation_file(struct Trfile **trfile) {
 	struct Trfile *definition;
 	struct Trfile *tmp;
 
+	if (LOG_DEBUG)
+		LOG_STRING("Unloading translation file.");
+
 	HASH_ITER(hh, *trfile, definition, tmp) {
-		HASH_DEL(*trfile, definition);  // Delete definition
-		free(definition);               // Free it
+		HASH_DEL(*trfile, definition);
+		free(definition);
 	}
 }
 
