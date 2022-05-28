@@ -86,7 +86,6 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 	if (raise_perror(fderror, "listen", "Failed to make socket passive."))
 		return true;
 
-
 	if (LOG_INFO) {
 		PRINT_LOCATION(stdout);
 
@@ -137,11 +136,12 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 		host_address = addr_unknown;
 	}
 
-	if (LOG_INFO)
-		PRINT_LOCATION(stdout);
+	if (LOG_ERROR) {
+		if (LOG_INFO)
+			PRINT_LOCATION(stdout);
 
-	if (LOG_ERROR)
 		printf("Inbound connection from %s (%s).\n", host_info, host_address);
+	}
 
 	// Read text from socket and process it
 	struct Stats stats = STATS_INIT;
@@ -154,10 +154,10 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 	if (raise_perror(fderror, "close", "Failed to close the child connection."))
 		return true;
 
-	if (LOG_INFO)
-		PRINT_LOCATION(stdout);
-
 	if (LOG_ERROR) {
+		if (LOG_INFO)
+			PRINT_LOCATION(stdout);
+
 		printf("End of stream, received %zu byte(s) in %d chunk(s)",
 		       stats.sum, stats.chunks);
 
@@ -219,16 +219,16 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 
 	if (!(attrib->copris_flags & MUST_CUTOFF)) {
 		// Discard whole chunk of text, if over the limit
-
 		stats->discarded = stats->sum;
 		utstring_clear(copris_text);
 
-		if (LOG_INFO)
-			PRINT_LOCATION(stdout);
+		if (LOG_ERROR) {
+			if (LOG_INFO)
+				PRINT_LOCATION(stdout);
 
-		if (LOG_ERROR)
 			printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
 			       "text and terminating connection.\n", stats->sum, attrib->limitnum);
+		}
 
 	} else {
 		// Cut off text at limit and remove any possible remains of multibyte characters,
@@ -241,12 +241,13 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 
 		bool terminated = utf8_terminate_incomplete_buffer(text, utstring_len(copris_text));
 
-		if (LOG_INFO)
-			PRINT_LOCATION(stdout);
+		if (LOG_ERROR) {
+			if (LOG_INFO)
+				PRINT_LOCATION(stdout);
 
-		if (LOG_ERROR)
 			printf("Client exceeded send size limit (%zu B/%zu B), cutting off text and "
 			       "terminating connection.\n", stats->sum, attrib->limitnum);
+		}
 
 		if (terminated && LOG_DEBUG)
 			PRINT_MSG("Additional multibyte characters were omitted from the output.");

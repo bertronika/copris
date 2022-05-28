@@ -105,12 +105,13 @@ static int inih_handler(void *user, const char *section, const char *name,
 	// Check for a duplicate key
 	HASH_FIND_STR(*file, name, s);
 	if (s != NULL) {
-		if (LOG_INFO)
-			PRINT_LOCATION(stdout);
+		if (LOG_ERROR) {
+			if (LOG_INFO)
+				PRINT_LOCATION(stdout);
 
-		if (LOG_ERROR)
 			PRINT_MSG("Definition for '%s' appears more than once in translation file, "
 			          "skipping new value.", name);
+		}
 
 		return COPRIS_PARSE_DUPLICATE;
 	}
