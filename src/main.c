@@ -250,13 +250,13 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case ':':
 			if (optopt == 'p')
-				PRINT_ERROR_MSG("Port number is missing.");
+				PRINT_ERROR_MSG("You must specify a port number.");
 			else if (optopt == 't')
-				PRINT_ERROR_MSG("Translation file is missing.");
+				PRINT_ERROR_MSG("You must specify a translation file.");
 			else if (optopt == 'r')
-				PRINT_ERROR_MSG("Printer set is missing.");
+				PRINT_ERROR_MSG("You must specify a printer set file.");
 			else if (optopt == 'l')
-				PRINT_ERROR_MSG("Limit number is missing.");
+				PRINT_ERROR_MSG("You must specify a limit number.");
 			else
 				PRINT_ERROR_MSG("Option '-%c' is missing an argument.", optopt);
 			return 1;
