@@ -59,7 +59,7 @@
  */
 int verbosity = 1;
 
-static void copris_help(char *copris_location) {
+static void copris_help(const char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
@@ -74,8 +74,7 @@ static void copris_help(char *copris_location) {
 	       "  -v, --verbose          Be verbose (-vv more)\n"
 	       "  -q, --quiet            Display nothing except fatal errors (to stderr)\n"
 	       "  -h, --help             Show this help\n"
-	       "  -V, --version          Show program version and included printer\n"
-	       "                         feature sets\n"
+	       "  -V, --version          Show program version and build-time options\n"
 	       "\n"
 	       "To read from stdin, omit the port argument. To echo data to stdout\n"
 	       "(console/terminal), omit the output file.\n"
