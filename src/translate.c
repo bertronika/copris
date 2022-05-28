@@ -109,8 +109,8 @@ static int inih_handler(void *user, const char *section, const char *name,
 			PRINT_LOCATION(stdout);
 
 		if (LOG_ERROR)
-			printf("Definition for '%s' appears more than once in translation file, "
-			       "skipping new value.\n", name);
+			PRINT_MSG("Definition for '%s' appears more than once in translation file, "
+			          "skipping new value.", name);
 
 		return COPRIS_PARSE_DUPLICATE;
 	}
