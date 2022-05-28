@@ -7,12 +7,6 @@
 
 #include "config.h"
 
-/*
- * Round backlog to a power of 2.
- * https://stackoverflow.com/a/5111841
- */
-#define BACKLOG 2
-
 #define HAS_DESTINATION (1 << 0)
 #define HAS_TRFILE      (1 << 1)
 #define HAS_PRSET       (1 << 2)
