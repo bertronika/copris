@@ -131,7 +131,7 @@ static int inih_handler(void *user, const char *section, const char *name,
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	memccpy(s->in,  name, '\0', name_len + 1);
+	memcpy(s->in,  name, name_len + 1);
 	memcpy(s->out, parsed_value, element_count);
 	HASH_ADD_STR(*file, in, s);
 
