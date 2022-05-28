@@ -28,17 +28,16 @@ bool copris_write_file(const char *dest, UT_string *copris_text) {
 		return raise_errno_perror(errno, "fopen", "Failed to open output file.");
 		
 	if (LOG_DEBUG)
-		LOG_STRING("Output file opened.");
+		PRINT_MSG("Output file opened.");
 
 	size_t written_text_length = fwrite(utstring_body(copris_text), 1, text_length, file_ptr);
 
 	if (written_text_length < text_length) {
-		fprintf(stderr, "fwrite: Failure while appending to output file; "
-		                "not enough bytes transferred.\n");
+		PRINT_ERROR_MSG("fwrite: Failure while appending to output file; "
+		                "not enough bytes transferred.");
 		error = true;
 	} else if (LOG_INFO) {
-		LOG_LOCATION();
-		printf("Appended %zu byte(s) to %s.\n", written_text_length, dest);
+		PRINT_MSG("Appended %zu byte(s) to %s.", written_text_length, dest);
 	}
 
 	// Flush streams to file and close it
@@ -47,7 +46,7 @@ bool copris_write_file(const char *dest, UT_string *copris_text) {
 		return true;
 
 	if (LOG_DEBUG)
-		LOG_STRING("Output file closed.");
+		PRINT_MSG("Output file closed.");
 	
 	return error;
 }

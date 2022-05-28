@@ -52,7 +52,7 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 		return true;
 
 	if (LOG_DEBUG)
-		LOG_STRING("Socket endpoint created.");
+		PRINT_MSG("Socket endpoint created.");
 
 	/*
 	 * A hack from tcpserver.c:87
@@ -78,7 +78,7 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 		return true;
 
 	if (LOG_DEBUG)
-		LOG_STRING("Socket bound to address.");
+		PRINT_MSG("Socket bound to address.");
 
 	// Make the parent socket passive - accept incoming connections.
 	// Limit number of connections to the value of BACKLOG.
@@ -86,12 +86,14 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 	if (raise_perror(fderror, "listen", "Failed to make socket passive."))
 		return true;
 
+
 	if (LOG_INFO) {
-		LOG_LOCATION();
-		if (LOG_DEBUG) {
+		PRINT_LOCATION(stdout);
+
+		if (LOG_DEBUG)
 			printf("Socket made passive. ");
-		}
-		printf("Now we listen...\n");
+
+		puts("Now we listen...");
 	}
 
 	// No error reported.
@@ -110,7 +112,7 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 		return true;
 
 	if (LOG_DEBUG)
-		LOG_STRING("Connection to socket accepted.");
+		PRINT_MSG("Connection to socket accepted.");
 
 	// Prevent more than one connection if not a daemon
 	if (!attrib->daemon) {
@@ -131,12 +133,12 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 	char *host_address = inet_ntoa(clientaddr.sin_addr);
 	char addr_unknown[] = "<address unknown>";
 	if (host_address == NULL) {
-		fprintf(stderr, "inet_ntoa: Failed converting host's address to dotted decimal.\n");
+		PRINT_ERROR_MSG("inet_ntoa: Failed converting host's address to dotted decimal.\n");
 		host_address = addr_unknown;
 	}
 
 	if (LOG_INFO)
-		LOG_LOCATION();
+		PRINT_LOCATION(stdout);
 
 	if (LOG_ERROR)
 		printf("Inbound connection from %s (%s).\n", host_info, host_address);
@@ -153,11 +155,11 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 		return true;
 
 	if (LOG_INFO)
-		LOG_LOCATION();
+		PRINT_LOCATION(stdout);
 
 	if (LOG_ERROR) {
 		printf("End of stream, received %zu byte(s) in %d chunk(s)",
-			   stats.sum, stats.chunks);
+		       stats.sum, stats.chunks);
 
 		if (stats.size_limit_active) {
 			printf(", %zu byte(s) %s.\n", stats.discarded,
@@ -167,10 +169,8 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 		}
 	}
 
-	if (LOG_INFO) {
-		LOG_LOCATION();
-		printf("Connection from %s (%s) closed.\n", host_info, host_address);
-	}
+	if (LOG_INFO)
+		PRINT_MSG("Connection from %s (%s) closed.", host_info, host_address);
 
 	// No error reported.
 	return false;
@@ -224,7 +224,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 		utstring_clear(copris_text);
 
 		if (LOG_INFO)
-			LOG_LOCATION();
+			PRINT_LOCATION(stdout);
 
 		if (LOG_ERROR)
 			printf("Client exceeded send size limit (%zu B/%zu B), discarding remaining "
@@ -242,13 +242,13 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 		bool terminated = utf8_terminate_incomplete_buffer(text, utstring_len(copris_text));
 
 		if (LOG_INFO)
-			LOG_LOCATION();
+			PRINT_LOCATION(stdout);
 
 		if (LOG_ERROR)
 			printf("Client exceeded send size limit (%zu B/%zu B), cutting off text and "
 			       "terminating connection.\n", stats->sum, attrib->limitnum);
 
 		if (terminated && LOG_DEBUG)
-			LOG_STRING("Additional multibyte characters were omitted from the output.");
+			PRINT_MSG("Additional multibyte characters were omitted from the output.");
 	}
 }

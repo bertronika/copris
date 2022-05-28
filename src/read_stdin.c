@@ -23,7 +23,7 @@ static bool read_from_stdin(UT_string *copris_text, struct Stats *stats);
 
 bool copris_handle_stdin(UT_string *copris_text) {
 	if (LOG_INFO)
-		LOG_STRING("Trying to read from stdin...");
+		PRINT_MSG("Trying to read from stdin...");
 
 	// Check if Copris is invoked standalone, outside of a pipe. That is usually
 	// unwanted, since the user has specified reading from stdin, and the only
@@ -31,8 +31,8 @@ bool copris_handle_stdin(UT_string *copris_text) {
 	errno = 0;
 	if (LOG_ERROR && isatty(STDIN_FILENO)) {
 		raise_errno_perror(errno, "isatty", "Error determining input terminal.");
-		LOG_NOTE("You are in text input mode (reading from "
-		         "stdin). To stop reading, press Ctrl+D.");
+		PRINT_NOTE("You are in text input mode (reading from "
+		           "stdin). To stop reading, press Ctrl+D.");
 	}
 
 	// Read text from standard input, print a note if only EOF has been received
@@ -40,14 +40,13 @@ bool copris_handle_stdin(UT_string *copris_text) {
 	bool no_text_read = read_from_stdin(copris_text, &stats);
 
 	if (no_text_read && LOG_ERROR)
-		LOG_NOTE("No text has been read!");
+		PRINT_NOTE("No text has been read!");
 
-	if (LOG_ERROR) {
-		if (LOG_INFO)
-			LOG_LOCATION();
+	if (LOG_INFO)
+		PRINT_LOCATION(stdout);
 
+	if (LOG_ERROR)
 		printf("Received %zu byte(s) in %d chunk(s) from stdin.\n", stats.sum, stats.chunks);
-	}
 
 	// Return true if no text has been read
 	return no_text_read;

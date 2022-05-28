@@ -44,23 +44,38 @@ int log_debug();
 #define LOG_INFO  (verbosity > 1)
 #define LOG_DEBUG (verbosity > 2)
 
+#define _PRINT_MSG(output, ...)              \
+    fprintf(output, __VA_ARGS__);            \
+    fputs("\n", output)
+
 #ifdef DEBUG
-#	define LOG_LOCATION()  (printf("%*s:%3d: ",     MAX_FILENAME_LENGTH, __FILE__, __LINE__     ))
-#	define LOG_STRING(str) (printf("%*s:%3d: %s\n", MAX_FILENAME_LENGTH, __FILE__, __LINE__, str))
+#   define PRINT_LOCATION(output)            \
+           fprintf(output, "%*s:%3d: ", MAX_FILENAME_LENGTH, __FILE__, __LINE__)
+#   define PRINT_MSG(...)                    \
+        do {                                 \
+            PRINT_LOCATION(stdout);          \
+            _PRINT_MSG(stdout, __VA_ARGS__); \
+        } while (0)
+#   define PRINT_ERROR_MSG(...)              \
+        do {                                 \
+           PRINT_LOCATION(stderr);           \
+           _PRINT_MSG(stderr, __VA_ARGS__);  \
+        } while (0)
 #else
-#	define LOG_LOCATION()  ((void)0)
-#	define LOG_STRING(str) (fputs(str, stdout))
+#   define PRINT_LOCATION(output) ((void)0)
+#   define PRINT_MSG(...)         do { _PRINT_MSG(stdout, __VA_ARGS__); } while (0)
+#   define PRINT_ERROR_MSG(...)   do { _PRINT_MSG(stderr, __VA_ARGS__); } while (0)
 #endif
 
-#define LOG_NOTE(str)                \
+#define PRINT_NOTE(str)              \
     do {                             \
         if (LOG_INFO)                \
-            LOG_LOCATION();          \
+            PRINT_LOCATION(stdout);  \
         else                         \
             fputs("Note: ", stdout); \
                                      \
         puts(str);                   \
-    } while (0);
+    } while (0)
 
 /*
  * Print current date and time in a custom format, without a newline character at the end.

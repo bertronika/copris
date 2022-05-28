@@ -32,10 +32,8 @@ bool load_translation_file(char *filename, struct Trfile **trfile) {
 	if (file == NULL)
 		return raise_errno_perror(errno, "fopen", "Error opening translation file.");
 
-	if (LOG_DEBUG) {
-		LOG_LOCATION();
-		printf("Parsing translation file '%s':\n", filename);
-	}
+	if (LOG_DEBUG)
+		PRINT_MSG("Parsing translation file '%s':", filename);
 
 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*trfile = NULL;
@@ -49,22 +47,21 @@ bool load_translation_file(char *filename, struct Trfile **trfile) {
 		// -1  Error opening file - we've already handled this
 		// -2  Memory allocation error - only if inih was built with INI_USE_STACK
 		if (parse_error < 0) {
-			fprintf(stderr, "inih: ini_malloc: Memory allocation error.\n");
+			PRINT_ERROR_MSG("inih: ini_malloc: Memory allocation error.");
 			break;
 		}
 
 		// Positive return number - returned error is a line number
 		if (parse_error > 0) {
-			fprintf(stderr, "Error parsing translation file '%s', fault on line %d.\n",
+			PRINT_ERROR_MSG("Error parsing translation file '%s', fault on line %d.",
 			                filename, parse_error);
 			break;
 		}
 
 		if (LOG_INFO) {
 			int definition_count = HASH_COUNT(*trfile);
-			LOG_LOCATION();
-			printf("Loaded translation file '%s' with %d definitions.\n",
-			       filename, definition_count);
+			PRINT_MSG("Loaded translation file '%s' with %d definitions.",
+			          filename, definition_count);
 		}
 
 		error = false;
@@ -95,33 +92,33 @@ static int inih_handler(void *user, const char *section, const char *name,
 	size_t value_len = strlen(value);
 
 	if (name_len > MAX_INIFILE_ELEMENT_LENGTH || value_len > MAX_INIFILE_ELEMENT_LENGTH) {
-		fprintf(stderr, "Name or value length exceeds maximum of %zu bytes.\n",
-		        (size_t)MAX_INIFILE_ELEMENT_LENGTH);
+		PRINT_ERROR_MSG("Name or value length exceeds maximum of %zu bytes.",
+		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
 
 	if (name_len == 0 || value_len == 0) {
-		fprintf(stderr, "Found an entry with either no name or no value.\n");
+		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
 		return COPRIS_PARSE_FAILURE;
 	}
 
 	// Check for a duplicate key
 	HASH_FIND_STR(*file, name, s);
 	if (s != NULL) {
-		if (LOG_ERROR) {
-			if (LOG_INFO)
-				LOG_LOCATION();
+		if (LOG_INFO)
+			PRINT_LOCATION(stdout);
 
+		if (LOG_ERROR)
 			printf("Definition for '%s' appears more than once in translation file, "
 			       "skipping new value.\n", name);
-		}
+
 		return COPRIS_PARSE_DUPLICATE;
 	}
 
 	// Key doesn't exist, add it
 	s = malloc(sizeof *s);
 	if (s == NULL) {
-		fprintf(stderr, "Memory allocation error.\n");
+		PRINT_ERROR_MSG("Memory allocation error.");
 		return COPRIS_PARSE_FAILURE;
 	}
 
@@ -139,7 +136,7 @@ static int inih_handler(void *user, const char *section, const char *name,
 	HASH_ADD_STR(*file, in, s);
 
 	if (LOG_DEBUG) {
-		LOG_LOCATION();
+		PRINT_LOCATION(stdout);
 		printf("parse:  %s (%zu) =>", s->in, name_len);
 
 		for (int i = 0; i < element_count; i++)
@@ -167,19 +164,18 @@ static int parse_value_to_binary(const char *value, char *parsed_value, int leng
 		// Check if no conversion has been done
 		if (valuepos == endptr) {
 			if (LOG_DEBUG)
-				LOG_STRING("Found unrecognised characters.");
+				PRINT_MSG("Found unrecognised characters.");
+
 			return -1;
 		}
 
 		// Check if characters are still remaining
-		if (*endptr && LOG_DEBUG) {
-			LOG_LOCATION();
-			printf("strtol: remaining: '%s'.\n", endptr);
-		}
+		if (*endptr && LOG_DEBUG)
+			PRINT_MSG("strtol: remaining: '%s'.", endptr);
 
 		// Check if value fits
 		if (temp_value < CHAR_MIN || temp_value > CHAR_MAX) {
-			fprintf(stderr, "'%s': value out of bounds.\n", value);
+			PRINT_ERROR_MSG("'%s': value out of bounds.", value);
 			return -1;
 		}
 
@@ -197,7 +193,7 @@ void unload_translation_file(struct Trfile **trfile) {
 	struct Trfile *tmp;
 
 	if (LOG_DEBUG)
-		LOG_STRING("Unloading translation file.");
+		PRINT_MSG("Unloading translation file.");
 
 	HASH_ITER(hh, *trfile, definition, tmp) {
 		HASH_DEL(*trfile, definition);

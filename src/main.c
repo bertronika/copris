@@ -45,9 +45,9 @@
 #define STRINGIFY(str) _STRINGIFY(str)
 
 #ifndef WITHOUT_CMARK
-#	define MARKDOWN_SUPPORT "yes"
+#   define MARKDOWN_SUPPORT "yes"
 #else
-#	define MARKDOWN_SUPPORT "no"
+#   define MARKDOWN_SUPPORT "no"
 #endif
 
 /*
@@ -138,11 +138,11 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 
 			if (*parserr) {
-				fprintf(stderr, "Unrecognised characters in port number (%s). ", parserr);
 				if (*parserr == '-')
-					fprintf(stderr, "Perhaps you forgot to specify the number?\n");
+					PRINT_ERROR_MSG("Unrecognised characters in port number (%s). "
+					                "Perhaps you forgot to specify the number?", parserr);
 				else
-					fprintf(stderr, "\n");
+					PRINT_ERROR_MSG("Unrecognised characters in port number (%s).", parserr);
 
 				return 1;
 			}
@@ -150,7 +150,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			// If user specifies a negative port number, it overflows the unsigned long.
 			// To prevent displaying a big number, display the entered string instead.
 			if (temp_portno > 65535 || temp_portno < 1) {
-				fprintf(stderr, "Port number %s out of reasonable range.\n", optarg);
+				PRINT_ERROR_MSG("Port number %s out of reasonable range.", optarg);
 				return 1;
 			}
 
@@ -161,8 +161,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case 't':
 			if (*optarg == '-') {
-				fprintf(stderr, "Unrecognised characters in translation file name (%s). "
-				                "Perhaps you forgot to specify the file?\n", optarg);
+				PRINT_ERROR_MSG("Unrecognised characters in translation file name (%s). "
+				                "Perhaps you forgot to specify the file?", optarg);
 				return 1;
 			}
 
@@ -176,7 +176,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 			// TODO: is this check necessary after checking pathconf for errors?
 			if (strlen(optarg) >= max_path_len) {
-				fprintf(stderr, "Translation file's name is too long.\n");
+				PRINT_ERROR_MSG("Translation file's name is too long.");
 				return 1;
 			}
 
@@ -186,8 +186,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 'r':
 #ifndef WITHOUT_CMARK
 			if (*optarg == '-') {
-				fprintf(stderr, "Unrecognised character in printer set name (%s). "
-				                "Perhaps you forgot to specify the set?\n", optarg);
+				PRINT_ERROR_MSG("Unrecognised character in printer set name (%s). "
+				                "Perhaps you forgot to specify the set?", optarg);
 				return 1;
 			}
 
@@ -196,14 +196,14 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				attrib->copris_flags |= HAS_PRSET;
 			} else {
 				// Excessive length already makes it wrong
-				fprintf(stderr, "Selected printer feature set does not exist (%s).\n", optarg);
+				PRINT_ERROR_MSG("Selected printer feature set does not exist (%s).", optarg);
 				return 1;
 			}
 #else
-			fprintf(stderr, "Option `-r|--printerset' isn't available in this "
-			                "release of COPRIS\n"
-			                "(printer feature sets were omitted with `-DWITHOUT_CMARK' "
-			                "at build time).\n");
+			PRINT_ERROR_MSG("Option `-r|--printerset' isn't available in this "
+			                "release of COPRIS -- "
+			                "printer feature sets were omitted with `-DWITHOUT_CMARK' "
+			                "at build time.");
 			return 1;
 #endif
 			break;
@@ -216,16 +216,18 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 
 			if (*parserr) {
-				fprintf(stderr, "Unrecognised characters in limit number (%s). ", parserr);
 				if (*parserr == '-')
-					fprintf(stderr, "Perhaps you forgot to specify the number?\n");
+					PRINT_ERROR_MSG("Unrecognised characters in limit number (%s). "
+					                "Perhaps you forgot to specify the number?", parserr);
+				else
+					PRINT_ERROR_MSG("Unrecognised characters in limit number (%s).", parserr);
 
 				return 1;
 			}
 
 			if (temp_limit > INT_MAX) {
-				fprintf(stderr, "Limit number %s out of range. Maximum possible "
-				                "value is %d (bytes).\n", optarg, INT_MAX);
+				PRINT_ERROR_MSG("Limit number %s out of range. Maximum possible "
+				                "value is %d (bytes).", optarg, INT_MAX);
 				return 1;
 			}
 
@@ -249,24 +251,24 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		case ':':
 			if (optopt == 'p')
-				fprintf(stderr, "Port number is missing.\n");
+				PRINT_ERROR_MSG("Port number is missing.");
 			else if (optopt == 't')
-				fprintf(stderr, "Translation file is missing.\n");
+				PRINT_ERROR_MSG("Translation file is missing.");
 			else if (optopt == 'r')
-				fprintf(stderr, "Printer set is missing.\n");
+				PRINT_ERROR_MSG("Printer set is missing.");
 			else if (optopt == 'l')
-				fprintf(stderr, "Limit number is missing.\n");
+				PRINT_ERROR_MSG("Limit number is missing.");
 			else
-				fprintf(stderr, "Option '-%c' is missing an argument.\n", optopt);
+				PRINT_ERROR_MSG("Option '-%c' is missing an argument.", optopt);
 			return 1;
 		case '?':
 			if (optopt == 0)
-				fprintf(stderr, "Option '%s' not recognised.\n", argv[optind - 1]);
+				PRINT_ERROR_MSG("Option '%s' not recognised.", argv[optind - 1]);
 			else
-				fprintf(stderr, "Option '-%c' not recognised.\n", optopt);
+				PRINT_ERROR_MSG("Option '-%c' not recognised.", optopt);
 			return 1;
 		default:
-			fprintf(stderr, "Getopt returned an unknown character code 0x%x.\n", c);
+			PRINT_ERROR_MSG("Getopt returned an unknown character code 0x%X.", c);
 			return 2;
 		}
 	} /* end of getopt */
@@ -284,13 +286,13 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 		// TODO: is this check necessary after checking pathconf for errors?
 		if (strlen(argv[optind]) >= max_path_len) {
-			fprintf(stderr, "Destination filename is too long.\n");
+			PRINT_ERROR_MSG("Destination filename is too long.");
 			return 1;
 		}
 
 		int ferror = access(argv[optind], W_OK);
 		if (raise_perror(ferror, "access", "Unable to write to output file/printer. Does "
-		                                  "it exist, with appropriate permissions?"))
+		                                   "it exist, with appropriate permissions?"))
 			return 1;
 
 		attrib->destination = argv[optind];
@@ -300,7 +302,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Check for multiple destination arguments
 	if ((attrib->copris_flags & HAS_DESTINATION) && argv[++optind]) {
 		if (LOG_ERROR)
-			LOG_NOTE("Only the first destination file name will be used.");
+			PRINT_NOTE("Only the first destination file name will be used.");
 	}
 
 	return 0;
@@ -330,19 +332,15 @@ int main(int argc, char **argv) {
 	if (error)
 		return error;
 
-	if (LOG_DEBUG) {
-		LOG_LOCATION();
-		printf("COPRIS started with PID %d\n", getpid());
-	}
+	if (LOG_DEBUG)
+		PRINT_MSG("COPRIS started with PID %d.", getpid());
 
 	if (argc < 2 && LOG_ERROR)
-		LOG_NOTE("COPRIS won't do much without any arguments. "
-                 "Try using the '--help' option.");
+		PRINT_NOTE("COPRIS won't do much without any arguments. "
+                   "Try using the '--help' option.");
 
-	if (LOG_INFO) {
-		LOG_LOCATION();
-		printf("Verbosity level set to %d.\n", verbosity);
-	}
+	if (LOG_INFO)
+		PRINT_MSG("Verbosity level set to %d.", verbosity);
 
 	// If no port number was specified by the user, assume input from stdin
 	bool is_stdin = false;
@@ -350,17 +348,17 @@ int main(int argc, char **argv) {
 		is_stdin = true;
 
 	if (attrib.limitnum && is_stdin && LOG_ERROR)
-		LOG_NOTE("Limit number not used while reading from stdin.");
+		PRINT_NOTE("Limit number not used while reading from stdin.");
 
 	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
 		attrib.daemon = 0;
 		if (LOG_ERROR)
-			LOG_NOTE("Daemon mode not available while reading from stdin.");
+			PRINT_NOTE("Daemon mode not available while reading from stdin.");
 	}
 
 	if (attrib.daemon && LOG_DEBUG)
-		LOG_STRING("Daemon mode enabled.");
+		PRINT_MSG("Daemon mode enabled.");
 
 #ifndef WITHOUT_CMARK
 	// Parsing and loading printer feature definitions
@@ -390,24 +388,20 @@ int main(int argc, char **argv) {
 				unload_translation_file(&trfile);
 				return EXIT_FAILURE;
 			} else {
-				fprintf(stderr, "Disabling translation.\n");
+				PRINT_ERROR_MSG("Disabling translation.");
 				attrib.copris_flags &= ~HAS_TRFILE;
 			}
 		}
 	}
 	
-	if (attrib.limitnum > 0 && LOG_DEBUG) {
-		LOG_LOCATION();
-		printf("Limiting incoming data to %zu bytes.\n", attrib.limitnum);
-	}
+	if (attrib.limitnum > 0 && LOG_DEBUG)
+		PRINT_MSG("Limiting incoming data to %zu bytes.", attrib.limitnum);
 	
-	if (!is_stdin && LOG_DEBUG) {
-		LOG_LOCATION();
-		printf("Server is listening to port %u.\n", attrib.portno);
-	}
+	if (!is_stdin && LOG_DEBUG)
+		PRINT_MSG("Server is listening to port %u.", attrib.portno);
 	
 	if (LOG_INFO) {
-		LOG_LOCATION();
+		PRINT_LOCATION(stdout);
 		printf("Data stream will be sent to ");
 		if (attrib.copris_flags & HAS_DESTINATION)
 			printf("%s.\n", attrib.destination);
@@ -478,7 +472,7 @@ int main(int argc, char **argv) {
 	utstring_free(copris_text);
 
 	if (!is_stdin && LOG_DEBUG)
-		LOG_STRING("Not running as a daemon, exiting.");
+		PRINT_MSG("Not running as a daemon, exiting.");
 
 	return 0;
 }
