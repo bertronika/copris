@@ -312,16 +312,10 @@ int main(int argc, char **argv) {
 	// Run-time options (program attributes)
 	struct Attribs attrib;
 
-	// Translation file hash structure
-	struct Trfile *trfile;
+	// Translation file and printer set hash structures
+	struct Inifile *trfile, *prset;
 
-	// Printer set hash structure
-	struct Prset *prset;
-
-	// Input text, passed between functions
-	UT_string *copris_text;
-
-	attrib.portno       = 0;  // 0 -> input from stdin, >0 -> actual port number
+	attrib.portno       = 0;  // If 0, read from stdin
 	attrib.prset        = -1;
 	attrib.daemon       = 0;
 	attrib.limitnum     = 0;
@@ -417,7 +411,8 @@ int main(int argc, char **argv) {
 			return EXIT_FAILURE;
 	}
 
-	// Create a string for the input text
+	// Create a string for the input text, passed between functions
+	UT_string *copris_text;
 	utstring_new(copris_text);
 
 	// Run the main program loop

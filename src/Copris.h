@@ -41,16 +41,10 @@ static const struct Stats STATS_INIT = {
 	0, 0, false, 0
 };
 
-struct Trfile {
-// 	char in[5];        /* key (name)   */
-// 	unsigned char out; /* item (value) */
+struct Inifile {
+	char in[MAX_INIFILE_ELEMENT_LENGTH];   /* key (name)   */
+	char out[MAX_INIFILE_ELEMENT_LENGTH];  /* item (value) */
 	UT_hash_handle hh;
-
-	// Input key holds at most one 4-byte Unicode
-	// character and 1 terminating NUL byte.
-
-	char in[MAX_INIFILE_ELEMENT_LENGTH];
-	char out[MAX_INIFILE_ELEMENT_LENGTH];
 };
 
 struct Prset {

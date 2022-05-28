@@ -27,7 +27,7 @@
 static int inih_handler(void *, const char *, const char *, const char *);
 static int parse_value_to_binary(const char *, char *, int);
 
-bool load_translation_file(char *filename, struct Trfile **trfile) {
+bool load_translation_file(char *filename, struct Inifile **trfile) {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL)
 		return raise_errno_perror(errno, "fopen", "Error opening translation file.");
@@ -84,8 +84,8 @@ bool load_translation_file(char *filename, struct Trfile **trfile) {
 static int inih_handler(void *user, const char *section, const char *name,
                    const char *value)
 {
-	struct Trfile **file = (struct Trfile**)user;  // Passed from caller
-	struct Trfile *s;                              // Local to this function
+	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
+	struct Inifile *s;                               // Local to this function
 	(void)section;
 
 	size_t name_len  = strlen(name);
@@ -188,9 +188,9 @@ static int parse_value_to_binary(const char *value, char *parsed_value, int leng
 	return i;
 }
 
-void unload_translation_file(struct Trfile **trfile) {
-	struct Trfile *definition;
-	struct Trfile *tmp;
+void unload_translation_file(struct Inifile **trfile) {
+	struct Inifile *definition;
+	struct Inifile *tmp;
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Unloading translation file.");
@@ -205,7 +205,7 @@ void unload_translation_file(struct Trfile **trfile) {
 // string won't contain them - every translated character is exactly one byte long.
 // If there's a multibyte character in the input that doesn't have a definition,
 // it'll get fully copied without any modifications.
-char *copris_translate(char *source, int source_len, struct Trfile **trfile) {
+char *copris_translate(char *source, int source_len, struct Inifile **trfile) {
 	// A duplicate copy of input string
 	errno = 0;
 	char *tr_source = strdup(source);
@@ -226,7 +226,7 @@ char *copris_translate(char *source, int source_len, struct Trfile **trfile) {
 	}
 	tr_string[0] = '\0';
 
-	struct Trfile *s;
+	struct Inifile *s;
 
 	int src_i  = 0; // Source string iterator
 	int insp_i = 0; // Inspected char iterator
