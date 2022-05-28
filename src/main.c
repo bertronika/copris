@@ -439,9 +439,8 @@ int main(int argc, char **argv) {
 		if (attrib.copris_flags & HAS_DESTINATION) {
 			copris_write_file(attrib.destination, copris_text);
 		} else {
-			// Print Beginning-/End-Of-Stream markers if output isn't a file
 			if (LOG_ERROR)
-				puts("; BOS");
+				puts("; BST"); // Begin-Stream-Transcript
 
 			fputs(utstring_body(copris_text), stdout);
 
@@ -451,7 +450,7 @@ int main(int argc, char **argv) {
 				if(processed_text[text_length - 1] != '\n')
 					puts("");
 
-				puts("; EOS");
+				puts("; EST"); // End-Stream-Transcript
 			}
 		}
 
