@@ -23,9 +23,9 @@
 #include "translate.h"
 #include "printerset.h"
 #include "utf8.h"
+#include "parse_value.h"
 
 static int inih_handler(void *, const char *, const char *, const char *);
-static int parse_value_to_binary(const char *, char *, int);
 
 bool load_translation_file(char *filename, struct Inifile **trfile) {
 	FILE *file = fopen(filename, "r");
@@ -81,8 +81,6 @@ bool load_translation_file(char *filename, struct Inifile **trfile) {
  */
 static int inih_handler(void *user, const char *section, const char *name, const char *value)
 {
-	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
-	struct Inifile *s;                               // Local to this function
 	(void)section;
 
 	size_t name_len  = strlen(name);
@@ -104,7 +102,10 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	// Check for a duplicate key
+	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
+	struct Inifile *s;                               // Local to this function
+
+	// Check if this 'name' already exists
 	HASH_FIND_STR(*file, name, s);
 	if (s != NULL) {
 		if (LOG_ERROR) {
@@ -150,58 +151,19 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-static int parse_value_to_binary(const char *value, char *parsed_value, int length)
-{
-	const char *valuepos = value;
-	char *endptr;   // Remaining text to be converted
-	int i = 0;      // Parsed value iterator
-
-	while (*valuepos) {
-		errno = 0;
-		long temp_value = strtol(valuepos, &endptr, 0);
-
-		if (raise_errno_perror(errno, "strtol", "Error parsing number."))
-			return -1;
-
-		// Check if no conversion has been done
-		if (valuepos == endptr) {
-			if (LOG_DEBUG)
-				PRINT_MSG("Found unrecognised characters.");
-
-			return -1;
-		}
-
-		// Check if characters are still remaining
-		//if (*endptr && LOG_DEBUG)
-			//PRINT_MSG("strtol: remaining: '%s'.", endptr);
-
-		// Check if value fits
-		if (temp_value < CHAR_MIN || temp_value > CHAR_MAX) {
-			PRINT_ERROR_MSG("'%s': value out of bounds.", value);
-			return -1;
-		}
-
-		parsed_value[i++] = temp_value;
-		valuepos = endptr;
-		assert(i <= length);
-	}
-	parsed_value[i] = '\0';
-
-	// Return number of parsed bytes
-	return i;
-}
-
 void unload_translation_file(struct Inifile **trfile) {
 	struct Inifile *definition;
 	struct Inifile *tmp;
-
-	if (LOG_DEBUG)
-		PRINT_MSG("Unloading translation file.");
+	int count = 0;
 
 	HASH_ITER(hh, *trfile, definition, tmp) {
 		HASH_DEL(*trfile, definition);
 		free(definition);
+		count++;
 	}
+
+	if (LOG_DEBUG)
+		PRINT_MSG("Unloaded translation file (count = %d).", count);
 }
 
 void translate_text(UT_string *copris_text, struct Inifile **trfile)

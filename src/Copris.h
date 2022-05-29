@@ -14,12 +14,11 @@
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */
-	int prset;           /* Parsed printer set index number                */
 	bool daemon;         /* Run continuously                               */
 	size_t limitnum;     /* Limit received number of bytes                 */
 
 	int copris_flags;    /* Flags regarding user-specified arguments:      */
-	char *prsetname;     /* Printer feature set name                       */
+	char *prset;         /* Printer feature set name                       */
 	char *trfile;        /* Translation file location                      */
 	char *destination;   /* Output file (printer)                          */
 };
@@ -38,12 +37,6 @@ static const struct Stats STATS_INIT = {
 struct Inifile {
 	char in[MAX_INIFILE_ELEMENT_LENGTH];   /* key (name)   */
 	char out[MAX_INIFILE_ELEMENT_LENGTH];  /* item (value) */
-	UT_hash_handle hh;
-};
-
-struct Prset {
-	char code[20];
-	char command[10];
 	UT_hash_handle hh;
 };
 

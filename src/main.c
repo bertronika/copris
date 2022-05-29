@@ -164,21 +164,21 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				                "Perhaps you forgot to specify the file?", optarg);
 				return 1;
 			}
+			{
+				// Get the maximum path name length on the filesystem where
+				// the file resides.
+				errno = 0;
+				size_t max_path_len = (size_t)pathconf(optarg, _PC_PATH_MAX);
 
-			// Get the maximum path name length on the filesystem where
-			// the trfile resides.
-			errno = 0;
-			size_t max_path_len = (size_t)pathconf(optarg, _PC_PATH_MAX);
+				if (raise_errno_perror(errno, "pathconf", "Error querying translation file."))
+					return 1;
 
-			if (raise_errno_perror(errno, "pathconf", "Error querying translation file."))
-				return 1;
-
-			// TODO: is this check necessary after checking pathconf for errors?
-			if (strlen(optarg) >= max_path_len) {
-				PRINT_ERROR_MSG("Translation file's name is too long.");
-				return 1;
+				// TODO: is this check necessary after checking pathconf for errors?
+				if (strlen(optarg) >= max_path_len) {
+					PRINT_ERROR_MSG("Translation file's name is too long.");
+					return 1;
+				}
 			}
-
 			attrib->trfile = optarg;
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
@@ -189,15 +189,23 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				                "Perhaps you forgot to specify the set?", optarg);
 				return 1;
 			}
+			{
+				// Get the maximum path name length on the filesystem where
+				// the file resides.
+				errno = 0;
+				size_t max_path_len = (size_t)pathconf(optarg, _PC_PATH_MAX);
 
-			if (strlen(optarg) <= PRSET_LEN) {
-				attrib->prsetname = optarg;
-				attrib->copris_flags |= HAS_PRSET;
-			} else {
-				// Excessive length already makes it wrong
-				PRINT_ERROR_MSG("Selected printer feature set does not exist (%s).", optarg);
-				return 1;
+				if (raise_errno_perror(errno, "pathconf", "Error querying printer set file."))
+					return 1;
+
+				// TODO: is this check necessary after checking pathconf for errors?
+				if (strlen(optarg) >= max_path_len) {
+					PRINT_ERROR_MSG("Printer set file's name is too long.");
+					return 1;
+				}
 			}
+			attrib->prset = optarg;
+			attrib->copris_flags |= HAS_PRSET;
 #else
 			PRINT_ERROR_MSG("Option `-r|--printerset' isn't available in this "
 			                "release of COPRIS -- "
@@ -313,7 +321,6 @@ int main(int argc, char **argv) {
 	struct Inifile *trfile, *prset;
 
 	attrib.portno       = 0;  // If 0, read from stdin
-	attrib.prset        = -1;
 	attrib.daemon       = 0;
 	attrib.limitnum     = 0;
 	attrib.copris_flags = 0x00;
@@ -352,25 +359,25 @@ int main(int argc, char **argv) {
 		PRINT_MSG("Daemon mode enabled.");
 
 #ifndef WITHOUT_CMARK
-	// Parsing and loading printer feature definitions
+	// Load a printer feature set file
 	if (attrib.copris_flags & HAS_PRSET) {
-		copris_initprset(&prset);
-// 		error = copris_loadprset(attrib.prsetfile, &prset);
-// 		if(error) {
-// 			// Missing printer sets are not a fatal error in quiet mode
-// 			if(verbosity) {
-// 				return EXIT_FAILURE;
-// 			} else {
-// 				fprintf(stderr, "Disabling printer feature set.\n");
-// 				attrib.copris_flags &= ~HAS_PRSET;
-// 			}
-// 		}
+		error = load_printer_set_file(attrib.prset, &prset);
+		if(error) {
+			// Missing printer sets are not a fatal error in quiet mode
+			if(verbosity) {
+				unload_printer_set_file(&prset);
+				return EXIT_FAILURE;
+			} else {
+				PRINT_ERROR_MSG("Disabling Markdown conversion.");
+				attrib.copris_flags &= ~HAS_PRSET;
+			}
+		}
 	}
 #else
 	(void)prset;
 #endif
 
-	// Parsing and loading translation definitions
+	// Load a translation file
 	if (attrib.copris_flags & HAS_TRFILE) {
 		error = load_translation_file(attrib.trfile, &trfile);
 		if (error) {
@@ -379,7 +386,7 @@ int main(int argc, char **argv) {
 				unload_translation_file(&trfile);
 				return EXIT_FAILURE;
 			} else {
-				PRINT_ERROR_MSG("Disabling translation.");
+				PRINT_ERROR_MSG("Disabling character translation.");
 				attrib.copris_flags &= ~HAS_TRFILE;
 			}
 		}
@@ -461,6 +468,9 @@ int main(int argc, char **argv) {
 
 	if (attrib.copris_flags & HAS_TRFILE)
 		unload_translation_file(&trfile);
+
+	if (attrib.copris_flags & HAS_PRSET)
+		unload_printer_set_file(&prset);
 
 	utstring_free(copris_text);
 

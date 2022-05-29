@@ -33,7 +33,8 @@ HASH   := $(shell git rev-parse --short HEAD)
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 # Source, object and dependency files for release and debug builds
-SRC = debug.c read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c main.c
+SRC = debug.c read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c \
+      parse_value.c main.c
 SOURCES := $(addprefix $(SRCDIR)/, $(SRC))
 OBJ_REL := $(SOURCES:%.c=%_rel.o)
 DEP_REL := $(SOURCES:%.c=%_rel.d)

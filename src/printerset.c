@@ -1,7 +1,6 @@
 /*
- * printerset.c
- * Printer feature sets
- * 
+ * Printer feature set file handling and text formatting
+ *
  * Copyright (C) 2020-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
@@ -9,6 +8,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <errno.h>
 
 #include <ini.h>    /* inih library - .ini file parser */
@@ -17,54 +18,191 @@
 #include "Copris.h"
 #include "debug.h"
 #include "printerset.h"
+#include "printer_commands.h"
 #include "utf8.h"
+#include "parse_value.h"
 
-void copris_initprset(struct Prset **prset) {
-	const char *all_codes[] = {
-		"C_RESET",
-		"C_BELL",
-		"C_DOUBLE_WIDTH",
-		"C_UNDERLINE_ON",
-		"C_UNDERLINE_OFF",
-		"C_BOLD_ON",
-		"C_BOLD_OFF",
-		"C_ITALIC_ON",
-		"C_ITALIC_OFF",
-		NULL
-	};
+static int inih_handler(void *, const char *, const char *, const char *);
+static bool initialise_commands(struct Inifile **);
 
+bool load_printer_set_file(char *filename, struct Inifile **prset)
+{
+	bool error = initialise_commands(prset);
+	if (error)
+		return error;
+
+	errno = 0;
+	FILE *file = fopen(filename, "r");
+	if (file == NULL)
+		return raise_errno_perror(errno, "fopen", "Error opening printer set file.");
+
+	if (LOG_DEBUG)
+		PRINT_MSG("Parsing printer set file '%s':", filename);
+
+	int parse_error = ini_parse_file(file, inih_handler, prset);
+
+	// If there's a parse error, break the one-time do-while loop and properly close the file
+	error = true;
+	do {
+		// Negative return number - can be either:
+		// -1  Error opening file - we've already handled this
+		// -2  Memory allocation error - only if inih was built with INI_USE_STACK
+		if (parse_error < 0) {
+			PRINT_ERROR_MSG("inih: ini_malloc: Memory allocation error.");
+			break;
+		}
+
+		// Positive return number - returned error is a line number
+		if (parse_error > 0) {
+			PRINT_ERROR_MSG("Error parsing printer set file '%s', fault on line %d.",
+			                filename, parse_error);
+			break;
+		}
+
+		if (LOG_INFO) {
+			int definition_count = 0; // These are user-specified definitions, not all available
+
+			struct Inifile *s;
+			for (s = *prset; s != NULL; s = s->hh.next) {
+				if (*s->out != '\0')
+					definition_count++;
+			}
+
+			PRINT_MSG("Loaded printer set file '%s' with %d definitions.",
+			          filename, definition_count);
+		}
+
+		error = false;
+	} while (0);
+
+	int tmperr = fclose(file);
+	if (raise_perror(tmperr, "close", "Failed to close the printer set file."))
+		return true;
+
+	return error;
+}
+
+/*
+ * [section]
+ * name = value  (inih library)
+ * key  = item   (uthash)
+ */
+static int inih_handler(void *user, const char *section, const char *name, const char *value)
+{
+	(void)section;
+
+	size_t name_len  = strlen(name);
+	size_t value_len = strlen(value);
+
+	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
+		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
+		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	if (name_len == 0 || value_len == 0) {
+		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
+	struct Inifile *s;                               // Local to this function
+
+	// Check if this 'name' doesn't exist
+	HASH_FIND_STR(*file, name, s);
+	if (s == NULL) {
+		PRINT_ERROR_MSG("Name '%s' doesn't belong to any command. Append '-vv' to the command "
+		                "line to see the available commands.", name);
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	if (*s->out != '\0') {
+		if (LOG_ERROR) {
+			if (LOG_INFO)
+				PRINT_LOCATION(stdout);
+
+			PRINT_MSG("Definition for '%s' appears more than once in translation file, "
+			          "skipping new value.", name);
+		}
+
+		return COPRIS_PARSE_DUPLICATE;
+	}
+
+	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
+	int element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
+
+	// Check for a parse error
+	if (element_count == -1) {
+		free(s);
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	memcpy(s->out, parsed_value, element_count + 1);
+
+	if (LOG_DEBUG) {
+		PRINT_LOCATION(stdout);
+		printf(" %s => 0x", s->in);
+		for (int i = 0; i < element_count; i++)
+			printf("%X ", s->out[i]);
+
+		printf("\n");
+	}
+
+	return COPRIS_PARSE_SUCCESS;
+}
+
+void unload_printer_set_file(struct Inifile **prset)
+{
+	struct Inifile *definition;
+	struct Inifile *tmp;
+	int count = 0;
+
+	HASH_ITER(hh, *prset, definition, tmp) {
+		HASH_DEL(*prset, definition);
+		free(definition);
+		count++;
+	}
+
+	if (LOG_DEBUG)
+		PRINT_MSG("Unloaded printer set file (count = %d).", count);
+}
+
+static bool initialise_commands(struct Inifile **prset)
+{
 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*prset = NULL;
+	struct Inifile *s;
+	int command_count = 0;
 
-	struct Prset *s;
-
-	for (int i = 0; all_codes[i] != NULL; i++) {
-		// Check for a duplicate key. Shouldn't happen with the above hardcoded table, but
-		// better be safe. Better put this in a unit test (TODO).
-		HASH_FIND_STR(*prset, all_codes[i], s);
+	for (int i = 0; printer_commands[i] != NULL; i++) {
+		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
+		// better be safe. Better check this with a unit test (TODO).
+		HASH_FIND_STR(*prset, printer_commands[i], s);
 		if(s != NULL)
 			continue;
 
-		// Insert the (unique) code
-		s = malloc(sizeof(struct Prset));
-		strcpy(s->code, all_codes[i]);
-		HASH_ADD_STR(*prset, code, s);
-
-		// Insert the blank-by-default command
-		strcpy(s->command, "");
-	}
-
-	// Debug format: TODO
-	if(log_debug()) {
-		log_date();
-		printf("Dump of loaded printer set definitions:\n");
-		for (s = *prset; s != NULL; s = s->hh.next) {
-			log_date();
-			printf("%20s = 0x", s->code);
-			for (int i = 0; s->command[i] != '\0'; i++) {
-				printf("%X", s->command[i]);
-			}
-			printf("\n");
+		// Insert the (unique) name
+		s = malloc(sizeof *s);
+		if (s == NULL) {
+			PRINT_ERROR_MSG("Memory allocation error.");
+			return STATUS_ERROR;
 		}
+
+		// Each name gets an empty value, to be filled later from the configuration file
+		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
+		memcpy(s->out, "", 1);
+		HASH_ADD_STR(*prset, in, s);
+
+		command_count++;
 	}
+
+	if(LOG_DEBUG) {
+		PRINT_MSG("Dump of available printer set definitions:");
+		for (s = *prset; s != NULL; s = s->hh.next)
+			PRINT_MSG(" %s", s->in);
+
+		PRINT_MSG("Initialised %d empty printer commands.", command_count);
+	}
+
+	return STATUS_SUCCESS;
 }
