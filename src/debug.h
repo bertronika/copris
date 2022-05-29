@@ -58,8 +58,10 @@ int log_debug();
         } while (0)
 #   define PRINT_ERROR_MSG(...)              \
         do {                                 \
-           PRINT_LOCATION(stderr);           \
-           _PRINT_MSG(stderr, __VA_ARGS__);  \
+            fputs("\x1B[1m", stderr);        \
+            PRINT_LOCATION(stderr);          \
+            _PRINT_MSG(stderr, __VA_ARGS__); \
+            fputs("\x1B[0m", stderr);        \
         } while (0)
 #else
 #   define PRINT_LOCATION(output) ((void)0)
