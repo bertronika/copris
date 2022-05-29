@@ -430,6 +430,8 @@ int main(int argc, char **argv) {
 			continue; // Do not attempt to write/display nothing
 
 		// Stage 2: Translate selected characters in text with a translation file
+		if (attrib.copris_flags & HAS_TRFILE)
+			translate_text(copris_text, &trfile);
 
 		// Stage 3: Normalise text
 

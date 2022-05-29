@@ -78,11 +78,8 @@ bool load_translation_file(char *filename, struct Inifile **trfile) {
  * [section]
  * name = value  (inih library)
  * key  = item   (uthash)
- *
- * `Handler should return nonzero on success, zero on error.'
  */
-static int inih_handler(void *user, const char *section, const char *name,
-                   const char *value)
+static int inih_handler(void *user, const char *section, const char *name, const char *value)
 {
 	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
 	struct Inifile *s;                               // Local to this function
@@ -91,8 +88,13 @@ static int inih_handler(void *user, const char *section, const char *name,
 	size_t name_len  = strlen(name);
 	size_t value_len = strlen(value);
 
-	if (name_len > MAX_INIFILE_ELEMENT_LENGTH || value_len > MAX_INIFILE_ELEMENT_LENGTH) {
-		PRINT_ERROR_MSG("Name or value length exceeds maximum of %zu bytes.",
+	if (utf8_count_codepoints(name, 2) > 1) {
+		PRINT_ERROR_MSG("'%s': name has more than one character.", name);
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
+		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
@@ -132,18 +134,17 @@ static int inih_handler(void *user, const char *section, const char *name,
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	memcpy(s->in,  name, name_len + 1);
-	memcpy(s->out, parsed_value, element_count);
+	memcpy(s->in, name, name_len + 1);
+	memcpy(s->out, parsed_value, element_count + 1);
 	HASH_ADD_STR(*file, in, s);
 
 	if (LOG_DEBUG) {
 		PRINT_LOCATION(stdout);
-		printf("parse:  %s (%zu) =>", s->in, name_len);
-
+		printf(" %1s (%zu) => 0x", s->in, name_len);
 		for (int i = 0; i < element_count; i++)
-			printf(" 0x%X", s->out[i]);
+			printf("%X ", s->out[i]);
 
-		printf(" (%d)\n", element_count);
+		printf("\n");
 	}
 
 	return COPRIS_PARSE_SUCCESS;
@@ -171,8 +172,8 @@ static int parse_value_to_binary(const char *value, char *parsed_value, int leng
 		}
 
 		// Check if characters are still remaining
-		if (*endptr && LOG_DEBUG)
-			PRINT_MSG("strtol: remaining: '%s'.", endptr);
+		//if (*endptr && LOG_DEBUG)
+			//PRINT_MSG("strtol: remaining: '%s'.", endptr);
 
 		// Check if value fits
 		if (temp_value < CHAR_MIN || temp_value > CHAR_MAX) {
@@ -186,6 +187,7 @@ static int parse_value_to_binary(const char *value, char *parsed_value, int leng
 	}
 	parsed_value[i] = '\0';
 
+	// Return number of parsed bytes
 	return i;
 }
 
@@ -202,79 +204,45 @@ void unload_translation_file(struct Inifile **trfile) {
 	}
 }
 
-// Translate input string. Input may contain multibyte characters, translated output
-// string won't contain them - every translated character is exactly one byte long.
-// If there's a multibyte character in the input that doesn't have a definition,
-// it'll get fully copied without any modifications.
-char *copris_translate(char *source, int source_len, struct Inifile **trfile) {
-	// A duplicate copy of input string
-	errno = 0;
-	char *tr_source = strdup(source);
-	if(tr_source == NULL) {
-		raise_errno_perror(errno, "strdup", "Memory allocation error");
-		exit(EXIT_FAILURE);
-	}
+void translate_text(UT_string *copris_text, struct Inifile **trfile)
+{
+	UT_string *translated_text;
+	utstring_new(translated_text);
 
-	// Space for a (multibyte) character to be matched with definitions
-	char inspected_char[UTF8_MAX_LENGTH + 1];
+	char *original = utstring_body(copris_text);
 
-	// Output string with all the translation
-	errno = 0;
-	char *tr_string = malloc(source_len + 1);
-	if(tr_string == NULL) {
-		raise_errno_perror(errno, "strdup", "Memory allocation error");
-		exit(EXIT_FAILURE);
-	}
-	tr_string[0] = '\0';
+	while (*original) {
+		char input_char[UTF8_MAX_LENGTH + 1];
+		size_t input_len;
+		char output_char[MAX_INIFILE_ELEMENT_LENGTH];
+		size_t output_len;
+		struct Inifile *s;
 
-	struct Inifile *s;
-
-	int src_i  = 0; // Source string iterator
-	int insp_i = 0; // Inspected char iterator
-	int tr_i   = 0; // Translated string iterator
-
-	while(src_i < source_len) {
-		inspected_char[insp_i] = tr_source[src_i];
-
-		// Check for a multibyte character
-		if(insp_i < UTF8_MAX_LENGTH && UTF8_IS_MULTIBYTE(inspected_char[insp_i])) {
-			// Multibyte char found, load its next byte
-			insp_i++;
-			src_i++;
-			continue;
+		if (UTF8_IS_MULTIBYTE(*original)) {
+			input_len = utf8_codepoint_length(*original);
+			memcpy(input_char, original, input_len);
 		} else {
-			// Either:
-			// - end of multibyte character
-			// - character in question was only single-byte
-			inspected_char[insp_i + 1] = '\0';
+			input_len = 1;
+			input_char[0] = *original;
 		}
+		input_char[input_len] = '\0';
 
-		// Match the loaded char with a definition, if it exists
-		HASH_FIND_STR(*trfile, inspected_char, s);
-		if(s != NULL) {
+		HASH_FIND_STR(*trfile, input_char, s);
+		if (s) {
 			// Definition found
-			tr_string[tr_i] = s->out;
-			tr_i++;
+			output_len = strlen(s->out);
+			memcpy(output_char, s->out, output_len);
 		} else {
-			// Definition not found
-			if(insp_i > 0) {
-				// Copy multibyte character
-				strcat(tr_string, inspected_char);
-
-				tr_i += insp_i + 1;
-				//tr_i += strlen(inspected_char);
-			} else {
-				// Copy single character
-				tr_string[tr_i++] = tr_source[src_i];
-			}
+			// Definition not found, copy original
+			output_len = 1;
+			output_char[0] = input_char[0];
 		}
-		insp_i = 0;
-		src_i++;
+
+		utstring_bincpy(translated_text, output_char, output_len);
+		original += input_len;
 	}
 
-	tr_string[tr_i] = '\0';
-
-	free(tr_source);
-
-	return tr_string;
+	utstring_clear(copris_text);
+	utstring_bincpy(copris_text, utstring_body(translated_text), utstring_len(translated_text));
+	utstring_free(translated_text);
 }
