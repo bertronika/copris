@@ -274,7 +274,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 	// Parse the last argument, destination (or lack thereof).
 	// Note that only the first argument is accepted.
-	if (argv[optind]) {
+	if (argv[optind] != NULL) {
 		// Get the maximum path name length on the filesystem where
 		// the output file resides.
 		errno = 0;
@@ -296,12 +296,10 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 		attrib->destination = argv[optind];
 		attrib->copris_flags |= HAS_DESTINATION;
-	}
 
-	// Check for multiple destination arguments
-	if ((attrib->copris_flags & HAS_DESTINATION) && argv[++optind]) {
-		if (LOG_ERROR)
-			PRINT_NOTE("Only the first destination file name will be used.");
+		if (argv[++optind] != NULL && LOG_ERROR)
+			PRINT_NOTE("Multiple destination file names detected; only the first one "
+			           "will be used.");
 	}
 
 	return 0;
