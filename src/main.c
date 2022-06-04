@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define COPRIS_VER "0.9"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -39,10 +37,6 @@
 #include "translate.h"
 #include "printerset.h"
 #include "writer.h"
-
-// Expand parameter to a literal string
-#define _STRINGIFY(str) #str
-#define STRINGIFY(str) _STRINGIFY(str)
 
 #ifdef W_CMARK
 #   define MARKDOWN_SUPPORT "yes"
@@ -87,18 +81,14 @@ static void copris_help(const char *copris_location) {
 }
 
 static void copris_version() {
-#ifdef DEBUG
-	printf("COPRIS version %s-%s\n", COPRIS_VER, STRINGIFY(DEBUG));
-#else
-	printf("COPRIS version %s\n", COPRIS_VER);
-#endif
-	printf("(C) 2020-22 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
+	printf("COPRIS version %s\n"
+	       "(C) 2020-22 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Build-time options\n"
 	       "  Text buffer size:                 %5d bytes\n"
 	       "  Maximum .ini file element length: %5d bytes\n"
 	       "  Markdown support:                 %5s\n"
 	       "\n",
-	       BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, MARKDOWN_SUPPORT);
+	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, MARKDOWN_SUPPORT);
 
 	exit(EXIT_SUCCESS);
 }

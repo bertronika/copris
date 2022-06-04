@@ -16,9 +16,8 @@
 
 # GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
-# Last git commit hash and current branch name
-HASH   := $(shell git rev-parse --short HEAD)
-BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+# Get latest version tag
+VERSION := $(shell git describe --tags --dirty)
 
 # Source, object and dependency files for release and debug builds
 SOURCES = debug.c read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c \
@@ -39,7 +38,7 @@ LIBRARIES = inih
 # Common, release and build compiler flags
 CFLAGS   ?= -Wall -Wextra -pedantic
 RELFLAGS ?= -O2 -g -DNDEBUG
-DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG="$(HASH)-$(BRANCH)"
+DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
 
 # Determine if linking with libcmark is needed
 ifndef WITHOUT_CMARK
@@ -47,7 +46,7 @@ ifndef WITHOUT_CMARK
 	CFLAGS += -DW_CMARK
 endif
 
-CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES))
+CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
 LDFLAGS += $(shell pkg-config --libs $(LIBRARIES))
 
 # List of mocked functions for unit tests
