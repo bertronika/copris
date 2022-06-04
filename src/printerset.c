@@ -31,10 +31,11 @@ bool load_printer_set_file(char *filename, struct Inifile **prset)
 	if (error)
 		return error;
 
-	errno = 0;
 	FILE *file = fopen(filename, "r");
-	if (file == NULL)
-		return raise_errno_perror(errno, "fopen", "Error opening printer set file.");
+	if (file == NULL) {
+		PRINT_SYSTEM_ERROR("fopen", "Error opening printer set file.");
+		return true;
+	}
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Parsing printer set file '%s':", filename);
@@ -76,8 +77,10 @@ bool load_printer_set_file(char *filename, struct Inifile **prset)
 	} while (0);
 
 	int tmperr = fclose(file);
-	if (raise_perror(tmperr, "close", "Failed to close the printer set file."))
+	if (tmperr != 0) {
+		PRINT_SYSTEM_ERROR("close", "Failed to close the printer set file.");
 		return true;
+	}
 
 	return error;
 }

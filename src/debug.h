@@ -75,4 +75,11 @@ int raise_errno_perror(int received_errno, char *function_name, char *message);
         puts(str);                   \
     } while (0)
 
+#define PRINT_SYSTEM_ERROR(name, msg) \
+    do {                              \
+        (void)errno; /* is missing */ \
+        PRINT_ERROR_MSG(msg);         \
+        perror(name);                 \
+    } while (0);
+
 #endif /* DEBUG_H */

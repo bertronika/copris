@@ -24,8 +24,10 @@ bool copris_write_file(const char *dest, UT_string *copris_text) {
 	
 	// Open destination file, set for (a)ppending text to it
 	FILE *file_ptr = fopen(dest, "a");
-	if (file_ptr == NULL)
-		return raise_errno_perror(errno, "fopen", "Failed to open output file.");
+	if (file_ptr == NULL) {
+		PRINT_SYSTEM_ERROR("fopen", "Failed to open output file.");
+		return true;
+	}
 		
 	if (LOG_DEBUG)
 		PRINT_MSG("Output file opened.");
@@ -42,8 +44,10 @@ bool copris_write_file(const char *dest, UT_string *copris_text) {
 
 	// Flush streams to file and close it
 	int tmperr = fclose(file_ptr);
-	if (raise_perror(tmperr, "fclose", "Failed to close the output file."))
+	if (tmperr != 0) {
+		PRINT_SYSTEM_ERROR("fclose", "Failed to close the output file.");
 		return true;
+	}
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Output file closed.");

@@ -29,8 +29,10 @@ static int inih_handler(void *, const char *, const char *, const char *);
 
 bool load_translation_file(char *filename, struct Inifile **trfile) {
 	FILE *file = fopen(filename, "r");
-	if (file == NULL)
-		return raise_errno_perror(errno, "fopen", "Error opening translation file.");
+	if (file == NULL) {
+		PRINT_SYSTEM_ERROR("fopen", "Error opening translation file.");
+		return true;
+	}
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Parsing translation file '%s':", filename);
@@ -68,8 +70,10 @@ bool load_translation_file(char *filename, struct Inifile **trfile) {
 	} while (0);
 
 	int tmperr = fclose(file);
-	if (raise_perror(tmperr, "close", "Failed to close the translation file."))
+	if (tmperr != 0) {
+		PRINT_SYSTEM_ERROR("close", "Failed to close the translation file.");
 		return true;
+	}
 
 	return error;
 }

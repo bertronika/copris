@@ -108,23 +108,26 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{NULL,            0,                 NULL, 0  }
 	};
 
-	int c;  // Current Getopt argument
-	/*
-	 * Putting a colon in front of the options disables the built-in error reporting
-	 * of getopt_long(3) and allows us to specify more appropriate errors (ie. `Printer
-	 * set is missing.' instead of `option requires an argument -- 'r')
-	 */
-	while ((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
-		char *parserr;  // String to integer conversion error
+	int c; // Current Getopt argument
 
+	// To avoid declaring variables inside statements, they are put here
+	long max_path_len;
+	unsigned long temp_portno;
+	unsigned long temp_limit;
+	char *parserr;
+
+	// Putting a colon in front of the options disables the built-in error reporting
+	// of getopt_long(3) and allows us to specify more appropriate errors (ie. `Printer
+	// set is missing.' instead of `option requires an argument -- 'r')
+	while ((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p':
-			// Reset errno to distinguish between success/failure after call
-			errno = 0;
-			unsigned long temp_portno = strtoul(optarg, &parserr, 10);
+			temp_portno = strtoul(optarg, &parserr, 10);
 
-			if (raise_errno_perror(errno, "strtoul", "Error parsing port number."))
+			if (temp_portno == ULONG_MAX) {
+				PRINT_SYSTEM_ERROR("strtoul", "Error parsing port number.");
 				return 1;
+			}
 
 			if (*parserr) {
 				if (*parserr == '-')
@@ -154,21 +157,23 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				                "Perhaps you forgot to specify the file?", optarg);
 				return 1;
 			}
-			{
-				// Get the maximum path name length on the filesystem where
-				// the file resides.
-				errno = 0;
-				size_t max_path_len = (size_t)pathconf(optarg, _PC_PATH_MAX);
 
-				if (raise_errno_perror(errno, "pathconf", "Error querying translation file."))
-					return 1;
+			// Get the maximum path name length on the filesystem where
+			// the file resides.
+			errno = 0;
+			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
-				// TODO: is this check necessary after checking pathconf for errors?
-				if (strlen(optarg) >= max_path_len) {
-					PRINT_ERROR_MSG("Translation file's name is too long.");
-					return 1;
-				}
+			if (max_path_len == -1) {
+				PRINT_SYSTEM_ERROR("pathconf", "Error querying translation file.");
+				return 1;
 			}
+
+			// TODO: is this check necessary after checking pathconf for errors?
+// 			if (strlen(optarg) >= max_path_len) {
+// 				PRINT_ERROR_MSG("Translation file's name is too long.");
+// 				return 1;
+// 			}
+
 			attrib->trfile = optarg;
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
@@ -179,21 +184,21 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				                "Perhaps you forgot to specify the set?", optarg);
 				return 1;
 			}
-			{
-				// Get the maximum path name length on the filesystem where
-				// the file resides.
-				errno = 0;
-				size_t max_path_len = (size_t)pathconf(optarg, _PC_PATH_MAX);
 
-				if (raise_errno_perror(errno, "pathconf", "Error querying printer set file."))
-					return 1;
+			errno = 0;
+			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
-				// TODO: is this check necessary after checking pathconf for errors?
-				if (strlen(optarg) >= max_path_len) {
-					PRINT_ERROR_MSG("Printer set file's name is too long.");
-					return 1;
-				}
+			if (max_path_len == -1) {
+				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer set file.");
+				return 1;
 			}
+
+			// TODO: is this check necessary after checking pathconf for errors?
+// 			if (strlen(optarg) >= max_path_len) {
+// 				PRINT_ERROR_MSG("Printer set file's name is too long.");
+// 				return 1;
+// 			}
+
 			attrib->prset = optarg;
 			attrib->copris_flags |= HAS_PRSET;
 #else
@@ -203,12 +208,12 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 #endif
 			break;
 		case 'l':
-			// Reset errno to distinguish between success/failure after call
-			errno = 0;
-			unsigned long temp_limit = strtoul(optarg, &parserr, 10);
+			temp_limit = strtoul(optarg, &parserr, 10);
 
-			if (raise_errno_perror(errno, "strtoul", "Error parsing limit number."))
+			if (temp_limit == ULONG_MAX) {
+				PRINT_SYSTEM_ERROR("strtoul", "Error parsing limit number.");
 				return 1;
+			}
 
 			if (*parserr) {
 				if (*parserr == '-')
@@ -271,24 +276,26 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Parse the last argument, destination (or lack thereof).
 	// Note that only the first argument is accepted.
 	if (argv[optind] != NULL) {
-		// Get the maximum path name length on the filesystem where
-		// the output file resides.
 		errno = 0;
-		size_t max_path_len = (size_t)pathconf(argv[optind], _PC_PATH_MAX);
+		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
 
-		if (raise_errno_perror(errno, "pathconf", "Error querying your chosen destination."))
-			return 1;
-
-		// TODO: is this check necessary after checking pathconf for errors?
-		if (strlen(argv[optind]) >= max_path_len) {
-			PRINT_ERROR_MSG("Destination filename is too long.");
+		if (max_path_len == -1) {
+			PRINT_SYSTEM_ERROR("pathconf", "Error querying your chosen destination.");
 			return 1;
 		}
 
-		int ferror = access(argv[optind], W_OK);
-		if (raise_perror(ferror, "access", "Unable to write to output file/printer. Does "
-		                                   "it exist, with appropriate permissions?"))
+		// TODO: is this check necessary after checking pathconf for errors?
+// 		if (strlen(argv[optind]) >= max_path_len) {
+// 			PRINT_ERROR_MSG("Destination filename is too long.");
+// 			return 1;
+// 		}
+
+		int tmperr = access(argv[optind], W_OK);
+		if (tmperr != 0) {
+			PRINT_SYSTEM_ERROR("access", "Unable to write to output file/printer. Does "
+		                                 "it exist, with appropriate permissions?")
 			return 1;
+		}
 
 		attrib->destination = argv[optind];
 		attrib->copris_flags |= HAS_DESTINATION;

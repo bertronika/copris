@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <errno.h>
 
 #include <utstring.h> /* uthash library - dynamic strings */
 
@@ -28,12 +27,9 @@ bool copris_handle_stdin(UT_string *copris_text) {
 	// Check if Copris is invoked standalone, outside of a pipe. That is usually
 	// unwanted, since the user has specified reading from stdin, and the only
 	// remaining way to enter text is to type it in interactively.
-	errno = 0;
-	if (LOG_ERROR && isatty(STDIN_FILENO)) {
-		raise_errno_perror(errno, "isatty", "Error determining input terminal.");
+	if (LOG_ERROR && isatty(STDIN_FILENO))
 		PRINT_NOTE("You are in text input mode (reading from "
 		           "stdin). To stop reading, press Ctrl+D.");
-	}
 
 	// Read text from standard input, print a note if only EOF has been received
 	struct Stats stats = STATS_INIT;

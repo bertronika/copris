@@ -39,17 +39,17 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
 
 bool copris_socket_listen(int *parentfd, unsigned int portno) {
-	int fderror;  // Return value of a socket operation
-
 	/*
 	 * Create a system socket using the following:
 	 *   AF_INET      IPv4
 	 *   SOCK_STREAM  TCP protocol
 	 *   IPPROTO_IP   IP protocol
 	 */
-	fderror = (*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP));
-	if (raise_perror(fderror, "socket", "Failed to create socket endpoint."))
+	*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+	if (*parentfd == -1) {
+		PRINT_SYSTEM_ERROR("socket", "Failed to create socket endpoint.");
 		return true;
+	}
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Socket endpoint created.");
@@ -72,19 +72,23 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 	serveraddr.sin_port        = htons((unsigned short)portno);
 	
 	// Associate the parent socket with a port
-	fderror = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-	if (raise_perror(fderror, "bind", "Failed to bind socket to address. "
-	                                  "Non-root users should set it >1023."))
+	int tmperr = bind(*parentfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
+	if (tmperr != 0) {
+		PRINT_SYSTEM_ERROR("bind", "Failed to bind socket to address. "
+		                           "Non-root users should set it >1023.");
 		return true;
+	}
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Socket bound to address.");
 
 	// Make the parent socket passive - accept incoming connections.
 	// Limit number of connections to the value of BACKLOG.
-	fderror = listen(*parentfd, BACKLOG);
-	if (raise_perror(fderror, "listen", "Failed to make socket passive."))
+	tmperr = listen(*parentfd, BACKLOG);
+	if (tmperr != 0) {
+		PRINT_SYSTEM_ERROR("listen", "Failed to make socket passive.");
 		return true;
+	}
 
 	if (LOG_INFO) {
 		PRINT_LOCATION(stdout);
@@ -100,33 +104,38 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 }
 
 bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib) {
-	int fderror;                    // Return value of a socket operation
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
 	clientlen = sizeof(clientaddr);
+	int tmperr;
 
 	// Wait for a connection request, accept it and pass it on as a child socket
 	int childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
-	if (raise_perror(childfd, "accept", "Failed to accept the connection."))
+	if (childfd == -1) {
+		PRINT_SYSTEM_ERROR("accept", "Failed to accept the connection.");
 		return true;
+	}
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Connection to socket accepted.");
 
 	// Prevent more than one connection if not a daemon
 	if (!attrib->daemon) {
-		fderror = close(*parentfd);
-		if (raise_perror(fderror, "close", "Failed to close the parent connection."))
+		tmperr = close(*parentfd);
+		if (tmperr != 0) {
+			PRINT_SYSTEM_ERROR("close", "Failed to close the parent connection.");
 			return true;
+		}
 	}
 
 	// Get host info (IP, hostname) of the client (TODO gai_strerror)
 	char host_info[NI_MAXHOST];
-	fderror = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr),
+	tmperr = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr),
 	                      host_info, sizeof(host_info), NULL, 0, 0);
-// 	if(fderror != 0) {
-// 		log_perr(-1, "getnameinfo", "Failed getting hostname from address.");
-// 	}
+	if (tmperr != 0) {
+		PRINT_SYSTEM_ERROR("getnameinfo", "Failed getting hostname from address.");
+		memccpy(host_info, "name unknown", '\0', NI_MAXHOST);
+	}
 
 	// Convert client's address from network byte order to a dotted-decimal form
 	char *host_address = inet_ntoa(clientaddr.sin_addr);
@@ -150,9 +159,11 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 		return true;
 
 	// Close the current connection
-	fderror = close(childfd);
-	if (raise_perror(fderror, "close", "Failed to close the child connection."))
+	tmperr = close(childfd);
+	if (tmperr != 0) {
+		PRINT_SYSTEM_ERROR("close", "Failed to close the child connection.");
 		return true;
+	}
 
 	if (LOG_ERROR) {
 		if (LOG_INFO)
@@ -202,8 +213,10 @@ static bool read_from_socket(UT_string *copris_text, int childfd,
 		}
 	}
 
-	if (raise_perror(buffer_length, "read", "Error reading from socket."))
+	if (buffer_length == -1) {
+		PRINT_SYSTEM_ERROR("read", "Error reading from socket.");
 		return true;
+	}
 
 	return false;
 }
@@ -212,8 +225,9 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib) {
 	const char limit_message[] = "You have sent too much text. Terminating connection.\n";
 
-	int werror = write(childfd, limit_message, (sizeof limit_message) - 1);
-	raise_perror(werror, "write", "Error sending termination text to socket.");
+	int tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
+	if (tmperr == -1)
+		PRINT_SYSTEM_ERROR("write", "Error sending termination text to socket.");
 
 	stats->size_limit_active = true;
 

@@ -23,11 +23,12 @@ int parse_value_to_binary(const char *value, char *parsed_value, int length)
 	int i = 0;      // Parsed value iterator
 
 	while (*valuepos) {
-		errno = 0;
 		long temp_value = strtol(valuepos, &endptr, 0);
 
-		if (raise_errno_perror(errno, "strtol", "Error parsing number."))
+		if (temp_value == LONG_MIN || temp_value == LONG_MAX) {
+			PRINT_SYSTEM_ERROR("strtol", "Error parsing number.");
 			return -1;
+		}
 
 		// Check if no conversion has been done
 		if (valuepos == endptr) {
