@@ -359,11 +359,11 @@ int main(int argc, char **argv) {
 		if (error) {
 			// Missing printer sets are not a fatal error when --quiet
 			if (verbosity) {
-				unload_translation_file(&trfile);
 				return EXIT_FAILURE;
 			} else {
-				PRINT_ERROR_MSG("Continuing without character translation.");
+				unload_translation_file(&trfile);
 				attrib.copris_flags &= ~HAS_TRFILE;
+				PRINT_ERROR_MSG("Continuing without character translation.");
 			}
 		}
 	}
@@ -375,11 +375,11 @@ int main(int argc, char **argv) {
 		if(error) {
 			// Missing translation files are as well not a fatal error in quiet mode
 			if(verbosity) {
-				unload_printer_set_file(&prset);
 				return EXIT_FAILURE;
 			} else {
-				PRINT_ERROR_MSG("Continuing without Markdown conversion.");
+				unload_printer_set_file(&prset);
 				attrib.copris_flags &= ~HAS_PRSET;
+				PRINT_ERROR_MSG("Continuing without Markdown conversion.");
 			}
 		}
 	}
