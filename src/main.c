@@ -362,7 +362,7 @@ int main(int argc, char **argv) {
 				unload_translation_file(&trfile);
 				return EXIT_FAILURE;
 			} else {
-				PRINT_ERROR_MSG("Disabling character translation.");
+				PRINT_ERROR_MSG("Continuing without character translation.");
 				attrib.copris_flags &= ~HAS_TRFILE;
 			}
 		}
@@ -378,7 +378,7 @@ int main(int argc, char **argv) {
 				unload_printer_set_file(&prset);
 				return EXIT_FAILURE;
 			} else {
-				PRINT_ERROR_MSG("Disabling Markdown conversion.");
+				PRINT_ERROR_MSG("Continuing without Markdown conversion.");
 				attrib.copris_flags &= ~HAS_PRSET;
 			}
 		}
