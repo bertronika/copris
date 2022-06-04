@@ -149,7 +149,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->portno = (unsigned int)temp_portno;
 			break;
 		case 'd':
-			attrib->daemon = 1;
+			attrib->daemon = true;
 			break;
 		case 't':
 			if (*optarg == '-') {
@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
 	struct Inifile *trfile, *prset;
 
 	attrib.portno       = 0;  // If 0, read from stdin
-	attrib.daemon       = 0;
+	attrib.daemon       = false;
 	attrib.limitnum     = 0;
 	attrib.copris_flags = 0x00;
 
@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
 
 	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
-		attrib.daemon = 0;
+		attrib.daemon = false;
 		if (LOG_ERROR)
 			PRINT_NOTE("Daemon mode not available while reading from stdin.");
 	}
