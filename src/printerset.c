@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <errno.h>
 
 #include <ini.h>    /* inih library - .ini file parser */
@@ -23,18 +22,18 @@
 #include "parse_value.h"
 
 static int inih_handler(void *, const char *, const char *, const char *);
-static bool initialise_commands(struct Inifile **);
+static int initialise_commands(struct Inifile **);
 
-bool load_printer_set_file(char *filename, struct Inifile **prset)
+int load_printer_set_file(char *filename, struct Inifile **prset)
 {
-	bool error = initialise_commands(prset);
+	int error = initialise_commands(prset);
 	if (error)
 		return error;
 
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Error opening printer set file.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_DEBUG)
@@ -43,7 +42,7 @@ bool load_printer_set_file(char *filename, struct Inifile **prset)
 	int parse_error = ini_parse_file(file, inih_handler, prset);
 
 	// If there's a parse error, break the one-time do-while loop and properly close the file
-	error = true;
+	error = -1;
 	do {
 		// Negative return number - can be either:
 		// -1  Error opening file - we've already handled this
@@ -73,13 +72,13 @@ bool load_printer_set_file(char *filename, struct Inifile **prset)
 			          filename, definition_count);
 		}
 
-		error = false;
+		error = 0;
 	} while (0);
 
 	int tmperr = fclose(file);
 	if (tmperr != 0) {
 		PRINT_SYSTEM_ERROR("close", "Failed to close the printer set file.");
-		return true;
+		return -1;
 	}
 
 	return error;
@@ -170,7 +169,7 @@ void unload_printer_set_file(struct Inifile **prset)
 		PRINT_MSG("Unloaded printer set file (count = %d).", count);
 }
 
-static bool initialise_commands(struct Inifile **prset)
+static int initialise_commands(struct Inifile **prset)
 {
 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*prset = NULL;
@@ -188,7 +187,7 @@ static bool initialise_commands(struct Inifile **prset)
 		s = malloc(sizeof *s);
 		if (s == NULL) {
 			PRINT_ERROR_MSG("Memory allocation error.");
-			return STATUS_ERROR;
+			return -1;
 		}
 
 		// Each name gets an empty value, to be filled later from the configuration file
@@ -207,5 +206,5 @@ static bool initialise_commands(struct Inifile **prset)
 		PRINT_MSG("Initialised %d empty printer commands.", command_count);
 	}
 
-	return STATUS_SUCCESS;
+	return 0;
 }

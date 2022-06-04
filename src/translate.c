@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
 #include <assert.h>
@@ -27,11 +26,11 @@
 
 static int inih_handler(void *, const char *, const char *, const char *);
 
-bool load_translation_file(char *filename, struct Inifile **trfile) {
+int load_translation_file(char *filename, struct Inifile **trfile) {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Error opening translation file.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_DEBUG)
@@ -43,7 +42,7 @@ bool load_translation_file(char *filename, struct Inifile **trfile) {
 	int parse_error = ini_parse_file(file, inih_handler, trfile);
 
 	// If there's a parse error, break the one-time do-while loop and properly close the file
-	bool error = true;
+	int error = -1;
 	do {
 		// Negative return number - can be either:
 		// -1  Error opening file - we've already handled this
@@ -66,13 +65,13 @@ bool load_translation_file(char *filename, struct Inifile **trfile) {
 			          filename, definition_count);
 		}
 
-		error = false;
+		error = 0;
 	} while (0);
 
 	int tmperr = fclose(file);
 	if (tmperr != 0) {
 		PRINT_SYSTEM_ERROR("close", "Failed to close the translation file.");
-		return true;
+		return -1;
 	}
 
 	return error;

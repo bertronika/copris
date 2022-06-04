@@ -33,12 +33,12 @@
 #include "read_socket.h"
 #include "utf8.h"
 
-static bool read_from_socket(UT_string *copris_text, int childfd,
+static int read_from_socket(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
 static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
 
-bool copris_socket_listen(int *parentfd, unsigned int portno) {
+int copris_socket_listen(int *parentfd, unsigned int portno) {
 	/*
 	 * Create a system socket using the following:
 	 *   AF_INET      IPv4
@@ -48,7 +48,7 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 	*parentfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 	if (*parentfd == -1) {
 		PRINT_SYSTEM_ERROR("socket", "Failed to create socket endpoint.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_DEBUG)
@@ -76,7 +76,7 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 	if (tmperr != 0) {
 		PRINT_SYSTEM_ERROR("bind", "Failed to bind socket to address. "
 		                           "Non-root users should set it >1023.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_DEBUG)
@@ -87,7 +87,7 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 	tmperr = listen(*parentfd, BACKLOG);
 	if (tmperr != 0) {
 		PRINT_SYSTEM_ERROR("listen", "Failed to make socket passive.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_INFO) {
@@ -99,11 +99,10 @@ bool copris_socket_listen(int *parentfd, unsigned int portno) {
 		puts("Now we listen...");
 	}
 
-	// No error reported.
-	return false;
+	return 0;
 }
 
-bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib) {
+int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib) {
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
 	clientlen = sizeof(clientaddr);
@@ -113,7 +112,7 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 	int childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
 	if (childfd == -1) {
 		PRINT_SYSTEM_ERROR("accept", "Failed to accept the connection.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_DEBUG)
@@ -124,7 +123,7 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 		tmperr = close(*parentfd);
 		if (tmperr != 0) {
 			PRINT_SYSTEM_ERROR("close", "Failed to close the parent connection.");
-			return true;
+			return -1;
 		}
 	}
 
@@ -154,15 +153,15 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 
 	// Read text from socket and process it
 	struct Stats stats = STATS_INIT;
-	bool read_error = read_from_socket(copris_text, childfd, &stats, attrib);
+	int read_error = read_from_socket(copris_text, childfd, &stats, attrib);
 	if (read_error)
-		return true;
+		return -1;
 
 	// Close the current connection
 	tmperr = close(childfd);
 	if (tmperr != 0) {
 		PRINT_SYSTEM_ERROR("close", "Failed to close the child connection.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_ERROR) {
@@ -183,12 +182,11 @@ bool copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs 
 	if (LOG_INFO)
 		PRINT_MSG("Connection from %s (%s) closed.", host_info, host_address);
 
-	// No error reported.
-	return false;
+	return 0;
 }
 
-static bool read_from_socket(UT_string *copris_text, int childfd,
-                             struct Stats *stats, struct Attribs *attrib) {
+static int read_from_socket(UT_string *copris_text, int childfd,
+                            struct Stats *stats, struct Attribs *attrib) {
 	char buffer[BUFSIZE];  // Inbound message buffer
 	int buffer_length;     // Return value of a socket operation - number of
 	                       // read bytes if successful
@@ -215,10 +213,10 @@ static bool read_from_socket(UT_string *copris_text, int childfd,
 
 	if (buffer_length == -1) {
 		PRINT_SYSTEM_ERROR("read", "Error reading from socket.");
-		return true;
+		return -1;
 	}
 
-	return false;
+	return 0;
 }
 
 static void apply_byte_limit(UT_string *copris_text, int childfd,
@@ -253,7 +251,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 		utstring_cut(copris_text, attrib->limitnum);
 		assert(strlen(text) == attrib->limitnum);
 
-		bool terminated = utf8_terminate_incomplete_buffer(text, utstring_len(copris_text));
+		int terminated = utf8_terminate_incomplete_buffer(text, utstring_len(copris_text));
 
 		if (LOG_ERROR) {
 			if (LOG_INFO)

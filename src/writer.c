@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 
@@ -18,15 +17,15 @@
 #include "debug.h"
 #include "writer.h"
 
-bool copris_write_file(const char *dest, UT_string *copris_text) {
-	bool error = false;
+int copris_write_file(const char *dest, UT_string *copris_text) {
+	int error = 0;
 	size_t text_length = utstring_len(copris_text);
 	
 	// Open destination file, set for (a)ppending text to it
 	FILE *file_ptr = fopen(dest, "a");
 	if (file_ptr == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Failed to open output file.");
-		return true;
+		return -1;
 	}
 		
 	if (LOG_DEBUG)
@@ -37,7 +36,7 @@ bool copris_write_file(const char *dest, UT_string *copris_text) {
 	if (written_text_length < text_length) {
 		PRINT_ERROR_MSG("fwrite: Failure while appending to output file; "
 		                "not enough bytes transferred.");
-		error = true;
+		error = -1;
 	} else if (LOG_INFO) {
 		PRINT_MSG("Appended %zu byte(s) to %s.", written_text_length, dest);
 	}
@@ -46,7 +45,7 @@ bool copris_write_file(const char *dest, UT_string *copris_text) {
 	int tmperr = fclose(file_ptr);
 	if (tmperr != 0) {
 		PRINT_SYSTEM_ERROR("fclose", "Failed to close the output file.");
-		return true;
+		return -1;
 	}
 
 	if (LOG_DEBUG)

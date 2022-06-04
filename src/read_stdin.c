@@ -8,7 +8,6 @@
  */
 
 #include <stdio.h>
-#include <stdbool.h>
 #include <unistd.h>
 
 #include <utstring.h> /* uthash library - dynamic strings */
@@ -18,9 +17,9 @@
 #include "debug.h"
 #include "read_stdin.h"
 
-static bool read_from_stdin(UT_string *copris_text, struct Stats *stats);
+static int read_from_stdin(UT_string *, struct Stats *);
 
-bool copris_handle_stdin(UT_string *copris_text) {
+int copris_handle_stdin(UT_string *copris_text) {
 	if (LOG_INFO)
 		PRINT_MSG("Trying to read from stdin...");
 
@@ -33,9 +32,9 @@ bool copris_handle_stdin(UT_string *copris_text) {
 
 	// Read text from standard input, print a note if only EOF has been received
 	struct Stats stats = STATS_INIT;
-	bool no_text_read = read_from_stdin(copris_text, &stats);
+	int text_length = read_from_stdin(copris_text, &stats);
 
-	if (no_text_read && LOG_ERROR)
+	if (text_length == 0 && LOG_ERROR)
 		PRINT_NOTE("No text has been read!");
 
 	if (LOG_ERROR) {
@@ -45,11 +44,11 @@ bool copris_handle_stdin(UT_string *copris_text) {
 		printf("Received %zu byte(s) in %d chunk(s) from stdin.\n", stats.sum, stats.chunks);
 	}
 
-	// Return true if no text has been read
-	return no_text_read;
+	// Return -1 if no text has been read
+	return (text_length) ? 0 : -1;
 }
 
-static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
+static int read_from_stdin(UT_string *copris_text, struct Stats *stats) {
 	char buffer[BUFSIZE];
 	size_t buffer_length = 0;
 
@@ -67,6 +66,5 @@ static bool read_from_stdin(UT_string *copris_text, struct Stats *stats) {
 		stats->sum += buffer_length; // TODO - possible overflow?
 	}
 
-	// Return true if no text has been read
-	return (buffer_length == 0);
+	return buffer_length;
 }

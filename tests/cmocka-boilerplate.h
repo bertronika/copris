@@ -4,7 +4,6 @@
 #include <cmocka.h>
 
 #include <stdio.h>
-#include <stdbool.h>
 
 #include <utstring.h> /* uthash library - dynamic strings */
 

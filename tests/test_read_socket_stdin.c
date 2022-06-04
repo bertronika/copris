@@ -33,7 +33,7 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
         will_return(__wrap_read, (sizeof input_2) - 1);          \
         will_return(__wrap_read, NULL); /* Signal an EOF */      \
                                                                  \
-        bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
+        int error = copris_handle_socket(copris_text, &parentfd, &attrib); \
                                                                  \
         assert_false(error);                                     \
         assert_string_equal(utstring_body(copris_text), result); \
@@ -56,7 +56,7 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
         will_return(__wrap_read, input);                         \
         will_return(__wrap_read, (sizeof input) - 1);            \
                                                                  \
-        bool error = copris_handle_socket(copris_text, &parentfd, &attrib); \
+        int error = copris_handle_socket(copris_text, &parentfd, &attrib); \
                                                                  \
         assert_false(error);                                     \
         assert_string_equal(utstring_body(copris_text), result); \
@@ -73,10 +73,10 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
         will_return(__wrap_fgets, input_2);                      \
         will_return(__wrap_fgets, NULL); /* Signal an EOF */     \
                                                                  \
-        bool no_text_read = copris_handle_stdin(copris_text);    \
+        int error = copris_handle_stdin(copris_text);            \
         expected_stats(sizeof result, 2);                        \
                                                                  \
-        assert_false(no_text_read);                              \
+        assert_false(error);                                     \
         assert_string_equal(utstring_body(copris_text), result); \
                                                                  \
         utstring_free(copris_text);                              \
@@ -92,7 +92,7 @@ static void stdin_read_no_text(void **state)
 
 	will_return(__wrap_fgets, NULL); /* Signal an EOF */
 
-	bool no_text_read = copris_handle_stdin(copris_text);
+	int no_text_read = copris_handle_stdin(copris_text);
 	expected_stats(1, 0);
 
 	assert_true(no_text_read);

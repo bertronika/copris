@@ -1,9 +1,6 @@
 #ifndef UTF8_H
 #define UTF8_H
 
-#include <stdbool.h>  /* bool      */
-#include <stddef.h>   /* size_t    */
-
 /*
  * UTF-8 Encoding
  *
@@ -27,8 +24,23 @@
 #define UTF8_IS_CONTINUATION(c) ((c & 0xC0) == 0x80)
 #define UTF8_IS_MULTIBYTE(c)    ((c & 0xC0) == 0xC0)
 
+/*
+ * Count the number of characters in string `s' of length `n', where any character
+ * can be from 1 to 4 bytes long.
+ * Return number of counted characters.
+ */
 size_t utf8_count_codepoints(const char *s, size_t n);
+
+/*
+ * Determine the byte length of a (multibyte) character `s' by analysing its first byte.
+ * Return byte length of the character.
+ */
 size_t utf8_codepoint_length(const char s);
-bool utf8_terminate_incomplete_buffer(char *str, size_t len);
+
+/*
+ * Check for incomplete multibyte characters in input string `str' of length `len'. If
+ * any found, terminate the string before letting them (and any following text) through.
+ */
+int utf8_terminate_incomplete_buffer(char *str, size_t len);
 
 #endif /* UTF8_H */
