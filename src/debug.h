@@ -70,46 +70,46 @@ extern int verbosity;
  *               -> src/translate.c: 33: Error opening translation file.
  *                  fopen: No such file or directory
  */
-#define _PRINT_MSG(output, ...)              \
-    fprintf(output, __VA_ARGS__);            \
+
+#define _PRINT_MSG(output, ...)          \
+    fprintf(output, __VA_ARGS__);        \
     fputs("\n", output)
 
 #ifdef DEBUG
-#   define PRINT_LOCATION(output)            \
+#   define PRINT_LOCATION(output)        \
            fprintf(output, "%*s:%3d: ", MAX_FILENAME_LENGTH, __FILE__, __LINE__)
-#   define PRINT_MSG(...)                    \
-        do {                                 \
-            PRINT_LOCATION(stdout);          \
-            _PRINT_MSG(stdout, __VA_ARGS__); \
-        } while (0)
-#   define PRINT_ERROR_MSG(...)              \
-        do {                                 \
-            fputs("\x1B[1m", stderr);        \
-            PRINT_LOCATION(stderr);          \
-            _PRINT_MSG(stderr, __VA_ARGS__); \
-            fputs("\x1B[0m", stderr);        \
-        } while (0)
 #else
 #   define PRINT_LOCATION(output) ((void)0)
-#   define PRINT_MSG(...)         do { _PRINT_MSG(stdout, __VA_ARGS__); } while (0)
-#   define PRINT_ERROR_MSG(...)   do { _PRINT_MSG(stderr, __VA_ARGS__); } while (0)
 #endif
 
-#define PRINT_NOTE(str)              \
-    do {                             \
-        if (LOG_INFO)                \
-            PRINT_LOCATION(stdout);  \
-        else                         \
-            fputs("Note: ", stdout); \
-                                     \
-        puts(str);                   \
+#define PRINT_MSG(...)                   \
+    do {                                 \
+        PRINT_LOCATION(stdout);          \
+        _PRINT_MSG(stdout, __VA_ARGS__); \
+    } while (0)
+#define PRINT_ERROR_MSG(...)             \
+    do {                                 \
+        fputs("\x1B[1m", stderr);        \
+        PRINT_LOCATION(stderr);          \
+        _PRINT_MSG(stderr, __VA_ARGS__); \
+        fputs("\x1B[0m", stderr);        \
     } while (0)
 
-#define PRINT_SYSTEM_ERROR(name, msg) \
-    do {                              \
-        (void)errno; /* is missing */ \
-        PRINT_ERROR_MSG(msg);         \
-        perror(name);                 \
+#define PRINT_NOTE(str)                  \
+    do {                                 \
+        if (LOG_INFO)                    \
+            PRINT_LOCATION(stdout);      \
+        else                             \
+            fputs("Note: ", stdout);     \
+                                         \
+        puts(str);                       \
+    } while (0)
+
+#define PRINT_SYSTEM_ERROR(name, msg)    \
+    do {                                 \
+        (void)errno; /* is missing */    \
+        PRINT_ERROR_MSG(msg);            \
+        perror(name);                    \
     } while (0);
 
 #endif /* DEBUG_H */
