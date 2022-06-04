@@ -353,12 +353,27 @@ int main(int argc, char **argv) {
 	if (attrib.daemon && LOG_DEBUG)
 		PRINT_MSG("Daemon mode enabled.");
 
+	// Load a translation file
+	if (attrib.copris_flags & HAS_TRFILE) {
+		error = load_translation_file(attrib.trfile, &trfile);
+		if (error) {
+			// Missing printer sets are not a fatal error when --quiet
+			if (verbosity) {
+				unload_translation_file(&trfile);
+				return EXIT_FAILURE;
+			} else {
+				PRINT_ERROR_MSG("Disabling character translation.");
+				attrib.copris_flags &= ~HAS_TRFILE;
+			}
+		}
+	}
+
 #ifdef W_CMARK
 	// Load a printer feature set file
 	if (attrib.copris_flags & HAS_PRSET) {
 		error = load_printer_set_file(attrib.prset, &prset);
 		if(error) {
-			// Missing printer sets are not a fatal error in quiet mode
+			// Missing translation files are as well not a fatal error in quiet mode
 			if(verbosity) {
 				unload_printer_set_file(&prset);
 				return EXIT_FAILURE;
@@ -372,27 +387,12 @@ int main(int argc, char **argv) {
 	(void)prset;
 #endif
 
-	// Load a translation file
-	if (attrib.copris_flags & HAS_TRFILE) {
-		error = load_translation_file(attrib.trfile, &trfile);
-		if (error) {
-			// Missing translation files are as well not a fatal error when --quiet
-			if (verbosity) {
-				unload_translation_file(&trfile);
-				return EXIT_FAILURE;
-			} else {
-				PRINT_ERROR_MSG("Disabling character translation.");
-				attrib.copris_flags &= ~HAS_TRFILE;
-			}
-		}
-	}
-	
 	if (attrib.limitnum > 0 && LOG_DEBUG)
 		PRINT_MSG("Limiting incoming data to %zu bytes.", attrib.limitnum);
 	
 	if (!is_stdin && LOG_DEBUG)
 		PRINT_MSG("Server is listening to port %u.", attrib.portno);
-	
+
 	if (LOG_INFO) {
 		PRINT_LOCATION(stdout);
 		printf("Data stream will be sent to ");
