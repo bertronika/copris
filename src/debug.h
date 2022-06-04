@@ -71,22 +71,26 @@ extern int verbosity;
  *                  fopen: No such file or directory
  */
 
-#define _PRINT_MSG(output, ...)          \
-    fprintf(output, __VA_ARGS__);        \
-    fputs("\n", output)
-
 #ifdef DEBUG
 #   define PRINT_LOCATION(output)        \
            fprintf(output, "%*s:%3d: ", MAX_FILENAME_LENGTH, __FILE__, __LINE__)
 #else
-#   define PRINT_LOCATION(output) ((void)0)
+#   define PRINT_LOCATION(output)        \
+           ((void)0)
 #endif
+
+#define _PRINT_MSG(output, ...)          \
+    fprintf(output, __VA_ARGS__);        \
+    fputs("\n", output)
 
 #define PRINT_MSG(...)                   \
     do {                                 \
         PRINT_LOCATION(stdout);          \
         _PRINT_MSG(stdout, __VA_ARGS__); \
     } while (0)
+
+// The two fputs() calls print terminal escape sequences
+// for bold and normal text.
 #define PRINT_ERROR_MSG(...)             \
     do {                                 \
         fputs("\x1B[1m", stderr);        \
@@ -105,6 +109,8 @@ extern int verbosity;
         puts(str);                       \
     } while (0)
 
+// The (void)errno statement is added as a check to ensure
+// errno.h is included in the file.
 #define PRINT_SYSTEM_ERROR(name, msg)    \
     do {                                 \
         (void)errno; /* is missing */    \
