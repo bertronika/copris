@@ -44,7 +44,7 @@
 #define _STRINGIFY(str) #str
 #define STRINGIFY(str) _STRINGIFY(str)
 
-#ifndef WITHOUT_CMARK
+#ifdef W_CMARK
 #   define MARKDOWN_SUPPORT "yes"
 #else
 #   define MARKDOWN_SUPPORT "no"
@@ -63,7 +63,7 @@ static void copris_help(const char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Listening port\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
-#ifndef WITHOUT_CMARK
+#ifdef W_CMARK
 	       "  -r, --printer PRSET    Printer feature set\n"
 #endif
 	       "  -d, --daemon           Run as a daemon\n"
@@ -183,7 +183,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
 		case 'r':
-#ifndef WITHOUT_CMARK
+#ifdef W_CMARK
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised character in printer set name (%s). "
 				                "Perhaps you forgot to specify the set?", optarg);
@@ -207,10 +207,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->prset = optarg;
 			attrib->copris_flags |= HAS_PRSET;
 #else
-			PRINT_ERROR_MSG("Option `-r|--printerset' isn't available in this "
-			                "release of COPRIS -- "
-			                "printer feature sets were omitted with `-DWITHOUT_CMARK' "
-			                "at build time.");
+			PRINT_ERROR_MSG("Option `-r|--printerset' isn't available in this release of COPRIS - "
+			                "printer feature sets were omitted at build time.");
 			return 1;
 #endif
 			break;
@@ -358,7 +356,7 @@ int main(int argc, char **argv) {
 	if (attrib.daemon && LOG_DEBUG)
 		PRINT_MSG("Daemon mode enabled.");
 
-#ifndef WITHOUT_CMARK
+#ifdef W_CMARK
 	// Load a printer feature set file
 	if (attrib.copris_flags & HAS_PRSET) {
 		error = load_printer_set_file(attrib.prset, &prset);
