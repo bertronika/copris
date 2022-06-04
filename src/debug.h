@@ -3,28 +3,73 @@
 
 #define MAX_FILENAME_LENGTH 17
 
-extern int verbosity;
-
-// ***** Message logging *****
 /*
- * Return `1' if current verbosity level, set in the global `verbosity' variable,
- * matches the function name, `0' otherwise.
- * Verbosity is set when parsing argument options according to the following table:
- *
- * VERBOSITY LEVEL       ARGUMENT
- * 0  silent/fatal only  -q
- * 1  error              (default)
- * 2  info               -v
- * 3  debug              -vv
- *
- * Fatal messages are handled with error reporting functions and don't have a logging
- * interface.
+ * The debugging interface consists of preprocessor macros, divided into logging and
+ * message printing categories.
  */
+
+/*
+ * COPRIS uses 4 verbosity levels to determine the amount of diagnostic text, written to
+ * standard output and standard error. Level is determined via user-provided arguments
+ * in main.c:parse_arguments() and passed to the global variable 'verbosity':
+ *
+ *  VERBOSITY  LEVEL          ARGUMENT  QUERY WITH
+ *  0          silent/fatal   -q        if (!verbosity)
+ *             messages only
+ *  1          error          (none)    LOG_ERROR();
+ *  2          info           -v        LOG_INFO();
+ *  3          debug          -vv       LOG_DEBUG();
+ */
+
+extern int verbosity;
 
 #define LOG_ERROR (verbosity > 0)
 #define LOG_INFO  (verbosity > 1)
 #define LOG_DEBUG (verbosity > 2)
 
+/*
+ * Following macros are used for printing text to the terminal. Note that their output may
+ * change according to the build type (debug/release).
+ *
+ * PRINT_LOCATION(output);
+ *           If in a debug build, prints file name and line number of the macro invocation,
+ *           without a newline at the end. 'output' may be either 'stdout' or 'stderr'. Prints
+ *           nothing if in a release build.
+ *           Example:
+ *               PRINT_LOCATION(stdout);
+ *               -> src/main.c:397:
+ *
+ * PRINT_MSG(...);
+ *           Invokes PRINT_LOCATION(stdout), prints the specified string to stdout. Takes
+ *           printf-like variadic arguments.
+ *           Example:
+ *               PRINT_MSG("Verbosity level set to %d.", verbosity);
+ *               -> src/main.c:336: Verbosity level set to 2.
+ *
+ * PRINT_ERROR_MSG(...);
+ *           Invokes PRINT_LOCATION(stderr), prints the specified string to stderr. Takes
+ *           printf-like variadic arguments.
+ *           Example:
+ *               PRINT_ERROR_MSG("Option '-%c' not recognised.", optopt);
+ *               -> src/main.c:268: Option '-b' not recognised.
+ *
+ * PRINT_NOTE(str);
+ *           Invokes PRINT_LOCATION(stdout) and prints 'str' with a newline to stdout if
+ *           verbosity set to INFO or higher. Else, prints 'Note: ' followed by 'str' and
+ *           a newline.
+ *           Example:
+ *               PRINT_NOTE("Limit number not used while reading from stdin.");
+ *               -> src/main.c:344: Limit number not used while reading from stdin.
+ *                  or
+ *               -> Note: Limit number not used while reading from stdin.
+ *
+ * PRINT_SYSTEM_ERROR(name, msg);
+ *           Passes 'msg' to PRINT_ERROR_MSG(), and 'name' to perror().
+ *           Example:
+ *               PRINT_SYSTEM_ERROR("fopen", "Error opening translation file.");
+ *               -> src/translate.c: 33: Error opening translation file.
+ *                  fopen: No such file or directory
+ */
 #define _PRINT_MSG(output, ...)              \
     fprintf(output, __VA_ARGS__);            \
     fputs("\n", output)
