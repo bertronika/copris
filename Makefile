@@ -35,7 +35,7 @@ TESTS_OBJS := $(filter-out src/main_dbg.o, $(OBJS_DBG))
 # Dynamic libraries to be linked
 LIBRARIES = inih
 
-# Common, release and build compiler flags
+# Default common, release and build compiler flags
 CFLAGS   ?= -Wall -Wextra -pedantic
 RELFLAGS ?= -O2 -g -DNDEBUG
 DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
@@ -119,4 +119,5 @@ clean:
 	rm -fr $(CPPCHECK_DIR)
 
 help:
-	head -n 16 $(firstword $(MAKEFILE_LIST))
+	head -n 16 $(firstword $(MAKEFILE_LIST)); \
+	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' $(firstword $(MAKEFILE_LIST))
