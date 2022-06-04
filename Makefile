@@ -20,7 +20,7 @@
 VERSION := $(shell git describe --tags --dirty)
 
 # Source, object and dependency files for release and debug builds
-SOURCES = debug.c read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c \
+SOURCES = read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c \
           parse_value.c main.c
 OBJS_REL := $(SOURCES:%.c=src/%_rel.o)
 DEPS_REL := $(SOURCES:%.c=src/%_rel.d)

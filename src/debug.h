@@ -5,21 +5,6 @@
 
 extern int verbosity;
 
-// ***** Error reporting *****
-/*
- * If `return_value' is less than 0, display specified `message', followed by a
- * perror(3) call with the specified `function_name'. Return value is 1 if an
- * error is printed, otherwise 0. Message is printed to stderr.
- */
-int raise_perror(int return_value, char *function_name, char *message);
-
-/*
- * If `received_errno' is different from 0, display specified `message', followed
- * by a perror(3) call with the specified `function_name'. Return value is 1 if an
- * error is printed, otherwise 0. Message is printed to stderr.
- */
-int raise_errno_perror(int received_errno, char *function_name, char *message);
-
 // ***** Message logging *****
 /*
  * Return `1' if current verbosity level, set in the global `verbosity' variable,
