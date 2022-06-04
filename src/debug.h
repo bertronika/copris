@@ -35,10 +35,6 @@ int raise_errno_perror(int received_errno, char *function_name, char *message);
  * Fatal messages are handled with error reporting functions and don't have a logging
  * interface.
  */
-// TODO deprecated
-int log_error();
-int log_info();
-int log_debug();
 
 #define LOG_ERROR (verbosity > 0)
 #define LOG_INFO  (verbosity > 1)
@@ -78,14 +74,5 @@ int log_debug();
                                      \
         puts(str);                   \
     } while (0)
-
-/*
- * Print current date and time in a custom format, without a newline character at the end.
- * Format is subject to change, ideally using the system locale (TODO).
- *
- * This function works only when compiling the debug target (-DDEBUG).
- */
-// TODO deprecated
-void log_date();
 
 #endif /* DEBUG_H */
