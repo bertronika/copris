@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
-#include <assert.h>
 
 #include "debug.h"
 #include "parse_value.h"
@@ -42,15 +41,19 @@ int parse_value_to_binary(const char *value, char *parsed_value, int length)
 		//if (*endptr && LOG_DEBUG)
 			//PRINT_MSG("strtol: remaining: '%s'.", endptr);
 
-		// Check if value fits
 		if (temp_value < CHAR_MIN || temp_value > CHAR_MAX) {
-			PRINT_ERROR_MSG("'%s': value out of bounds.", value);
+			PRINT_ERROR_MSG("Value '%s' in '%s' is out of bounds.", valuepos, value);
+			return -1;
+		}
+
+		if (i + 1 == length) {
+			PRINT_ERROR_MSG("Definition '%s' is overlong. Shorten it or recompile COPRIS "
+			                "with a bigger limit.", value);
 			return -1;
 		}
 
 		parsed_value[i++] = temp_value;
 		valuepos = endptr;
-		assert(i <= length);
 	}
 	parsed_value[i] = '\0';
 
