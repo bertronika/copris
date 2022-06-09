@@ -196,7 +196,7 @@ static int initialise_commands(struct Inifile **prset)
 
 		// Each name gets an empty value, to be filled later from the configuration file
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
-		memcpy(s->out, "", 1);
+		*s->out = '\0';
 		HASH_ADD_STR(*prset, in, s);
 
 		command_count++;
