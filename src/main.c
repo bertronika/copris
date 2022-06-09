@@ -425,8 +425,7 @@ int main(int argc, char **argv) {
 				return EXIT_FAILURE;
 		}
 
-		size_t text_length = utstring_len(copris_text);
-		if (text_length == 0)
+		if ((size_t)utstring_len(copris_text) == 0)
 			continue; // Do not attempt to write/display nothing
 
 		// Stage 2: Translate selected characters in text with a translation file
@@ -444,6 +443,7 @@ int main(int argc, char **argv) {
 			copris_write_file(attrib.destination, copris_text);
 		} else {
 			const char *processed_text = utstring_body(copris_text);
+			size_t text_length = utstring_len(copris_text);
 			if (LOG_ERROR)
 				puts("; BST"); // Begin-Stream-Transcript
 
