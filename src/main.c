@@ -436,6 +436,8 @@ int main(int argc, char **argv) {
 		// Stage 3: Normalise text
 
 		// Stage 4: Handle Markdown in text with a printer set file
+		if (attrib.copris_flags & HAS_PRSET)
+			convert_markdown(copris_text, &prset);
 
 		// Stage 5: Write text to the output destination
 		if (attrib.copris_flags & HAS_DESTINATION) {

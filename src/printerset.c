@@ -9,10 +9,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <errno.h>
+#include <assert.h>
 
-#include <ini.h>    /* inih library - .ini file parser */
-#include <uthash.h> /* uthash library - hash table     */
+#include <ini.h>      /* inih library - .ini file parser   */
+#include <uthash.h>   /* uthash library - hash table       */
+#include <utstring.h> /* uthash library - dynamic strings  */
+#include <cmark.h>    /* cmark library - CommonMark parser */
 
 #include "Copris.h"
 #include "debug.h"
@@ -207,4 +211,106 @@ static int initialise_commands(struct Inifile **prset)
 	}
 
 	return 0;
+}
+
+void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
+
+void convert_markdown(UT_string *copris_text, struct Inifile **prset)
+{
+	// Create a temporary string
+	UT_string *converted_text;
+	utstring_new(converted_text);
+
+	char *body      = utstring_body(copris_text);
+	size_t body_len = utstring_len(copris_text);
+
+	cmark_node *document = cmark_parse_document(body, body_len, CMARK_OPT_DEFAULT);
+	cmark_iter *iter = cmark_iter_new(document);
+	cmark_event_type ev_type;
+
+	while ((ev_type = cmark_iter_next(iter)) != CMARK_EVENT_DONE) {
+		cmark_node *cur = cmark_iter_get_node(iter);
+		render_node(cur, ev_type, prset, converted_text);
+	}
+
+	cmark_iter_free(iter);
+	cmark_node_free(document);
+
+	// Overwrite input text
+	utstring_clear(copris_text);
+	utstring_bincpy(copris_text, utstring_body(converted_text), utstring_len(converted_text));
+	utstring_free(converted_text);
+}
+
+static void insert_code(const char *code, struct Inifile **prset, UT_string *text)
+{
+	struct Inifile *s;
+	HASH_FIND_STR(*prset, code, s);
+
+	assert(s != NULL);
+
+// 	if (*s->out == '\0')
+
+	size_t code_len = strlen(s->out);
+	utstring_bincpy(text, s->out, code_len);
+}
+
+void render_node(cmark_node *node, cmark_event_type ev_type, struct Inifile **prset, UT_string *text)
+{
+	cmark_node_type node_type = cmark_node_get_type(node);
+	bool entering = (ev_type == CMARK_EVENT_ENTER);
+
+	const char *node_literal;
+	size_t node_len;
+	int heading_level;
+
+	switch (node_type) {
+	case CMARK_NODE_DOCUMENT:
+	case CMARK_NODE_HTML_BLOCK:
+		break;
+	case CMARK_NODE_PARAGRAPH:
+		utstring_bincpy(text, "\n", 1);
+
+		break;
+// 	case CMARK_NODE_HEADING:
+// 		heading_level = cmark_node_get_heading_level(node);
+// 		if (heading_level == 3)
+// 			insert_code((entering ? "C_H3_ON" : "C_H3_OFF"), prset, text);
+// 		else if (heading_level == 2)
+// 			insert_code((entering ? "C_H2_ON" : "C_H2_OFF"), prset, text);
+// 		else if (heading_level == 1)
+// 			insert_code((entering ? "C_H1_ON" : "C_H1_OFF"), prset, text);
+// 		else
+// 			assert(0);
+//
+// 		break;
+	case CMARK_NODE_STRONG:
+		insert_code((entering ? "C_BOLD_ON" : "C_BOLD_OFF"), prset, text);
+
+		break;
+	case CMARK_NODE_EMPH:
+		insert_code((entering ? "C_ITALIC_ON" : "C_ITALIC_OFF"), prset, text);
+
+		break;
+	case CMARK_NODE_TEXT:
+		node_literal = cmark_node_get_literal(node);
+		node_len = strlen(node_literal);
+		utstring_bincpy(text, node_literal, node_len);
+
+		break;
+	case CMARK_NODE_SOFTBREAK:
+		utstring_bincpy(text, "\n", 1);
+
+		break;
+	case CMARK_NODE_LINEBREAK:
+		utstring_bincpy(text, "\n\n", 2);
+
+		break;
+	case CMARK_NODE_NONE:
+		assert(0);
+		break;
+	default:
+		printf("Unhandled: %s\n", cmark_node_get_type_string(node));
+		break;
+	}
 }

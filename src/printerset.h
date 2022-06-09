@@ -17,4 +17,11 @@ int load_printer_set_file(char *filename, struct Inifile **prset);
  */
 void unload_printer_set_file(struct Inifile **prset);
 
+/*
+ * Take input text `copris_text' and convert the Markdown specifiers to printer's
+ * escape codes, passed by `prset' hash table. Put converted text into `copris_text',
+ * overwriting previous content.
+ */
+void convert_markdown(UT_string *copris_text, struct Inifile **prset);
+
 #endif /* PRINTERSET_H */
