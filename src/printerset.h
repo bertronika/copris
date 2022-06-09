@@ -6,6 +6,9 @@
 #define COPRIS_PARSE_SUCCESS   1
 #define COPRIS_PARSE_DUPLICATE 2
 
+#define INSERT_TEXT(string) \
+        utstring_bincpy(text, string, (sizeof string) - 1)
+
 /*
  * Load printer set file `filename' into a hash table, passed by `prset'.
  * Return 0 on success.

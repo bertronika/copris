@@ -27,6 +27,8 @@
 
 static int inih_handler(void *, const char *, const char *, const char *);
 static int initialise_commands(struct Inifile **);
+static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
+static void insert_code(const char *, struct Inifile **, UT_string *);
 
 int load_printer_set_file(char *filename, struct Inifile **prset)
 {
@@ -213,8 +215,6 @@ static int initialise_commands(struct Inifile **prset)
 	return 0;
 }
 
-void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
-
 void convert_markdown(UT_string *copris_text, struct Inifile **prset)
 {
 	// Create a temporary string
@@ -242,6 +242,145 @@ void convert_markdown(UT_string *copris_text, struct Inifile **prset)
 	utstring_free(converted_text);
 }
 
+static void render_node(cmark_node *node, cmark_event_type ev_type,
+                        struct Inifile **prset, UT_string *text)
+{
+	cmark_node_type node_type = cmark_node_get_type(node);
+	bool entering = (ev_type == CMARK_EVENT_ENTER);
+
+	static cmark_list_type list_type;
+	static int ordered_list_index = 1;
+
+// 	printf("node type '%s' (%d)\n", cmark_node_get_type_string(node), entering);
+
+	switch (node_type) {
+	case CMARK_NODE_DOCUMENT:
+	case CMARK_NODE_HTML_BLOCK:
+		break;
+
+	case CMARK_NODE_PARAGRAPH: {
+	    cmark_node *parent = cmark_node_parent(node);
+	    cmark_node *grandparent = cmark_node_parent(parent);
+// 		cmark_node_type g_node_type = cmark_node_get_type(grandparent);
+
+// 	    if (grandparent != NULL && g_node_type == CMARK_NODE_LIST) {
+// 		if ((entering && grandparent == NULL) || (!entering && g_node_type == CMARK_NODE_LIST))
+		if (entering && grandparent == NULL)
+			INSERT_TEXT("\n");
+
+		break;
+	}
+	case CMARK_NODE_HEADING: {
+		int heading_level = cmark_node_get_heading_level(node);
+		assert(heading_level > 0 && heading_level <= 6);
+
+		char heading_code[9]; // "C_Hn_OFF"
+
+		if (entering) {
+			INSERT_TEXT("\n");
+			sprintf(heading_code, "C_H%1d_ON", heading_level);
+		} else
+			sprintf(heading_code, "C_H%1d_OFF", heading_level);
+
+		insert_code(heading_code, prset, text);
+
+		if (!entering)
+			INSERT_TEXT("\n");
+
+		break;
+	}
+	case CMARK_NODE_STRONG:
+		insert_code((entering ? "C_BOLD_ON" : "C_BOLD_OFF"), prset, text);
+		break;
+
+	case CMARK_NODE_EMPH:
+		insert_code((entering ? "C_ITALIC_ON" : "C_ITALIC_OFF"), prset, text);
+		break;
+
+	case CMARK_NODE_CODE_BLOCK:
+	case CMARK_NODE_CODE:
+	case CMARK_NODE_TEXT: {
+		const char *node_literal = cmark_node_get_literal(node);
+		assert(node_literal != NULL);
+
+		size_t node_len = strlen(node_literal);
+
+		if (node_type == CMARK_NODE_CODE)
+			insert_code("C_CODE_ON", prset, text);
+		else if (node_type == CMARK_NODE_CODE_BLOCK) {
+			INSERT_TEXT("\n");
+			insert_code("C_CODE_BLOCK_ON", prset, text);
+		}
+
+		utstring_bincpy(text, node_literal, node_len);
+
+		if (node_type == CMARK_NODE_CODE)
+			insert_code("C_CODE_OFF", prset, text);
+		else if (node_type == CMARK_NODE_CODE_BLOCK)
+			insert_code("C_CODE_BLOCK_OFF", prset, text);
+
+		if (!entering)
+			INSERT_TEXT("\n");
+
+		break;
+	}
+	case CMARK_NODE_LIST:
+		if (entering) {
+			list_type = cmark_node_get_list_type(node);
+		} else {
+			list_type = CMARK_NO_LIST;
+			ordered_list_index = 1;  // reset index
+		}
+
+		if (!entering)
+			INSERT_TEXT("\n");
+
+		break;
+
+	case CMARK_NODE_ITEM:
+		assert(list_type != CMARK_NO_LIST);
+		if (!entering)
+			break;
+
+		if (list_type == CMARK_BULLET_LIST)
+			INSERT_TEXT("\n> ");
+		else if (list_type == CMARK_ORDERED_LIST)
+			utstring_printf(text, "\n%d. ", ordered_list_index++);
+
+		break;
+
+	case CMARK_NODE_LINK:
+		if (entering) {
+			const char *node_url = cmark_node_get_url(node);
+			assert(node_url != NULL);
+
+			size_t node_len = strlen(node_url);
+
+			insert_code("C_LINK_ON", prset, text);
+			utstring_bincpy(text, node_url, node_len);
+			insert_code("C_LINK_OFF", prset, text);
+		}
+
+		break;
+
+	case CMARK_NODE_SOFTBREAK:
+		INSERT_TEXT("\n");
+		break;
+
+	case CMARK_NODE_LINEBREAK:
+		INSERT_TEXT("\n\n");
+		break;
+
+	case CMARK_NODE_NONE:
+		assert(0);
+		break;
+
+	default:
+		printf("Unhandled node type '%s' (%d)\n", cmark_node_get_type_string(node), entering);
+		break;
+	}
+}
+
 static void insert_code(const char *code, struct Inifile **prset, UT_string *text)
 {
 	struct Inifile *s;
@@ -249,68 +388,9 @@ static void insert_code(const char *code, struct Inifile **prset, UT_string *tex
 
 	assert(s != NULL);
 
-// 	if (*s->out == '\0')
+	if (*s->out == '\0')
+		return;
 
 	size_t code_len = strlen(s->out);
 	utstring_bincpy(text, s->out, code_len);
-}
-
-void render_node(cmark_node *node, cmark_event_type ev_type, struct Inifile **prset, UT_string *text)
-{
-	cmark_node_type node_type = cmark_node_get_type(node);
-	bool entering = (ev_type == CMARK_EVENT_ENTER);
-
-	const char *node_literal;
-	size_t node_len;
-	int heading_level;
-
-	switch (node_type) {
-	case CMARK_NODE_DOCUMENT:
-	case CMARK_NODE_HTML_BLOCK:
-		break;
-	case CMARK_NODE_PARAGRAPH:
-		utstring_bincpy(text, "\n", 1);
-
-		break;
-// 	case CMARK_NODE_HEADING:
-// 		heading_level = cmark_node_get_heading_level(node);
-// 		if (heading_level == 3)
-// 			insert_code((entering ? "C_H3_ON" : "C_H3_OFF"), prset, text);
-// 		else if (heading_level == 2)
-// 			insert_code((entering ? "C_H2_ON" : "C_H2_OFF"), prset, text);
-// 		else if (heading_level == 1)
-// 			insert_code((entering ? "C_H1_ON" : "C_H1_OFF"), prset, text);
-// 		else
-// 			assert(0);
-//
-// 		break;
-	case CMARK_NODE_STRONG:
-		insert_code((entering ? "C_BOLD_ON" : "C_BOLD_OFF"), prset, text);
-
-		break;
-	case CMARK_NODE_EMPH:
-		insert_code((entering ? "C_ITALIC_ON" : "C_ITALIC_OFF"), prset, text);
-
-		break;
-	case CMARK_NODE_TEXT:
-		node_literal = cmark_node_get_literal(node);
-		node_len = strlen(node_literal);
-		utstring_bincpy(text, node_literal, node_len);
-
-		break;
-	case CMARK_NODE_SOFTBREAK:
-		utstring_bincpy(text, "\n", 1);
-
-		break;
-	case CMARK_NODE_LINEBREAK:
-		utstring_bincpy(text, "\n\n", 2);
-
-		break;
-	case CMARK_NODE_NONE:
-		assert(0);
-		break;
-	default:
-		printf("Unhandled: %s\n", cmark_node_get_type_string(node));
-		break;
-	}
 }
