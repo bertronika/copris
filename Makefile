@@ -3,6 +3,7 @@
 #	- all       synonym for `release'
 #	- release   build the release build (executable name `copris')
 #	- debug     build the debugging build (executable name `copris_dbg')
+#	- install   copy release build's program files to appropriate directories, obeying PREFIX
 #	- clean     clean object, dependency, binary and test files
 #	- help      print this text
 
@@ -18,6 +19,15 @@
 
 # Get latest version tag
 VERSION := $(shell git describe --tags --dirty)
+
+# Installation directories
+PREFIX  ?= /usr/local
+BINDIR  ?= $(PREFIX)/bin
+DATADIR ?= $(PREFIX)/share
+MANDIR  ?= $(PREFIX)/man
+DESTDIR ?=
+
+INSTALL ?= install -p
 
 # Source, object and dependency files for release and debug builds
 SOURCES = read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c \
@@ -63,7 +73,8 @@ CPPCHECK_XML   = $(CPPCHECK_DIR)/report.xml
 CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
 
 # Targets that do not produce an eponymous file
-.PHONY: all release debug analyse unit-tests analyse-cppcheck analyse-cppcheck-html clean help
+.PHONY: all release debug analyse unit-tests analyse-cppcheck analyse-cppcheck-html \
+        install clean help
 
 all:     release
 release: copris
@@ -112,6 +123,9 @@ $(CPPCHECK_DIR)/index.html: $(SOURCES)
 # changed, only the files including it will be recompiled.
 -include $(DEPS_REL) $(DEPS_DBG)
 
+install: release
+	$(INSTALL) -D -m755 copris $(DESTDIR)$(BINDIR)
+
 clean:
 	rm -f $(OBJS_REL) $(DEPS_REL) copris
 	rm -f $(OBJS_DBG) $(DEPS_DBG) copris_dbg
@@ -119,5 +133,6 @@ clean:
 	rm -fr $(CPPCHECK_DIR)
 
 help:
-	head -n 16 $(firstword $(MAKEFILE_LIST)); \
+	head -n 17 $(firstword $(MAKEFILE_LIST)); \
 	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' $(firstword $(MAKEFILE_LIST))
+	# Default installation prefix: $(PREFIX)
