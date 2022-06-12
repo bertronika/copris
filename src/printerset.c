@@ -274,13 +274,13 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 		int heading_level = cmark_node_get_heading_level(node);
 		assert(heading_level > 0 && heading_level <= 6);
 
-		char heading_code[9]; // "C_Hn_OFF"
+		char heading_code[9]; // "F_Hn_OFF"
 
 		if (entering) {
 			INSERT_TEXT("\n");
-			sprintf(heading_code, "C_H%1d_ON", heading_level);
+			sprintf(heading_code, "F_H%1d_ON", heading_level);
 		} else
-			sprintf(heading_code, "C_H%1d_OFF", heading_level);
+			sprintf(heading_code, "F_H%1d_OFF", heading_level);
 
 		insert_code(heading_code, prset, text);
 
@@ -290,11 +290,11 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 		break;
 	}
 	case CMARK_NODE_STRONG:
-		insert_code((entering ? "C_BOLD_ON" : "C_BOLD_OFF"), prset, text);
+		insert_code((entering ? "F_BOLD_ON" : "F_BOLD_OFF"), prset, text);
 		break;
 
 	case CMARK_NODE_EMPH:
-		insert_code((entering ? "C_ITALIC_ON" : "C_ITALIC_OFF"), prset, text);
+		insert_code((entering ? "F_ITALIC_ON" : "F_ITALIC_OFF"), prset, text);
 		break;
 
 	case CMARK_NODE_CODE_BLOCK:
@@ -306,18 +306,18 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 		size_t node_len = strlen(node_literal);
 
 		if (node_type == CMARK_NODE_CODE)
-			insert_code("C_CODE_ON", prset, text);
+			insert_code("F_CODE_ON", prset, text);
 		else if (node_type == CMARK_NODE_CODE_BLOCK) {
 			INSERT_TEXT("\n");
-			insert_code("C_CODE_BLOCK_ON", prset, text);
+			insert_code("F_CODE_BLOCK_ON", prset, text);
 		}
 
 		utstring_bincpy(text, node_literal, node_len);
 
 		if (node_type == CMARK_NODE_CODE)
-			insert_code("C_CODE_OFF", prset, text);
+			insert_code("F_CODE_OFF", prset, text);
 		else if (node_type == CMARK_NODE_CODE_BLOCK)
-			insert_code("C_CODE_BLOCK_OFF", prset, text);
+			insert_code("F_CODE_BLOCK_OFF", prset, text);
 
 		if (!entering)
 			INSERT_TEXT("\n");
@@ -356,9 +356,9 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 
 			size_t node_len = strlen(node_url);
 
-			insert_code("C_LINK_ON", prset, text);
+			insert_code("F_LINK_ON", prset, text);
 			utstring_bincpy(text, node_url, node_len);
-			insert_code("C_LINK_OFF", prset, text);
+			insert_code("F_LINK_OFF", prset, text);
 		}
 
 		break;
