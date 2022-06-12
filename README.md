@@ -9,12 +9,10 @@ or `nc(1)`), and optionally applies two processing methods to it:
 
 ## Character translation
 
-COPRIS can load an user-specified *translation file*, consisting of
-source-destination character definitions, and apply them in the input
-text, replacing *source* characters with *destination* ones. Primary use
-of this feature is to avoid sending multi-byte (UTF-8) characters, not
-understood by printers, and swapping them with appropriate locale-specific
-replacements (or at least similar ones).
+COPRIS can load a *translation file* that defines user-specified
+characters, not understood by printers - usually multi-byte (UTF-8)
+ones. They are swapped with appropriate (or at least similar)
+locale-specific replacements, defined in the same file.
 
 
 ## Printer feature sets
@@ -50,9 +48,10 @@ characters. Printers were internally modified - some symbols, such as `~
 localised text without having to send special commands to their printers.
 
 COPRIS allows you to avoid manually swapping characters with the use
-of *translation files*, consisting of definitions with `key = value`
-pairs. Input text is scanned for occurrences of left-hand *keys*, which
-are replaced with appropriate right-hand *values*.
+of *translation files*, consisting of source-destination `key = raw
+values` definitions. Input text is scanned for occurrences of left-hand
+*keys*, which are replaced with appropriate right-hand *values*, specified
+in decimal, hexadecimal or octal bases.
 
 To use a translation file, specify the `-t/--trfile filename.ini`
 argument in the command line.
