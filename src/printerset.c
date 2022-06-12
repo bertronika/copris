@@ -278,9 +278,9 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 
 		if (entering) {
 			INSERT_TEXT("\n");
-			sprintf(heading_code, "F_H%1d_ON", heading_level);
+			snprintf(heading_code, 9, "F_H%d_ON", heading_level);
 		} else
-			sprintf(heading_code, "F_H%1d_OFF", heading_level);
+			snprintf(heading_code, 9, "F_H%d_OFF", heading_level);
 
 		insert_code(heading_code, prset, text);
 
