@@ -13,7 +13,7 @@
  * Load printer set file `filename' into a hash table, passed by `prset'.
  * Return 0 on success.
  */
-int load_printer_set_file(char *filename, struct Inifile **prset);
+int load_printer_set_file(const char *filename, struct Inifile **prset);
 
 /*
  * Unload printer set hash table, passed by `prset'.

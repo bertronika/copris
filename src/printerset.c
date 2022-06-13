@@ -32,7 +32,7 @@ static int validate_printer_set_file(const char *, struct Inifile **);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
 static void insert_code(const char *, struct Inifile **, UT_string *);
 
-int load_printer_set_file(char *filename, struct Inifile **prset)
+int load_printer_set_file(const char *filename, struct Inifile **prset)
 {
 	int error = initialise_commands(prset);
 	if (error)
