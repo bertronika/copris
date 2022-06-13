@@ -293,7 +293,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		int tmperr = access(argv[optind], W_OK);
 		if (tmperr != 0) {
 			PRINT_SYSTEM_ERROR("access", "Unable to write to output file/printer. Does "
-		                                 "it exist, with appropriate permissions?")
+		                                 "it exist, with appropriate permissions?");
 			return 1;
 		}
 
@@ -372,9 +372,9 @@ int main(int argc, char **argv) {
 	// Load a printer feature set file
 	if (attrib.copris_flags & HAS_PRSET) {
 		error = load_printer_set_file(attrib.prset, &prset);
-		if(error) {
+		if (error) {
 			// Missing translation files are as well not a fatal error in quiet mode
-			if(verbosity) {
+			if (verbosity) {
 				return EXIT_FAILURE;
 			} else {
 				unload_printer_set_file(&prset);
@@ -451,7 +451,7 @@ int main(int argc, char **argv) {
 
 			if (LOG_ERROR) {
 				// Print a new line if one's missing in the final text
-				if(processed_text[text_length - 1] != '\n')
+				if (processed_text[text_length - 1] != '\n')
 					puts("");
 
 				puts("; EST"); // End-Stream-Transcript
