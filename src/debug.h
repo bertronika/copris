@@ -68,7 +68,7 @@ extern int verbosity;
  *           Example:
  *               PRINT_SYSTEM_ERROR("fopen", "Error opening translation file.");
  *               -> src/translate.c: 33: Error opening translation file.
- *                  fopen: No such file or directory
+ *               -> fopen: No such file or directory
  */
 
 #ifdef DEBUG
@@ -116,6 +116,6 @@ extern int verbosity;
         (void)errno; /* is missing */    \
         PRINT_ERROR_MSG(msg);            \
         perror(name);                    \
-    } while (0);
+    } while (0)
 
 #endif /* DEBUG_H */
