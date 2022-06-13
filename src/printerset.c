@@ -25,8 +25,8 @@
 #include "utf8.h"
 #include "parse_value.h"
 
-static int inih_handler(void *, const char *, const char *, const char *);
 static int initialise_commands(struct Inifile **);
+static int inih_handler(void *, const char *, const char *, const char *);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
 static void insert_code(const char *, struct Inifile **, UT_string *);
 
@@ -91,6 +91,46 @@ int load_printer_set_file(char *filename, struct Inifile **prset)
 	}
 
 	return error;
+}
+
+static int initialise_commands(struct Inifile **prset)
+{
+	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
+	*prset = NULL;
+	struct Inifile *s;
+	int command_count = 0;
+
+	for (int i = 0; printer_commands[i] != NULL; i++) {
+		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
+		// better be safe. Better check this with a unit test (TODO).
+		HASH_FIND_STR(*prset, printer_commands[i], s);
+		if (s != NULL)
+			continue;
+
+		// Insert the (unique) name
+		s = malloc(sizeof *s);
+		if (s == NULL) {
+			PRINT_ERROR_MSG("Memory allocation error.");
+			return -1;
+		}
+
+		// Each name gets an empty value, to be filled later from the configuration file
+		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
+		*s->out = '\0';
+		HASH_ADD_STR(*prset, in, s);
+
+		command_count++;
+	}
+
+	if (LOG_DEBUG) {
+		PRINT_MSG("Dump of available printer set definitions:");
+		for (s = *prset; s != NULL; s = s->hh.next)
+			PRINT_MSG(" %s", s->in);
+
+		PRINT_MSG("Initialised %d empty printer commands.", command_count);
+	}
+
+	return 0;
 }
 
 /*
@@ -176,46 +216,6 @@ void unload_printer_set_file(struct Inifile **prset)
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Unloaded printer set file (count = %d).", count);
-}
-
-static int initialise_commands(struct Inifile **prset)
-{
-	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
-	*prset = NULL;
-	struct Inifile *s;
-	int command_count = 0;
-
-	for (int i = 0; printer_commands[i] != NULL; i++) {
-		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
-		// better be safe. Better check this with a unit test (TODO).
-		HASH_FIND_STR(*prset, printer_commands[i], s);
-		if (s != NULL)
-			continue;
-
-		// Insert the (unique) name
-		s = malloc(sizeof *s);
-		if (s == NULL) {
-			PRINT_ERROR_MSG("Memory allocation error.");
-			return -1;
-		}
-
-		// Each name gets an empty value, to be filled later from the configuration file
-		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
-		*s->out = '\0';
-		HASH_ADD_STR(*prset, in, s);
-
-		command_count++;
-	}
-
-	if (LOG_DEBUG) {
-		PRINT_MSG("Dump of available printer set definitions:");
-		for (s = *prset; s != NULL; s = s->hh.next)
-			PRINT_MSG(" %s", s->in);
-
-		PRINT_MSG("Initialised %d empty printer commands.", command_count);
-	}
-
-	return 0;
 }
 
 void convert_markdown(UT_string *copris_text, struct Inifile **prset)
