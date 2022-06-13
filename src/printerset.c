@@ -47,44 +47,47 @@ int load_printer_set_file(char *filename, struct Inifile **prset)
 
 	int parse_error = ini_parse_file(file, inih_handler, prset);
 
-	// If there's a parse error, break the one-time do-while loop and properly close the file
+	// If there's a parse error, properly close the file before exiting
 	error = -1;
-	do {
-		// Negative return number - can be either:
-		// -1  Error opening file - we've already handled this
-		// -2  Memory allocation error - only if inih was built with INI_USE_STACK
-		if (parse_error < 0) {
-			PRINT_ERROR_MSG("inih: ini_malloc: Memory allocation error.");
-			break;
+
+	// Negative return number - can be either:
+	// -1  Error opening file - we've already handled this
+	// -2  Memory allocation error - only if inih was built with INI_USE_STACK
+	if (parse_error < 0) {
+		PRINT_ERROR_MSG("inih: ini_malloc: Memory allocation error.");
+		goto close_file;
+	}
+
+	// Positive return number - returned error is a line number
+	if (parse_error > 0) {
+		PRINT_ERROR_MSG("Error parsing printer set file '%s', fault on line %d.",
+		                filename, parse_error);
+		goto close_file;
+	}
+
+	if (LOG_INFO) {
+		int definition_count = 0; // These are user-specified definitions, not all available
+
+		struct Inifile *s;
+		for (s = *prset; s != NULL; s = s->hh.next) {
+			if (*s->out != '\0')
+				definition_count++;
 		}
 
-		// Positive return number - returned error is a line number
-		if (parse_error > 0) {
-			PRINT_ERROR_MSG("Error parsing printer set file '%s', fault on line %d.",
-			                filename, parse_error);
-			break;
+		PRINT_MSG("Loaded printer set file '%s' with %d definitions.",
+		          filename, definition_count);
+	}
+
+	error = 0;
+
+	// Why parentheses? warning: a label can only be part of a statement and a declaration
+	//                  is not a statement [-Wpedantic]
+	close_file: {
+		int tmperr = fclose(file);
+		if (tmperr != 0) {
+			PRINT_SYSTEM_ERROR("close", "Failed to close the printer set file.");
+			return -1;
 		}
-
-		if (LOG_INFO) {
-			int definition_count = 0; // These are user-specified definitions, not all available
-
-			struct Inifile *s;
-			for (s = *prset; s != NULL; s = s->hh.next) {
-				if (*s->out != '\0')
-					definition_count++;
-			}
-
-			PRINT_MSG("Loaded printer set file '%s' with %d definitions.",
-			          filename, definition_count);
-		}
-
-		error = 0;
-	} while (0);
-
-	int tmperr = fclose(file);
-	if (tmperr != 0) {
-		PRINT_SYSTEM_ERROR("close", "Failed to close the printer set file.");
-		return -1;
 	}
 
 	return error;
@@ -186,7 +189,7 @@ static int initialise_commands(struct Inifile **prset)
 		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
 		// better be safe. Better check this with a unit test (TODO).
 		HASH_FIND_STR(*prset, printer_commands[i], s);
-		if(s != NULL)
+		if (s != NULL)
 			continue;
 
 		// Insert the (unique) name
@@ -204,7 +207,7 @@ static int initialise_commands(struct Inifile **prset)
 		command_count++;
 	}
 
-	if(LOG_DEBUG) {
+	if (LOG_DEBUG) {
 		PRINT_MSG("Dump of available printer set definitions:");
 		for (s = *prset; s != NULL; s = s->hh.next)
 			PRINT_MSG(" %s", s->in);
