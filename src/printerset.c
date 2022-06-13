@@ -109,7 +109,7 @@ static int initialise_commands(struct Inifile **prset)
 		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
 		// better be safe. Better check this with a unit test (TODO).
 		HASH_FIND_STR(*prset, printer_commands[i], s);
-		assert(s != NULL);
+		assert(s == NULL);
 
 		// Insert the (unique) name
 		s = malloc(sizeof *s);
