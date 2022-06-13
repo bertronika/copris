@@ -218,7 +218,8 @@ static int validate_printer_set_file(const char *filename, struct Inifile **prse
 		size_t command_len = strlen(printer_commands[i]);
 
 		// Only pick *_ON commands
-		if (printer_commands[i][command_len - 1] != 'N')
+		if (printer_commands[i][command_len - 2] != 'O' &&
+		    printer_commands[i][command_len - 1] != 'N')
 			continue;
 
 		// Check if the command was defined in the printer set file
