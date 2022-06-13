@@ -19,6 +19,7 @@
 #include <cmark.h>    /* cmark library - CommonMark parser */
 
 #include "Copris.h"
+#include "config.h"
 #include "debug.h"
 #include "printerset.h"
 #include "printer_commands.h"
@@ -27,6 +28,7 @@
 
 static int initialise_commands(struct Inifile **);
 static int inih_handler(void *, const char *, const char *, const char *);
+static int validate_printer_set_file(const char *, struct Inifile **);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
 static void insert_code(const char *, struct Inifile **, UT_string *);
 
@@ -90,6 +92,9 @@ int load_printer_set_file(char *filename, struct Inifile **prset)
 		}
 	}
 
+	if (!error)
+		error = validate_printer_set_file(filename, prset);
+
 	return error;
 }
 
@@ -104,8 +109,7 @@ static int initialise_commands(struct Inifile **prset)
 		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
 		// better be safe. Better check this with a unit test (TODO).
 		HASH_FIND_STR(*prset, printer_commands[i], s);
-		if (s != NULL)
-			continue;
+		assert(s != NULL);
 
 		// Insert the (unique) name
 		s = malloc(sizeof *s);
@@ -200,6 +204,51 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	}
 
 	return COPRIS_PARSE_SUCCESS;
+}
+
+static int validate_printer_set_file(const char *filename, struct Inifile **prset)
+{
+	struct Inifile *s;
+
+	for (int i = 0; printer_commands[i] != NULL; i++) {
+		// Only pick commands with a pair (prefixed with F_)
+		if (printer_commands[i][0] != 'F')
+			continue;
+
+		size_t command_len = strlen(printer_commands[i]);
+
+		// Only pick *_ON commands
+		if (printer_commands[i][command_len - 1] != 'N')
+			continue;
+
+		// Check if the command was defined in the printer set file
+		HASH_FIND_STR(*prset, printer_commands[i], s);
+		assert(s != NULL);
+		if (*s->out == '\0')
+			continue; /* Looks like it's not */
+
+		// Check for its pair - replace _ON suffix with _OFF
+		char command_pair[MAX_INIFILE_ELEMENT_LENGTH];
+		memcpy(command_pair, printer_commands[i], command_len);
+		assert(command_len + 1 <= MAX_INIFILE_ELEMENT_LENGTH);
+		command_pair[command_len - 1] = 'F';
+		command_pair[command_len]     = 'F';
+		command_pair[command_len + 1] = '\0';
+
+		HASH_FIND_STR(*prset, command_pair, s);
+		assert(s != NULL);
+		if (*s->out == '\0') {
+			PRINT_ERROR_MSG("%s: command %s is missing its pair definition %s.",
+			                filename, printer_commands[i], command_pair);
+
+			return -1;
+		}
+	}
+
+	if (LOG_DEBUG)
+		PRINT_MSG("No definition pairs are missing in '%s'.", filename);
+
+	return 0;
 }
 
 void unload_printer_set_file(struct Inifile **prset)

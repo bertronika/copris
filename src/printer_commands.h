@@ -1,9 +1,9 @@
 static const char *printer_commands[] = {
-	/* Non-printable commands */
+	/* Non-printable commands with no predefined values */
 	"C_RESET",
 	"C_BELL",
 
-	/* Formatting commands that have no predefined values */
+	/* Formatting commands that have no predefined values; both parts of a pair must be defined */
 	"F_BOLD_ON",
 	"F_BOLD_OFF",
 	"F_ITALIC_ON",
