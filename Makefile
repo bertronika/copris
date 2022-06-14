@@ -89,21 +89,21 @@ analyse: debug
 
 # Compile the release binary
 copris: $(OBJS_REL)
-	$(CC) $(LDFLAGS) $(CFLAGS) $(RELFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(RELFLAGS) $^ $(LDFLAGS) -o $@
 
 %_rel.o: %.c
 	$(CC) $(CFLAGS) $(RELFLAGS) -MMD -MP -c $< -o $@
 
 # Compile the debug binary
 copris_dbg: $(OBJS_DBG)
-	$(CC) $(LDFLAGS) $(CFLAGS) $(DBGFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(DBGFLAGS) $^ $(LDFLAGS) -o $@
 
 %_dbg.o: %.c
 	$(CC) $(CFLAGS) $(DBGFLAGS) -MMD -MP -c $< -o $@
 
 # Compile and run tests
 tests/run_%: tests/%.c tests/wrappers.c $(TESTS_OBJS)
-	$(CC) $(LDFLAGS) $(CFLAGS) $(TESTFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(TESTFLAGS) $^ $(LDFLAGS) -o $@
 
 unit-tests: $(TESTS_BINS)
 	for utest in $(TESTS_BINS); do ./$$utest; echo; done
