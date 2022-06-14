@@ -17,8 +17,8 @@
 
 # GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
-# Get latest version tag
-VERSION := $(shell git describe --tags --dirty)
+# Get latest version tag if in a git repository, else from a local file
+VERSION := $(shell git describe --tags --dirty 2>/dev/null || cat VERSION)
 
 # Installation directories
 PREFIX  ?= /usr/local
