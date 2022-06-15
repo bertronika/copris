@@ -124,6 +124,13 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// set is missing.' instead of `option requires an argument -- 'r')
 	while ((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch (c) {
+#ifndef W_CMARK
+		case 'r':
+		case ',':
+			PRINT_ERROR_MSG("Options regarding printer feature sets aren't available in "
+			                "this release of COPRIS - they were not included at build time.");
+			return 1;
+#endif
 		case 'p':
 			temp_portno = strtoul(optarg, &parserr, 10);
 
@@ -177,8 +184,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->trfile = optarg;
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
-		case 'r':
 #ifdef W_CMARK
+		case 'r':
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised character in printer set name (%s). "
 				                "Perhaps you forgot to specify the set?", optarg);
@@ -201,15 +208,11 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 			attrib->prset = optarg;
 			attrib->copris_flags |= HAS_PRSET;
-#else
-			PRINT_ERROR_MSG("Option `-r|--printerset' isn't available in this release of COPRIS - "
-			                "printer feature sets were omitted at build time.");
-			return 1;
-#endif
 			break;
 		case ',':
 			attrib->copris_flags = DUMP_CMDS;
 			return 0;
+#endif
 		case 'd':
 			attrib->daemon = true;
 			break;
