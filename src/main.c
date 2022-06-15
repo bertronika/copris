@@ -103,7 +103,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{"dump-commands", no_argument,       NULL, ','},
 		{"daemon",        no_argument,       NULL, 'd'},
 		{"limit",         required_argument, NULL, 'l'},
-		{"cutoff-limit",  no_argument,       NULL, 'D'},
+		{"cutoff-limit",  no_argument,       NULL, '.'},
 		{"verbose",       no_argument,       NULL, 'v'},
 		{"quiet",         no_argument,       NULL, 'q'},
 		{"help",          no_argument,       NULL, 'h'},
@@ -239,7 +239,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 			attrib->limitnum = (size_t)temp_limit;
 			break;
-		case 'D':
+		case '.':
 			attrib->copris_flags |= MUST_CUTOFF;
 			break;
 		case 'v':
