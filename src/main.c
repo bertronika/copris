@@ -334,10 +334,12 @@ int main(int argc, char **argv) {
 	if (error)
 		return error;
 
+#ifdef W_CMARK
 	if (attrib.copris_flags == DUMP_CMDS) {
 		error = dump_printer_set_commands(&prset);
 		return error;
 	}
+#endif
 
 	if (LOG_DEBUG)
 		PRINT_MSG("COPRIS started with PID %d.", getpid());
@@ -448,9 +450,11 @@ int main(int argc, char **argv) {
 
 		// Stage 3: Normalise text
 
-		// Stage 4: Handle Markdown in text with a printer set file
+		// Stage 4: Handle Markdown in text with a printer set file, if supported
+#ifdef W_CMARK
 		if (attrib.copris_flags & HAS_PRSET)
 			convert_markdown(copris_text, &prset);
+#endif
 
 		// Stage 5: Write text to the output destination
 		if (attrib.copris_flags & HAS_DESTINATION) {
@@ -480,8 +484,10 @@ int main(int argc, char **argv) {
 	if (attrib.copris_flags & HAS_TRFILE)
 		unload_translation_file(&trfile);
 
+#ifdef W_CMARK
 	if (attrib.copris_flags & HAS_PRSET)
 		unload_printer_set_file(&prset);
+#endif
 
 	utstring_free(copris_text);
 
