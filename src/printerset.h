@@ -9,6 +9,9 @@
 #define INSERT_TEXT(string) \
         utstring_bincpy(text, string, (sizeof string) - 1)
 
+#define INSERT_CODE(string) \
+        insert_code_helper(string, prset, text)
+
 /*
  * Load printer set file `filename' into a hash table, passed by `prset'.
  * Return 0 on success.

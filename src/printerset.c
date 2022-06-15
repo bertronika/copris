@@ -31,7 +31,7 @@ static void initialise_predefined_command(const char *, char *);
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_printer_set_file(const char *, struct Inifile **);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
-static void insert_code(const char *, struct Inifile **, UT_string *);
+static void insert_code_helper(const char *, struct Inifile **, UT_string *);
 
 int load_printer_set_file(const char *filename, struct Inifile **prset)
 {
@@ -394,7 +394,7 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 		} else
 			snprintf(heading_code, 9, "F_H%d_OFF", heading_level);
 
-		insert_code(heading_code, prset, text);
+		INSERT_CODE(heading_code);
 
 		if (!entering)
 			INSERT_TEXT("\n");
@@ -402,11 +402,11 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 		break;
 	}
 	case CMARK_NODE_STRONG:
-		insert_code((entering ? "F_BOLD_ON" : "F_BOLD_OFF"), prset, text);
+		INSERT_CODE((entering ? "F_BOLD_ON" : "F_BOLD_OFF"));
 		break;
 
 	case CMARK_NODE_EMPH:
-		insert_code((entering ? "F_ITALIC_ON" : "F_ITALIC_OFF"), prset, text);
+		INSERT_CODE((entering ? "F_ITALIC_ON" : "F_ITALIC_OFF"));
 		break;
 
 	case CMARK_NODE_CODE_BLOCK:
@@ -418,18 +418,18 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 		size_t node_len = strlen(node_literal);
 
 		if (node_type == CMARK_NODE_CODE)
-			insert_code("F_CODE_ON", prset, text);
+			INSERT_CODE("F_CODE_ON");
 		else if (node_type == CMARK_NODE_CODE_BLOCK) {
 			INSERT_TEXT("\n");
-			insert_code("F_CODE_BLOCK_ON", prset, text);
+			INSERT_CODE("F_CODE_BLOCK_ON");
 		}
 
 		utstring_bincpy(text, node_literal, node_len);
 
 		if (node_type == CMARK_NODE_CODE)
-			insert_code("F_CODE_OFF", prset, text);
+			INSERT_CODE("F_CODE_OFF");
 		else if (node_type == CMARK_NODE_CODE_BLOCK)
-			insert_code("F_CODE_BLOCK_OFF", prset, text);
+			INSERT_CODE("F_CODE_BLOCK_OFF");
 
 		if (!entering)
 			INSERT_TEXT("\n");
@@ -454,10 +454,13 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 		if (!entering)
 			break;
 
-		if (list_type == CMARK_BULLET_LIST)
-			INSERT_TEXT("\n> ");
-		else if (list_type == CMARK_ORDERED_LIST)
+		if (list_type == CMARK_BULLET_LIST) {
+			INSERT_TEXT("\n");
+			INSERT_CODE("P_LIST_ITEM");
+			INSERT_TEXT(" ");
+		} else if (list_type == CMARK_ORDERED_LIST) {
 			utstring_printf(text, "\n%d. ", ordered_list_index++);
+		}
 
 		break;
 
@@ -468,9 +471,9 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 
 			size_t node_len = strlen(node_url);
 
-			insert_code("F_LINK_ON", prset, text);
+			INSERT_CODE("F_LINK_ON");
 			utstring_bincpy(text, node_url, node_len);
-			insert_code("F_LINK_OFF", prset, text);
+			INSERT_CODE("F_LINK_OFF");
 		}
 
 		break;
@@ -493,7 +496,7 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 	}
 }
 
-static void insert_code(const char *code, struct Inifile **prset, UT_string *text)
+static void insert_code_helper(const char *code, struct Inifile **prset, UT_string *text)
 {
 	struct Inifile *s;
 	HASH_FIND_STR(*prset, code, s);
