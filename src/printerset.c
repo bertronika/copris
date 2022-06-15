@@ -214,24 +214,29 @@ static int validate_printer_set_file(const char *filename, struct Inifile **prse
 
 		size_t command_len = strlen(printer_commands[i]);
 
-		// Only pick *_ON commands
-		if (printer_commands[i][command_len - 2] != 'O' &&
-		    printer_commands[i][command_len - 1] != 'N')
-			continue;
+		// Check which state the command defines
+		bool is_on = (printer_commands[i][command_len - 2] == 'O' &&
+		              printer_commands[i][command_len - 1] == 'N');
 
-		// Check if the command was defined in the printer set file
+		// Check if the command was user-defined in the printer set file
 		HASH_FIND_STR(*prset, printer_commands[i], s);
 		assert(s != NULL);
 		if (*s->out == '\0')
 			continue; /* Looks like it's not */
 
-		// Check for its pair - replace _ON suffix with _OFF
+		// Get command's pair - swap suffix _ON with _OFF or vice versa
 		char command_pair[MAX_INIFILE_ELEMENT_LENGTH];
 		memcpy(command_pair, printer_commands[i], command_len);
 		assert(command_len + 1 <= MAX_INIFILE_ELEMENT_LENGTH);
-		command_pair[command_len - 1] = 'F';
-		command_pair[command_len]     = 'F';
-		command_pair[command_len + 1] = '\0';
+
+		if (is_on) {
+			command_pair[command_len - 1] = 'F';
+			command_pair[command_len]     = 'F';
+			command_pair[command_len + 1] = '\0';
+		} else {
+			command_pair[command_len - 2] = 'N';
+			command_pair[command_len - 1] = '\0';
+		}
 
 		HASH_FIND_STR(*prset, command_pair, s);
 		assert(s != NULL);
