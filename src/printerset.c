@@ -27,6 +27,7 @@
 #include "parse_value.h"
 
 static int initialise_commands(struct Inifile **);
+static void initialise_predefined_command(const char *, char *);
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_printer_set_file(const char *, struct Inifile **);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
@@ -120,8 +121,13 @@ static int initialise_commands(struct Inifile **prset)
 
 		// Each name gets an empty value, to be filled later from the configuration file
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
-		// TODO predefined values
-		*s->out = '\0';
+
+		// Check if command can be predefined
+		if (printer_commands[i][0] == 'P')
+			initialise_predefined_command(printer_commands[i], s->out);
+		else
+			*s->out = '\0';
+
 		HASH_ADD_STR(*prset, in, s);
 
 		command_count++;
@@ -132,6 +138,17 @@ static int initialise_commands(struct Inifile **prset)
 		          "their listing.", command_count);
 
 	return 0;
+}
+
+static void initialise_predefined_command(const char *command, char *value)
+{
+	value[0] = '\0';
+
+	if (strcmp(command, "P_LIST_ITEM") == 0)
+		value[0] = (const char)P_LIST_ITEM;
+
+	assert(value[0] != '\0');
+	value[1] = '\0';
 }
 
 /*

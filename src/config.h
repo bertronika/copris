@@ -15,4 +15,6 @@
 // Maximum lengths of name and value strings in .ini files
 #define MAX_INIFILE_ELEMENT_LENGTH 32
 
+#define P_LIST_ITEM '+'
+
 #endif /* CONFIG_H */
