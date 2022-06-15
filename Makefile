@@ -29,9 +29,25 @@ DESTDIR ?=
 
 INSTALL ?= install -p
 
+# Default common, release and build compiler flags
+CFLAGS   ?= -Wall -Wextra -pedantic
+RELFLAGS ?= -O2 -g -DNDEBUG
+DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
+
+# Dynamic libraries to be linked
+LIBRARIES = inih
+
 # Source, object and dependency files for release and debug builds
-SOURCES = read_socket.c read_stdin.c writer.c translate.c printerset.c utf8.c \
+SOURCES = read_socket.c read_stdin.c writer.c translate.c utf8.c \
           parse_value.c main.c
+
+# Determine if linking with libcmark is needed
+ifndef WITHOUT_CMARK
+	CFLAGS    += -DW_CMARK
+	LIBRARIES += libcmark
+	SOURCES   += printerset.c
+endif
+
 OBJS_REL := $(SOURCES:%.c=src/%_rel.o)
 DEPS_REL := $(SOURCES:%.c=src/%_rel.d)
 OBJS_DBG := $(SOURCES:%.c=src/%_dbg.o)
@@ -41,20 +57,6 @@ DEPS_DBG := $(SOURCES:%.c=src/%_dbg.d)
 TESTS = test_read_socket_stdin.c test_utf8.c
 TESTS_BINS := $(TESTS:%.c=tests/run_%)
 TESTS_OBJS := $(filter-out src/main_dbg.o, $(OBJS_DBG))
-
-# Dynamic libraries to be linked
-LIBRARIES = inih
-
-# Default common, release and build compiler flags
-CFLAGS   ?= -Wall -Wextra -pedantic
-RELFLAGS ?= -O2 -g -DNDEBUG
-DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
-
-# Determine if linking with libcmark is needed
-ifndef WITHOUT_CMARK
-	LIBRARIES += libcmark
-	CFLAGS += -DW_CMARK
-endif
 
 CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
 LDFLAGS += $(shell pkg-config --libs $(LIBRARIES))
