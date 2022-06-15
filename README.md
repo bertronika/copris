@@ -174,6 +174,10 @@ For a summary of all command line arguments, invoke COPRIS with
 `-h/--help`. For a listing of build-type options, version and author
 information, invoke with `-V/--version`.
 
+Note that you can only use `-l/--limit` and `--cutoff-limit` when reading
+from the network. If you want to limit incoming text from a local source,
+use some other tool or amend your data.
+
 COPRIS will print informative status messages to the terminal, except
 if you use the `-q/--quiet` parameter, which will hide all non-essential
 messages, except fatal errors. Note that if an output file is specified,
