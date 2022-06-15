@@ -185,7 +185,8 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	if (*s->out != '\0') {
+	// Warn if definition was already set, but only if command can't be predefined
+	if (*s->out != '\0' && *s->in != 'P') {
 		if (LOG_ERROR) {
 			if (LOG_INFO)
 				PRINT_LOCATION(stdout);
