@@ -59,6 +59,8 @@ static void copris_help(const char *copris_location) {
 	       "  -t, --trfile TRFILE    Character translation file\n"
 #ifdef W_CMARK
 	       "  -r, --printer PRSET    Printer feature set\n"
+	       "      --dump-commands    Print all possible printer feature set commands\n"
+	       "                         in an INI file format\n"
 #endif
 	       "  -d, --daemon           Run as a daemon\n"
 	       "  -l, --limit NUMBER     Limit number of received bytes\n"
@@ -99,6 +101,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{"daemon",        no_argument,       NULL, 'd'},
 		{"trfile",        required_argument, NULL, 't'},
 		{"printer",       required_argument, NULL, 'r'},
+		{"dump-commands", no_argument,       NULL, ','},
 		{"limit",         required_argument, NULL, 'l'},
 		{"cutoff-limit",  no_argument,       NULL, 'D'},
 		{"verbose",       no_argument,       NULL, 'v'},
@@ -236,6 +239,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 'D':
 			attrib->copris_flags |= MUST_CUTOFF;
 			break;
+		case ',':
+			attrib->copris_flags = DUMP_CMDS;
+			return 0;
 		case 'v':
 			if (verbosity != 0 && verbosity < 3)
 				verbosity++;
@@ -324,6 +330,11 @@ int main(int argc, char **argv) {
 	int error = parse_arguments(argc, argv, &attrib);
 	if (error)
 		return error;
+
+	if (attrib.copris_flags == DUMP_CMDS) {
+		error = dump_printer_set_commands(&prset);
+		return error;
+	}
 
 	if (LOG_DEBUG)
 		PRINT_MSG("COPRIS started with PID %d.", getpid());

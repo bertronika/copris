@@ -16,6 +16,11 @@
 int load_printer_set_file(const char *filename, struct Inifile **prset);
 
 /*
+ * Print out all printer commands, recognised by COPRIS, in an INI-style format.
+ */
+int dump_printer_set_commands(struct Inifile **prset);
+
+/*
  * Unload printer set hash table, passed by `prset'.
  */
 void unload_printer_set_file(struct Inifile **prset);

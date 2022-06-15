@@ -1,9 +1,9 @@
 static const char *printer_commands[] = {
-	/* Non-printable commands with no predefined values */
+	/* Non-printable commands */
 	"C_RESET",
 	"C_BELL",
 
-	/* Formatting commands that have no predefined values; both parts of a pair must be defined */
+	/* Formatting commands; both parts of a pair must be defined */
 	"F_BOLD_ON",
 	"F_BOLD_OFF",
 	"F_ITALIC_ON",
@@ -30,7 +30,7 @@ static const char *printer_commands[] = {
 	"F_LINK_ON",
 	"F_LINK_OFF",
 
-	/* Commands with predefined values if the printer set file doesn't define them */
-	"P_LIST_ITEM", /*  '-'  */
+	/* Overridable commands with predefined values in config.h */
+	"P_LIST_ITEM",
 	NULL
 };
