@@ -98,10 +98,10 @@ static void copris_version() {
 static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
 		{"port",          required_argument, NULL, 'p'},
-		{"daemon",        no_argument,       NULL, 'd'},
 		{"trfile",        required_argument, NULL, 't'},
 		{"printer",       required_argument, NULL, 'r'},
 		{"dump-commands", no_argument,       NULL, ','},
+		{"daemon",        no_argument,       NULL, 'd'},
 		{"limit",         required_argument, NULL, 'l'},
 		{"cutoff-limit",  no_argument,       NULL, 'D'},
 		{"verbose",       no_argument,       NULL, 'v'},
@@ -150,9 +150,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			}
 
 			attrib->portno = (unsigned int)temp_portno;
-			break;
-		case 'd':
-			attrib->daemon = true;
 			break;
 		case 't':
 			if (*optarg == '-') {
@@ -210,6 +207,12 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			return 1;
 #endif
 			break;
+		case ',':
+			attrib->copris_flags = DUMP_CMDS;
+			return 0;
+		case 'd':
+			attrib->daemon = true;
+			break;
 		case 'l':
 			temp_limit = strtoul(optarg, &parserr, 10);
 
@@ -239,9 +242,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 'D':
 			attrib->copris_flags |= MUST_CUTOFF;
 			break;
-		case ',':
-			attrib->copris_flags = DUMP_CMDS;
-			return 0;
 		case 'v':
 			if (verbosity != 0 && verbosity < 3)
 				verbosity++;
