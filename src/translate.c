@@ -199,8 +199,8 @@ void translate_text(UT_string *copris_text, struct Inifile **trfile)
 			memcpy(output_char, s->out, output_len);
 		} else {
 			// Definition not found, copy original
-			output_len = 1;
-			output_char[0] = input_char[0];
+			output_len = input_len;
+			memcpy(output_char, input_char, output_len);
 		}
 
 		utstring_bincpy(translated_text, output_char, output_len);
