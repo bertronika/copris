@@ -185,18 +185,8 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	// Warn if definition was already set, but only if command can't be predefined
-	if (*s->out != '\0' && *s->in != 'P') {
-		if (LOG_ERROR) {
-			if (LOG_INFO)
-				PRINT_LOCATION(stdout);
-
-			PRINT_MSG("Definition for '%s' appears more than once in translation file, "
-			          "skipping new value.", name);
-		}
-
-		return COPRIS_PARSE_DUPLICATE;
-	}
+	// Warn if definition was already set, but only if command isn't meant to be redefined
+	bool definition_overwriten = (*s->out != '\0' && *s->in != 'P');
 
 	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
 	int element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
@@ -214,6 +204,9 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		printf(" %s => 0x", s->in);
 		for (int i = 0; i < element_count; i++)
 			printf("%X ", s->out[i]);
+
+		if (definition_overwriten)
+			printf(" (overwriting old value)");
 
 		printf("\n");
 	}
