@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
 #include <assert.h>
@@ -110,23 +111,15 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 	// Check if this 'name' already exists
 	HASH_FIND_STR(*file, name, s);
-	if (s != NULL) {
-		if (LOG_ERROR) {
-			if (LOG_INFO)
-				PRINT_LOCATION(stdout);
+	bool name_overwritten = (s != NULL);
 
-			PRINT_MSG("Definition for '%s' appears more than once in translation file, "
-			          "skipping new value.", name);
+	if (!name_overwritten) {
+		// Key doesn't exist, add it
+		s = malloc(sizeof *s);
+		if (s == NULL) {
+			PRINT_ERROR_MSG("Memory allocation error.");
+			return COPRIS_PARSE_FAILURE;
 		}
-
-		return COPRIS_PARSE_DUPLICATE;
-	}
-
-	// Key doesn't exist, add it
-	s = malloc(sizeof *s);
-	if (s == NULL) {
-		PRINT_ERROR_MSG("Memory allocation error.");
-		return COPRIS_PARSE_FAILURE;
 	}
 
 	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
@@ -138,15 +131,21 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	memcpy(s->in, name, name_len + 1);
 	memcpy(s->out, parsed_value, element_count + 1);
-	HASH_ADD_STR(*file, in, s);
+
+	if (!name_overwritten) {
+		memcpy(s->in, name, name_len + 1);
+		HASH_ADD_STR(*file, in, s);
+	}
 
 	if (LOG_DEBUG) {
 		PRINT_LOCATION(stdout);
 		printf(" %1s (%zu) => 0x", s->in, name_len);
 		for (int i = 0; i < element_count; i++)
 			printf("%X ", s->out[i]);
+
+		if (name_overwritten)
+			printf(" (overwriting old value)");
 
 		printf("\n");
 	}
