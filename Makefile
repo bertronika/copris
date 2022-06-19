@@ -127,8 +127,10 @@ $(CPPCHECK_DIR)/index.html: $(SOURCES)
 # changed, only the files including it will be recompiled.
 -include $(DEPS_REL) $(DEPS_DBG)
 
-install: release
-	$(INSTALL) -D -m755 copris $(DESTDIR)$(BINDIR)
+install: copris man/copris.1
+	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(DATADIR)/copris $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL) -m755 copris $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m644 man/copris.1 $(DESTDIR)$(MANDIR)/man1
 
 clean:
 	rm -f $(OBJS_REL) $(DEPS_REL) copris
