@@ -1,15 +1,16 @@
+
 # Build system for COPRIS
-# Possible targets (you don't need to specify one for a regular release build):
+# Possible common targets (you don't need to specify one for a regular release build):
 #	- all       synonym for `release'
 #	- release   build the release build (executable name `copris')
 #	- debug     build the debugging build (executable name `copris_dbg')
-#	- install   copy release build's program files to appropriate directories, obeying PREFIX
-#	- clean     clean object, dependency, binary and test files
+#	- install   install a copy of release build with samples and documentation
+#	- clean     remove temporary object, dependency, binary and test files
 #	- help      print this text
 
 # Run `make' with `WITHOUT_CMARK=1' to omit Markdown support.
 
-# For code analysis purposes run:
+# Code analysis targets:
 #	- unit-tests              build and run unit tests
 #	- analyse                 same as `debug', but compile with GCC's static analyser
 #	- analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
@@ -29,10 +30,12 @@ DESTDIR ?=
 
 INSTALL ?= install -p
 
-# Default common, release and build compiler flags
+# Default common, release and debug build compiler flags
 CFLAGS   ?= -Wall -Wextra -pedantic
 RELFLAGS ?= -O2 -g -DNDEBUG
 DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
+
+# -Wconversion
 
 # Dynamic libraries to be linked
 LIBRARIES = inih
@@ -48,6 +51,9 @@ ifndef WITHOUT_CMARK
 	SOURCES   += printerset.c
 endif
 
+CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
+LDFLAGS += $(shell pkg-config --libs $(LIBRARIES))
+
 OBJS_REL := $(SOURCES:%.c=src/%_rel.o)
 DEPS_REL := $(SOURCES:%.c=src/%_rel.d)
 OBJS_DBG := $(SOURCES:%.c=src/%_dbg.o)
@@ -58,16 +64,12 @@ TESTS = test_read_socket_stdin.c test_utf8.c
 TESTS_BINS := $(TESTS:%.c=tests/run_%)
 TESTS_OBJS := $(filter-out src/main_dbg.o, $(OBJS_DBG))
 
-CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
-LDFLAGS += $(shell pkg-config --libs $(LIBRARIES))
-
 # List of mocked functions for unit tests
 MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write
 
 # Compiler flags for unit tests
 TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(DBGFLAGS) -DBUFSIZE=10 \
              $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK))
-# -Wconversion
 
 # Cppcheck settings. Note that 'style' includes 'warning', 'performance' and 'portability'.
 CPPCHECK_DIR   = cppcheck_report
@@ -135,6 +137,6 @@ clean:
 	rm -fr $(CPPCHECK_DIR)
 
 help:
-	head -n 17 $(firstword $(MAKEFILE_LIST)); \
+	head -n 18 $(firstword $(MAKEFILE_LIST)); \
 	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' $(firstword $(MAKEFILE_LIST))
-	# Default installation prefix: $(PREFIX)
+	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
