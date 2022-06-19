@@ -23,21 +23,3 @@ computer:
 ```
 copris -r epson.ini /dev/ttyUSB0 < Manual.md
 ```
-
-If you need to debug COPRIS or are curious about its internal status,
-use the `-v/--verbose` parameter up to two times.
-
-For a summary of all command line arguments, invoke COPRIS with
-`-h/--help`. For a listing of build-type options, version and author
-information, invoke with `-V/--version`.
-
-Note that you can only use `-l/--limit` and `--cutoff-limit` when reading
-from the network. If you want to limit incoming text from a local source,
-use some other tool or amend your data.
-
-COPRIS will print informative status messages to the terminal, except
-if you use the `-q/--quiet` parameter, which will hide all non-essential
-messages, except fatal errors. Note that if an output file is specified,
-no status messages are sent to it. If a non-fatal error occurs in quiet
-mode, COPRIS will disable the offending broken feature, notify you about
-it and continue execution.

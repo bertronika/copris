@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2022-06-19" "" "0.9-356-g1b2b1a9-dirty"
+.TH "COPRIS" "1" "2022-06-19" "" "0.9-360-g3c475ad-dirty"
 .hy
 .SH NAME
 .PP
@@ -67,23 +67,24 @@ key = whitespace separated values ; inline comment
 Numeric port number, if listening on a network.
 .TP
 \f[B]-t\f[R], \f[B]--trfile\f[R] \f[I]TRFILE\f[R]
-Path to the translation file
+Path to the character translation file.
 .TP
 \f[B]-r\f[R], \f[B]--printer\f[R] \f[I]PRSET\f[R]
-Path to the printer feature set file
+Path to the printer feature set file.
 .TP
 \f[B]--dump-commands\f[R]
 Print all possible printer feature set commands in an INI file format
+(e.g.\ to be piped into a new printer feature set file you are making)
 .TP
 \f[B]-d\f[R], \f[B]--daemon\f[R]
-Run as a daemon, if listening on a network
+Run as a daemon, if listening on a network.
 .TP
 \f[B]-l\f[R], \f[B]--limit\f[R] \f[I]NUMBER\f[R]
-Limit number of received bytes, if listening on a network
+Limit number of received bytes, if listening on a network.
 .TP
 \f[B]--cutoff-limit\f[R]
-If limit is active, cut text right on the \f[I]NUMBER\f[R] count instead
-of omitting the whole chunk
+If \f[B]limit\f[R] is active, cut text right on the \f[I]NUMBER\f[R]
+count instead of omitting the whole chunk.
 .TP
 \f[B]-v\f[R], \f[B]--verbose\f[R]
 Be verbose.
@@ -93,11 +94,11 @@ Specify twice to be even more verbose.
 Be quiet, print only fatal errors.
 .TP
 \f[B]-h\f[R], \f[B]--help\f[R]
-Print an option summary.
+Print a short option summary.
 .TP
 \f[B]-V\f[R], \f[B]--version\f[R]
 Print program version, author and build-time options.
-.SH USAGE AND EXAMPLES
+.SH EXAMPLES
 .PP
 Run as a simple server on port 8080, perform no text conversion, output
 received data to the serial port and exit after one connection.
@@ -131,31 +132,10 @@ the local computer:
 copris -r epson.ini /dev/ttyUSB0 < Manual.md
 \f[R]
 .fi
-.PP
-If you need to debug COPRIS or are curious about its internal status,
-use the \f[V]-v/--verbose\f[R] parameter up to two times.
-.PP
-For a summary of all command line arguments, invoke COPRIS with
-\f[V]-h/--help\f[R].
-For a listing of build-type options, version and author information,
-invoke with \f[V]-V/--version\f[R].
-.PP
-Note that you can only use \f[V]-l/--limit\f[R] and
-\f[V]--cutoff-limit\f[R] when reading from the network.
-If you want to limit incoming text from a local source, use some other
-tool or amend your data.
-.PP
-COPRIS will print informative status messages to the terminal, except if
-you use the \f[V]-q/--quiet\f[R] parameter, which will hide all
-non-essential messages, except fatal errors.
-Note that if an output file is specified, no status messages are sent to
-it.
-If a non-fatal error occurs in quiet mode, COPRIS will disable the
-offending broken feature, notify you about it and continue execution.
 .SH FILES
 .PP
 Example translation and feature set files can be found in
 \f[V]/usr/share/copris\f[R].
 .SH DEVELOPMENT
 .PP
-\f[B]copris\f[R] is developed at <https://github.com/bertronika/copris>.
+COPRIS is developed at <https://github.com/bertronika/copris>.

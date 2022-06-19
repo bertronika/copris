@@ -58,7 +58,7 @@ static void copris_help(const char *copris_location) {
 	       "  -p, --port NUMBER      Listening port\n"
 	       "  -t, --trfile TRFILE    Character translation file\n"
 #ifdef W_CMARK
-	       "  -r, --printer PRSET    Printer feature set\n"
+	       "  -r, --printer PRSET    Printer feature set file\n"
 	       "      --dump-commands    Print all possible printer feature set commands\n"
 	       "                         in an INI file format\n"
 #endif

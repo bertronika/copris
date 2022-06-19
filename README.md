@@ -171,8 +171,8 @@ If you need to debug COPRIS or are curious about its internal status,
 use the `-v/--verbose` parameter up to two times.
 
 For a summary of all command line arguments, invoke COPRIS with
-`-h/--help`. For a listing of build-type options, version and author
-information, invoke with `-V/--version`.
+`-h/--help`. For a listing of program version, author and build-time
+options, invoke with `-V/--version`.
 
 Note that you can only use `-l/--limit` and `--cutoff-limit` when reading
 from the network. If you want to limit incoming text from a local source,
