@@ -27,7 +27,7 @@
 #include "parse_value.h"
 
 static int initialise_commands(struct Inifile **);
-static void initialise_predefined_command(const char *, char *);
+static int initialise_predefined_command(const char *, char *);
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_printer_set_file(const char *, struct Inifile **);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
@@ -123,10 +123,13 @@ static int initialise_commands(struct Inifile **prset)
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
 
 		// Check if command can be predefined
-		if (printer_commands[i][0] == 'P')
-			initialise_predefined_command(printer_commands[i], s->out);
-		else
+		if (printer_commands[i][0] == 'P') {
+			int error = initialise_predefined_command(printer_commands[i], s->out);
+			if (error)
+				return error;
+		} else {
 			*s->out = '\0';
+		}
 
 		HASH_ADD_STR(*prset, in, s);
 
@@ -140,15 +143,23 @@ static int initialise_commands(struct Inifile **prset)
 	return 0;
 }
 
-static void initialise_predefined_command(const char *command, char *value)
+static int initialise_predefined_command(const char *command, char *value)
 {
-	value[0] = '\0';
+	char raw_value[MAX_INIFILE_ELEMENT_LENGTH];
 
 	if (strcmp(command, "P_LIST_ITEM") == 0)
-		value[0] = (const char)P_LIST_ITEM;
+		SET_RAW_VALUE(P_LIST_ITEM);
 
-	assert(value[0] != '\0');
-	value[1] = '\0';
+	int element_count = parse_value_to_binary(raw_value, value, strlen(raw_value));
+
+	if (element_count < 1) {
+		PRINT_ERROR_MSG("Cannot parse predefined command '%s', set to '%s'. "
+		                "Please review 'copris.h' and recompile.", command, raw_value);
+		return -1;
+	}
+
+	assert(value[element_count] == '\0');
+	return 0;
 }
 
 /*
@@ -287,7 +298,7 @@ int dump_printer_set_commands(struct Inifile **prset)
 				puts("\n# Formatting commands; both parts of a pair must be defined");
 				break;
 			case 'P':
-				puts("\n# Overridable commands with predefined values shown in comments"); // TODO
+				puts("\n# Overridable commands with predefined parsed values shown");
 				break;
 			}
 		}
@@ -296,6 +307,8 @@ int dump_printer_set_commands(struct Inifile **prset)
 
 		if (s->in[command_len - 2] == 'O' && s->in[command_len - 1] == 'N')
 			printf("; %s  = \n", s->in);
+		else if (s->in[0] == 'P')
+			printf("; %s =  ; defaults to `%s'\n", s->in, s->out);
 		else
 			printf("; %s = \n", s->in);
 	}

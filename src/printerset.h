@@ -5,10 +5,13 @@
 #define COPRIS_PARSE_FAILURE   0
 #define COPRIS_PARSE_SUCCESS   1
 
-#define INSERT_TEXT(string) \
+#define SET_RAW_VALUE(value) \
+        memccpy(raw_value, value, '\0', MAX_INIFILE_ELEMENT_LENGTH)
+
+#define INSERT_TEXT(string)  \
         utstring_bincpy(text, string, (sizeof string) - 1)
 
-#define INSERT_CODE(string) \
+#define INSERT_CODE(string)  \
         insert_code_helper(string, prset, text)
 
 /*
