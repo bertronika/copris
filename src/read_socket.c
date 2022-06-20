@@ -194,7 +194,10 @@ static int read_from_socket(UT_string *copris_text, int childfd,
 	// read() returns number of read bytes, or -1 on error (and sets errno), and puts
 	// _no_ termination at the end of the buffer.
 	while ((buffer_length = read(childfd, buffer, BUFSIZE)) > 0) {
-		//buffer[buffer_length] = '\0';
+		if (buffer_length == -1) {
+			PRINT_SYSTEM_ERROR("read", "Error reading from socket.");
+			return -1;
+		}
 
 		// Note that the ending null byte is omitted from the count. This isn't
 		// a problem, since utstring_bincpy() terminates its internal string
@@ -209,11 +212,6 @@ static int read_from_socket(UT_string *copris_text, int childfd,
 			apply_byte_limit(copris_text, childfd, stats, attrib);
 			break;
 		}
-	}
-
-	if (buffer_length == -1) {
-		PRINT_SYSTEM_ERROR("read", "Error reading from socket.");
-		return -1;
 	}
 
 	return 0;
