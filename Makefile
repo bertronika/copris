@@ -94,6 +94,8 @@ analyse: debug
 # Compile the release binary
 copris: $(OBJS_REL)
 	$(CC) $(CFLAGS) $(RELFLAGS) $^ $(LDFLAGS) -o $@
+	# Validate predefined values from 'config.h'
+	./copris --dump-commands >/dev/null
 
 %_rel.o: %.c
 	$(CC) $(CFLAGS) $(RELFLAGS) -MMD -MP -c $< -o $@
