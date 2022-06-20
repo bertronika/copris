@@ -188,7 +188,7 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *
 static int read_from_socket(UT_string *copris_text, int childfd,
                             struct Stats *stats, struct Attribs *attrib) {
 	char buffer[BUFSIZE];  // Inbound message buffer
-	int buffer_length;     // Return value of a socket operation - number of
+	ssize_t buffer_length; // Return value of a socket operation - number of
 	                       // read bytes if successful
 
 	// read() returns number of read bytes, or -1 on error (and sets errno), and puts
@@ -223,7 +223,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib) {
 	const char limit_message[] = "You have sent too much text. Terminating connection.\n";
 
-	int tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
+	ssize_t tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
 	if (tmperr == -1)
 		PRINT_SYSTEM_ERROR("write", "Error sending termination text to socket.");
 

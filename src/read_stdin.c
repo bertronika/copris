@@ -17,7 +17,7 @@
 #include "debug.h"
 #include "read_stdin.h"
 
-static int read_from_stdin(UT_string *, struct Stats *);
+static size_t read_from_stdin(UT_string *, struct Stats *);
 
 int copris_handle_stdin(UT_string *copris_text) {
 	if (LOG_INFO)
@@ -32,7 +32,7 @@ int copris_handle_stdin(UT_string *copris_text) {
 
 	// Read text from standard input, print a note if only EOF has been received
 	struct Stats stats = STATS_INIT;
-	int text_length = read_from_stdin(copris_text, &stats);
+	size_t text_length = read_from_stdin(copris_text, &stats);
 
 	if (text_length == 0 && LOG_ERROR)
 		PRINT_NOTE("No text has been read!");
@@ -48,7 +48,7 @@ int copris_handle_stdin(UT_string *copris_text) {
 	return (text_length) ? 0 : -1;
 }
 
-static int read_from_stdin(UT_string *copris_text, struct Stats *stats) {
+static size_t read_from_stdin(UT_string *copris_text, struct Stats *stats) {
 	char buffer[BUFSIZE];
 	size_t buffer_length = 0;
 

@@ -52,7 +52,7 @@ int parse_value_to_binary(const char *value, char *parsed_value, int length)
 			return -1;
 		}
 
-		parsed_value[i++] = temp_value;
+		parsed_value[i++] = (char)temp_value;
 		valuepos = endptr;
 	}
 	parsed_value[i] = '\0';
