@@ -82,7 +82,7 @@ static void copris_help(const char *copris_location) {
 	exit(EXIT_SUCCESS);
 }
 
-static void copris_version() {
+static void copris_version(void) {
 	printf("COPRIS version %s\n"
 	       "(C) 2020-22 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Build-time options\n"
