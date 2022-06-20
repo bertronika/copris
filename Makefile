@@ -31,7 +31,7 @@ DESTDIR ?=
 INSTALL ?= install -p
 
 # Default common, release and debug build compiler flags
-CFLAGS   ?= -Wall -Wextra -pedantic
+CFLAGS   ?= -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic
 RELFLAGS ?= -O2 -g -DNDEBUG
 DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
 
