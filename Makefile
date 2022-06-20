@@ -1,7 +1,6 @@
 
 # Build system for COPRIS
 # Possible common targets (you don't need to specify one for a regular release build):
-#	- all       synonym for `release'
 #	- release   build the release build (executable name `copris')
 #	- debug     build the debugging build (executable name `copris_dbg')
 #	- install   install a copy of release build with samples and documentation
@@ -80,7 +79,6 @@ CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information
 .PHONY: all release debug analyse unit-tests analyse-cppcheck analyse-cppcheck-html \
         install clean help
 
-all:     release
 release: copris
 debug:   copris_dbg
 analyse: DBGFLAGS += -fanalyzer
@@ -141,6 +139,6 @@ clean:
 	rm -fr $(CPPCHECK_DIR)
 
 help:
-	head -n 18 $(firstword $(MAKEFILE_LIST)); \
+	head -n 17 $(firstword $(MAKEFILE_LIST)); \
 	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' $(firstword $(MAKEFILE_LIST))
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
