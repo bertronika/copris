@@ -212,9 +212,9 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 	if (LOG_DEBUG) {
 		PRINT_LOCATION(stdout);
-		printf(" %s => 0x", s->in);
+		printf(" %s =>", s->in);
 		for (int i = 0; i < element_count; i++)
-			printf("%X ", s->out[i]);
+			printf(" 0x%X", s->out[i]);
 
 		if (definition_overwriten)
 			printf(" (overwriting old value)");
