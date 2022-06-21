@@ -298,19 +298,23 @@ int dump_printer_set_commands(struct Inifile **prset)
 				puts("\n# Formatting commands; both parts of a pair must be defined");
 				break;
 			case 'P':
-				puts("\n# Overridable commands with predefined parsed values shown");
+				puts("\n# Overridable commands with predefined values shown");
 				break;
 			}
 		}
 
 		size_t command_len = strlen(s->in);
 
-		if (s->in[command_len - 2] == 'O' && s->in[command_len - 1] == 'N')
+		if (s->in[command_len - 2] == 'O' && s->in[command_len - 1] == 'N') {
 			printf("; %s  = \n", s->in);
-		else if (s->in[0] == 'P')
-			printf("; %s =  ; defaults to `%s'\n", s->in, s->out);
-		else
+		} else if (s->in[0] == 'P') {
+			printf("; %s =  ; defaults to `0x%X", s->in, s->out[0]);
+			for (int i = 1; s->out[i] != '\0'; i++)
+				printf(" 0x%X", s->out[i]);
+			printf("'\n");
+		} else {
 			printf("; %s = \n", s->in);
+		}
 	}
 
 	puts("");
