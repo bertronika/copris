@@ -139,7 +139,7 @@ system's kernel do the rest.
 
 The last argument, specified to COPRIS, can either be a character device
 (e.g. `/dev/ttyUSB0`) or a normal text file. COPRIS simply appends any
-received text to it. If nothing is specified, data will be printed to
+received text to it. If nothing is specified, data will be echoed to
 the terminal with corresponding `Begin-` and `End-Stream-Transcript`
 markers (`;BST` and `;EST`).
 
@@ -179,16 +179,17 @@ For a summary of all command line arguments, invoke COPRIS with
 `-h/--help`. For a listing of program version, author and build-time
 options, invoke with `-V/--version`.
 
-Note that you can only use `-l/--limit` and `--cutoff-limit` when reading
-from the network. If you want to limit incoming text from a local source,
-use some other tool or amend your data.
+Note that you can only use `-l/--limit` and `--cutoff-limit` when running as
+a network server (on a port, specified with `-p/--port`). If you want to limit
+incoming text from a local source (by omitting the port argument and reading
+from standard input), use some other tool or manually amend your data.
 
-COPRIS will print informative status messages to the terminal, except
-if you use the `-q/--quiet` parameter, which will hide all non-essential
-messages, except fatal errors. Note that if an output file is specified,
-no status messages are sent to it. If a non-fatal error occurs in quiet
-mode, COPRIS will disable the offending broken feature, notify you about
-it and continue execution.
+COPRIS will show informative status messages and notes, if it assumes it is
+not invoked properly. You may use the `-q/--quiet` parameter to silence them,
+which will only leave you with possible warnings and fatal errors, routed to
+standard error. Note that if an output file is specified, no status messages
+are sent to it. If a non-fatal error occurs in quiet mode, COPRIS will disable
+the offending broken feature, notify you about it and continue execution.
 
 
 # Installation

@@ -58,7 +58,7 @@ m4_changequote(`[[[', `]]]')m4_dnl
 
 **-q**, **\--quiet**
 : Do not show any unneccessary messages, except warnings and fatal errors, routed
-  to *stderr*. This also omits *notes*, printed if COPRIS assumes it is not
+  to *stderr*. This also omits *notes*, shown if COPRIS assumes it is not
   invoked properly.
 
 **-h**, **\--help**
