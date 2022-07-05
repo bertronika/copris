@@ -281,9 +281,17 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		}
 	} /* end of getopt */
 
-	// Parse the last argument, destination (or lack thereof).
-	// Note that only the first argument is accepted.
-	if (argv[optind] != NULL) {
+	// Check if there's no last argument - destination file name
+	if (argv[optind] == NULL)
+		goto no_destination;
+
+	// Parse the destination file name. Note that only the first argument is accepted.
+	// If it equals '-', assume standard output.
+	if (*argv[optind] == '-') {
+		PRINT_NOTE("Found `-' as the destination name, redirecting text to standard output.\n"
+		           "COPRIS does not use `-' to denote reading from standard input. Omit "
+		           "the destination argument for that.");
+	} else {
 		errno = 0;
 		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
 
@@ -313,6 +321,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			           "will be used.");
 	}
 
+	no_destination:
 	return 0;
 }
 
