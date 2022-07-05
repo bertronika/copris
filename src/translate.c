@@ -114,36 +114,46 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	HASH_FIND_STR(*file, name, s);
 	bool name_overwritten = (s != NULL);
 
+	// Add a new key if it doesn't already exist
 	if (!name_overwritten) {
-		// Key doesn't exist, add it
 		s = malloc(sizeof *s);
 		if (s == NULL) {
 			PRINT_ERROR_MSG("Memory allocation error.");
 			return COPRIS_PARSE_FAILURE;
 		}
-	}
 
-	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
-	int element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
-
-	// Check for a parse error
-	if (element_count == -1) {
-		free(s);
-		return COPRIS_PARSE_FAILURE;
-	}
-
-	memcpy(s->out, parsed_value, element_count + 1);
-
-	if (!name_overwritten) {
 		memcpy(s->in, name, name_len + 1);
 		HASH_ADD_STR(*file, in, s);
+	}
+
+	int element_count = 0;
+
+	// Parse value if it wasn't explicitly specified to be empty
+	if (*value != '@') {
+		char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
+		element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
+
+		// Check for a parse error
+		if (element_count == -1) {
+			PRINT_ERROR_MSG("Failure while processing value for `%s'.", name);
+			free(s);
+			return COPRIS_PARSE_FAILURE;
+		}
+
+		memcpy(s->out, parsed_value, element_count + 1);
+	} else {
+		*s->out = '\0';
 	}
 
 	if (LOG_DEBUG) {
 		PRINT_LOCATION(stdout);
 		printf(" %1s (%zu) =>", s->in, name_len);
-		for (int i = 0; i < element_count; i++)
-			printf(" 0x%X", s->out[i]);
+
+		if (element_count == 0)
+			printf(" (empty)");
+		else
+			for (int i = 0; i < element_count; i++)
+				printf(" 0x%X", s->out[i]);
 
 		if (name_overwritten)
 			printf(" (overwriting old value)");
