@@ -31,8 +31,9 @@ int parse_value_to_binary(const char *value, char *parsed_value, int length)
 
 		// Check if no conversion has been done
 		if (valuepos == endptr) {
-			if (LOG_DEBUG)
-				PRINT_MSG("Found unrecognised characters.");
+			PRINT_ERROR_MSG("Found an unrecognised character. Make sure your definitions consist "
+			                "only of decimal, hexadecimal or octal values, separated by spaces. "
+			                "Consult the README or the man page for more information.");
 
 			return -1;
 		}
