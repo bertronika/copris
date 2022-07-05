@@ -194,8 +194,8 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	// Check if this 'name' doesn't exist
 	HASH_FIND_STR(*file, name, s);
 	if (s == NULL) {
-		PRINT_ERROR_MSG("Name '%s' doesn't belong to any command. Append '-vv' to the command "
-		                "line to see the available commands.", name);
+		PRINT_ERROR_MSG("Name '%s' doesn't belong to any command. Run COPRIS with "
+		                "`--dump-commands' to see the available commands.", name);
 		return COPRIS_PARSE_FAILURE;
 	}
 
