@@ -63,8 +63,8 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 
 	// Positive return number - returned error is a line number
 	if (parse_error > 0) {
-		PRINT_ERROR_MSG("Error parsing printer set file '%s', fault on line %d.",
-		                filename, parse_error);
+		PRINT_ERROR_MSG("Fault on line %d of printer feature set file `%s'.",
+		                parse_error, filename);
 		goto close_file;
 	}
 
@@ -177,14 +177,14 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	size_t name_len  = strlen(name);
 	size_t value_len = strlen(value);
 
-	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
-		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
-		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
+	if (name_len == 0 || value_len == 0) {
+		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	if (name_len == 0 || value_len == 0) {
-		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
+	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
+		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
+		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
 
@@ -202,22 +202,34 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	// Warn if definition was already set, but only if command isn't meant to be redefined
 	bool definition_overwriten = (*s->out != '\0' && *s->in != 'P');
 
-	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
-	int element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
+	int element_count = 0;
 
-	// Check for a parse error
-	if (element_count == -1) {
-		free(s);
-		return COPRIS_PARSE_FAILURE;
+	// Parse value if it wasn't explicitly specified to be empty
+	if (*value != '@') {
+		char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
+		element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
+
+		// Check for a parse error
+		if (element_count == -1) {
+			PRINT_ERROR_MSG("Failure happened while processing %s.", name);
+			free(s);
+			return COPRIS_PARSE_FAILURE;
+		}
+
+		memcpy(s->out, parsed_value, element_count + 1);
+	} else {
+		*s->out = '\0';
 	}
-
-	memcpy(s->out, parsed_value, element_count + 1);
 
 	if (LOG_DEBUG) {
 		PRINT_LOCATION(stdout);
 		printf(" %s =>", s->in);
-		for (int i = 0; i < element_count; i++)
-			printf(" 0x%X", s->out[i]);
+
+		if (element_count == 0)
+			printf(" (empty)");
+		else
+			for (int i = 0; i < element_count; i++)
+				printf(" 0x%X", s->out[i]);
 
 		if (definition_overwriten)
 			printf(" (overwriting old value)");
