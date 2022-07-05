@@ -21,7 +21,6 @@
 #include "Copris.h"
 #include "debug.h"
 #include "translate.h"
-#include "printerset.h"
 #include "utf8.h"
 #include "parse_value.h"
 
@@ -30,49 +29,51 @@ static int inih_handler(void *, const char *, const char *, const char *);
 int load_translation_file(char *filename, struct Inifile **trfile) {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
-		PRINT_SYSTEM_ERROR("fopen", "Error opening translation file.");
+		PRINT_SYSTEM_ERROR("fopen", "Failed to open translation file.");
 		return -1;
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("Parsing translation file '%s':", filename);
+		PRINT_MSG("`%s': parsing translation file:", filename);
 
 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*trfile = NULL;
 
 	int parse_error = ini_parse_file(file, inih_handler, trfile);
 
-	// If there's a parse error, break the one-time do-while loop and properly close the file
+	// If there's a parse error, properly close the file before exiting
 	int error = -1;
-	do {
-		// Negative return number - can be either:
-		// -1  Error opening file - we've already handled this
-		// -2  Memory allocation error - only if inih was built with INI_USE_STACK
-		if (parse_error < 0) {
-			PRINT_ERROR_MSG("inih: ini_malloc: Memory allocation error.");
-			break;
+
+	// Negative return number - can be either:
+	// -1  Error opening file - we've already handled this
+	// -2  Memory allocation error - only if inih was built with INI_USE_STACK
+	if (parse_error < 0) {
+		PRINT_ERROR_MSG("inih: ini_malloc: Memory allocation error.");
+		goto close_file;
+	}
+
+	// Positive return number - returned error is a line number
+	if (parse_error > 0) {
+		PRINT_ERROR_MSG("`%s': (first) fault on line %d.", filename, parse_error);
+		goto close_file;
+	}
+
+	if (LOG_INFO) {
+		int definition_count = HASH_COUNT(*trfile);
+		PRINT_MSG("`%s': loaded %d translation file definitions.",
+		          filename, definition_count);
+	}
+
+	error = 0;
+
+	// Why parentheses? warning: a label can only be part of a statement and a declaration
+	//                  is not a statement [-Wpedantic]
+	close_file: {
+		int tmperr = fclose(file);
+		if (tmperr != 0) {
+			PRINT_SYSTEM_ERROR("close", "Failed to close translation file.");
+			return -1;
 		}
-
-		// Positive return number - returned error is a line number
-		if (parse_error > 0) {
-			PRINT_ERROR_MSG("Error parsing translation file '%s', fault on line %d.",
-			                filename, parse_error);
-			break;
-		}
-
-		if (LOG_INFO) {
-			int definition_count = HASH_COUNT(*trfile);
-			PRINT_MSG("Loaded translation file '%s' with %d definitions.",
-			          filename, definition_count);
-		}
-
-		error = 0;
-	} while (0);
-
-	int tmperr = fclose(file);
-	if (tmperr != 0) {
-		PRINT_SYSTEM_ERROR("close", "Failed to close the translation file.");
-		return -1;
 	}
 
 	return error;
@@ -90,19 +91,19 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	size_t name_len  = strlen(name);
 	size_t value_len = strlen(value);
 
-	if (utf8_count_codepoints(name, 2) > 1) {
-		PRINT_ERROR_MSG("'%s': name has more than one character.", name);
+	if (name_len == 0 || value_len == 0) {
+		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
 		return COPRIS_PARSE_FAILURE;
 	}
 
 	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
-		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
+		PRINT_ERROR_MSG("`%s': value length exceeds maximum of %zu bytes.", value,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	if (name_len == 0 || value_len == 0) {
-		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
+	if (utf8_count_codepoints(name, 2) > 1) {
+		PRINT_ERROR_MSG("`%s': name has more than one character.", name);
 		return COPRIS_PARSE_FAILURE;
 	}
 
