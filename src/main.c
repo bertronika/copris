@@ -385,7 +385,7 @@ int main(int argc, char **argv) {
 			if (verbosity) {
 				return EXIT_FAILURE;
 			} else {
-				unload_translation_file(&trfile);
+				unload_translation_file(attrib.trfile, &trfile);
 				attrib.copris_flags &= ~HAS_TRFILE;
 				PRINT_ERROR_MSG("Continuing without character translation.");
 			}
@@ -490,7 +490,7 @@ int main(int argc, char **argv) {
 	} while (attrib.daemon); /* end of main program loop */
 
 	if (attrib.copris_flags & HAS_TRFILE)
-		unload_translation_file(&trfile);
+		unload_translation_file(attrib.trfile, &trfile);
 
 #ifdef W_CMARK
 	if (attrib.copris_flags & HAS_PRSET)
