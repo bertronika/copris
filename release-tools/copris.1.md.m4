@@ -10,7 +10,7 @@ m4_changequote(`[[[', `]]]')m4_dnl
 
 # SYNOPSIS
 
-| **copris** \[*options*\] \[*output file*\]
+| **copris** \[*options*\] \[*printer* or *output file*\]
 | **copris** **\--dump-commands** > new_printer_set.ini
 
 
@@ -25,39 +25,52 @@ m4_changequote(`[[[', `]]]')m4_dnl
 # OPTIONS
 
 **-p**, **\--port** *NUMBER*
-: Numeric port number, if listening on a network.
+: Run COPRIS as a network server on port *NUMBER*. Superuser
+  privileges are required if *NUMBER* is less than 1024.
 
-**-t**, **\--trfile** *TRFILE*
-: Path to the character translation file.
+**-t**, **\--trfile** *FILE*
+: Enable character translation with definitions from character translation
+  *FILE*.
 
-**-r**, **\--printer** *PRSET*
-: Path to the printer feature set file.
+**-r**, **\--printer** *FILE*
+: Enable Markdown parsing with definitions from printer feature set
+  *FILE*. COPRIS must be compiled with Markdown support for this option to
+  be available.
 
 **\--dump-commands**
-: Print all possible printer feature set commands in an INI file format
-  (e.g. to be piped into a new printer feature set file you are making)
+: Show all possible printer feature set commands in INI file format
+  (e.g. to be piped into a new printer feature set file you are making).
+  COPRIS must be compiled with Markdown support for this option to
+  be available.
 
 **-d**, **\--daemon**
-: Run as a daemon, if listening on a network.
+: If running as a network server, do not exit after the first connection.
 
 **-l**, **\--limit** *NUMBER*
-: Limit number of received bytes, if listening on a network.
+: If running as a network server, limit number of received bytes to *NUMBER*.
 
 **\--cutoff-limit**
-: If **limit** is active, cut text right on the *NUMBER* count instead of
-  omitting the whole chunk.
+: If limit is active, cut text on *NUMBER* count instead of
+  discarding the whole chunk.
 
 **-v**, **\--verbose**
-: Be verbose. Specify twice to be even more verbose.
+: Show informative status messages. If specified twice, show even more messages.
 
 **-q**, **\--quiet**
-: Be quiet, print only fatal errors.
+: Do not show any unneccessary messages, except warnings and fatal errors, routed
+  to *stderr*. This also omits *notes*, printed if COPRIS assumes it is not
+  invoked properly.
 
 **-h**, **\--help**
-: Print a short option summary.
+: Show a short option summary.
 
 **-V**, **\--version**
-: Print program version, author and build-time options.
+: Show program version, author and build-time options (e.g. if Markdown support
+  is present).
+
+Do not specify a port number if you want to read from standard input. Likewise,
+omit the output file to have text echoed out to standard output (or piped
+elsewhere).
 
 
 # EXAMPLES
@@ -75,5 +88,5 @@ Example translation and feature set files can be found in
 
 # DEVELOPMENT
 
-COPRIS is developed at <https://github.com/bertronika/copris>.
+COPRIS' development repository resides at <https://github.com/bertronika/copris>.
 

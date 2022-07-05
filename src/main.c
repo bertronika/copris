@@ -55,27 +55,26 @@ int verbosity = 1;
 
 static void copris_help(const char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
-	       "  -p, --port NUMBER      Listening port\n"
-	       "  -t, --trfile TRFILE    Character translation file\n"
+	       "  -p, --port NUMBER      Run as a network server on port NUMBER\n"
+	       "  -t, --trfile FILE      Enable character translation with definitions from FILE\n"
 #ifdef W_CMARK
-	       "  -r, --printer PRSET    Printer feature set file\n"
-	       "      --dump-commands    Print all possible printer feature set commands\n"
-	       "                         in an INI file format\n"
+	       "  -r, --printer FILE     Enable Markdown processing with a printer feature set FILE\n"
+	       "      --dump-commands    Show all possible printer feature set commands\n"
 #endif
-	       "  -d, --daemon           Run as a daemon\n"
-	       "  -l, --limit NUMBER     Limit number of received bytes\n"
-	       "      --cutoff-limit     Cut text off at limit instead of\n"
+	       "  -d, --daemon           Do not exit after the first network connection\n"
+	       "  -l, --limit NUMBER     Limit number of received bytes from the network to NUMBER\n"
+	       "      --cutoff-limit     If using limit, cut text off at NUMBER instead of\n"
 	       "                         discarding the whole chunk\n"
 	       "\n"
-	       "  -v, --verbose          Be verbose (-vv more)\n"
-	       "  -q, --quiet            Display nothing except fatal errors (to stderr)\n"
-	       "  -h, --help             Show this help\n"
-	       "  -V, --version          Show program version and build-time options\n"
+	       "  -v, --verbose          Show informative messages (show even more with `-vv')\n"
+	       "  -q, --quiet            Do not show any messages, except warnings and fatal errors\n"
+	       "  -h, --help             Show this option summary\n"
+	       "  -V, --version          Show program version, author and build-time options\n"
 	       "\n"
 	       "To read from stdin, omit the port argument. To echo data to stdout\n"
 	       "(console/terminal), omit the output file.\n"
 	       "\n"
-	       "Warning notes will be printed if COPRIS assumes it is not invoked\n"
+	       "Notes will be shown if COPRIS assumes it is not invoked\n"
 	       "correctly, but never when the quiet argument is present.\n",
 	       copris_location);
 
