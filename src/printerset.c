@@ -29,7 +29,7 @@
 static int initialise_commands(struct Inifile **);
 static int initialise_predefined_command(const char *, char *);
 static int inih_handler(void *, const char *, const char *, const char *);
-static int validate_printer_set_file(const char *, struct Inifile **);
+static int validate_definition_pairs(const char *, struct Inifile **);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
 static void insert_code_helper(const char *, struct Inifile **, UT_string *);
 
@@ -94,11 +94,12 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 	}
 
 	if (!error)
-		error = validate_printer_set_file(filename, prset);
+		error = validate_definition_pairs(filename, prset);
 
 	return error;
 }
 
+// Initialise the prset struct with predefined names and empty strings as values.
 static int initialise_commands(struct Inifile **prset)
 {
 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
@@ -143,6 +144,7 @@ static int initialise_commands(struct Inifile **prset)
 	return 0;
 }
 
+// Set predefined commands (ones with the `P_' prefix) to values, specified in config.h.
 static int initialise_predefined_command(const char *command, char *value)
 {
 	char raw_value[MAX_INIFILE_ELEMENT_LENGTH];
@@ -167,6 +169,7 @@ static int initialise_predefined_command(const char *command, char *value)
  * name = value  (inih library)
  * key  = item   (uthash)
  */
+// Parse the loaded translation file line by line
 static int inih_handler(void *user, const char *section, const char *name, const char *value)
 {
 	(void)section;
@@ -225,7 +228,8 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-static int validate_printer_set_file(const char *filename, struct Inifile **prset)
+// Check if part of a definition pair is missing (every *_ON has a *_OFF and vice-versa)
+static int validate_definition_pairs(const char *filename, struct Inifile **prset)
 {
 	struct Inifile *s;
 
