@@ -99,12 +99,13 @@ but you can check by running `copris --version`).
 [1]: https://spec.commonmark.org/
 
 
-## How do I make a printer set file?
+## How do I make a printer feature set file?
 
 Consult the printer's manual. There should be a section on escape
-codes. Then, copy the sample printer set file and append codes to the
-appropriate attributes in either decimal, hexadecimal or octal format,
-with each one separated by at least one space.
+codes. Then, generate a sample printer feature set file
+(`--dump-commands`, see man page) and append codes to the appropriate
+attributes in either decimal, hexadecimal or octal format, with each one
+separated by at least one space.
 
 Example from Epson's LX-300 manual, page A-14 (91):
 
@@ -136,7 +137,7 @@ system's kernel do the rest.
 
 ## What can be specified as the output?
 
-The last argument, specified to COPRIS, can be a block device
+The last argument, specified to COPRIS, can either be a character device
 (e.g. `/dev/ttyUSB0`) or a normal text file. COPRIS simply appends any
 received text to it. If nothing is specified, data will be printed to
 the terminal with corresponding `Begin-` and `End-Stream-Transcript`
