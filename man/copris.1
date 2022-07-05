@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2022-07-05" "" "0.9-373-g7fc0e3c-dirty"
+.TH "COPRIS" "1" "2022-07-05" "" "0.9-385-ge52af15-dirty"
 .hy
 .SH NAME
 .PP
@@ -62,6 +62,11 @@ expected to be in the INI file format:
 key = whitespace separated values ; inline comment
 \f[R]
 .fi
+.PP
+In case you need a \f[V]key\f[R] to resolve to nothing, set
+\f[V]\[at]\f[R] as the value (e.g.
+if you want to remove certain characters from the text, or omit
+rendering some Markdown attributes).
 .SH OPTIONS
 .TP
 \f[B]-p\f[R], \f[B]--port\f[R] \f[I]NUMBER\f[R]

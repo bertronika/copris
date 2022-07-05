@@ -35,6 +35,10 @@ INI file format:
 key = whitespace separated values ; inline comment
 ```
 
+In case you need a `key` to resolve to nothing, set `@` as the value (e.g.
+if you want to remove certain characters from the text, or omit rendering
+some Markdown attributes).
+
 
 # Why translate characters?
 

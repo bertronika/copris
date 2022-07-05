@@ -37,6 +37,10 @@ INI file format:
 [section]
 key = whitespace separated values ; inline comment
 ```
+
+In case you need a `key` to resolve to nothing, set `@` as the value (e.g.
+if you want to remove certain characters from the text, or omit rendering
+some Markdown attributes).
 m4_ifdef([[[GEN_MANPAGE]]], , [[[m4_dnl -- print if GEN_MANPAGE not defined
 
 
