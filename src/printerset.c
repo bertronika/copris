@@ -154,7 +154,7 @@ static int initialise_predefined_command(const char *command, char *value)
 
 	if (element_count < 1) {
 		PRINT_ERROR_MSG("Cannot parse predefined command '%s', set to '%s'. "
-		                "Please review 'copris.h' and recompile.", command, raw_value);
+		                "Please review 'config.h' and recompile.", command, raw_value);
 		return -1;
 	}
 
