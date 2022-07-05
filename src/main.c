@@ -401,7 +401,7 @@ int main(int argc, char **argv) {
 			if (verbosity) {
 				return EXIT_FAILURE;
 			} else {
-				unload_printer_set_file(&prset);
+				unload_printer_set_file(attrib.prset, &prset);
 				attrib.copris_flags &= ~HAS_PRSET;
 				PRINT_ERROR_MSG("Continuing without Markdown conversion.");
 			}
@@ -494,7 +494,7 @@ int main(int argc, char **argv) {
 
 #ifdef W_CMARK
 	if (attrib.copris_flags & HAS_PRSET)
-		unload_printer_set_file(&prset);
+		unload_printer_set_file(attrib.prset, &prset);
 #endif
 
 	utstring_free(copris_text);

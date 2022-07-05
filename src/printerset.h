@@ -26,9 +26,9 @@ int load_printer_set_file(const char *filename, struct Inifile **prset);
 int dump_printer_set_commands(struct Inifile **prset);
 
 /*
- * Unload printer set hash table, passed by `prset'.
+ * Unload printer set hash table, loaded from `filename', passed by `prset'.
  */
-void unload_printer_set_file(struct Inifile **prset);
+void unload_printer_set_file(const char *filename, struct Inifile **prset);
 
 /*
  * Take input text `copris_text' and convert the Markdown specifiers to printer's
