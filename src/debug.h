@@ -93,8 +93,8 @@ extern int verbosity;
 // for bold and normal text.
 #define PRINT_ERROR_MSG(...)             \
     do {                                 \
-        fputs("\x1B[1m", stderr);        \
         PRINT_LOCATION(stderr);          \
+        fputs("\x1B[1m", stderr);        \
         _PRINT_MSG(stderr, __VA_ARGS__); \
         fputs("\x1B[0m", stderr);        \
     } while (0)
