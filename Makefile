@@ -59,7 +59,7 @@ OBJS_DBG := $(SOURCES:%.c=src/%_dbg.o)
 DEPS_DBG := $(SOURCES:%.c=src/%_dbg.d)
 
 # Unit test files (executables will be prefixed with 'run_')
-TESTS = test_read_socket_stdin.c test_utf8.c
+TESTS = test_read_socket_stdin.c test_utf8.c test_parse_value.c
 TESTS_BINS := $(TESTS:%.c=tests/run_%)
 TESTS_OBJS := $(filter-out src/main_dbg.o, $(OBJS_DBG))
 
@@ -67,7 +67,8 @@ TESTS_OBJS := $(filter-out src/main_dbg.o, $(OBJS_DBG))
 MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write
 
 # Compiler flags for unit tests
-TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(DBGFLAGS) -DBUFSIZE=10 \
+TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(DBGFLAGS) \
+             -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10 \
              $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK))
 
 # Cppcheck settings. Note that 'style' includes 'warning', 'performance' and 'portability'.

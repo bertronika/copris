@@ -1,21 +1,24 @@
 /*
  * Compile-time options for COPRIS
+ *
+ * Values, specified here, are used by default, apart from unit tests.
  */
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Inbound text buffer size. This value is used by default in COPRIS,
-// only unit tests override it.
+// Inbound text buffer size
 #ifndef BUFSIZE
 #   define BUFSIZE 16
 #endif
 
 // Maximum lengths of elements - name and value strings - in .ini files
-#define MAX_INIFILE_ELEMENT_LENGTH 32
+#ifndef MAX_INIFILE_ELEMENT_LENGTH
+#   define MAX_INIFILE_ELEMENT_LENGTH 32
+#endif
 
 /*
- * Default predefined values for printer feature set commands.
+ * Default predefined values for printer feature set commands
  *
  * They should be defined in the same format as the .ini files.
  * NOTE: if set improperly, an error will be thrown at run time, but only
