@@ -1,7 +1,7 @@
-% COPRIS(1) | esyscmd(`git describe --tags --dirty 2>/dev/null || cat ../VERSION')dnl
+% COPRIS(1) | m4_esyscmd(`git describe --tags --dirty 2>/dev/null || cat ../VERSION')m4_dnl
 %
-% esyscmd(`date --iso-8601')dnl
-changequote(`[[[', `]]]')dnl
+% m4_esyscmd(`date --iso-8601')m4_dnl
+m4_changequote(`[[[', `]]]')m4_dnl
 
 # NAME
 
@@ -16,10 +16,10 @@ changequote(`[[[', `]]]')dnl
 
 # DESCRIPTION
 
-changequote`'
-define(`manpage')
-include(README.md.m4)
-changequote(`[[[', `]]]')dnl
+m4_define([[[GEN_MANPAGE]]])m4_dnl
+m4_changequote`'m4_dnl
+m4_include(README.md.m4)m4_dnl
+m4_changequote(`[[[', `]]]')m4_dnl
 
 
 # OPTIONS
@@ -62,7 +62,9 @@ changequote(`[[[', `]]]')dnl
 
 # EXAMPLES
 
-include(usage_examples.md.m4)
+m4_changequote`'m4_dnl
+m4_include(usage_examples.md.m4)m4_dnl
+m4_changequote(`[[[', `]]]')m4_dnl
 
 
 # FILES
@@ -75,4 +77,3 @@ Example translation and feature set files can be found in
 
 COPRIS is developed at <https://github.com/bertronika/copris>.
 
-changequote`'dnl

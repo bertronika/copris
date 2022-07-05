@@ -25,7 +25,7 @@ copris.1: copris.1.md
 	pandoc --standalone --to man $< --output $@
 
 %.md: %.md.m4
-	m4 -EE $< > $@
+	m4 -PEE $< > $@
 
 clean:
 	rm -f $(INTERMED)

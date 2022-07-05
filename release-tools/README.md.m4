@@ -1,8 +1,8 @@
-changequote(`[[[', `]]]')dnl
-ifdef([[[manpage]]], , [[[dnl -- if manpage not defined
+m4_changequote(`[[[', `]]]')m4_dnl
+m4_ifdef([[[GEN_MANPAGE]]], , [[[m4_dnl -- print if GEN_MANPAGE not defined
 # COPRIS - a converting printer server
 
-]]])dnl
+]]])m4_dnl endif GEN_MANPAGE
 COPRIS is a printer server and text conversion program, intended to
 receive UTF-8 encoded text locally or over a network, process it and
 send it to a dot-matrix printer. In its core, COPRIS reads text from
@@ -37,7 +37,7 @@ INI file format:
 [section]
 key = whitespace separated values ; inline comment
 ```
-ifdef([[[manpage]]], , [[[dnl -- if manpage not defined
+m4_ifdef([[[GEN_MANPAGE]]], , [[[m4_dnl -- print if GEN_MANPAGE not defined
 
 
 # Why translate characters?
@@ -146,7 +146,7 @@ markers (`;BST` and `;EST`).
 
 # Usage and examples
 
-include(usage_examples.md.m4)dnl
+m4_include(usage_examples.md.m4)m4_dnl
 
 If you need to debug COPRIS or are curious about its internal status,
 use the `-v/--verbose` parameter up to two times.
@@ -205,5 +205,4 @@ By default a non-stripped release binary is build, which includes some
 debugging symbols for crash diagnosis. There are many more targets present
 for debugging and development purposes, run `make help` to review them.
 
-]]])dnl endif manpage
-changequote`'dnl
+]]])m4_dnl endif GEN_MANPAGE

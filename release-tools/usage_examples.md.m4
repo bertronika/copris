@@ -1,3 +1,4 @@
+m4_changequote(`[[[', `]]]')m4_dnl
 Run as a simple server on port 8080, perform no text conversion, output
 received data to the serial port and exit after one connection. Note
 that superuser privileges are required if the specified port is smaller
