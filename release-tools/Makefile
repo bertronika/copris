@@ -15,8 +15,8 @@ INTERMED = README.md copris.1 copris.1.md
 
 gen-docs: $(DOCS)
 
-$(README): README.md
-$(MANPAGE): copris.1
+$(README): README.md usage_examples.md.m4
+$(MANPAGE): copris.1 README.md usage_examples.md.m4
 
 $(DOCS):
 	cp $< $@
