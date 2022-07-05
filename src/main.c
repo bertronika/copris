@@ -166,7 +166,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 			// Get the maximum path name length on the filesystem where
 			// the file resides.
-			errno = 0;
+			errno = 0; /* pathconf() needs errno to be reset */
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
 			if (max_path_len == -1) {
@@ -191,7 +191,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 			}
 
-			errno = 0;
+			errno = 0; /* pathconf() needs errno to be reset */
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
 			if (max_path_len == -1) {
@@ -292,7 +292,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		           "COPRIS does not use `-' to denote reading from standard input. Omit "
 		           "the destination argument for that.");
 	} else {
-		errno = 0;
+		errno = 0; /* pathconf() needs errno to be reset */
 		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
 
 		if (max_path_len == -1) {
