@@ -10,7 +10,7 @@ MANPAGE  = ../man/copris.1
 DOCS     = $(README) $(MANPAGE)
 INTERMED = README.md copris.1 copris.1.md
 
-.PHONY: all gen-docs clean
+.PHONY: gen-docs clean
 .INTERMEDIATE: $(INTERMED)
 
 gen-docs: $(DOCS)
@@ -25,7 +25,7 @@ copris.1: copris.1.md
 	pandoc --standalone --to man $< --output $@
 
 %.md: %.md.m4
-	m4 --fatal-warnings $< > $@
+	m4 -EE $< > $@
 
 clean:
 	rm -f $(INTERMED)
