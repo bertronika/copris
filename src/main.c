@@ -56,9 +56,9 @@ int verbosity = 1;
 static void copris_help(const char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Run as a network server on port NUMBER\n"
-	       "  -t, --trfile FILE      Enable character translation with definitions from FILE\n"
+	       "  -t, --translate FILE   Enable character translation with definitions from FILE\n"
 #ifdef W_CMARK
-	       "  -r, --printer FILE     Enable Markdown processing with a printer feature set FILE\n"
+	       "  -r, --process-md FILE  Enable Markdown processing with a printer feature set FILE\n"
 	       "      --dump-commands    Show all possible printer feature set commands\n"
 #endif
 	       "  -d, --daemon           Do not exit after the first network connection\n"
@@ -97,8 +97,8 @@ static void copris_version(void) {
 static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
 		{"port",          required_argument, NULL, 'p'},
-		{"trfile",        required_argument, NULL, 't'},
-		{"printer",       required_argument, NULL, 'r'},
+		{"translate",     required_argument, NULL, 't'},
+		{"process-md",    required_argument, NULL, 'r'},
 		{"dump-commands", no_argument,       NULL, ','},
 		{"daemon",        no_argument,       NULL, 'd'},
 		{"limit",         required_argument, NULL, 'l'},
@@ -186,7 +186,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 #ifdef W_CMARK
 		case 'r':
 			if (*optarg == '-') {
-				PRINT_ERROR_MSG("Unrecognised character in printer set name (%s). "
+				PRINT_ERROR_MSG("Unrecognised character in printer feature set name (%s). "
 				                "Perhaps you forgot to specify the set?", optarg);
 				return 1;
 			}
@@ -195,7 +195,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
 			if (max_path_len == -1) {
-				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer set file.");
+				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer feature set file.");
 				return 1;
 			}
 
@@ -263,7 +263,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			else if (optopt == 't')
 				PRINT_ERROR_MSG("You must specify a translation file.");
 			else if (optopt == 'r')
-				PRINT_ERROR_MSG("You must specify a printer set file.");
+				PRINT_ERROR_MSG("You must specify a printer feature set file.");
 			else if (optopt == 'l')
 				PRINT_ERROR_MSG("You must specify a limit number.");
 			else
@@ -329,7 +329,7 @@ int main(int argc, char **argv) {
 	// Run-time options (program attributes)
 	struct Attribs attrib;
 
-	// Translation file and printer set hash structures
+	// Translation file and printer feature set hash structures
 	struct Inifile *trfile, *prset;
 
 	attrib.portno       = 0;  // If 0, read from stdin
@@ -381,7 +381,7 @@ int main(int argc, char **argv) {
 	if (attrib.copris_flags & HAS_TRFILE) {
 		error = load_translation_file(attrib.trfile, &trfile);
 		if (error) {
-			// Missing printer sets are not a fatal error when --quiet
+			// Missing printer feature sets are not a fatal error when --quiet
 			if (verbosity) {
 				return EXIT_FAILURE;
 			} else {
@@ -458,7 +458,7 @@ int main(int argc, char **argv) {
 
 		// Stage 3: Normalise text
 
-		// Stage 4: Handle Markdown in text with a printer set file, if supported
+		// Stage 4: Handle Markdown in text with a printer feature set file
 #ifdef W_CMARK
 		if (attrib.copris_flags & HAS_PRSET)
 			convert_markdown(copris_text, &prset);
