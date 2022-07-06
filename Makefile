@@ -39,20 +39,23 @@ DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
 # Dynamic libraries to be linked
 LIBRARIES = inih
 
-# Source, object and dependency files for release and debug builds
+# Source files (don't forget printerset.c being added below)
 SOURCES = read_socket.c read_stdin.c writer.c translate.c utf8.c \
           parse_value.c main.c
 
-# Determine if linking with libcmark is needed
+# Include Markdown support and link with libcmark if not requested otherwise
 ifndef WITHOUT_CMARK
 	CFLAGS    += -DW_CMARK
 	LIBRARIES += libcmark
 	SOURCES   += printerset.c
 endif
 
+# Additional compiler and linker library flags + version string
+# (it is here because it could be overrided above)
 CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
 LDFLAGS += $(shell pkg-config --libs $(LIBRARIES))
 
+# Object and dependency files for release and debug builds
 OBJS_REL := $(SOURCES:%.c=src/%_rel.o)
 DEPS_REL := $(SOURCES:%.c=src/%_rel.d)
 OBJS_DBG := $(SOURCES:%.c=src/%_dbg.o)
@@ -77,7 +80,7 @@ CPPCHECK_XML   = $(CPPCHECK_DIR)/report.xml
 CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
 
 # Targets that do not produce an eponymous file
-.PHONY: all release debug analyse unit-tests analyse-cppcheck analyse-cppcheck-html \
+.PHONY: release debug analyse unit-tests analyse-cppcheck analyse-cppcheck-html \
         install clean help
 
 release: copris
