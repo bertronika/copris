@@ -11,7 +11,6 @@
 #define HAS_TRFILE      (1 << 1)
 #define HAS_PRSET       (1 << 2)
 #define MUST_CUTOFF     (1 << 3)
-#define DUMP_CMDS       (1 << 4)
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */

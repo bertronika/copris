@@ -209,9 +209,10 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->prset = optarg;
 			attrib->copris_flags |= HAS_PRSET;
 			break;
-		case ',':
-			attrib->copris_flags = DUMP_CMDS;
-			return 0;
+		case ',': {
+			struct Inifile *prset;
+			exit(dump_printer_set_commands(&prset));
+		}
 #endif
 		case 'd':
 			attrib->daemon = true;
@@ -348,13 +349,6 @@ int main(int argc, char **argv) {
 	int error = parse_arguments(argc, argv, &attrib);
 	if (error)
 		return error;
-
-#ifdef W_CMARK
-	if (attrib.copris_flags == DUMP_CMDS) {
-		error = dump_printer_set_commands(&prset);
-		return error;
-	}
-#endif
 
 	if (LOG_DEBUG)
 		PRINT_MSG("COPRIS started with PID %d.", getpid());
