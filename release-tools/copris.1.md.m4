@@ -28,11 +28,11 @@ m4_changequote(`[[[', `]]]')m4_dnl
 : Run COPRIS as a network server on port *NUMBER*. Superuser
   privileges are required if *NUMBER* is less than 1024.
 
-**-t**, **\--trfile** *FILE*
+**-t**, **\--translate** *FILE*
 : Enable character translation with definitions from character translation
   *FILE*.
 
-**-r**, **\--printer** *FILE*
+**-r**, **\--process-md** *FILE*
 : Enable Markdown parsing with definitions from printer feature set
   *FILE*. COPRIS must be compiled with Markdown support for this option to
   be available.

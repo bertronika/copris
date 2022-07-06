@@ -47,8 +47,8 @@ getting common in offices and homes, they usually included only a
 handful of character sets (English, French, German, Italian, Spanish and
 such). Languages, whose alphabets required additional letters, had to be
 incorporated in some way. The solution was to sacrifice some of the ASCII
-characters. Printers were internally modified - some symbols, such as `~
-@ {`, actually printed locale-specific characters. Users could then print
+characters. Printers were internally modified - some symbols, such as
+`~ @ {`, actually printed locale-specific characters. Users could then print
 localised text without having to send special commands to their printers.
 
 COPRIS allows you to avoid manually swapping characters with the use
@@ -57,7 +57,7 @@ values` definitions. Input text is scanned for occurrences of left-hand
 *keys*, which are replaced with appropriate right-hand *values*, specified
 in decimal, hexadecimal or octal bases.
 
-To use a translation file, specify the `-t/--trfile filename.ini`
+To use a translation file, specify the `-t/--translate filename.ini`
 argument in the command line.
 
 
@@ -92,9 +92,9 @@ can be also specified in a translation file to imitate the lost ones.
 
 Pass Markdown-formatted text to COPRIS, compliant with the [CommonMark
 specification][1]. Before doing that, specify an appropriate printer
-feature set file with the `-r/--printer filename.ini` argument. Also make
-sure COPRIS is compiled with Markdown support (which it is by default,
-but you can check by running `copris --version`).
+feature set file with the `-r/--process-md filename.ini` argument. Also
+make sure COPRIS is compiled with Markdown support (which it is by
+default, but you can check by running `copris --version`).
 
 [1]: https://spec.commonmark.org/
 
