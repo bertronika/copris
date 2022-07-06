@@ -96,18 +96,19 @@ static void copris_version(void) {
 
 static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
-		{"port",          required_argument, NULL, 'p'},
-		{"translate",     required_argument, NULL, 't'},
-		{"process-md",    required_argument, NULL, 'r'},
-		{"dump-commands", no_argument,       NULL, ','},
-		{"daemon",        no_argument,       NULL, 'd'},
-		{"limit",         required_argument, NULL, 'l'},
-		{"cutoff-limit",  no_argument,       NULL, '.'},
-		{"verbose",       no_argument,       NULL, 'v'},
-		{"quiet",         no_argument,       NULL, 'q'},
-		{"help",          no_argument,       NULL, 'h'},
-		{"version",       no_argument,       NULL, 'V'},
-		{NULL,            0,                 NULL, 0  }
+		{"port",           required_argument, NULL, 'p'},
+		{"translate",      required_argument, NULL, 't'},
+		{"process-md",     required_argument, NULL, 'r'},
+		{"dump-commands",  no_argument,       NULL, ','},
+		{"daemon",         no_argument,       NULL, 'd'},
+		{"limit",          required_argument, NULL, 'l'},
+		{"cutoff-limit",   no_argument,       NULL, '.'},
+		{"verbose",        no_argument,       NULL, 'v'},
+		{"quiet",          no_argument,       NULL, 'q'},
+		{"help",           no_argument,       NULL, 'h'},
+		{"version",        no_argument,       NULL, 'V'},
+		{"can-process-md", no_argument,       NULL, '@'},
+		{NULL,             0,                 NULL, 0  }
 	};
 
 	int c; // Current Getopt argument
@@ -257,6 +258,12 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 'V':
 			copris_version();
 			break;
+		case '@':
+#ifdef W_CMARK
+			exit(0);
+#else
+			exit(-1);
+#endif
 		case ':':
 			if (optopt == 'p')
 				PRINT_ERROR_MSG("You must specify a port number.");
