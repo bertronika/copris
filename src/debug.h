@@ -101,7 +101,7 @@ extern int verbosity;
        } while (0)
 #else
 #   define PRINT_ERROR_MSG(...)          \
-           printf("Silencing an error message in %s, line %d.\n", __FILE__, __LINE__);
+           printf("Silencing an error message in %s, line %d.\n", __FILE__, __LINE__)
 #endif
 
 #define PRINT_NOTE(str)                  \
