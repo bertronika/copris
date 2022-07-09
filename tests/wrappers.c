@@ -96,12 +96,16 @@ ssize_t __wrap_read(int fd, void *buffer, size_t count)
 
 	char *read_data = mock_type(char *);
 
+	// NULL signals an EOF
 	if (read_data == NULL)
 		return 0;
 
-	size_t data_len = mock_type(size_t);
+	size_t data_len = strlen(read_data);
+	// strlen() isn't strictly the right function, as read() accepts any binary
+	// data, not just strings. However, for the use case of COPRIS, it should
+	// be adequate.
 
-	// Check if the test value fits into the buffer
+	// Check if the test value fits into the buffer (BUFSIZE)
 	assert_in_range(data_len, 0, count);
 
 	memcpy(buffer, read_data, data_len);
