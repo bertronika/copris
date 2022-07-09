@@ -19,8 +19,10 @@ CFLAGS  = -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic \
 MOCKFLAGS := $(shell pkg-config --cflags --libs cmocka) \
              $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
 
-.PHONY: run_cmocka clean help
 TESTED_OBJECTS := $(TESTED_SOURCES:%.c=test-%.o)
+
+.PHONY: all run_cmocka clean help
+all: run_cmocka
 
 run_cmocka: tests_cmocka
 	./$<

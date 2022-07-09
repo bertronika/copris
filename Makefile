@@ -10,7 +10,7 @@
 # Run `make' with `WITHOUT_CMARK=1' to omit Markdown support.
 
 # Code analysis targets:
-#	- unit-tests              build and run unit tests
+#	- check                   build and run unit tests
 #	- analyse                 same as `debug', but compile with GCC's static analyser
 #	- analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
 #	- analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
@@ -61,26 +61,13 @@ DEPS_REL := $(SOURCES:%.c=src/%_rel.d)
 OBJS_DBG := $(SOURCES:%.c=src/%_dbg.o)
 DEPS_DBG := $(SOURCES:%.c=src/%_dbg.d)
 
-# Unit test files (executables will be prefixed with 'run_')
-TESTS = test_read_socket_stdin.c test_utf8.c test_parse_value.c
-TESTS_BINS := $(TESTS:%.c=tests/run_%)
-TESTS_OBJS := $(filter-out src/main_dbg.o, $(OBJS_DBG))
-
-# List of mocked functions for unit tests
-MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write
-
-# Compiler flags for unit tests
-TESTFLAGS := $(shell pkg-config --cflags --libs cmocka) $(DBGFLAGS) \
-             -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10 \
-             $(foreach MOCK, $(MOCKS), -Wl,--wrap=$(MOCK))
-
 # Cppcheck settings. Note that 'style' includes 'warning', 'performance' and 'portability'.
 CPPCHECK_DIR   = cppcheck_report
 CPPCHECK_XML   = $(CPPCHECK_DIR)/report.xml
 CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
 
 # Targets that do not produce an eponymous file
-.PHONY: release debug analyse unit-tests analyse-cppcheck analyse-cppcheck-html \
+.PHONY: release debug analyse check analyse-cppcheck analyse-cppcheck-html \
         install clean help
 
 release: copris
@@ -109,12 +96,8 @@ copris_dbg: $(OBJS_DBG)
 %_dbg.o: %.c
 	$(CC) $(CFLAGS) $(DBGFLAGS) -MMD -MP -c $< -o $@
 
-# Compile and run tests
-tests/run_%: tests/%.c tests/wrappers.c $(TESTS_OBJS)
-	$(CC) $(CFLAGS) $(TESTFLAGS) $^ $(LDFLAGS) -o $@
-
-unit-tests: $(TESTS_BINS)
-	for utest in $(TESTS_BINS); do ./$$utest; echo; done
+check:
+	$(MAKE) -C tests/ all
 
 # Run Cppcheck code analysis (first recipe prints to stdout, second generates a HTML report)
 analyse-cppcheck:
@@ -139,7 +122,6 @@ install: copris man/copris.1
 clean:
 	rm -f $(OBJS_REL) $(DEPS_REL) copris
 	rm -f $(OBJS_DBG) $(DEPS_DBG) copris_dbg
-	rm -f $(TESTS_BINS)
 	rm -fr $(CPPCHECK_DIR)
 
 help:

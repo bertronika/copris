@@ -8,5 +8,5 @@ copris_dbg
 # Cppcheck's report directory
 cppcheck_report/
 
-# Ignore test executables
-tests/run_*
+# Ignore the compiled test executable
+tests/tests_cmocka
