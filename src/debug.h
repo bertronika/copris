@@ -16,9 +16,9 @@
  *  VERBOSITY  LEVEL          ARGUMENT  QUERY WITH
  *  0          silent/fatal   -q        if (!verbosity)
  *             messages only
- *  1          error          (none)    LOG_ERROR();
- *  2          info           -v        LOG_INFO();
- *  3          debug          -vv       LOG_DEBUG();
+ *  1          error          (none)    if (LOG_ERROR)
+ *  2          info           -v        if (LOG_INFO)
+ *  3          debug          -vv       if (LOG_DEBUG)
  */
 
 extern int verbosity;
