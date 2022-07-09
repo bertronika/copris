@@ -108,7 +108,7 @@ analyse-cppcheck:
 	cppcheck $(CPPCHECK_FLAGS) src/
 
 analyse-cppcheck-html: $(CPPCHECK_DIR)/index.html
-$(CPPCHECK_DIR)/index.html: $(SOURCES)
+$(CPPCHECK_DIR)/index.html: src/
 	mkdir -p $(CPPCHECK_DIR)
 	cppcheck $(CPPCHECK_FLAGS) --xml src/ 2>$(CPPCHECK_XML)
 	cppcheck-htmlreport --file=$(CPPCHECK_XML) --report-dir=$(CPPCHECK_DIR)
