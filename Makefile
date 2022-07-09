@@ -52,7 +52,7 @@ ifndef WITHOUT_CMARK
 endif
 
 # Additional compiler and linker library flags + version string
-# (it is here because it could be overrided above)
+# (it is here because it could be overridden above)
 CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
 LDFLAGS += $(shell pkg-config --libs $(LIBRARIES))
 
@@ -98,6 +98,7 @@ copris_dbg: $(OBJS_DBG)
 %_dbg.o: %.c
 	$(CC) $(CFLAGS) $(DBGFLAGS) -MMD -MP -c $< -o $@
 
+# Call unit tests' Makefile
 check:
 	$(MAKE) -C tests/ all
 
