@@ -16,6 +16,11 @@
 
 #include "../src/config.h"
 
+// Tests expect the following buffer size:
+#if BUFSIZE != 10
+#   error "Buffer size set improperly for unit tests."
+#endif
+
 char *__real_fgets(char *buffer, int buffer_size, FILE *stream);
 char *__wrap_fgets(char *buffer, int buffer_size, FILE *stream)
 {
