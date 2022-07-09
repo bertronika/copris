@@ -12,10 +12,10 @@ TESTED_SOURCES = parse_value.c read_stdin.c read_socket.c utf8.c
 MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write
 
 # Tests build configuration
-DEFINES    = -DDEBUG -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10
-CFLAGS     = -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic \
-             -Og -g3 -ggdb -gdwarf \
-             $(DEFINES)
+DEFINES = -DDEBUG -DUNIT_TESTS -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10
+CFLAGS  = -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic \
+          -Og -g3 -ggdb -gdwarf \
+          $(DEFINES)
 MOCKFLAGS := $(shell pkg-config --cflags --libs cmocka) \
              $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
 
