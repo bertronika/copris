@@ -1,19 +1,20 @@
 
 # Build system for COPRIS
-# Possible common targets (you don't need to specify one for a regular release build):
-#	- release   build the release build (executable name `copris')
-#	- debug     build the debugging build (executable name `copris_dbg')
-#	- install   install a copy of release build with samples and documentation
-#	- clean     remove temporary object, dependency, binary and test files
-#	- help      print this text
+# Common targets (you don't need to specify one for a regular release build):
+#   - release     build the release build (executable name `copris')
+#   - debug       build the debugging build (executable name `copris_dbg')
+#   - install     install a copy of release build with samples and documentation
+#   - clean       remove object and dependency files
+#   - distclean   remove object, dependency, binary and test files
+#   - help        print this text
 
 # Run `make' with `WITHOUT_CMARK=1' to omit Markdown support.
 
 # Code analysis targets:
-#	- check                   build and run unit tests
-#	- analyse                 same as `debug', but compile with GCC's static analyser
-#	- analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
-#	- analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
+#   - check                   build and run unit tests
+#   - analyse                 same as `debug', but compile with GCC's static analyser
+#   - analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
+#   - analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
 
 # GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
@@ -70,10 +71,11 @@ CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information
 .PHONY: release debug analyse check analyse-cppcheck analyse-cppcheck-html \
         install clean help
 
+all:     copris
 release: copris
 debug:   copris_dbg
 analyse: DBGFLAGS += -fanalyzer
-analyse: debug
+analyse: copris_dbg
 
 # Automatic variables of GNU Make:
 # $@  The file name of the target of the rule.
@@ -120,11 +122,15 @@ install: copris man/copris.1
 	$(INSTALL) -m644 man/copris.1 $(DESTDIR)$(MANDIR)/man1
 
 clean:
-	rm -f $(OBJS_REL) $(DEPS_REL) copris
-	rm -f $(OBJS_DBG) $(DEPS_DBG) copris_dbg
+	rm -f $(OBJS_REL) $(DEPS_REL)
+	rm -f $(OBJS_DBG) $(DEPS_DBG)
+
+distclean: clean
+	rm -f copris copris_dbg
 	rm -fr $(CPPCHECK_DIR)
+	$(MAKE) -C tests/ clean
 
 help:
-	head -n 17 $(firstword $(MAKEFILE_LIST)); \
+	head -n 18 $(firstword $(MAKEFILE_LIST)); \
 	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' $(firstword $(MAKEFILE_LIST))
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
