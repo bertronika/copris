@@ -78,6 +78,10 @@ copris_dbg: $(OBJS_DBG)
 check:
 	$(MAKE) -C tests/ all
 
+coverage: DBGFLAGS += --coverage
+coverage: copris_dbg
+	$(MAKE) -C tests/ coverage
+
 # Run Cppcheck code analysis (first recipe prints to stdout, second generates a HTML report)
 analyse-cppcheck:
 	mkdir -p $(CPPCHECK_DIR)

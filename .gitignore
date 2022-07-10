@@ -8,5 +8,9 @@ copris_dbg
 # Cppcheck's report directory
 cppcheck_report/
 
-# Test executables
+# Tests files
 tests/cmocka-*
+tests/*.gcno
+tests/*.gcda
+tests/coverage.info
+tests/coverage_report/

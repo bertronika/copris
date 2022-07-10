@@ -3,6 +3,7 @@
 # Possible targets:
 #   - run-cmocka-standalone   run cmocka unit tests
 #   - run-cmocka-prove        run cmocka unit tests through Perl's prove
+#   - coverage                run cmocka unit tests and check sources coverage
 #   - clean                   remove compiled object and binary files
 #   - help                    show this text
 
@@ -19,18 +20,18 @@ TESTED_SOURCES = parse_value.c utf8.c read_stdin.c read_socket.c
 MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write
 
 # Tests build configuration
-DEFINES = -DDEBUG -DUNIT_TESTS -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10
-CFLAGS  = -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic \
-          -Og -g3 -ggdb -gdwarf \
-          $(DEFINES)
-MOCKFLAGS := $(shell pkg-config --cflags --libs cmocka) \
-             $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
+DEFINES = -DUNIT_TESTS -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10
 
-TESTED_OBJECTS := $(TESTED_SOURCES:%.c=src_%.o)
+CFLAGS    += $(DBGFLAGS) $(DEFINES)
+MOCKFLAGS := $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
+
 TEST_BINARIES  := $(TESTED_SOURCES:%.c=cmocka-%)
+SOURCE_OBJECTS := $(filter-out src_main.o,$(SOURCES:%.c=src_%.o))
+TESTED_OBJECTS := $(TESTED_SOURCES:%.c=src_%.o)
+TEST_GCDA      := $(TESTED_SOURCES:%.c=src_%.gcda)
 
-.PHONY: all run_cmocka clean help
-# .SECONDARY: $(TESTED_OBJECTS)
+.PHONY: all run-cmocka-standalone run-cmocka-prove coverage clean help
+.SECONDARY: $(SOURCE_OBJECTS) cmocka-wrappers.o
 all: run-cmocka-standalone
 
 run-cmocka-standalone: $(TEST_BINARIES)
@@ -40,23 +41,39 @@ run-cmocka-prove: $(TEST_BINARIES)
 	CMOCKA_MESSAGE_OUTPUT=tap prove -f $(addprefix ./,$^)
 
 # Test binaries
-cmocka-%: cmocka-%.c src_%.o wrappers.o
-	$(CC) $(CFLAGS) $(MOCKFLAGS) $^ -o $@
+cmocka-%: $(SOURCE_OBJECTS) cmocka-%.o cmocka-wrappers.o
+	$(CC) $(CFLAGS) $(MOCKFLAGS) --coverage $^ $(LDFLAGS) -o $@
 
-# Additional prerequisites
-cmocka-read_socket: src_utf8.o
-
-# Source objects to be tested
+# Source objects. Compile with the coverage flag if they are to be tested
+# (this prevents lcov/genhtml telling us untested files have 0 % coverage).
 src_%.o: ../src/%.c
+	if [ "$(filter $@, $(TESTED_OBJECTS))" = "$@" ]; then \
+		$(CC) $(CFLAGS) --coverage -c $< -o $@; \
+	else \
+		$(CC) $(CFLAGS) -c $< -o $@; \
+	fi
+
+# Tests objects
+cmocka-%.o: cmocka-%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Mocked function wrappers
-wrappers.o: wrappers.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# coverage: coverage.info
+coverage: coverage_report/index.html
+
+src_%.gcda: cmocka-%
+	./$<
+
+coverage.info: $(TEST_GCDA)
+	lcov --capture --base-directory ../src --no-external --directory . --output-file $@
+
+coverage_report/index.html: coverage.info
+	mkdir -p $(dir $@)
+	genhtml $< --legend --output-directory $(dir $@)
 
 clean:
-	rm -f $(TEST_BINARIES) wrappers.o src_utf8.o
+	rm -f $(TEST_BINARIES) $(SOURCE_OBJECTS) cmocka-wrappers.o
+	rm -fr coverage_report/ coverage.info *.gcda *.gcno
 
 help:
-	head -n 14 $(firstword $(MAKEFILE_LIST))
+	head -n 11 $(firstword $(MAKEFILE_LIST))
 	# Compiler flags for tests: $(CFLAGS)
