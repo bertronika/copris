@@ -21,6 +21,8 @@
 # Get latest version tag if in a git repository, else from a local file
 VERSION := $(shell git describe --tags --dirty 2>/dev/null || cat VERSION)
 
+include Makefile.common
+
 # Installation directories
 PREFIX  ?= /usr/local
 BINDIR  ?= $(PREFIX)/bin
@@ -29,32 +31,6 @@ MANDIR  ?= $(PREFIX)/man
 DESTDIR ?=
 
 INSTALL ?= install -p
-
-# Default common, release and debug build compiler flags
-CFLAGS   ?= -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic
-RELFLAGS ?= -O2 -g -DNDEBUG
-DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
-
-# -Wconversion
-
-# Dynamic libraries to be linked
-LIBRARIES = inih
-
-# Source files (don't forget printerset.c being added below)
-SOURCES = read_socket.c read_stdin.c writer.c translate.c utf8.c \
-          parse_value.c main.c
-
-# Include Markdown support and link with libcmark if not requested otherwise
-ifndef WITHOUT_CMARK
-	CFLAGS    += -DW_CMARK
-	LIBRARIES += libcmark
-	SOURCES   += printerset.c
-endif
-
-# Additional compiler and linker library flags + version string
-# (it is here because it could be overridden above)
-CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
-LDFLAGS += $(shell pkg-config --libs $(LIBRARIES))
 
 # Object and dependency files for release and debug builds
 OBJS_REL := $(SOURCES:%.c=src/%_rel.o)
@@ -133,5 +109,5 @@ distclean: clean
 
 help:
 	head -n 18 $(firstword $(MAKEFILE_LIST)); \
-	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' $(firstword $(MAKEFILE_LIST))
+	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' Makefile.common
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)

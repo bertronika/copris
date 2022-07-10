@@ -6,6 +6,12 @@
 #   - clean                   remove compiled object and binary files
 #   - help                    show this text
 
+# Run with `WITHOUT_CMARK=1' to skip checking `printerset.c'.
+
+VERSION := $(shell git describe --tags --dirty 2>/dev/null || cat ../VERSION)
+include ../Makefile.common
+LIBRARIES += cmocka
+
 # List of sources that have unit tests (sorted by approximate complexity)
 TESTED_SOURCES = parse_value.c utf8.c read_stdin.c read_socket.c
 
