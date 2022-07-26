@@ -60,7 +60,7 @@ analyse: copris_dbg
 
 # Compile the release binary
 copris: $(OBJS_REL)
-	$(CC) $(CFLAGS) $(RELFLAGS) $^ $(LDFLAGS) -o $@
+	$(CC) $^ $(LDFLAGS) -o $@
 	# Validate predefined values from 'config.h' if compiled with Markdown support
 	./copris --can-process-md && ./copris --dump-commands >/dev/null || true
 
@@ -69,7 +69,7 @@ copris: $(OBJS_REL)
 
 # Compile the debug binary
 copris_dbg: $(OBJS_DBG)
-	$(CC) $(CFLAGS) $(DBGFLAGS) $^ $(LDFLAGS) -o $@
+	$(CC) $^ $(LDFLAGS) -o $@
 
 %_dbg.o: %.c
 	$(CC) $(CFLAGS) $(DBGFLAGS) -MMD -MP -c $< -o $@
