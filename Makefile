@@ -50,8 +50,6 @@ CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information
 all:     copris
 release: copris
 debug:   copris_dbg
-analyse: DBGFLAGS += -fanalyzer
-analyse: copris_dbg
 
 # Automatic variables of GNU Make:
 # $@  The file name of the target of the rule.
@@ -77,6 +75,10 @@ copris_dbg: $(OBJS_DBG)
 # Call unit tests' Makefile
 check:
 	$(MAKE) -C tests/ all
+
+# Remove objects first, then recompile them with static analysis
+analyse: DBGFLAGS += -fanalyzer
+analyse: | clean $(OBJS_DBG)
 
 # Run Cppcheck code analysis (first recipe prints to stdout, second generates a HTML report)
 analyse-cppcheck:
