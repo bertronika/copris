@@ -315,7 +315,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		int tmperr = access(argv[optind], W_OK);
 		if (tmperr != 0) {
 			PRINT_SYSTEM_ERROR("access", "Unable to write to output file/printer. Does "
-		                                 "it exist, with appropriate permissions?");
+			                             "it exist, with appropriate permissions?");
 			return 1;
 		}
 
@@ -353,7 +353,7 @@ int main(int argc, char **argv) {
 
 	if (argc < 2 && LOG_ERROR)
 		PRINT_NOTE("COPRIS won't do much without any arguments. "
-                   "Try using the '--help' option.");
+		           "Try using the '--help' option.");
 
 	if (LOG_INFO)
 		PRINT_MSG("Verbosity level set to %d.", verbosity);
