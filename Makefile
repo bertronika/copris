@@ -10,7 +10,7 @@
 
 # Run `make' with `WITHOUT_CMARK=1' to omit Markdown support.
 
-# Code analysis targets:
+# Code analysis targets (more are present in `tests/Makefile'):
 #   - check                   build and run unit tests
 #   - analyse                 same as `debug', but compile with GCC's static analyser
 #   - analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
@@ -44,8 +44,8 @@ CPPCHECK_XML   = $(CPPCHECK_DIR)/report.xml
 CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
 
 # Targets that do not produce an eponymous file
-.PHONY: release debug analyse check analyse-cppcheck analyse-cppcheck-html \
-        install clean help
+.PHONY: release debug install clean distclean help \
+        check analyse analyse-cppcheck analyse-cppcheck-html
 
 all:     copris
 release: copris
@@ -77,10 +77,6 @@ copris_dbg: $(OBJS_DBG)
 # Call unit tests' Makefile
 check:
 	$(MAKE) -C tests/ all
-
-coverage: DBGFLAGS += --coverage
-coverage: copris_dbg
-	$(MAKE) -C tests/ coverage
 
 # Run Cppcheck code analysis (first recipe prints to stdout, second generates a HTML report)
 analyse-cppcheck:
