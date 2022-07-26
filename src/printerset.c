@@ -325,14 +325,21 @@ int dump_printer_set_commands(struct Inifile **prset)
 		size_t command_len = strlen(s->in);
 
 		if (s->in[command_len - 2] == 'O' && s->in[command_len - 1] == 'N') {
-			printf("; %s  = \n", s->in);         /* *_ON commands with extra padding */
+			// *_ON commands with extra padding
+			printf("; %s  = \n", s->in);
+
 		} else if (s->in[0] == 'P') {
-			printf("; %s =  ; defaults to `0x%X", s->in, s->out[0]); /* P_* commands */
+			// P_* commands
+			printf("; %s =  ; defaults to `0x%X", s->in, s->out[0]);
+
+			// P_* values
 			for (int i = 1; s->out[i] != '\0'; i++)
-				printf(" 0x%X", s->out[i]);                            /* P_* values */
+				printf(" 0x%X", s->out[i]);
+
 			printf("'\n");
 		} else {
-			printf("; %s = \n", s->in);                                /* all others */
+			// all others
+			printf("; %s = \n", s->in);
 		}
 	}
 
