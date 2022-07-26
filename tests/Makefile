@@ -57,18 +57,24 @@ src_%.o: ../src/%.c
 cmocka-%.o: cmocka-%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# coverage: coverage.info
-coverage: coverage_report/index.html
+# Test coverage
+coverage: coverage_report/src/index.html
+	#
+	# Report generated at file://$(realpath $<)
+	#
 
-src_%.gcda: cmocka-%
-	./$<
+# Generate a HTML coverage report
+coverage_report/src/index.html: coverage.info
+	mkdir -p coverage_report/
+	genhtml $< --legend --output-directory coverage_report/
 
+# Generate a text coverage report
 coverage.info: $(TEST_GCDA)
 	lcov --capture --base-directory ../src --no-external --directory . --output-file $@
 
-coverage_report/index.html: coverage.info
-	mkdir -p $(dir $@)
-	genhtml $< --legend --output-directory $(dir $@)
+# Run instrumented test binaries
+src_%.gcda: cmocka-%
+	./$<
 
 clean:
 	rm -f $(TEST_BINARIES) $(SOURCE_OBJECTS) cmocka-wrappers.o
