@@ -109,5 +109,5 @@ distclean: clean
 
 help:
 	head -n 18 $(firstword $(MAKEFILE_LIST)); \
-	grep -m 3 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS)' Makefile.common
+	grep -m 4 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS|LDFLAGS)' Makefile.common
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
