@@ -10,8 +10,7 @@ LDFLAGS  ?=
 LIBRARIES = inih
 
 # Source files (don't forget printerset.c being added below)
-SOURCES = read_socket.c read_stdin.c writer.c translate.c utf8.c \
-          parse_value.c main.c
+SOURCES = utf8.c writer.c parse_value.c read_stdin.c translate.c read_socket.c main.c
 
 # Include Markdown support and link with libcmark if not requested otherwise
 ifndef WITHOUT_CMARK
