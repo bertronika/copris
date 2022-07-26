@@ -137,11 +137,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			}
 
 			if (*parse_error) {
+				PRINT_ERROR_MSG("Unrecognised characters in port number (%s).", parse_error);
 				if (*parse_error == '-')
-					PRINT_ERROR_MSG("Unrecognised characters in port number (%s). "
-					                "Perhaps you forgot to specify the number?", parse_error);
-				else
-					PRINT_ERROR_MSG("Unrecognised characters in port number (%s).", parse_error);
+					PRINT_ERROR_MSG("Perhaps you forgot to specify the number?");
 
 				return 1;
 			}
@@ -226,11 +224,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			}
 
 			if (*parse_error) {
-				if (*parse_error == '-')
-					PRINT_ERROR_MSG("Unrecognised characters in limit number (%s). "
-					                "Perhaps you forgot to specify the number?", parse_error);
-				else
-					PRINT_ERROR_MSG("Unrecognised characters in limit number (%s).", parse_error);
+				PRINT_ERROR_MSG("Unrecognised characters in limit number (%s).", parse_error);
+					if (*parse_error == '-')
+						PRINT_ERROR_MSG("Perhaps you forgot to specify the number?");
 
 				return 1;
 			}
