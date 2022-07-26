@@ -257,6 +257,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			copris_version();
 			break;
 		case '@':
+		// Tell if this build includes Markdown support (used in the Makefile)
 #ifdef W_CMARK
 			exit(0);
 #else
