@@ -12,7 +12,7 @@
 
 # Code analysis targets (more are present in `tests/Makefile'):
 #   - check                   build and run unit tests
-#   - analyse                 same as `debug', but compile with GCC's static analyser
+#   - analyse                 analyse object files with with GCC's static analyser
 #   - analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
 #   - analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
 
