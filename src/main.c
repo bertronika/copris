@@ -111,13 +111,10 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{NULL,             0,                 NULL, 0  }
 	};
 
-	int c; // Current Getopt argument
-
-	// To avoid declaring variables inside statements, they are put here
-	long max_path_len;
-	unsigned long temp_portno;
-	unsigned long temp_limit;
-	char *parserr;
+	// Variables common to multiple switch cases
+	int c;              // Current Getopt argument
+	char *parse_error;  // Filled in by strtoul
+	long max_path_len;  // For filenames
 
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. `Printer
@@ -131,20 +128,20 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			                "this release of COPRIS - they were not included at build time.");
 			return 1;
 #endif
-		case 'p':
-			temp_portno = strtoul(optarg, &parserr, 10);
+		case 'p': {
+			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
 
 			if (temp_portno == ULONG_MAX) {
 				PRINT_SYSTEM_ERROR("strtoul", "Error parsing port number.");
 				return 1;
 			}
 
-			if (*parserr) {
-				if (*parserr == '-')
+			if (*parse_error) {
+				if (*parse_error == '-')
 					PRINT_ERROR_MSG("Unrecognised characters in port number (%s). "
-					                "Perhaps you forgot to specify the number?", parserr);
+					                "Perhaps you forgot to specify the number?", parse_error);
 				else
-					PRINT_ERROR_MSG("Unrecognised characters in port number (%s).", parserr);
+					PRINT_ERROR_MSG("Unrecognised characters in port number (%s).", parse_error);
 
 				return 1;
 			}
@@ -158,7 +155,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 			attrib->portno = (unsigned int)temp_portno;
 			break;
-		case 't':
+		}
+		case 't': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised characters in translation file name (%s). "
 				                "Perhaps you forgot to specify the file?", optarg);
@@ -184,8 +182,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->trfile = optarg;
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
+		}
 #ifdef W_CMARK
-		case 'r':
+		case 'r': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised character in printer feature set name (%s). "
 				                "Perhaps you forgot to specify the set?", optarg);
@@ -209,6 +208,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->prset = optarg;
 			attrib->copris_flags |= HAS_PRSET;
 			break;
+		}
 		case ',': {
 			struct Inifile *prset;
 			exit(dump_printer_set_commands(&prset));
@@ -217,20 +217,20 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 'd':
 			attrib->daemon = true;
 			break;
-		case 'l':
-			temp_limit = strtoul(optarg, &parserr, 10);
+		case 'l': {
+			unsigned long temp_limit = strtoul(optarg, &parse_error, 10);
 
 			if (temp_limit == ULONG_MAX) {
 				PRINT_SYSTEM_ERROR("strtoul", "Error parsing limit number.");
 				return 1;
 			}
 
-			if (*parserr) {
-				if (*parserr == '-')
+			if (*parse_error) {
+				if (*parse_error == '-')
 					PRINT_ERROR_MSG("Unrecognised characters in limit number (%s). "
-					                "Perhaps you forgot to specify the number?", parserr);
+					                "Perhaps you forgot to specify the number?", parse_error);
 				else
-					PRINT_ERROR_MSG("Unrecognised characters in limit number (%s).", parserr);
+					PRINT_ERROR_MSG("Unrecognised characters in limit number (%s).", parse_error);
 
 				return 1;
 			}
@@ -243,6 +243,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 			attrib->limitnum = (size_t)temp_limit;
 			break;
+		}
 		case '.':
 			attrib->copris_flags |= MUST_CUTOFF;
 			break;
