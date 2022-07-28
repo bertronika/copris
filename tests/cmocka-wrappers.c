@@ -127,3 +127,37 @@ ssize_t __wrap_write(int fd, const void *buf, size_t count)
 	// Pretend everything has been written successfully
 	return count;
 }
+
+int __real_printf(const char *format, ...);
+int __wrap_printf(const char *format, ...)
+{
+	(void)format;
+
+	return 1;
+}
+
+int __real_fprintf(FILE *stream, const char *format, ...);
+int __wrap_fprintf(FILE *stream, const char *format, ...)
+{
+	(void)stream;
+	(void)format;
+
+	return 1;
+}
+
+int __real_puts(const char *s);
+int __wrap_puts(const char *s)
+{
+	(void)s;
+
+	return 1;
+}
+
+int __real_fputs(const char *s, FILE *stream);
+int __wrap_fputs(const char *s, FILE *stream)
+{
+	(void)s;
+	(void)stream;
+
+	return 1;
+}
