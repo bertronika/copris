@@ -37,7 +37,7 @@ TEST_GCDA      := $(TESTED_SOURCES:%.c=src_%.gcda)
 all: run-cmocka-standalone
 
 run-cmocka-standalone: $(TEST_BINARIES)
-	for test in $^; do ./$$test 1 1 || exit 1; done
+	for test in $^; do ./$$test -v -v -v || exit 1; done
 
 run-cmocka-prove: $(TEST_BINARIES)
 	CMOCKA_MESSAGE_OUTPUT=tap prove -f $(addprefix ./,$^)
@@ -76,7 +76,7 @@ coverage.info: $(TEST_GCDA)
 
 # Run instrumented test binaries with maximum verbosity
 src_%.gcda: cmocka-%
-	./$< 1 1
+	./$< -v -v -v
 
 clean:
 	rm -f $(TEST_BINARIES) $(SOURCE_OBJECTS) cmocka-wrappers.o
