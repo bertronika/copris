@@ -48,20 +48,25 @@ static void utf8_test_incomplete_buffer(void **state)
 	char example5[] = {'h', 'r', 'o', '\xC5', '\xA1', '\xC4', '\0'}; // "hrošč"
 	char example6[] = {'5', '0', '\xE2', '\x82', '\0'}; // "50€"
 
-	utf8_terminate_incomplete_buffer(example2, (sizeof example2) - 1);
+	int was_terminated = utf8_terminate_incomplete_buffer(example2, (sizeof example2) - 1);
 	assert_string_equal(example2, "");
+	assert_true(was_terminated);
 
-	utf8_terminate_incomplete_buffer(example3, (sizeof example3) - 1);
+	was_terminated = utf8_terminate_incomplete_buffer(example3, (sizeof example3) - 1);
 	assert_string_equal(example3, "€");
+	assert_false(was_terminated);
 
-	utf8_terminate_incomplete_buffer(example4, (sizeof example4) - 1);
+	was_terminated = utf8_terminate_incomplete_buffer(example4, (sizeof example4) - 1);
 	assert_string_equal(example4, "");
+	assert_true(was_terminated);
 
-	utf8_terminate_incomplete_buffer(example5, (sizeof example5) - 1);
+	was_terminated = utf8_terminate_incomplete_buffer(example5, (sizeof example5) - 1);
 	assert_string_equal(example5, "hroš");
+	assert_true(was_terminated);
 
-	utf8_terminate_incomplete_buffer(example6, (sizeof example6) - 1);
+	was_terminated = utf8_terminate_incomplete_buffer(example6, (sizeof example6) - 1);
 	assert_string_equal(example6, "50");
+	assert_true(was_terminated);
 }
 
 int main(int argc, char **argv)
