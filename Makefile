@@ -63,14 +63,14 @@ copris: $(OBJS_REL)
 	./copris --can-process-md && ./copris --dump-commands >/dev/null || true
 
 %_rel.o: %.c
-	$(CC) $(CFLAGS) $(RELFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(RELFLAGS) -MMD -MP -c $< -o $@
 
 # Compile the debug binary
 copris_dbg: $(OBJS_DBG)
 	$(CC) $^ $(LDFLAGS) -o $@
 
 %_dbg.o: %.c
-	$(CC) $(CFLAGS) $(DBGFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(DBGFLAGS) -MMD -MP -c $< -o $@
 
 # Call unit tests' Makefile
 check:

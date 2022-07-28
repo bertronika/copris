@@ -1,5 +1,5 @@
 # Default, overridable build flags (REL = release, DBG = debug)
-CFLAGS   ?= -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic -MMD -MP
+CFLAGS   ?= -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic
 RELFLAGS ?= -O2 -g -DNDEBUG
 DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
 LDFLAGS  ?=
