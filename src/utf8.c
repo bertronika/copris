@@ -1,3 +1,12 @@
+/*
+ * Helper functions for parsing UTF-8 encoded strings
+ *
+ * Copyright (C) 2021-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ *
+ * This file is part of COPRIS, a converting printer server, licensed under the
+ * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 
