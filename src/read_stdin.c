@@ -27,7 +27,7 @@ int copris_handle_stdin(UT_string *copris_text) {
 	// unwanted, since the user has specified reading from stdin, and the only
 	// remaining way to enter text is to type it in interactively.
 	if (LOG_ERROR && isatty(STDIN_FILENO))
-		PRINT_NOTE("You are in text input mode (reading from "
+		PRINT_NOTE("You are in text input mode (reading from " /* LCOV_EXCL_LINE */
 		           "stdin). To stop reading, press Ctrl+D.");
 
 	// Read text from standard input, print a note if only EOF has been received
