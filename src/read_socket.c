@@ -225,7 +225,8 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
 
 	ssize_t tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
 	if (tmperr == -1)
-		PRINT_SYSTEM_ERROR("write", "Error sending termination text to socket.");
+		PRINT_SYSTEM_ERROR("write", "Error sending termination " /* LCOV_EXCL_LINE */
+		                            "text to socket.");
 
 	stats->size_limit_active = true;
 
