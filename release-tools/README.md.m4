@@ -206,7 +206,7 @@ COPRIS into its own directory (e.g. `make PREFIX=/usr/local/stow/copris`)
 and then symlinking it into place (e.g. running `sudo stow copris` in
 `/usr/local/stow`).
 
-By default a non-stripped release binary is build, which includes some
+By default a non-stripped release binary is built, which includes some
 debugging symbols for crash diagnosis. There are many more targets present
 for debugging and development purposes, run `make help` to review them.
 
