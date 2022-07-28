@@ -40,6 +40,7 @@ size_t utf8_codepoint_length(const char s);
 /*
  * Check for incomplete multibyte characters in input string `str' of length `len'. If
  * any found, terminate the string before letting them (and any following text) through.
+ * Return -1 if buffer was prematurely terminated, 0 otherwise.
  */
 int utf8_terminate_incomplete_buffer(char *str, size_t len);
 
