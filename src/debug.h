@@ -89,20 +89,15 @@ extern int verbosity;
         _PRINT_MSG(stdout, __VA_ARGS__); \
     } while (0)
 
-#ifndef UNIT_TESTS
 // The two fputs() calls print terminal escape sequences
 // for bold and normal text.
-#   define PRINT_ERROR_MSG(...)             \
-       do {                                 \
-           PRINT_LOCATION(stderr);          \
-           fputs("\x1B[1m", stderr);        \
-           _PRINT_MSG(stderr, __VA_ARGS__); \
-           fputs("\x1B[0m", stderr);        \
-       } while (0)
-#else
-#   define PRINT_ERROR_MSG(...)          \
-           printf("Silencing an error message in %s, line %d.\n", __FILE__, __LINE__)
-#endif
+#define PRINT_ERROR_MSG(...)             \
+    do {                                 \
+        PRINT_LOCATION(stderr);          \
+        fputs("\x1B[1m", stderr);        \
+        _PRINT_MSG(stderr, __VA_ARGS__); \
+        fputs("\x1B[0m", stderr);        \
+    } while (0)
 
 #define PRINT_NOTE(str)                  \
     do {                                 \
