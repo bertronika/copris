@@ -35,7 +35,7 @@ TEST_GCDA      := $(TESTED_SOURCES:%.c=src_%.gcda)
 all: run-cmocka-standalone
 
 run-cmocka-standalone: $(TEST_BINARIES)
-	for test in $^; do ./$$test; done
+	for test in $^; do ./$$test || exit 1; done
 
 run-cmocka-prove: $(TEST_BINARIES)
 	CMOCKA_MESSAGE_OUTPUT=tap prove -f $(addprefix ./,$^)
