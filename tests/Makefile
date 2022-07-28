@@ -46,14 +46,9 @@ run-cmocka-prove: $(TEST_BINARIES)
 cmocka-%: $(SOURCE_OBJECTS) cmocka-%.o cmocka-wrappers.o
 	$(CC) $(MOCKFLAGS) --coverage $^ $(LDFLAGS) -o $@
 
-# Source objects. Compile with the coverage flag if they are to be tested
-# (this prevents lcov/genhtml telling us untested files have 0 % coverage).
+# Source objects with coverage instrumentation
 src_%.o: ../src/%.c
-	if [ "$(filter $@, $(TESTED_OBJECTS))" = "$@" ]; then \
-		$(CC) $(CFLAGS) --coverage -c $< -o $@; \
-	else \
-		$(CC) $(CFLAGS) -c $< -o $@; \
-	fi
+	$(CC) $(CFLAGS) --coverage -c $< -o $@
 
 # Tests objects
 cmocka-%.o: cmocka-%.c
@@ -70,9 +65,10 @@ coverage_report/src/index.html: coverage.info
 	mkdir -p coverage_report/
 	genhtml $< --legend --output-directory coverage_report/
 
-# Generate a text coverage report
+# Generate a text coverage report, including only tested files
 coverage.info: $(TEST_GCDA)
-	lcov --capture --base-directory ../src --no-external --directory . --output-file $@
+	lcov --capture --directory . --base-directory ../src --no-external --output-file $@ \
+	$(foreach SRC,$(TESTED_SOURCES),--include $(realpath ../src/$(SRC)))
 
 # Run instrumented test binaries with maximum verbosity
 src_%.gcda: cmocka-%
