@@ -44,7 +44,7 @@ run-cmocka-prove: $(TEST_BINARIES)
 
 # Test binaries
 cmocka-%: $(SOURCE_OBJECTS) cmocka-%.o cmocka-wrappers.o
-	$(CC) $(CFLAGS) $(MOCKFLAGS) --coverage $^ $(LDFLAGS) -o $@
+	$(CC) $(MOCKFLAGS) --coverage $^ $(LDFLAGS) -o $@
 
 # Source objects. Compile with the coverage flag if they are to be tested
 # (this prevents lcov/genhtml telling us untested files have 0 % coverage).
