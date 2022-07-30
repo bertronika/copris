@@ -147,9 +147,20 @@ static int initialise_commands(struct Inifile **prset)
 static int initialise_predefined_command(const char *command, char *value)
 {
 	char raw_value[MAX_INIFILE_ELEMENT_LENGTH];
+	char *retval = 0;
 
 	if (strcmp(command, "P_LIST_ITEM") == 0)
-		SET_RAW_VALUE(P_LIST_ITEM);
+		retval = SET_RAW_VALUE(P_LIST_ITEM);
+	else if (strcmp(command, "P_THEMATIC_BREAK") == 0)
+		retval = SET_RAW_VALUE(P_THEMATIC_BREAK);
+
+	if (retval == NULL) {
+		PRINT_ERROR_MSG("Predefined command's '%s' value length exceeds %d, specified by "
+		                "MAX_INIFILE_ELEMENT_LENGTH. Please review 'config.h' and recompile.",
+		                command, MAX_INIFILE_ELEMENT_LENGTH);
+
+		return -1;
+	}
 
 	int element_count = parse_value_to_binary(raw_value, value, strlen(raw_value));
 
@@ -438,6 +449,12 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 
 		break;
 	}
+	case CMARK_NODE_THEMATIC_BREAK:
+		INSERT_TEXT("\n");
+		INSERT_CODE("P_THEMATIC_BREAK");
+		INSERT_TEXT("\n");
+		break;
+
 	case CMARK_NODE_STRONG:
 		INSERT_CODE((entering ? "F_BOLD_ON" : "F_BOLD_OFF"));
 		break;

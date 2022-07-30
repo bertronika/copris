@@ -32,5 +32,6 @@ static const char *printer_commands[] = {
 
 	/* Overridable commands with predefined values in config.h */
 	"P_LIST_ITEM",
+	"P_THEMATIC_BREAK",
 	NULL
 };
