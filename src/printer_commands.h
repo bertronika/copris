@@ -35,3 +35,11 @@ static const char *printer_commands[] = {
 	"P_THEMATIC_BREAK",
 	NULL
 };
+
+/*
+ * When adding new predefined commands:
+ *  - add command name here
+ *  - add its default value to config.h
+ *  - add its initialisation to printerset.c:initialise_commands()
+ *  - use its value in printerset.c:render_node() with INSERT_CODE("P_xyz")
+ */
