@@ -229,7 +229,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 		memcpy(s->out, parsed_value, element_count + 1);
 	} else {
-		*s->out = '\0';
+		*s->out = '@';
 	}
 
 	if (LOG_DEBUG) {
@@ -292,12 +292,16 @@ static int validate_definition_pairs(const char *filename, struct Inifile **prse
 
 		HASH_FIND_STR(*prset, command_pair, s);
 		assert(s != NULL);
+		// No value, meaning no pair was found
 		if (*s->out == '\0') {
 			PRINT_ERROR_MSG("`%s': command `%s' is missing its pair definition `%s'. "
 			                "Either add one or define it as empty using `@' as the value.",
 			                filename, printer_commands[i], command_pair);
 
 			return -1;
+		// '@' found, meaning the command is empty on purpose
+		} else if (*s->out == '@') {
+			*s->out = '\0';
 		}
 	}
 
