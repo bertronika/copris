@@ -188,7 +188,8 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	size_t value_len = strlen(value);
 
 	if (name_len == 0 || value_len == 0) {
-		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
+		PRINT_ERROR_MSG("Found an entry with either no name or no value. If you want to "
+		                "define a command without any value, use `@' in place of the value.");
 		return COPRIS_PARSE_FAILURE;
 	}
 
@@ -293,7 +294,7 @@ static int validate_definition_pairs(const char *filename, struct Inifile **prse
 		assert(s != NULL);
 		if (*s->out == '\0') {
 			PRINT_ERROR_MSG("`%s': command `%s' is missing its pair definition `%s'. "
-			                "Either add it or at least set it to empty using `@' as a value.",
+			                "Either add one or define it as empty using `@' as the value.",
 			                filename, printer_commands[i], command_pair);
 
 			return -1;
