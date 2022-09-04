@@ -36,6 +36,7 @@
 #include "read_stdin.h"
 #include "translate.h"
 #include "printerset.h"
+#include "markdown.h"
 #include "writer.h"
 
 #ifdef W_CMARK
@@ -458,7 +459,7 @@ int main(int argc, char **argv) {
 		// Stage 4: Handle Markdown in text with a printer feature set file
 #ifdef W_CMARK
 		if (attrib.copris_flags & HAS_PRSET)
-			convert_markdown(copris_text, &prset);
+			parse_markdown(copris_text, &prset);
 #endif
 
 		// Stage 5: Write text to the output destination
