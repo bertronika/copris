@@ -2,12 +2,6 @@
 #define SOCKET_H
 
 /*
- * Round backlog to a power of 2.
- * https://stackoverflow.com/a/5111841
- */
-#define BACKLOG 2
-
-/*
  * Create a system socket on port number `portno' and set a file descriptor,
  * passed by `parentfd'.
  * Return 0 on success.

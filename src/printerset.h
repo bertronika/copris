@@ -1,10 +1,6 @@
 #ifndef PRINTERSET_H
 #define PRINTERSET_H
 
-// `Handler should return nonzero on success, zero on error.'
-#define COPRIS_PARSE_FAILURE   0
-#define COPRIS_PARSE_SUCCESS   1
-
 /*
  * Load printer set file `filename' into a hash table, passed by `prset'.
  * Return 0 on success.

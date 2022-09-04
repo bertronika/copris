@@ -84,6 +84,11 @@ int load_translation_file(const char *filename, struct Inifile **trfile) {
  * name = value  (inih library)
  * key  = item   (uthash)
  */
+// `Handler should return nonzero on success, zero on error.'
+#define COPRIS_PARSE_FAILURE   0
+#define COPRIS_PARSE_SUCCESS   1
+#define COPRIS_PARSE_DUPLICATE 2
+
 static int inih_handler(void *user, const char *section, const char *name, const char *value)
 {
 	(void)section;

@@ -135,7 +135,11 @@ static int initialise_commands(struct Inifile **prset)
  * name = value  (inih library)
  * key  = item   (uthash)
  */
-// Parse the loaded translation file line by line
+
+// `Handler should return nonzero on success, zero on error.'
+#define COPRIS_PARSE_FAILURE   0
+#define COPRIS_PARSE_SUCCESS   1
+
 static int inih_handler(void *user, const char *section, const char *name, const char *value)
 {
 	(void)section;

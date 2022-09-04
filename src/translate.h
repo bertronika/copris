@@ -1,11 +1,6 @@
 #ifndef TRANSLATE_H
 #define TRANSLATE_H
 
-// `Handler should return nonzero on success, zero on error.'
-#define COPRIS_PARSE_FAILURE   0
-#define COPRIS_PARSE_SUCCESS   1
-#define COPRIS_PARSE_DUPLICATE 2
-
 /*
  * Load translation file `filename' into a hash table, passed by `prset'.
  * Return 0 on success.

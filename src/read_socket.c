@@ -38,6 +38,12 @@ static int read_from_socket(UT_string *copris_text, int childfd,
 static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
 
+/*
+ * Round backlog to a power of 2.
+ * https://stackoverflow.com/a/5111841
+ */
+#define BACKLOG 2
+
 int copris_socket_listen(int *parentfd, unsigned int portno) {
 	/*
 	 * Create a system socket using the following:
