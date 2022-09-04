@@ -37,12 +37,8 @@ int copris_handle_stdin(UT_string *copris_text) {
 	if (text_length == 0 && LOG_ERROR)
 		PRINT_NOTE("No text has been read!");
 
-	if (LOG_ERROR) {
-		if (LOG_INFO)
-			PRINT_LOCATION(stdout);
-
-		printf("Received %zu byte(s) in %d chunk(s) from stdin.\n", stats.sum, stats.chunks);
-	}
+	if (LOG_ERROR)
+		PRINT_MSG("Received %zu byte(s) in %d chunk(s) from stdin.", stats.sum, stats.chunks);
 
 	// Return -1 if no text has been read
 	return (text_length) ? 0 : -1;
