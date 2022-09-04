@@ -39,12 +39,6 @@
 #include "markdown.h"
 #include "writer.h"
 
-#ifdef W_CMARK
-#   define MARKDOWN_SUPPORT "yes"
-#else
-#   define MARKDOWN_SUPPORT "no"
-#endif
-
 /*
  * Verbosity levels:
  * 0  silent/only fatal
@@ -58,10 +52,8 @@ static void copris_help(const char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Run as a network server on port NUMBER\n"
 	       "  -t, --translate FILE   Enable character translation with definitions from FILE\n"
-#ifdef W_CMARK
 	       "  -r, --process-md FILE  Enable Markdown processing with a printer feature set FILE\n"
 	       "      --dump-commands    Show all possible printer feature set commands\n"
-#endif
 	       "  -d, --daemon           Do not exit after the first network connection\n"
 	       "  -l, --limit NUMBER     Limit number of received bytes from the network to NUMBER\n"
 	       "      --cutoff-limit     If using limit, cut text off at NUMBER instead of\n"
@@ -88,9 +80,8 @@ static void copris_version(void) {
 	       "Build-time options\n"
 	       "  Text buffer size:                 %5d bytes\n"
 	       "  Maximum .ini file element length: %5d bytes\n"
-	       "  Markdown support:                 %5s\n"
 	       "\n",
-	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, MARKDOWN_SUPPORT);
+	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH);
 
 	exit(EXIT_SUCCESS);
 }
@@ -108,7 +99,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{"quiet",          no_argument,       NULL, 'q'},
 		{"help",           no_argument,       NULL, 'h'},
 		{"version",        no_argument,       NULL, 'V'},
-		{"can-process-md", no_argument,       NULL, '@'},
 		{NULL,             0,                 NULL, 0  }
 	};
 
@@ -122,13 +112,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// set is missing.' instead of `option requires an argument -- 'r')
 	while ((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
 		switch (c) {
-#ifndef W_CMARK
-		case 'r':
-		case ',':
-			PRINT_ERROR_MSG("Options regarding printer feature sets aren't available in "
-			                "this release of COPRIS - they were not included at build time.");
-			return 1;
-#endif
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
 
@@ -182,7 +165,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
 		}
-#ifdef W_CMARK
 		case 'r': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised character in printer feature set name (%s). "
@@ -212,7 +194,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			struct Inifile *prset;
 			exit(dump_printer_set_commands(&prset));
 		}
-#endif
 		case 'd':
 			attrib->daemon = true;
 			break;
@@ -257,13 +238,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case 'V':
 			copris_version();
 			break;
-		case '@':
-		// Tell if this build includes Markdown support (used in the Makefile)
-#ifdef W_CMARK
-			exit(0);
-#else
-			exit(-1);
-#endif
 		case ':':
 			if (optopt == 'p')
 				PRINT_ERROR_MSG("You must specify a port number.");
@@ -391,7 +365,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-#ifdef W_CMARK
 	// Load a printer feature set file
 	if (attrib.copris_flags & HAS_PRSET) {
 		error = load_printer_set_file(attrib.prset, &prset);
@@ -405,9 +378,6 @@ int main(int argc, char **argv) {
 			PRINT_ERROR_MSG("Continuing without Markdown conversion.");
 		}
 	}
-#else
-	(void)prset;
-#endif
 
 	if (attrib.limitnum > 0 && LOG_DEBUG)
 		PRINT_MSG("Limiting incoming data to %zu bytes.", attrib.limitnum);
@@ -457,10 +427,8 @@ int main(int argc, char **argv) {
 		// Stage 3: Normalise text
 
 		// Stage 4: Handle Markdown in text with a printer feature set file
-#ifdef W_CMARK
 		if (attrib.copris_flags & HAS_PRSET)
 			parse_markdown(copris_text, &prset);
-#endif
 
 		// Stage 5: Write text to the output destination
 		if (attrib.copris_flags & HAS_DESTINATION) {
@@ -490,10 +458,8 @@ int main(int argc, char **argv) {
 	if (attrib.copris_flags & HAS_TRFILE)
 		unload_translation_file(attrib.trfile, &trfile);
 
-#ifdef W_CMARK
 	if (attrib.copris_flags & HAS_PRSET)
 		unload_printer_set_file(attrib.prset, &prset);
-#endif
 
 	utstring_free(copris_text);
 
