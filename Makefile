@@ -59,8 +59,6 @@ debug:   copris_dbg
 # Compile the release binary
 copris: $(OBJS_REL)
 	$(CC) $^ $(LDFLAGS) -o $@
-	# Validate predefined values from 'config.h' if compiled with Markdown support
-	./copris --can-process-md && ./copris --dump-commands >/dev/null || true
 
 %_rel.o: %.c
 	$(CC) $(CFLAGS) $(RELFLAGS) -MMD -MP -c $< -o $@
