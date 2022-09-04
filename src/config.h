@@ -12,8 +12,7 @@
 #   define BUFSIZE 128
 #endif
 
-// Maximum lengths of name and value strings in .ini files and
-// predefined commands below
+// Maximum lengths of name and value strings in .ini files
 #ifndef MAX_INIFILE_ELEMENT_LENGTH
 #   define MAX_INIFILE_ELEMENT_LENGTH 48
 #endif
