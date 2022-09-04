@@ -9,7 +9,7 @@
 
 // Inbound text buffer size
 #ifndef BUFSIZE
-#   define BUFSIZE 16
+#   define BUFSIZE 128
 #endif
 
 // Maximum lengths of name and value strings in .ini files and
