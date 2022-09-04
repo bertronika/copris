@@ -27,7 +27,6 @@
 #include "parse_value.h"
 
 static int initialise_commands(struct Inifile **);
-static int initialise_predefined_command(const char *, char *);
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_definition_pairs(const char *, struct Inifile **);
 static void render_node(cmark_node *, cmark_event_type, struct Inifile **, UT_string *);
@@ -121,16 +120,7 @@ static int initialise_commands(struct Inifile **prset)
 
 		// Each name gets an empty value, to be filled later from the configuration file
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
-
-		// Check if command can be predefined
-		if (printer_commands[i][0] == 'P') {
-			int error = initialise_predefined_command(printer_commands[i], s->out);
-			if (error)
-				return error;
-		} else {
-			*s->out = '\0';
-		}
-
+		*s->out = '\0';
 		HASH_ADD_STR(*prset, in, s);
 
 		command_count++;
@@ -140,37 +130,6 @@ static int initialise_commands(struct Inifile **prset)
 		PRINT_MSG("Initialised %d empty printer commands. Use `--dump-commands' for "
 		          "their listing.", command_count);
 
-	return 0;
-}
-
-// Set predefined commands (ones with the `P_' prefix) to values, specified in config.h.
-static int initialise_predefined_command(const char *command, char *value)
-{
-	char raw_value[MAX_INIFILE_ELEMENT_LENGTH];
-	char *retval = 0;
-
-	if (strcmp(command, "P_LIST_ITEM") == 0)
-		retval = SET_RAW_VALUE(P_LIST_ITEM);
-	else if (strcmp(command, "P_THEMATIC_BREAK") == 0)
-		retval = SET_RAW_VALUE(P_THEMATIC_BREAK);
-
-	if (retval == NULL) {
-		PRINT_ERROR_MSG("Predefined command's '%s' value length exceeds %d, specified by "
-		                "MAX_INIFILE_ELEMENT_LENGTH. Please review 'config.h' and recompile.",
-		                command, MAX_INIFILE_ELEMENT_LENGTH);
-
-		return -1;
-	}
-
-	int element_count = parse_value_to_binary(raw_value, value, strlen(raw_value));
-
-	if (element_count < 1) {
-		PRINT_ERROR_MSG("Cannot parse predefined command '%s', set to '%s'. "
-		                "Please review 'config.h' and recompile.", command, raw_value);
-		return -1;
-	}
-
-	assert(value[element_count] == '\0');
 	return 0;
 }
 
@@ -211,7 +170,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	}
 
 	// Warn if definition was already set, but only if command isn't meant to be redefined
-	bool definition_overwriten = (*s->out != '\0' && *s->in != 'P');
+	bool definition_overwriten = (*s->out != '\0');
 
 	int element_count = 0;
 
@@ -332,9 +291,6 @@ int dump_printer_set_commands(struct Inifile **prset)
 			case 'F':
 				puts("\n# Formatting commands; both parts of a pair must be defined");
 				break;
-			case 'P':
-				puts("\n# Overridable commands with predefined values shown");
-				break;
 			}
 		}
 
@@ -344,15 +300,6 @@ int dump_printer_set_commands(struct Inifile **prset)
 			// *_ON commands with extra padding
 			printf("; %s  = \n", s->in);
 
-		} else if (s->in[0] == 'P') {
-			// P_* commands
-			printf("; %s =  ; defaults to `0x%X", s->in, s->out[0]);
-
-			// P_* values
-			for (int i = 1; s->out[i] != '\0'; i++)
-				printf(" 0x%X", s->out[i]);
-
-			printf("'\n");
 		} else {
 			// all others
 			printf("; %s = \n", s->in);
@@ -456,7 +403,6 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 	}
 	case CMARK_NODE_THEMATIC_BREAK:
 		INSERT_TEXT("\n");
-		INSERT_CODE("P_THEMATIC_BREAK");
 		INSERT_TEXT("\n");
 		break;
 
@@ -515,7 +461,6 @@ static void render_node(cmark_node *node, cmark_event_type ev_type,
 
 		if (list_type == CMARK_BULLET_LIST) {
 			INSERT_TEXT("\n");
-			INSERT_CODE("P_LIST_ITEM");
 			INSERT_TEXT(" ");
 		} else if (list_type == CMARK_ORDERED_LIST) {
 			utstring_printf(text, "\n%d. ", ordered_list_index++);
