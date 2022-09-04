@@ -52,7 +52,7 @@ static void copris_help(const char *copris_location) {
 	printf("Usage: %s [arguments] [printer or output file]\n\n"
 	       "  -p, --port NUMBER      Run as a network server on port NUMBER\n"
 	       "  -t, --translate FILE   Enable character translation with definitions from FILE\n"
-	       "  -r, --process-md FILE  Enable Markdown processing with a printer feature set FILE\n"
+	       "  -r, --printer FILE     Enable Markdown processing with a printer feature set FILE\n"
 	       "      --dump-commands    Show all possible printer feature set commands\n"
 	       "  -d, --daemon           Do not exit after the first network connection\n"
 	       "  -l, --limit NUMBER     Limit number of received bytes from the network to NUMBER\n"
@@ -90,7 +90,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
 		{"port",           required_argument, NULL, 'p'},
 		{"translate",      required_argument, NULL, 't'},
-		{"process-md",     required_argument, NULL, 'r'},
+		{"printer",        required_argument, NULL, 'r'},
 		{"dump-commands",  no_argument,       NULL, ','},
 		{"daemon",         no_argument,       NULL, 'd'},
 		{"limit",          required_argument, NULL, 'l'},
