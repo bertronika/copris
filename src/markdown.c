@@ -4,7 +4,7 @@
  * Why so? Because it only recognises some simple text attributes and doesn't alter
  * any other text layout whatsoever. Attributes include:
  *  - emphasis (bold and italic)
- *  - 4 levels of headings (denoted with pound signs, not underlined)
+ *  - 4 levels of headings (denoted with pound signs)
  *  - blockquotes
  *  - inline code and code blocks
  *
@@ -26,6 +26,9 @@
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
+ *
+ * TODO parse underlined headings
+ * TODO ignore syntax type in code blocks
  */
 
 #include <stdio.h>
@@ -59,13 +62,14 @@ typedef enum attribute {
 static void insert_code_helper(const char *, struct Inifile **, UT_string *);
 
 /*
- * Asterisks present quite a lot of ambiguity. That's the reason the parser deals so
+ * Asterisks bring quite a lot of ambiguity. That's the reason the parser deals so
  * much with them. They can represent:
  *  - start and end of bold, italic or bold and italic text
  *  - a list element
  *  - a horizontal rule
  *
- * The latter two aren't touched by this function, but shall not be parsed as bold/italic.
+ * The latter two aren't touched by this function, but shall not be mistakenly
+ * parsed as bold/italic.
  */
 void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 {
@@ -95,7 +99,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	size_t line_char_i = 0;
 
 	for (size_t i = 0; text[i] != '\0'; i++) {
-		// Catch horizontal rules (`***') and copy them to output.
+		// Catch horizontal rules (`***'/`---') and copy them to output.
 		if ((i + 3 < text_len && text[i + 3] == '\n') &&
 		    ((text[i] == '*' && text[i + 1] == '*' && text[i + 2] == '*') ||
 		     (text[i] == '-' && text[i + 1] == '-' && text[i + 2] == '-'))) {
