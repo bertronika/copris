@@ -32,16 +32,13 @@ m4_changequote(`[[[', `]]]')m4_dnl
 : Enable character translation with definitions from character translation
   *FILE*.
 
-**-r**, **\--process-md** *FILE*
+**-r**, **\--printer** *FILE*
 : Enable Markdown parsing with definitions from printer feature set
-  *FILE*. COPRIS must be compiled with Markdown support for this option to
-  be available.
+  *FILE*.
 
 **\--dump-commands**
 : Show all possible printer feature set commands in INI file format
   (e.g. to be piped into a new printer feature set file you are making).
-  COPRIS must be compiled with Markdown support for this option to
-  be available.
 
 **-d**, **\--daemon**
 : If running as a network server, do not exit after the first connection.
@@ -65,8 +62,7 @@ m4_changequote(`[[[', `]]]')m4_dnl
 : Show a short option summary.
 
 **-V**, **\--version**
-: Show program version, author and build-time options (e.g. if Markdown support
-  is present).
+: Show program version, author and build-time options.
 
 Do not specify a port number if you want to read from standard input. Likewise,
 omit the output file to have text echoed out to standard output (or piped
