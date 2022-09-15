@@ -99,15 +99,16 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 	for (size_t i = 0; text[i]; i++) {
 		// Catch horizontal rules (`***') and copy them to output.
-		if (i + 3 < text_len && text[i] == '*' && text[i + 1] == '*' &&
-		    text[i + 2] == '*' && text[i + 3] == '\n') {
+		if ((i + 3 < text_len && text[i + 3] == '\n') &&
+		    ((text[i] == '*' && text[i + 1] == '*' && text[i + 2] == '*') ||
+		     (text[i] == '-' && text[i + 1] == '-' && text[i + 2] == '-'))) {
 			text_attribute = RULE;
 			i += 3;
 
 		// Emphasis: inline `*'/`_' pairs for italic, `**`/`__' for bold,
 		//           `***'/`___' for both.
 		} else if ((text[i] == '*' || text[i] == '_') &&
-		           (i + 1 < text_len && text[i + 1] != ' ')) {
+		           (i + 1 < text_len)) {
 			if (i + 1 < text_len && (text[i + 1] == '*' || text[i + 1] == '_')) {
 				if (i + 2 < text_len && (text[i + 2] == '*' || text[i + 2] == '_')) {
 					text_attribute |= ITALIC | BOLD;
@@ -238,7 +239,13 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				error_in_line = current_line;
 
 		} else if (text_attribute == RULE) {
-			INSERT_TEXT("***\n");
+			char rule_text[5];
+			rule_text[0] = text[i - 3];
+			rule_text[1] = rule_text[0];
+			rule_text[2] = rule_text[0];
+			rule_text[3] = '\n';
+			rule_text[4] = '\0';
+			INSERT_TEXT(rule_text);
 			text_attribute &= ~(RULE);
 		}
 
