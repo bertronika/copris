@@ -2,13 +2,12 @@
 	"name": "copris",
 	"files": [ { "git": 1 } ],
 	"build": {
-		"directory": ".",
 		"targets": [
-			{"name": "debug",   "build_cmd": "make debug"},
-			{"name": "release", "build_cmd": "make release"},
-			{"name": "clean",   "build_cmd": "make clean"}
+			{"name": "debug",   "build_cmd": "make --output-sync --warn-undefined-variables --no-builtin-rules debug"},
+			{"name": "release", "build_cmd": "make --output-sync --warn-undefined-variables --no-builtin-rules release"},
+			{"name": "distclean",   "build_cmd": "make --output-sync --warn-undefined-variables --no-builtin-rules distclean"}
 		],
 		"default_target": "debug",
-		"clean_target": "clean"
+		"clean_target": "distclean"
 	}
 }
