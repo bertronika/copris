@@ -87,6 +87,9 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	size_t text_len = utstring_len(copris_text);
 	char last_char  = ' ';
 
+	static char *heading_on[]  = {0, "F_H1_ON", "F_H2_ON", "F_H3_ON", "F_H4_ON"};
+	static char *heading_off[] = {0, "F_H1_OFF", "F_H2_OFF", "F_H3_OFF", "F_H4_OFF"};
+
 	int current_line = 1;
 	int error_in_line = 0;
 // 	size_t line_length = 0;
@@ -175,9 +178,8 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 			// Reset open attributes on a new line
 			if (text[i] == '\n') {
 				if (heading_level) {
-					char heading_code[9];
-					snprintf(heading_code, 9, "F_H%d_OFF", heading_level);
-					INSERT_CODE(heading_code);
+					assert(heading_level <= 4);
+					INSERT_CODE(heading_off[heading_level]);
 					heading_level = 0;
 				} else if (blockquote_open) {
 					INSERT_CODE("F_BLOCKQUOTE_OFF");
@@ -214,9 +216,8 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				error_in_line = current_line;
 
 		} else if (text_attribute == HEADING) {
-			char heading_code[8];
-			snprintf(heading_code, 8, "F_H%d_ON", heading_level);
-			INSERT_CODE(heading_code);
+			assert(heading_level <= 4);
+			INSERT_CODE(heading_on[heading_level]);
 			text_attribute &= ~(HEADING);
 
 		} else if (text_attribute == BLOCKQUOTE) {
