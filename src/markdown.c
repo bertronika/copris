@@ -36,7 +36,6 @@
 #include <utstring.h> /* uthash library - dynamic strings  */
 
 #include "Copris.h"
-#include "config.h"
 #include "debug.h"
 #include "markdown.h"
 
@@ -146,15 +145,15 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				i += 1;
 			}
 
-		// Blockquote: `> '
+		// Blockquote: `> ' (greater-than sign *and* a space)
 		} else if ((i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '>' && text[i + 1] == ' ')) {
 			text_attribute = BLOCKQUOTE;
 			blockquote_open = true;
 			i += 1;
 
-		// Inline code: "`" and two block code syntaxes: "```" at beginning and end
-		//              or "    " on each line.
+		// Inline code: "`", and two block code variants: "```" at beginning/end of block
+		//              or "    " (four spaces) on each line.
 		} else if (text[i] == '`' && !code_block_open) {
 			if (i + 2 < text_len && text[i + 1] == '`' && text[i + 2] == '`') {
 				text_attribute |= CODE_BLOCK;
