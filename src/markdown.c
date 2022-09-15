@@ -92,12 +92,9 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 	int current_line = 1;
 	int error_in_line = 0;
-// 	size_t line_length = 0;
+	size_t line_char_i = 0;
 
-// 	for (; text[line_length] != '\n'; line_length++);
-// 	for (size_t i = 0; i < chars_until_nl; i++)
-
-	for (size_t i = 0; text[i]; i++) {
+	for (size_t i = 0; text[i] != '\0'; i++) {
 		// Catch horizontal rules (`***') and copy them to output.
 		if ((i + 3 < text_len && text[i + 3] == '\n') &&
 		    ((text[i] == '*' && text[i + 1] == '*' && text[i + 2] == '*') ||
@@ -107,8 +104,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 		// Emphasis: inline `*'/`_' pairs for italic, `**`/`__' for bold,
 		//           `***'/`___' for both.
-		} else if ((text[i] == '*' || text[i] == '_') &&
-		           (i + 1 < text_len)) {
+		} else if (text[i] == '*' || text[i] == '_') {
 			if (i + 1 < text_len && (text[i + 1] == '*' || text[i + 1] == '_')) {
 				if (i + 2 < text_len && (text[i + 2] == '*' || text[i + 2] == '_')) {
 					text_attribute |= ITALIC | BOLD;
@@ -120,7 +116,9 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 					bold_on = !bold_on;
 					i += 1;
 				}
-			} else {
+
+			} else if ((!italic_on && i + 1 < text_len && text[i + 1] != ' ') ||
+			           (italic_on && line_char_i != 0)) {
 				text_attribute |= ITALIC;
 				italic_on = !italic_on;
 			}
@@ -250,8 +248,12 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 		}
 
 		last_char = text[i];
-		if (last_char == '\n')
+		if (last_char == '\n') {
 			current_line++;
+			line_char_i = 0;
+		} else {
+			line_char_i++;
+		}
 	}
 
 	// Close missing tags
