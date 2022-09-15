@@ -269,7 +269,6 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 	// Notify about the first occurence. The order matters!
 	if (LOG_ERROR) {
-		assert(error_in_line != 0);
 		if (code_block_on)
 			PRINT_MSG("Warning: code block still open on EOF, possibly in line %d.",
 			          error_in_line);
