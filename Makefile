@@ -8,8 +8,6 @@
 #   - distclean   remove object, dependency, binary and test files
 #   - help        print this text
 
-# Run `make' with `WITHOUT_CMARK=1' to omit Markdown support.
-
 # Code analysis targets (more are present in `tests/Makefile'):
 #   - check                   build and run unit tests
 #   - analyse                 analyse object files with with GCC's static analyser
@@ -108,6 +106,6 @@ distclean: clean
 	$(MAKE) -C tests/ clean
 
 help:
-	head -n 18 $(firstword $(MAKEFILE_LIST)); \
+	head -n 16 $(firstword $(MAKEFILE_LIST)); \
 	grep -m 4 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS|LDFLAGS)' Makefile.common
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
