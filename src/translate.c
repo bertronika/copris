@@ -152,13 +152,14 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 	if (LOG_DEBUG) {
 		PRINT_LOCATION(stdout);
-		printf(" %1s (%zu) =>", s->in, name_len);
 
-		if (element_count == 0)
-			printf(" (empty)");
-		else
+		if (element_count == 0) {
+			printf(" %1s (%zu) => (empty)", s->in, name_len);
+		} else {
+			printf(" %1s (%zu) =>", s->in, name_len);
 			for (int i = 0; i < element_count; i++)
 				printf(" 0x%X", s->out[i]);
+		}
 
 		if (name_overwritten)
 			printf(" (overwriting old value)");
