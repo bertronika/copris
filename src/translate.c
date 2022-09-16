@@ -58,10 +58,13 @@ int load_translation_file(const char *filename, struct Inifile **trfile) {
 		goto close_file;
 	}
 
-	if (LOG_INFO) {
-		int definition_count = HASH_COUNT(*trfile);
+	int definition_count = HASH_COUNT(*trfile);
+
+	if (LOG_INFO)
 		PRINT_MSG("Loaded %d translation file definitions.", definition_count);
-	}
+
+	if (LOG_ERROR && definition_count < 1)
+		PRINT_NOTE("Your translation file appears to be empty.");
 
 	error = 0;
 
