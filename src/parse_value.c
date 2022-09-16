@@ -96,16 +96,14 @@ int parse_numbers_to_commands(const char *value, char *parsed_value, int parsed_
 
 		// Check if no conversion has been done
 		if (valuepos == endptr) {
-			PRINT_ERROR_MSG("Found an unrecognised character. Make sure your values consist "
-			                "only of decimal, hexadecimal or octal values, separated by spaces. "
-			                "Consult the README or the man page for more information.");
+			PRINT_ERROR_MSG("Found unrecognised character(s) `%s'. Make sure your values "
+			                "consist only of space-separated decimal, hexadecimal or octal "
+			                "numbers, or variable names, prefixed either with `F_' or `C_'. "
+			                "Consult the README or the man page for more information.",
+			                valuepos);
 
 			return -1;
 		}
-
-		// Check if characters are still remaining
-		//if (*endptr && LOG_DEBUG)
-			//PRINT_MSG("strtol: remaining: '%s'.", endptr);
 
 		if (temp_value < CHAR_MIN || temp_value > CHAR_MAX) {
 			PRINT_ERROR_MSG("Value '%s' in '%s' is out of bounds.", valuepos, value);
