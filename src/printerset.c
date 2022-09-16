@@ -41,7 +41,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("`%s': parsing printer feature set file:", filename);
+		PRINT_MSG("Parsing printer feature set file '%s':", filename);
 
 	int command_count = 0;
 	int parse_error = ini_parse_file(file, inih_handler, prset);
@@ -59,7 +59,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 
 	// Positive return number - returned error is a line number
 	if (parse_error > 0) {
-		PRINT_ERROR_MSG("`%s': (first) fault on line %d.", filename, parse_error);
+		PRINT_ERROR_MSG("'%s': (first) fault on line %d.", filename, parse_error);
 		goto close_file;
 	}
 
@@ -71,8 +71,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 	}
 
 	if (LOG_INFO)
-		PRINT_MSG("`%s': loaded %d printer feature set commands.",
-		          filename, command_count);
+		PRINT_MSG("Loaded %d printer feature set commands.", command_count);
 
 	if (LOG_ERROR && command_count < 1)
 		PRINT_NOTE("Your printer feature set file appears to be empty.");
@@ -122,8 +121,7 @@ static int initialise_commands(struct Inifile **prset)
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("Initialised %d empty printer commands. Use `--dump-commands' for "
-		          "their listing.", command_count);
+		PRINT_MSG("Initialised %d empty printer commands.", command_count);
 
 	return 0;
 }
@@ -233,9 +231,6 @@ static int validate_command_pairs(const char *filename, struct Inifile **prset)
 {
 	struct Inifile *s;
 
-	if (LOG_DEBUG)
-		PRINT_MSG("`%s': validating commands.", filename);
-
 	for (int i = 0; printer_commands[i] != NULL; i++) {
 		// Only pick commands with a pair (prefixed with F_)
 		if (printer_commands[i][0] != 'F')
@@ -271,7 +266,7 @@ static int validate_command_pairs(const char *filename, struct Inifile **prset)
 		assert(s != NULL);
 		// No value, meaning no pair was found
 		if (*s->out == '\0') {
-			PRINT_ERROR_MSG("`%s': command `%s' is missing its pair `%s'. Either "
+			PRINT_ERROR_MSG("'%s': command `%s' is missing its pair `%s'. Either "
 			                "add one or define it as empty using `@' as the value.",
 			                filename, printer_commands[i], command_pair);
 
@@ -283,7 +278,7 @@ static int validate_command_pairs(const char *filename, struct Inifile **prset)
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("`%s': no command pairs are missing.", filename);
+		PRINT_MSG("No command pairs are missing.");
 
 	return 0;
 }
@@ -329,7 +324,7 @@ int dump_printer_set_commands(struct Inifile **prset)
 	return 0;
 }
 
-void unload_printer_set_file(const char *filename, struct Inifile **prset)
+void unload_printer_set_file(struct Inifile **prset)
 {
 	struct Inifile *command;
 	struct Inifile *tmp;
@@ -342,5 +337,5 @@ void unload_printer_set_file(const char *filename, struct Inifile **prset)
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("`%s': unloaded printer feature set file (count = %d).", filename, count);
+		PRINT_MSG("Unloaded printer feature set file (count = %d).", count);
 }

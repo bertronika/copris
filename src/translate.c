@@ -34,7 +34,7 @@ int load_translation_file(const char *filename, struct Inifile **trfile) {
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("`%s': parsing translation file:", filename);
+		PRINT_MSG("Parsing translation file '%s':", filename);
 
 	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*trfile = NULL;
@@ -54,14 +54,13 @@ int load_translation_file(const char *filename, struct Inifile **trfile) {
 
 	// Positive return number - returned error is a line number
 	if (parse_error > 0) {
-		PRINT_ERROR_MSG("`%s': (first) fault on line %d.", filename, parse_error);
+		PRINT_ERROR_MSG("'%s': (first) fault on line %d.", filename, parse_error);
 		goto close_file;
 	}
 
 	if (LOG_INFO) {
 		int definition_count = HASH_COUNT(*trfile);
-		PRINT_MSG("`%s': loaded %d translation file definitions.",
-		          filename, definition_count);
+		PRINT_MSG("Loaded %d translation file definitions.", definition_count);
 	}
 
 	error = 0;
@@ -167,7 +166,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-void unload_translation_file(const char *filename, struct Inifile **trfile) {
+void unload_translation_file(struct Inifile **trfile) {
 	struct Inifile *definition;
 	struct Inifile *tmp;
 	int count = 0;
@@ -179,7 +178,7 @@ void unload_translation_file(const char *filename, struct Inifile **trfile) {
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("`%s': unloaded translation file (count = %d).", filename, count);
+		PRINT_MSG("Unloaded translation file (count = %d).", count);
 }
 
 void translate_text(UT_string *copris_text, struct Inifile **trfile)

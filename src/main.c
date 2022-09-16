@@ -359,7 +359,7 @@ int main(int argc, char **argv) {
 				return EXIT_FAILURE;
 
 			// Missing printer feature sets are not a fatal error when --quiet
-			unload_translation_file(attrib.trfile, &trfile);
+			unload_translation_file(&trfile);
 			attrib.copris_flags &= ~HAS_TRFILE;
 			PRINT_ERROR_MSG("Continuing without character translation.");
 		}
@@ -373,7 +373,7 @@ int main(int argc, char **argv) {
 				return EXIT_FAILURE;
 
 			// Missing translation files are as well not a fatal error in quiet mode
-			unload_printer_set_file(attrib.prset, &prset);
+			unload_printer_set_file(&prset);
 			attrib.copris_flags &= ~HAS_PRSET;
 			PRINT_ERROR_MSG("Continuing without Markdown conversion.");
 		}
@@ -456,10 +456,10 @@ int main(int argc, char **argv) {
 	} while (attrib.daemon); /* end of main program loop */
 
 	if (attrib.copris_flags & HAS_TRFILE)
-		unload_translation_file(attrib.trfile, &trfile);
+		unload_translation_file(&trfile);
 
 	if (attrib.copris_flags & HAS_PRSET)
-		unload_printer_set_file(attrib.prset, &prset);
+		unload_printer_set_file(&prset);
 
 	utstring_free(copris_text);
 
