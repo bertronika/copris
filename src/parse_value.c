@@ -23,10 +23,7 @@ int parse_all_to_commands(const char *value, size_t value_len,
                           UT_string *parsed_value, struct Inifile **prset)
 {
 	char *value_copy = strndup(value, value_len + 1);
-	if (value_copy == NULL) {
-		PRINT_ERROR_MSG("Memory allocation error.");
-		exit(1);
-	}
+	CHECK_MALLOC(value_copy);
 
 	int element_count = 0;
 	int variable_count = 0;

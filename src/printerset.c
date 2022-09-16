@@ -111,10 +111,7 @@ static int initialise_commands(struct Inifile **prset)
 
 		// Insert the (unique) name
 		s = malloc(sizeof *s);
-		if (s == NULL) {
-			PRINT_ERROR_MSG("Memory allocation error.");
-			return -1;
-		}
+		CHECK_MALLOC(s);
 
 		// Each name gets an empty value, to be filled later from the configuration file
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
@@ -180,10 +177,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 		// Insert the (unique) name
 		s = malloc(sizeof *s);
-		if (s == NULL) {
-			PRINT_ERROR_MSG("Memory allocation error.");
-			return -1;
-		}
+		CHECK_MALLOC(s);
 
 		memcpy(s->in, name, name_len);
 		HASH_ADD_STR(*prset, in, s);

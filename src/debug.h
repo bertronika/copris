@@ -118,4 +118,11 @@ extern int verbosity;
         perror(name);                    \
     } while (0)
 
+
+#define CHECK_MALLOC(var)                \
+    if (var == NULL) {                   \
+        PRINT_ERROR_MSG("Memory allocation error."); \
+        exit(-1);                        \
+    }
+
 #endif /* DEBUG_H */

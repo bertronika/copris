@@ -122,10 +122,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	// Add a new key if it doesn't already exist
 	if (!name_overwritten) {
 		s = malloc(sizeof *s);
-		if (s == NULL) {
-			PRINT_ERROR_MSG("Memory allocation error.");
-			return COPRIS_PARSE_FAILURE;
-		}
+		CHECK_MALLOC(s);
 
 		memcpy(s->in, name, name_len + 1);
 		HASH_ADD_STR(*file, in, s);
