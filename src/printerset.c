@@ -43,6 +43,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 	if (LOG_DEBUG)
 		PRINT_MSG("`%s': parsing printer feature set file:", filename);
 
+	int command_count = 0;
 	int parse_error = ini_parse_file(file, inih_handler, prset);
 
 	// If there's a parse error, properly close the file before exiting
@@ -62,18 +63,19 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 		goto close_file;
 	}
 
-	if (LOG_INFO) {
-		int command_count = 0; // These are user-specified definitions, not all available
+	// Count commands that were defined by the user
+	struct Inifile *s;
+	for (s = *prset; s != NULL; s = s->hh.next) {
+		if (*s->out != '\0')
+			command_count++;
+	}
 
-		struct Inifile *s;
-		for (s = *prset; s != NULL; s = s->hh.next) {
-			if (*s->out != '\0')
-				command_count++;
-		}
-
+	if (LOG_INFO)
 		PRINT_MSG("`%s': loaded %d printer feature set commands.",
 		          filename, command_count);
-	}
+
+	if (LOG_ERROR && command_count < 1)
+		PRINT_NOTE("Your printer feature set file appears to be empty.");
 
 	error = 0;
 
@@ -87,7 +89,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 		}
 	}
 
-	if (!error)
+	if (!error && command_count > 0)
 		error = validate_command_pairs(filename, prset);
 
 	return error;
