@@ -211,13 +211,13 @@ notify you about it and continue execution.
 COPRIS requires, apart from a standard C library, two additional
 libraries:
 
-- [uthash][2] ([upstream][3])
-- [inih][4] ([upstream][5])
+- uthash ([Repology][1], [upstream][2])
+- inih ([Repology][3], [upstream][4])
 
-[2]: https://repology.org/project/uthash/versions
-[3]: https://troydhanson.github.io/uthash/utstring.html
-[4]: https://repology.org/project/inih/versions
-[5]: https://github.com/benhoyt/inih
+[1]: https://repology.org/project/uthash/versions
+[2]: https://github.com/troydhanson/uthash
+[3]: https://repology.org/project/inih/versions
+[4]: https://github.com/benhoyt/inih
 
 I've tried to pick common libraries, present in many Linux distributions
 and BSD's, meaning they should be easily installable with your package
