@@ -78,7 +78,7 @@ m4_changequote(`[[[', `]]]')m4_dnl
 
 # FILES
 
-Example translation and feature set files can be found in
+Example translation and printer feature set files can be found in
 `/usr/share/copris`.
 
 

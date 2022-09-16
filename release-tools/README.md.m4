@@ -57,12 +57,12 @@ You might have noticed that some commonly used characters are now unavailable. L
 
 # How can I apply formatting to text?
 
-Pass Markdown-formatted text to COPRIS. Before doing that, specify an appropriate printer feature set file with the `-r/--printer filename.ini` argument. Note that COPRIS will *not* modify the layout of the text, but only apply those formatting attributes, present in the feature set file.
+Pass Markdown-formatted text to COPRIS. Before doing that, specify an appropriate printer feature set file with the `-r/--printer filename.ini` argument. Note that COPRIS will *not* modify the layout of the text, but only apply formatting attributes from commands, present in the feature set file.
 
 
 ## How do I make a printer feature set file?
 
-Consult the printer's manual. There should be a section on escape codes. Then, generate a sample printer feature set file (`--dump-commands`, see man page) and append codes to the appropriate attributes in either decimal, hexadecimal or octal format, with each one separated by at least one space.
+Consult the printer's manual. There should be a section on escape codes. Then, generate a sample printer feature set file (`--dump-commands`, see man page) and append codes to the appropriate commands in either decimal, hexadecimal or octal format, with each one separated by at least one space.
 
 Example from Epson's LX-300 manual, page A-14 (91):
 
@@ -77,12 +77,21 @@ Corresponding printer set file:
 
 ```ini
 # lx300.ini
-C_ITALIC_ON  = 0x1B 0x34  ; hexadecimal notation, 0x1B = ESC
-C_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
+F_ITALIC_ON  = 0x1B 0x34  ; hexadecimal notation, 0x1B = ESC
+F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 ```
 
 The `ascii(7)` man page might come in handy for determining values of various control codes.
 
+You can use existing commands as variables, as long as you define the command *before* using it as a variable. Furthermore, you may define your own variables and use them in existing commands. For COPRIS to recognise them, they must be prefixed with `C_`. Variables may be interweaved with commands.
+
+```ini
+# lx300.ini - continued
+C_UNDERLINE_ON  = 0x1B 0x2D 0x31
+C_UNDERLINE_OFF = 0x1B 0x2D 0x30
+F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
+F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
+```
 
 # How does COPRIS handle the output serial/parallel/USB/etc. connection?
 
