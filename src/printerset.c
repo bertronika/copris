@@ -22,12 +22,11 @@
 #include "debug.h"
 #include "printerset.h"
 #include "printer_commands.h"
-#include "utf8.h"
 #include "parse_value.h"
 
 static int initialise_commands(struct Inifile **);
 static int inih_handler(void *, const char *, const char *, const char *);
-static int validate_definition_pairs(const char *, struct Inifile **);
+static int validate_command_pairs(const char *, struct Inifile **);
 
 int load_printer_set_file(const char *filename, struct Inifile **prset)
 {
@@ -64,16 +63,16 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 	}
 
 	if (LOG_INFO) {
-		int definition_count = 0; // These are user-specified definitions, not all available
+		int command_count = 0; // These are user-specified definitions, not all available
 
 		struct Inifile *s;
 		for (s = *prset; s != NULL; s = s->hh.next) {
 			if (*s->out != '\0')
-				definition_count++;
+				command_count++;
 		}
 
-		PRINT_MSG("`%s': loaded %d printer feature set definitions.",
-		          filename, definition_count);
+		PRINT_MSG("`%s': loaded %d printer feature set commands.",
+		          filename, command_count);
 	}
 
 	error = 0;
@@ -89,7 +88,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 	}
 
 	if (!error)
-		error = validate_definition_pairs(filename, prset);
+		error = validate_command_pairs(filename, prset);
 
 	return error;
 }
@@ -132,13 +131,13 @@ static int initialise_commands(struct Inifile **prset)
 
 /*
  * [section]
- * name = value  (inih library)
- * key  = item   (uthash)
+ * name = value  (inih library)  - command
+ * key  = item   (uthash)        - command
  */
 
 // `Handler should return nonzero on success, zero on error.'
-#define COPRIS_PARSE_FAILURE   0
-#define COPRIS_PARSE_SUCCESS   1
+#define COPRIS_PARSE_FAILURE 0
+#define COPRIS_PARSE_SUCCESS 1
 
 static int inih_handler(void *user, const char *section, const char *name, const char *value)
 {
@@ -153,48 +152,69 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
+	if (name_len >= MAX_INIFILE_ELEMENT_LENGTH) {
+		PRINT_ERROR_MSG("`%s': name length exceeds maximum of %zu bytes.", name,
+		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	if (value_len >= MAX_INIFILE_ELEMENT_LENGTH) {
 		PRINT_ERROR_MSG("`%s': value length exceeds maximum of %zu bytes.", value,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
-	struct Inifile *s;                               // Local to this function
+	struct Inifile **prset = (struct Inifile**)user;
+	struct Inifile *s;
 
-	// Check if this 'name' doesn't exist
-	HASH_FIND_STR(*file, name, s);
+	// Check if command name exists. If not, validate its name and add it to the table.
+	HASH_FIND_STR(*prset, name, s);
 	if (s == NULL) {
-		PRINT_ERROR_MSG("Name `%s' doesn't belong to any command. Run COPRIS with "
-		                "`--dump-commands' to see the available commands.", name);
-		return COPRIS_PARSE_FAILURE;
+		if (name[0] != 'C' || name[1] != '_') {
+			PRINT_ERROR_MSG("Name `%s' is unknown. If you'd like to define a custom "
+			                "command, it must be prefixed with `C_'.", name);
+			return COPRIS_PARSE_FAILURE;
+		}
+
+		// Insert the (unique) name
+		s = malloc(sizeof *s);
+		if (s == NULL) {
+			PRINT_ERROR_MSG("Memory allocation error.");
+			return -1;
+		}
+
+		memcpy(s->in, name, name_len);
+		HASH_ADD_STR(*prset, in, s);
 	}
 
-	// Warn if definition was already set, but only if command isn't meant to be redefined
-	bool definition_overwriten = (*s->out != '\0');
+	// Check if a command was already set
+	bool command_overwriten = (*s->out != '\0');
 
 	int element_count = 0;
 
 	// Parse value if it wasn't explicitly specified to be empty
 	if (*value != '@') {
-		char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
-		element_count = parse_value_to_binary(value, parsed_value, (sizeof parsed_value) - 1);
+		UT_string *parsed_value;
+		utstring_new(parsed_value);
 
-		// Check for a parse error
+		// Resolve variables to numbers and numbers to command values
+		element_count = parse_all_to_commands(value, value_len, parsed_value, prset);
+
 		if (element_count == -1) {
-			PRINT_ERROR_MSG("Failure while processing value for `%s'.", name);
+			PRINT_ERROR_MSG("Failure while processing command `%s'.", name);
 			free(s);
 			return COPRIS_PARSE_FAILURE;
 		}
 
-		memcpy(s->out, parsed_value, element_count + 1);
+		memcpy(s->out, utstring_body(parsed_value), element_count + 1);
+		utstring_free(parsed_value);
 	} else {
 		*s->out = '@';
 	}
 
 	if (LOG_DEBUG) {
 		PRINT_LOCATION(stdout);
-		printf(" %s =>", s->in);
+		printf(" %s = %s =>", s->in, value);
 
 		if (element_count == 0)
 			printf(" (empty)");
@@ -202,7 +222,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 			for (int i = 0; i < element_count; i++)
 				printf(" 0x%X", s->out[i]);
 
-		if (definition_overwriten)
+		if (command_overwriten)
 			printf(" (overwriting old value)");
 
 		printf("\n");
@@ -211,13 +231,13 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-// Check if part of a definition pair is missing (every *_ON has a *_OFF and vice-versa)
-static int validate_definition_pairs(const char *filename, struct Inifile **prset)
+// Check if part of a command pair is missing (every *_ON has a *_OFF and vice-versa)
+static int validate_command_pairs(const char *filename, struct Inifile **prset)
 {
 	struct Inifile *s;
 
 	if (LOG_DEBUG)
-		PRINT_MSG("`%s': validating definitions.", filename);
+		PRINT_MSG("`%s': validating commands.", filename);
 
 	for (int i = 0; printer_commands[i] != NULL; i++) {
 		// Only pick commands with a pair (prefixed with F_)
@@ -254,8 +274,8 @@ static int validate_definition_pairs(const char *filename, struct Inifile **prse
 		assert(s != NULL);
 		// No value, meaning no pair was found
 		if (*s->out == '\0') {
-			PRINT_ERROR_MSG("`%s': command `%s' is missing its pair definition `%s'. "
-			                "Either add one or define it as empty using `@' as the value.",
+			PRINT_ERROR_MSG("`%s': command `%s' is missing its pair `%s'. Either "
+			                "add one or define it as empty using `@' as the value.",
 			                filename, printer_commands[i], command_pair);
 
 			return -1;
@@ -266,7 +286,7 @@ static int validate_definition_pairs(const char *filename, struct Inifile **prse
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("`%s': no definition pairs are missing.", filename);
+		PRINT_MSG("`%s': no command pairs are missing.", filename);
 
 	return 0;
 }
@@ -286,9 +306,9 @@ int dump_printer_set_commands(struct Inifile **prset)
 		if (*s->in != code_prefix) {
 			code_prefix = *s->in;
 			switch (code_prefix) {
-			case 'C':
-				puts("# Non-printable commands");
-				break;
+			//case 'C':
+				//puts("# Non-printable commands");
+				//break;
 			case 'F':
 				puts("\n# Formatting commands; both parts of a pair must be defined");
 				break;
@@ -314,13 +334,13 @@ int dump_printer_set_commands(struct Inifile **prset)
 
 void unload_printer_set_file(const char *filename, struct Inifile **prset)
 {
-	struct Inifile *definition;
+	struct Inifile *command;
 	struct Inifile *tmp;
 	int count = 0;
 
-	HASH_ITER(hh, *prset, definition, tmp) {
-		HASH_DEL(*prset, definition);
-		free(definition);
+	HASH_ITER(hh, *prset, command, tmp) {
+		HASH_DEL(*prset, command);
+		free(command);
 		count++;
 	}
 
