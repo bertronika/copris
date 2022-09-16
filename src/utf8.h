@@ -1,6 +1,3 @@
-#ifndef UTF8_H
-#define UTF8_H
-
 /*
  * UTF-8 Encoding
  *
@@ -44,4 +41,3 @@ size_t utf8_codepoint_length(const char s);
  */
 int utf8_terminate_incomplete_buffer(char *str, size_t len);
 
-#endif /* UTF8_H */

@@ -1,6 +1,3 @@
-#ifndef COPRIS_H
-#define COPRIS_H
-
 #include <stddef.h>   /* size_t         */
 #include <stdbool.h>  /* bool           */
 #include <uthash.h>   /* UT_hash_handle */
@@ -40,4 +37,3 @@ struct Inifile {
 	UT_hash_handle hh;
 };
 
-#endif /* COPRIS_H */

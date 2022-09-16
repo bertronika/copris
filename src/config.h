@@ -4,9 +4,6 @@
  * Values, specified here, are used by default, apart from unit tests.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
-
 // Inbound text buffer size
 #ifndef BUFSIZE
 #   define BUFSIZE 128
@@ -17,4 +14,3 @@
 #   define MAX_INIFILE_ELEMENT_LENGTH 48
 #endif
 
-#endif /* CONFIG_H */

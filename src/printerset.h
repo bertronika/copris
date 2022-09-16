@@ -1,6 +1,3 @@
-#ifndef PRINTERSET_H
-#define PRINTERSET_H
-
 /*
  * Load printer set file `filename' into a hash table, passed by `prset'.
  * Return 0 on success.
@@ -17,4 +14,3 @@ int dump_printer_set_commands(struct Inifile **prset);
  */
 void unload_printer_set_file(const char *filename, struct Inifile **prset);
 
-#endif /* PRINTERSET_H */

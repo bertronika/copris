@@ -1,6 +1,3 @@
-#ifndef SOCKET_H
-#define SOCKET_H
-
 /*
  * Create a system socket on port number `portno' and set a file descriptor,
  * passed by `parentfd'.
@@ -16,4 +13,3 @@ int copris_socket_listen(int *parentfd, unsigned int portno);
  */
 int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib);
 
-#endif /* SOCKET_H */

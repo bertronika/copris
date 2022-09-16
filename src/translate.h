@@ -1,6 +1,3 @@
-#ifndef TRANSLATE_H
-#define TRANSLATE_H
-
 /*
  * Load translation file `filename' into a hash table, passed by `prset'.
  * Return 0 on success.
@@ -18,4 +15,3 @@ void unload_translation_file(const char *filename, struct Inifile **trfile);
  */
 void translate_text(UT_string *copris_text, struct Inifile **trfile);
 
-#endif /* TRANSLATE_H */
