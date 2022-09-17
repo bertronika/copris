@@ -1,31 +1,19 @@
 # Internal release tools for documentation generation and packaging.
-#
-# Order of documentation processing is as follows:
-#  DESTINATION    INTERMEDIATE STEP           SOURCE
-#  README.md                                  release-tools/README.md.m4
-#  man/copris.1   release-tools/copris.1.md   release-tools/copris.1.md.m4
 
-README   = ../README.md
-MANPAGE  = ../man/copris.1
-DOCS     = $(README) $(MANPAGE)
-INTERMED = README.md copris.1 copris.1.md
+README  = ../README.md
+MANPAGE = ../man/copris.1
 
-.PHONY: gen-docs clean
-.INTERMEDIATE: $(INTERMED)
+.PHONY: all readme manpage
 
-gen-docs: $(DOCS)
+all: readme manpage
+readme: $(README)
+manpage: $(MANPAGE) $(MANPAGE).txt
 
-$(README): README.md usage_examples.md.m4
-$(MANPAGE): copris.1 README.md usage_examples.md.m4
+$(README): README.md.m4 usage_examples.md.m4
+	m4 -PEE README.md.m4 | fmt -s > $@
 
-$(DOCS):
-	cp $< $@
+$(MANPAGE): copris.1.md.m4 README.md.m4 usage_examples.md.m4
+	m4 -PEE copris.1.md.m4 | pandoc --standalone --to man > $@
 
-copris.1: copris.1.md
-	pandoc --standalone --to man $< --output $@
-
-%.md: %.md.m4
-	m4 -PEE $< | fmt -s > $@
-
-clean:
-	rm -f $(INTERMED)
+$(MANPAGE).txt: $(MANPAGE)
+	man -l $< | col -bx > $@
