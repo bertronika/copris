@@ -1,6 +1,6 @@
 /*
  * COPRIS - a converting printer server
- * Copyright (C) 2020-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,35 +48,39 @@
  */
 int verbosity = 1;
 
-static void copris_help(const char *copris_location) {
-	printf("Usage: %s [arguments] [printer or output file]\n\n"
-	       "  -p, --port NUMBER      Run as a network server on port NUMBER\n"
-	       "  -t, --translate FILE   Enable character translation with definitions from FILE\n"
-	       "  -r, --printer FILE     Enable Markdown processing with a printer feature set FILE\n"
-	       "      --dump-commands    Show all possible printer feature set commands\n"
-	       "  -d, --daemon           Do not exit after the first network connection\n"
-	       "  -l, --limit NUMBER     Limit number of received bytes from the network to NUMBER\n"
-	       "      --cutoff-limit     If using limit, cut text off at NUMBER instead of\n"
-	       "                         discarding the whole chunk\n"
-	       "\n"
-	       "  -v, --verbose          Show informative messages (show even more with `-vv')\n"
-	       "  -q, --quiet            Do not show any messages, except warnings and fatal errors\n"
-	       "  -h, --help             Show this option summary\n"
-	       "  -V, --version          Show program version, author and build-time options\n"
-	       "\n"
-	       "To read from stdin, omit the port argument. To echo data to stdout\n"
-	       "(console/terminal), omit the output file.\n"
-	       "\n"
-	       "Notes will be shown if COPRIS assumes it is not invoked\n"
-	       "correctly, but never when the quiet argument is present.\n",
-	       copris_location);
+static void copris_help(void) {
+	puts("Usage: copris [arguments] [printer or output file]\n"
+	     "\n"
+	     "  -p, --port=PORT        Run as a network server on port number PORT\n"
+	     "  -t, --translate=FILE   Enable character translation with definitions\n"
+	     "                         from FILE\n"
+	     "  -r, --printer=FILE     Enable Markdown processing with printer feature\n"
+	     "                         set FILE\n"
+	     "      --dump-commands    Show all possible printer feature set commands\n"
+	     "  -d, --daemon           Do not exit after the first network connection\n"
+	     "  -l, --limit=LIMIT      Discard the whole chunk of text, received from the\n"
+	     "                         network, when it surpasses LIMIT number of bytes\n"
+	     "      --cutoff-limit     If using `--limit', cut text off at exactly LIMIT\n"
+	     "                         number of bytes instead of discarding the whole chunk\n"
+	     "\n"
+	     "  -v, --verbose          Display diagnostic messages (can be used twice)\n"
+	     "  -q, --quiet            Supress all unnecessary messages, except warnings and\n"
+	     "                         fatal errors\n"
+	     "  -h, --help             Show this argument summary\n"
+	     "  -V, --version          Show program version, author and build-time options\n"
+	     "\n"
+	     "To read from stdin, omit the port argument. To echo data\n"
+	     "to stdout (console/terminal), omit the output file.\n"
+	     "\n"
+	     "Notes will be shown if COPRIS assumes it is not invoked\n"
+	     "correctly, but never when the quiet argument is present.\n");
 
 	exit(EXIT_SUCCESS);
 }
 
 static void copris_version(void) {
 	printf("COPRIS version %s\n"
-	       "(C) 2020-22 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
+	       "(C) 2020-23 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Build-time options\n"
 	       "  Text buffer size:                 %5d bytes\n"
 	       "  Maximum .ini file element length: %5d bytes\n"
@@ -233,7 +237,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			verbosity = 0;
 			break;
 		case 'h':
-			copris_help(argv[0]);
+			copris_help();
 			break;
 		case 'V':
 			copris_version();
@@ -339,13 +343,15 @@ int main(int argc, char **argv) {
 		is_stdin = true;
 
 	if (attrib.limitnum && is_stdin && LOG_ERROR)
-		PRINT_NOTE("Limit number not used while reading from stdin.");
+		PRINT_NOTE("Limit number cannot be used while reading from stdin, continuing without the "
+		           "limit feature.");
 
 	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
 		attrib.daemon = false;
 		if (LOG_ERROR)
-			PRINT_NOTE("Daemon mode not available while reading from stdin.");
+			PRINT_NOTE("Daemon mode not available while reading from stdin, continuing with "
+			           "daemon mode disabled.");
 	}
 
 	if (attrib.daemon && LOG_DEBUG)
