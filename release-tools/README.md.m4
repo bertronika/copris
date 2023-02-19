@@ -116,10 +116,11 @@ Note that you can only use `-l/--limit` and `--cutoff-limit` when running as a n
 COPRIS will show informative status messages and notes, if it assumes it is not invoked properly. You may use the `-q/--quiet` parameter to silence them, which will only leave you with possible warnings and fatal errors, routed to standard error. Note that if an output file is specified, no status messages are sent to it. If a non-fatal error occurs in quiet mode, COPRIS will disable the offending broken feature, notify you about it and continue execution.
 
 
-# Installation
+# Building and installation
 
-COPRIS requires, apart from a standard C library, two additional libraries:
+COPRIS requires, apart from a standard C library, three additional libraries:
 
+- pkg-config or pkgconf for the compilation process
 - uthash ([Repology][1], [upstream][2])
 - inih ([Repology][3], [upstream][4])
 
@@ -128,7 +129,7 @@ COPRIS requires, apart from a standard C library, two additional libraries:
 [3]: https://repology.org/project/inih/versions
 [4]: https://github.com/benhoyt/inih
 
-I've tried to pick common libraries, present in many Linux distributions and BSD's, meaning they should be easily installable with your package manager. Note that `inih` requires, unlike the header-only `uthash`, both development headers and the dynamically linked libraries themselves (e.g. `libinih-devel` and `libinih0`, names on your end may differ).
+I've tried to pick common libraries, present in many Linux distributions and BSD's, meaning they should be easily installable with your package manager. Note that `inih` requires, unlike the header-only `uthash`, both development headers and the dynamic libraries themselves (e.g. `libinih-devel` and `libinih0`, names on your end may differ).
 
 Build COPRIS using the included `Makefile` (you'll need GNU Make, if you're on a BSD). The procedure is as follows:
 
