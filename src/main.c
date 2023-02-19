@@ -275,7 +275,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	if (*argv[optind] == '-') {
 		PRINT_NOTE("Found `-' as the destination name, redirecting text to standard output.\n"
 		           "COPRIS does not use `-' to denote reading from standard input. Omit "
-		           "the destination argument for that.");
+		           "the destination argument instead.");
 	} else {
 		errno = 0; /* pathconf() needs errno to be reset */
 		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
@@ -301,7 +301,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		attrib->destination = argv[optind];
 		attrib->copris_flags |= HAS_DESTINATION;
 
-		if (argv[++optind] != NULL && LOG_ERROR)
+		if (argv[++optind] != NULL)
 			PRINT_NOTE("Multiple destination file names detected; only the first one "
 			           "will be used.");
 	}
@@ -330,7 +330,7 @@ int main(int argc, char **argv) {
 	if (LOG_DEBUG)
 		PRINT_MSG("COPRIS started with PID %d.", getpid());
 
-	if (argc < 2 && LOG_ERROR)
+	if (argc < 2)
 		PRINT_NOTE("COPRIS won't do much without any arguments. "
 		           "Try using the '--help' option.");
 
@@ -342,16 +342,15 @@ int main(int argc, char **argv) {
 	if (attrib.portno == 0)
 		is_stdin = true;
 
-	if (attrib.limitnum && is_stdin && LOG_ERROR)
+	if (attrib.limitnum && is_stdin)
 		PRINT_NOTE("Limit number cannot be used while reading from stdin, continuing without the "
 		           "limit feature.");
 
 	// Disable daemon mode if input is coming from stdin
 	if (attrib.daemon && is_stdin) {
 		attrib.daemon = false;
-		if (LOG_ERROR)
-			PRINT_NOTE("Daemon mode not available while reading from stdin, continuing with "
-			           "daemon mode disabled.");
+		PRINT_NOTE("Daemon mode not available while reading from stdin, continuing with "
+		           "daemon mode disabled.");
 	}
 
 	if (attrib.daemon && LOG_DEBUG)

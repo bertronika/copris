@@ -53,7 +53,7 @@ extern int verbosity;
  * PRINT_NOTE(str);
  *           Invokes PRINT_LOCATION(stdout) and prints 'str' with a newline to stdout if
  *           verbosity set to INFO or higher. Else, prints 'Note: ' followed by 'str' and
- *           a newline.
+ *           a newline. If quiet mode is enabled (verbosity == 0), nothing is printed.
  *           Example:
  *               PRINT_NOTE("Limit number not used while reading from stdin.");
  *               -> src/main.c:344: Limit number not used while reading from stdin.
@@ -98,6 +98,9 @@ extern int verbosity;
 
 #define PRINT_NOTE(str)                  \
     do {                                 \
+        if (!verbosity)                  \
+            break;                       \
+                                         \
         if (LOG_INFO)                    \
             PRINT_LOCATION(stdout);      \
         else                             \

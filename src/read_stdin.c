@@ -1,7 +1,7 @@
 /*
  * Functions for reading text from the standard input
  *
- * Copyright (C) 2020-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
@@ -26,7 +26,7 @@ int copris_handle_stdin(UT_string *copris_text) {
 	// Check if Copris is invoked standalone, outside of a pipe. That is usually
 	// unwanted, since the user has specified reading from stdin, and the only
 	// remaining way to enter text is to type it in interactively.
-	if (LOG_ERROR && isatty(STDIN_FILENO))
+	if (isatty(STDIN_FILENO))
 		PRINT_NOTE("You are in text input mode (reading from " /* LCOV_EXCL_LINE */
 		           "stdin). To stop reading, press Ctrl+D.");
 
@@ -34,7 +34,7 @@ int copris_handle_stdin(UT_string *copris_text) {
 	struct Stats stats = STATS_INIT;
 	size_t text_length = read_from_stdin(copris_text, &stats);
 
-	if (text_length == 0 && LOG_ERROR)
+	if (text_length == 0)
 		PRINT_NOTE("No text has been read!");
 
 	if (LOG_ERROR)
