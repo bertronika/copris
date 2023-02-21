@@ -1,7 +1,7 @@
 /*
  * Stream socket (TCP) server for receiving text over the network
  *
- * Copyright (C) 2020-2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
@@ -14,14 +14,17 @@
         (s)->d[(n)]='\0';  \
     } while (0)
 
+// For 'getnameinfo' outside the GNU world
+#define _XOPEN_SOURCE 600
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <netdb.h>
-#include <arpa/inet.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include <errno.h>
 #include <assert.h>
 
