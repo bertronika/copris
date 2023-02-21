@@ -10,7 +10,7 @@
 # Run with `WITHOUT_CMARK=1' to skip checking `printerset.c'.
 
 VERSION := $(shell git describe --tags --dirty 2>/dev/null || cat ../VERSION)
-include ../Makefile.common
+include ../Common.mk
 LIBRARIES += cmocka
 
 # List of sources that have unit tests (sorted by approximate complexity)

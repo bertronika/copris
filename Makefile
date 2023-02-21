@@ -19,7 +19,7 @@
 # Get latest version tag if in a git repository, else from a local file
 VERSION := $(shell git describe --tags --dirty 2>/dev/null || cat VERSION)
 
-include Makefile.common
+include Common.mk
 
 # Installation directories
 PREFIX  ?= /usr/local
