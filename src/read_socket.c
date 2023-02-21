@@ -137,12 +137,12 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *
 	}
 
 	// Get host info (IP, hostname) of the client (TODO gai_strerror)
-	char host_info[NI_MAXHOST];
+	char host_info[256];
 	tmperr = getnameinfo((struct sockaddr *)&clientaddr, sizeof(clientaddr),
 	                      host_info, sizeof(host_info), NULL, 0, 0);
 	if (tmperr != 0) {
 		PRINT_SYSTEM_ERROR("getnameinfo", "Failed getting hostname from address.");
-		memccpy(host_info, "name unknown", '\0', NI_MAXHOST);
+		memccpy(host_info, "name unknown", '\0', 256);
 	}
 
 	// Convert client's address from network byte order to a dotted-decimal form
