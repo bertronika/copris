@@ -3,9 +3,9 @@
 # Common targets (you don't need to specify one for a regular release build):
 #   - release     build the release build (executable name `copris')
 #   - debug       build the debugging build (executable name `copris_dbg')
-#   - install     install a copy of release build with samples and documentation
+#   - install     install a copy of the release build with samples and documentation
 #   - clean       remove object and dependency files
-#   - distclean   remove object, dependency, binary and test files
+#   - distclean   remove object, dependency, binary and temporary test files
 #   - help        print this text
 
 # Code analysis targets (more are present in `tests/Makefile'):

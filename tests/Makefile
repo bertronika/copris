@@ -7,8 +7,6 @@
 #   - clean                   remove compiled object and binary files
 #   - help                    show this text
 
-# Run with `WITHOUT_CMARK=1' to skip checking `printerset.c'.
-
 VERSION := $(shell git describe --tags --dirty 2>/dev/null || cat ../VERSION)
 include ../Common.mk
 LIBRARIES += cmocka
