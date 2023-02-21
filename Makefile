@@ -14,6 +14,9 @@
 #   - analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
 #   - analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
 
+# You may use the USERFLAGS variable to specify custom compiler/linker flags
+# e.g.  make USERFLAGS=-std=c99 debug
+
 # GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
 include Common.mk

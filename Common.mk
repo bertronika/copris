@@ -2,10 +2,11 @@
 VERSION = $(shell git describe --tags --dirty 2>/dev/null || cat VERSION)
 
 # Default, overridable build flags (REL = release, DBG = debug)
-CFLAGS   ?= -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic
-RELFLAGS ?= -O2 -g -DNDEBUG
-DBGFLAGS ?= -Og -g3 -ggdb -gdwarf -DDEBUG
-LDFLAGS  ?=
+USERFLAGS ?=
+CFLAGS    ?= -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic $(USERFLAGS)
+RELFLAGS  ?= -O2 -g -DNDEBUG
+DBGFLAGS  ?= -Og -g3 -ggdb -gdwarf -DDEBUG
+LDFLAGS   ?=
 
 # -Wconversion
 
