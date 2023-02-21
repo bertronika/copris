@@ -1,3 +1,6 @@
+# Get latest version tag if in a tagged git repository, else from a local file
+VERSION = $(shell git describe --tags --dirty 2>/dev/null || cat VERSION)
+
 # Default, overridable build flags (REL = release, DBG = debug)
 CFLAGS   ?= -Wall -Wextra -Wstrict-prototypes -Wshadow -Wundef -pedantic
 RELFLAGS ?= -O2 -g -DNDEBUG

@@ -7,7 +7,6 @@
 #   - clean                   remove compiled object and binary files
 #   - help                    show this text
 
-VERSION := $(shell git describe --tags --dirty 2>/dev/null || cat ../VERSION)
 include ../Common.mk
 LIBRARIES += cmocka
 
@@ -77,5 +76,5 @@ clean:
 	rm -fr coverage_report/ coverage.info *.gcda *.gcno
 
 help:
-	head -n 11 $(firstword $(MAKEFILE_LIST))
+	head -n 9 $(firstword $(MAKEFILE_LIST))
 	# Compiler flags for tests: $(CFLAGS)
