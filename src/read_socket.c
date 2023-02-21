@@ -14,8 +14,8 @@
         (s)->d[(n)]='\0';  \
     } while (0)
 
-// For 'getnameinfo' outside the GNU world
-#define _XOPEN_SOURCE 600
+// For 'getnameinfo' and 'memccpy' in ISO C
+#define _XOPEN_SOURCE 700
 
 #include <stdio.h>
 #include <stdlib.h>

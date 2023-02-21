@@ -7,6 +7,9 @@
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
  */
 
+// For 'memccpy' in ISO C
+#define _XOPEN_SOURCE 700
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
