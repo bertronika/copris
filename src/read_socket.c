@@ -7,13 +7,6 @@
  * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
  */
 
-// An addition to utstring.h that terminates the string at given index
-#define utstring_cut(s,n)  \
-    do {                   \
-        (s)->i=(n);        \
-        (s)->d[(n)]='\0';  \
-    } while (0)
-
 // For 'getnameinfo' and 'memccpy' in ISO C
 #define _XOPEN_SOURCE 700
 
@@ -35,6 +28,7 @@
 #include "debug.h"
 #include "read_socket.h"
 #include "utf8.h"
+#include "utstring_cut.h"
 
 static int read_from_socket(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib);
