@@ -422,7 +422,7 @@ int main(int argc, char **argv) {
 				return EXIT_FAILURE;
 		}
 
-		if ((size_t)utstring_len(copris_text) == 0)
+		if (utstring_len(copris_text) == 0)
 			continue; // Do not attempt to write/display nothing
 
 		// Stage 2: Translate selected characters in text with a translation file
