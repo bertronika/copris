@@ -4,17 +4,18 @@
 
 #include "config.h"
 
-#define HAS_DESTINATION (1 << 0)
-#define HAS_TRFILE      (1 << 1)
-#define HAS_PRSET       (1 << 2)
-#define MUST_CUTOFF     (1 << 3)
+#define HAS_DESTINATION  (1 << 0)
+#define HAS_TRFILE       (1 << 1)
+#define HAS_PRSET        (1 << 2)
+#define MUST_CUTOFF      (1 << 3)
+#define FILTER_NON_ASCII (1 << 4)
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */
 	bool daemon;         /* Run continuously                               */
 	size_t limitnum;     /* Limit received number of bytes                 */
 
-	int copris_flags;    /* Flags regarding user-specified arguments:      */
+	int copris_flags;    /* Flags regarding user-specified arguments       */
 	char *prset;         /* Printer feature set name                       */
 	char *trfile;        /* Translation file location                      */
 	char *destination;   /* Output file (printer)                          */

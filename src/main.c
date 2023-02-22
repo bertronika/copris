@@ -37,6 +37,7 @@
 #include "translate.h"
 #include "printerset.h"
 #include "markdown.h"
+#include "filters.h"
 #include "writer.h"
 
 /*
@@ -51,23 +52,24 @@ int verbosity = 1;
 static void copris_help(void) {
 	puts("Usage: copris [arguments] [printer or output file]\n"
 	     "\n"
-	     "  -p, --port=PORT        Run as a network server on port number PORT\n"
-	     "  -t, --translate=FILE   Enable character translation with definitions\n"
-	     "                         from FILE\n"
-	     "  -r, --printer=FILE     Enable Markdown processing with printer feature\n"
-	     "                         set FILE\n"
-	     "      --dump-commands    Show all possible printer feature set commands\n"
-	     "  -d, --daemon           Do not exit after the first network connection\n"
-	     "  -l, --limit=LIMIT      Discard the whole chunk of text, received from the\n"
-	     "                         network, when it surpasses LIMIT number of bytes\n"
-	     "      --cutoff-limit     If using `--limit', cut text off at exactly LIMIT\n"
-	     "                         number of bytes instead of discarding the whole chunk\n"
+	     "  -p, --port=PORT         Run as a network server on port number PORT\n"
+	     "  -t, --translate=FILE    Enable character translation with definitions\n"
+	     "                          from FILE\n"
+	     "  -r, --printer=FILE      Enable Markdown processing with printer feature\n"
+	     "                          set FILE\n"
+	     "      --dump-commands     Show all possible printer feature set commands\n"
+	     "  -d, --daemon            Do not exit after the first network connection\n"
+	     "  -l, --limit=LIMIT       Discard the whole chunk of text, received from the\n"
+	     "                          network, when it surpasses LIMIT number of bytes\n"
+	     "      --cutoff-limit      If using `--limit', cut text off at exactly LIMIT\n"
+	     "                          number of bytes instead of discarding the whole chunk\n"
+	     "  -R, --remove-non-ascii  Remove all characters outside the ASCII character set\n"
 	     "\n"
-	     "  -v, --verbose          Display diagnostic messages (can be used twice)\n"
-	     "  -q, --quiet            Supress all unnecessary messages, except warnings and\n"
-	     "                         fatal errors\n"
-	     "  -h, --help             Show this argument summary\n"
-	     "  -V, --version          Show program version, author and build-time options\n"
+	     "  -v, --verbose           Display diagnostic messages (can be used twice)\n"
+	     "  -q, --quiet             Supress all unnecessary messages, except warnings and\n"
+	     "                          fatal errors\n"
+	     "  -h, --help              Show this argument summary\n"
+	     "  -V, --version           Show program version, author and build-time options\n"
 	     "\n"
 	     "To read from stdin, omit the port argument. To echo data\n"
 	     "to stdout (console/terminal), omit the output file.\n"
@@ -92,18 +94,19 @@ static void copris_version(void) {
 
 static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
-		{"port",           required_argument, NULL, 'p'},
-		{"translate",      required_argument, NULL, 't'},
-		{"printer",        required_argument, NULL, 'r'},
-		{"dump-commands",  no_argument,       NULL, ','},
-		{"daemon",         no_argument,       NULL, 'd'},
-		{"limit",          required_argument, NULL, 'l'},
-		{"cutoff-limit",   no_argument,       NULL, '.'},
-		{"verbose",        no_argument,       NULL, 'v'},
-		{"quiet",          no_argument,       NULL, 'q'},
-		{"help",           no_argument,       NULL, 'h'},
-		{"version",        no_argument,       NULL, 'V'},
-		{NULL,             0,                 NULL, 0  }
+		{"port",             required_argument, NULL, 'p'},
+		{"translate",        required_argument, NULL, 't'},
+		{"printer",          required_argument, NULL, 'r'},
+		{"dump-commands",    no_argument,       NULL, ','},
+		{"daemon",           no_argument,       NULL, 'd'},
+		{"limit",            required_argument, NULL, 'l'},
+		{"cutoff-limit",     no_argument,       NULL, '.'},
+		{"remove-non-ascii", no_argument,       NULL, 'R'},
+		{"verbose",          no_argument,       NULL, 'v'},
+		{"quiet",            no_argument,       NULL, 'q'},
+		{"help",             no_argument,       NULL, 'h'},
+		{"version",          no_argument,       NULL, 'V'},
+		{NULL,               0,                 NULL, 0  }
 	};
 
 	// Variables common to multiple switch cases
@@ -114,7 +117,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. `Printer
 	// set is missing.' instead of `option requires an argument -- 'r')
-	while ((c = getopt_long(argc, argv, ":p:dt:r:l:vqhV", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":p:dt:r:l:RvqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
@@ -226,6 +229,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->limitnum = (size_t)temp_limit;
 			break;
 		}
+		case 'R':
+			attrib->copris_flags |= FILTER_NON_ASCII;
+			break;
 		case '.':
 			attrib->copris_flags |= MUST_CUTOFF;
 			break;
@@ -429,7 +435,9 @@ int main(int argc, char **argv) {
 		if (attrib.copris_flags & HAS_TRFILE)
 			translate_text(copris_text, &trfile);
 
-		// Stage 3: Normalise text
+		// Stage 3: Filter text
+		if (attrib.copris_flags & FILTER_NON_ASCII)
+			filter_non_ascii(copris_text);
 
 		// Stage 4: Handle Markdown in text with a printer feature set file
 		if (attrib.copris_flags & HAS_PRSET)

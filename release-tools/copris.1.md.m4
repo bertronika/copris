@@ -50,6 +50,12 @@ m4_changequote(`[[[', `]]]')m4_dnl
 : If limit is active, cut text on *NUMBER* count instead of
   discarding the whole chunk.
 
+**\-R**, **\--remove-non-ascii**
+: Remove all characters (or bytes) that aren't part of the ASCII character set.
+  As (old) dot-matrix printers generally don't support Unicode-encoded
+  characters, this will both prevent them being wrongly printed, but at the same
+  time possibly corrupt the meaning of the text.
+
 **-v**, **\--verbose**
 : Show informative status messages. If specified twice, show even more messages.
 
