@@ -4,7 +4,7 @@
  * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
- * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
+ * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
  */
 
 // For 'memccpy' in ISO C
@@ -100,7 +100,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 // Initialise the prset struct with predefined names and empty strings as values.
 static int initialise_commands(struct Inifile **prset)
 {
-	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
+	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*prset = NULL;
 	struct Inifile *s;
 	int command_count = 0;
@@ -135,7 +135,7 @@ static int initialise_commands(struct Inifile **prset)
  * key  = item   (uthash)        - command
  */
 
-// `Handler should return nonzero on success, zero on error.'
+// 'Handler should return nonzero on success, zero on error.'
 #define COPRIS_PARSE_FAILURE 0
 #define COPRIS_PARSE_SUCCESS 1
 
@@ -148,18 +148,18 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 	if (name_len == 0 || value_len == 0) {
 		PRINT_ERROR_MSG("Found an entry with either no name or no value. If you want to "
-		                "define a command without any value, use `@' in place of the value.");
+		                "define a command without any value, use '@' in place of the value.");
 		return COPRIS_PARSE_FAILURE;
 	}
 
 	if (name_len >= MAX_INIFILE_ELEMENT_LENGTH) {
-		PRINT_ERROR_MSG("`%s': name length exceeds maximum of %zu bytes.", name,
+		PRINT_ERROR_MSG("'%s': name length exceeds maximum of %zu bytes.", name,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
 
 	if (value_len >= MAX_INIFILE_ELEMENT_LENGTH) {
-		PRINT_ERROR_MSG("`%s': value length exceeds maximum of %zu bytes.", value,
+		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
@@ -171,8 +171,8 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	HASH_FIND_STR(*prset, name, s);
 	if (s == NULL) {
 		if (name[0] != 'C' || name[1] != '_') {
-			PRINT_ERROR_MSG("Name `%s' is unknown. If you'd like to define a custom "
-			                "command, it must be prefixed with `C_'.", name);
+			PRINT_ERROR_MSG("Name '%s' is unknown. If you'd like to define a custom "
+			                "command, it must be prefixed with 'C_'.", name);
 			return COPRIS_PARSE_FAILURE;
 		}
 
@@ -198,7 +198,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		element_count = parse_all_to_commands(value, value_len, parsed_value, prset);
 
 		if (element_count == -1) {
-			PRINT_ERROR_MSG("Failure while processing command `%s'.", name);
+			PRINT_ERROR_MSG("Failure while processing command '%s'.", name);
 			free(s);
 			return COPRIS_PARSE_FAILURE;
 		}
@@ -269,8 +269,8 @@ static int validate_command_pairs(const char *filename, struct Inifile **prset)
 		assert(s != NULL);
 		// No value, meaning no pair was found
 		if (*s->out == '\0') {
-			PRINT_ERROR_MSG("'%s': command `%s' is missing its pair `%s'. Either "
-			                "add one or define it as empty using `@' as the value.",
+			PRINT_ERROR_MSG("'%s': command '%s' is missing its pair '%s'. Either "
+			                "add one or define it as empty using '@' as the value.",
 			                filename, printer_commands[i], command_pair);
 
 			return -1;

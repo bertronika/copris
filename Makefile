@@ -1,14 +1,14 @@
 
 # Build system for COPRIS
 # Common targets (you don't need to specify one for a regular release build):
-#   - release     build the release build (executable name `copris')
-#   - debug       build the debugging build (executable name `copris_dbg')
+#   - release     build the release build (executable name 'copris')
+#   - debug       build the debugging build (executable name 'copris_dbg')
 #   - install     install a copy of the release build with samples and documentation
 #   - clean       remove object and dependency files
 #   - distclean   remove object, dependency, binary and temporary test files
 #   - help        print this text
 
-# Code analysis targets (more are present in `tests/Makefile'):
+# Code analysis targets (more are present in 'tests/Makefile'):
 #   - check                   build and run unit tests
 #   - analyse                 analyse object files with with GCC's static analyser
 #   - analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout

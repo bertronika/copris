@@ -61,7 +61,7 @@ static void copris_help(void) {
 	     "  -d, --daemon            Do not exit after the first network connection\n"
 	     "  -l, --limit=LIMIT       Discard the whole chunk of text, received from the\n"
 	     "                          network, when it surpasses LIMIT number of bytes\n"
-	     "      --cutoff-limit      If using `--limit', cut text off at exactly LIMIT\n"
+	     "      --cutoff-limit      If using '--limit', cut text off at exactly LIMIT\n"
 	     "                          number of bytes instead of discarding the whole chunk\n"
 	     "  -R, --remove-non-ascii  Remove all characters outside the ASCII character set\n"
 	     "\n"
@@ -115,8 +115,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	long max_path_len;  // For filenames
 
 	// Putting a colon in front of the options disables the built-in error reporting
-	// of getopt_long(3) and allows us to specify more appropriate errors (ie. `Printer
-	// set is missing.' instead of `option requires an argument -- 'r')
+	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'Printer
+	// set is missing.' instead of 'option requires an argument -- 'r')
 	while ((c = getopt_long(argc, argv, ":p:dt:r:l:RvqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
@@ -279,8 +279,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Parse the destination file name. Note that only the first argument is accepted.
 	// If it equals '-', assume standard output.
 	if (*argv[optind] == '-') {
-		PRINT_NOTE("Found `-' as the destination name, redirecting text to standard output.\n"
-		           "COPRIS does not use `-' to denote reading from standard input. Omit "
+		PRINT_NOTE("Found '-' as the destination name, redirecting text to standard output.\n"
+		           "COPRIS does not use '-' to denote reading from standard input. Omit "
 		           "the destination argument instead.");
 	} else {
 		errno = 0; /* pathconf() needs errno to be reset */

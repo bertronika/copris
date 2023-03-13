@@ -4,7 +4,7 @@
  * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
- * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
+ * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
  */
 
 // For 'strndup' in ISO C
@@ -40,11 +40,11 @@ int parse_all_to_commands(const char *value, size_t value_len,
 			struct Inifile *s;
 			HASH_FIND_STR(*prset, token, s);
 			if (s == NULL) {
-				PRINT_ERROR_MSG("Internal variable `%s' does not exist. If it is a custom "
-				                "command, make sure it has the `C_' prefix.", token);
+				PRINT_ERROR_MSG("Internal variable '%s' does not exist. If it is a custom "
+				                "command, make sure it has the 'C_' prefix.", token);
 				problem = true;
 			} else if (*s->out == '\0') {
-				PRINT_ERROR_MSG("Variable `%s' does not (yet) exist. Custom command "
+				PRINT_ERROR_MSG("Variable '%s' does not (yet) exist. Custom command "
 				                "should be specified after it.", token);
 				problem = true;
 			} else {
@@ -97,9 +97,9 @@ int parse_numbers_to_commands(const char *value, char *parsed_value, int parsed_
 
 		// Check if no conversion has been done
 		if (valuepos == endptr) {
-			PRINT_ERROR_MSG("Found unrecognised character(s) `%s'. Make sure your values "
+			PRINT_ERROR_MSG("Found unrecognised character(s) '%s'. Make sure your values "
 			                "consist only of space-separated decimal, hexadecimal or octal "
-			                "numbers, or variable names, prefixed either with `F_' or `C_'. "
+			                "numbers, or variable names, prefixed either with 'F_' or 'C_'. "
 			                "Consult the README or the man page for more information.",
 			                valuepos);
 

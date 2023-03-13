@@ -25,7 +25,7 @@
  * Copyright (C) 2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
- * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
+ * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
  *
  * TODO parse underlined headings
  * TODO ignore syntax type in code blocks
@@ -99,15 +99,15 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	size_t line_char_i = 0;
 
 	for (size_t i = 0; text[i] != '\0'; i++) {
-		// Catch horizontal rules (`***'/`---') and copy them to output.
+		// Catch horizontal rules ('***'/'---') and copy them to output.
 		if ((i + 3 < text_len && text[i + 3] == '\n') &&
 		    ((text[i] == '*' && text[i + 1] == '*' && text[i + 2] == '*') ||
 		     (text[i] == '-' && text[i + 1] == '-' && text[i + 2] == '-'))) {
 			text_attribute = RULE;
 			i += 3;
 
-		// Emphasis: inline `*'/`_' pairs for italic, `**`/`__' for bold,
-		//           `***'/`___' for both.
+		// Emphasis: inline '*'/'_' pairs for italic, '**'/'__' for bold,
+		//           '***'/'___' for both.
 		} else if (text[i] == '*' || text[i] == '_') {
 			if (i + 1 < text_len && (text[i + 1] == '*' || text[i + 1] == '_')) {
 				if (i + 2 < text_len && (text[i + 2] == '*' || text[i + 2] == '_')) {
@@ -127,7 +127,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				italic_on = !italic_on;
 			}
 
-		// Headings: `#' through `####' on a blank line. More than one space after the
+		// Headings: '#' through '####' on a blank line. More than one space after the
 		//           pound sign will be preserved (e.g. to center titles).
 		} else if ((i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '#')) {
@@ -151,7 +151,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				i += 1;
 			}
 
-		// Blockquote: `> ' (greater-than sign *and* a space)
+		// Blockquote: '> ' (greater-than sign *and* a space)
 		} else if ((i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '>' && text[i + 1] == ' ')) {
 			text_attribute = BLOCKQUOTE;

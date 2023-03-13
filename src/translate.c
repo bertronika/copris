@@ -4,7 +4,7 @@
  * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
- * GNU GPLv3 or later. See files `main.c' and `COPYING' for more details.
+ * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
  */
 
 #include <stdio.h>
@@ -36,7 +36,7 @@ int load_translation_file(const char *filename, struct Inifile **trfile) {
 	if (LOG_DEBUG)
 		PRINT_MSG("Parsing translation file '%s':", filename);
 
-	// `Your hash must be declared as a NULL-initialized pointer to your structure.'
+	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*trfile = NULL;
 
 	int parse_error = ini_parse_file(file, inih_handler, trfile);
@@ -86,7 +86,7 @@ int load_translation_file(const char *filename, struct Inifile **trfile) {
  * name = value  (inih library)
  * key  = item   (uthash)
  */
-// `Handler should return nonzero on success, zero on error.'
+// 'Handler should return nonzero on success, zero on error.'
 #define COPRIS_PARSE_FAILURE   0
 #define COPRIS_PARSE_SUCCESS   1
 #define COPRIS_PARSE_DUPLICATE 2
@@ -104,13 +104,13 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	}
 
 	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
-		PRINT_ERROR_MSG("`%s': value length exceeds maximum of %zu bytes.", value,
+		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
 		return COPRIS_PARSE_FAILURE;
 	}
 
 	if (utf8_count_codepoints(name, 2) > 1) {
-		PRINT_ERROR_MSG("`%s': name has more than one character.", name);
+		PRINT_ERROR_MSG("'%s': name has more than one character.", name);
 		return COPRIS_PARSE_FAILURE;
 	}
 
@@ -139,7 +139,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 		// Check for a parse error
 		if (element_count == -1) {
-			PRINT_ERROR_MSG("Failure while processing value for `%s'.", name);
+			PRINT_ERROR_MSG("Failure while processing value for '%s'.", name);
 			free(s);
 			return COPRIS_PARSE_FAILURE;
 		}
