@@ -157,7 +157,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		} else {
 			printf(" %1s (%zu) =>", s->in, name_len);
 			for (int i = 0; i < element_count; i++)
-				printf(" 0x%X", s->out[i]);
+				printf(" 0x%X", (unsigned int)(s->out[i] & 0xFF));
 		}
 
 		if (name_overwritten)
