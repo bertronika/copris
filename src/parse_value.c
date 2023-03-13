@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
+#include <string.h>
 
 #include <uthash.h>   /* uthash library - hash table       */
 #include <utstring.h> /* uthash library - dynamic strings  */
@@ -106,7 +107,10 @@ int parse_numbers_to_commands(const char *value, char *parsed_value, int parsed_
 		}
 
 		if ((unsigned long)temp_value > 255) { // 8 bytes
-			PRINT_ERROR_MSG("Value '%s' in '%s' is out of bounds.", valuepos, value);
+			if (strcmp(valuepos, value) == 0)
+				PRINT_ERROR_MSG("Value '%s' is out of bounds.", valuepos);
+			else
+				PRINT_ERROR_MSG("Value '%s', part of '%s', is out of bounds.", valuepos, value);
 			return -1;
 		}
 
