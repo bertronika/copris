@@ -14,3 +14,7 @@ int dump_printer_set_commands(struct Inifile **prset);
  */
 void unload_printer_set_file(struct Inifile **prset);
 
+/*
+ * Prepend and append any session commands to 'copris_text', present in 'prset'.
+ */
+void apply_session_commands(UT_string *copris_text, struct Inifile **prset);

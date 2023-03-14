@@ -21,5 +21,9 @@ static const char *printer_commands[] = {
 	"F_LINK_ON",
 	"F_LINK_OFF",
 
+    /* Printing session commands; these will be used before and after printing received text */
+    "S_BEFORE_TEXT",
+    "S_AFTER_TEXT",
+
 	NULL
 };

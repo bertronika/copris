@@ -439,9 +439,12 @@ int main(int argc, char **argv) {
 		if (attrib.copris_flags & FILTER_NON_ASCII)
 			filter_non_ascii(copris_text);
 
-		// Stage 4: Handle Markdown in text with a printer feature set file
-		if (attrib.copris_flags & HAS_PRSET)
+		// Stage 4: Handle Markdown in text and printing session commands with
+		//          a printer feature set file
+		if (attrib.copris_flags & HAS_PRSET) {
 			parse_markdown(copris_text, &prset);
+			apply_session_commands(copris_text, &prset);
+		}
 
 		// Stage 5: Write text to the output destination
 		if (attrib.copris_flags & HAS_DESTINATION) {
