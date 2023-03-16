@@ -1,4 +1,4 @@
-COPRIS(1)                                   0.9-495-g91fbff5-dirty                                   COPRIS(1)
+COPRIS(1)                             0.9-505-g6bbfbc2-dirty                            COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -8,22 +8,22 @@ SYNOPSIS
        copris --dump-commands > new_printer_set.ini
 
 DESCRIPTION
-       COPRIS  is a printer server and text conversion program, intended to receive UTF-8 encoded text locally
-       or over a network, process it and send it to a dot-matrix printer.  In its core, COPRIS reads text from
-       standard  input or a built-in TCP socket server (similar to telnet(1) or nc(1)), and optionally applies
-       two processing methods to it:
+       COPRIS  is a printer server and text conversion program, intended to receive UTF-8 encoded
+       text locally or over a network, process it and send it to a dot-matrix  printer.   In  its
+       core,  COPRIS  reads  text from standard input or a built-in TCP socket server (similar to
+       telnet(1) or nc(1)), and optionally applies two processing methods to it:
 
    Character translation
-       COPRIS can load a translation file that defines user-specified characters, not understood by printers -
-       usually  multi-byte  (UTF-8) ones.  They are swapped with appropriate (or at least similar) locale-spe-
-       cific replacements, defined in the same file.
+       COPRIS can load a translation file that defines user-specified characters, not  understood
+       by  printers  - usually multi-byte (UTF-8) ones.  They are swapped with appropriate (or at
+       least similar) locale-specific replacements, defined in the same file.
 
    Printer feature sets
-       While COPRIS processes only plain text, some additional markup can be applied to it via printer feature
-       set files.  These may specify printer’s escape codes for attributes, such as bold, italic, double-width
-       text, they may change font faces, sizes, spacing and so on.  COPRIS searches for a subset  of  Markdown
-       attributes, present in input text, and replaces them with printer’s escape codes, much the same as with
-       translation files.
+       While COPRIS processes only plain text, some additional markup can be applied  to  it  via
+       printer  feature set files.  These may specify printer’s escape codes for attributes, such
+       as bold, italic, double-width text, they may change font faces, sizes, spacing and so  on.
+       COPRIS  searches  for a subset of Markdown attributes, present in input text, and replaces
+       them with printer’s escape codes, much the same as with translation files.
 
    File format
        Translation and printer feature set files are expected to be in the INI file format:
@@ -32,13 +32,14 @@ DESCRIPTION
               [section]
               key = whitespace separated values ; inline comment
 
-       In case you need a key to resolve to a blank value, set @ as the value (e.g. if you want to remove  in-
-       stead of replace certain characters in the text, or omit rendering some Markdown attributes).
+       In case you need a key to resolve to a blank value, set @ as the value (e.g. if  you  want
+       to  remove instead of replace certain characters in the text, or omit rendering some Mark-
+       down attributes).
 
 OPTIONS
        -p, --port NUMBER
-              Run  COPRIS  as a network server on port NUMBER.  Superuser privileges are required if NUMBER is
-              less than 1024.
+              Run COPRIS as a network server on port NUMBER.  Superuser privileges  are  required
+              if NUMBER is less than 1024.
 
        -t, --translate FILE
               Enable character translation with definitions from character translation FILE.
@@ -47,8 +48,8 @@ OPTIONS
               Enable Markdown parsing with definitions from printer feature set FILE.
 
        --dump-commands
-              Show all possible printer feature set commands in INI file format (e.g. to be piped into  a  new
-              printer feature set file you are making).
+              Show all possible printer feature set commands in INI file format (e.g. to be piped
+              into a new printer feature set file you are making).
 
        -d, --daemon
               If running as a network server, do not exit after the first connection.
@@ -60,16 +61,17 @@ OPTIONS
               If limit is active, cut text on NUMBER count instead of discarding the whole chunk.
 
        -R, --remove-non-ascii
-              Remove  all characters (or bytes) that aren’t part of the ASCII character set.  As (old) dot-ma-
-              trix printers generally don’t support Unicode-encoded characters, this will  both  prevent  them
-              being wrongly printed, but at the same time possibly corrupt the meaning of the text.
+              Remove all characters (or bytes) that aren’t part of the ASCII character  set.   As
+              (old)  dot-matrix printers generally don’t support Unicode-encoded characters, this
+              will both prevent them being wrongly printed, but at the same time possibly corrupt
+              the meaning of the text.
 
        -v, --verbose
               Show informative status messages.  If specified twice, show even more messages.
 
        -q, --quiet
-              Do not show any unneccessary messages, except warnings and fatal errors, routed to stderr.  This
-              also omits notes, shown if COPRIS assumes it is not invoked properly.
+              Do  not show any unneccessary messages, except warnings and fatal errors, routed to
+              stderr.  This also omits notes, shown if COPRIS assumes it is not invoked properly.
 
        -h, --help
               Show a short option summary.
@@ -77,24 +79,25 @@ OPTIONS
        -V, --version
               Show program version, author and build-time options.
 
-       Do not specify a port number if you want to read from standard input.  Likewise, omit the  output  file
-       to have text echoed out to standard output (or piped elsewhere).
+       Do not specify a port number if you want to read from standard input.  Likewise, omit  the
+       output file to have text echoed out to standard output (or piped elsewhere).
 
 EXAMPLES
-       Run  as  a  simple  server on port 8080, perform no text conversion, output received data to the serial
-       port and exit after one connection.  Note that superuser privileges are required if the specified  port
-       is smaller than 1024.
+       Run  as  a simple server on port 8080, perform no text conversion, output received data to
+       the serial port and exit after one connection.  Note that  superuser  privileges  are  re-
+       quired if the specified port is smaller than 1024.
 
               copris -p 8080 /dev/ttyS0
 
-       Serve  on  port  8080  as a daemon (do not exit after first connection), translate characters using the
-       slovene.ini translation file, limit any incoming text to maximum 100 characters and print received data
-       to the terminal.  Note that text limit works only when running as a server.
+       Serve  on port 8080 as a daemon (do not exit after first connection), translate characters
+       using the slovene.ini translation file, limit any incoming text to maximum 100  characters
+       and  print received data to the terminal.  Note that text limit works only when running as
+       a server.
 
               copris -p 8080 -d -t slovene.ini -l 100
 
-       Read  local  file Manual.md using the specified printer feature set epson.ini and output formatted text
-       to a USB interface on the local computer:
+       Read local file Manual.md using the specified printer feature  set  epson.ini  and  output
+       formatted text to a USB interface on the local computer:
 
               copris -r epson.ini /dev/ttyUSB0 < Manual.md
 
@@ -104,4 +107,4 @@ FILES
 DEVELOPMENT
        COPRIS’ development repository resides at <https://github.com/bertronika/copris>.
 
-                                                  2023-02-22                                         COPRIS(1)
+                                            2023-03-16                                  COPRIS(1)

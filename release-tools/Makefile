@@ -10,10 +10,10 @@ readme: $(README)
 manpage: $(MANPAGE) $(MANPAGE).txt
 
 $(README): README.md.m4 usage_examples.md.m4
-	m4 -PEE README.md.m4 | fmt -s > $@
+	m4 -PEE README.md.m4 | fmt -s -w 100 > $@
 
 $(MANPAGE): copris.1.md.m4 README.md.m4 usage_examples.md.m4
 	m4 -PEE copris.1.md.m4 | pandoc --standalone --to man > $@
 
 $(MANPAGE).txt: $(MANPAGE)
-	man -l $< | col -bx > $@
+	MANWIDTH=100 man -l $< | col -bx > $@
