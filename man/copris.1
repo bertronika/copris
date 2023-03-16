@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-02-22" "" "0.9-495-g91fbff5-dirty"
+.TH "COPRIS" "1" "2023-03-16" "" "0.9-505-gc698c7c-dirty"
 .hy
 .SH NAME
 .PP
@@ -40,8 +40,8 @@ optionally applies two processing methods to it:
 COPRIS can load a \f[I]translation file\f[R] that defines user-specified
 characters, not understood by printers - usually multi-byte (UTF-8)
 ones.
-They are swapped with appropriate (or at least similar) locale-specific
-replacements, defined in the same file.
+They are swapped (reencoded) with appropriate, or at least similar
+locale-specific replacements, defined in the same file.
 .SS Printer feature sets
 .PP
 While COPRIS processes only plain text, some additional markup can be

@@ -8,7 +8,7 @@ COPRIS is a printer server and text conversion program, intended to receive UTF-
 
 ## Character translation
 
-COPRIS can load a *translation file* that defines user-specified characters, not understood by printers - usually multi-byte (UTF-8) ones. They are swapped with appropriate (or at least similar) locale-specific replacements, defined in the same file.
+COPRIS can load a *translation file* that defines user-specified characters, not understood by printers - usually multi-byte (UTF-8) ones. They are swapped (reencoded) with appropriate, or at least similar locale-specific replacements, defined in the same file.
 
 
 ## Printer feature sets
@@ -83,6 +83,9 @@ F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 
 The `ascii(7)` man page might come in handy for determining values of various control codes.
 
+
+### Additional commands
+
 You can use existing commands as variables, as long as you define the command *before* using it as a variable. Furthermore, you may define your own variables and use them in existing commands. For COPRIS to recognise them, they must be prefixed with `C_`. Variables may be interweaved with commands.
 
 ```ini
@@ -92,6 +95,9 @@ C_UNDERLINE_OFF = 0x1B 0x2D 0x30
 F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
+
+COPRIS also provides two variables that are sent to the printer before and after printing the received text. They are named `S_BEFORE_TEXT` and `S_AFTER_TEXT` respectively. They can be used e.g. for setting margins, line spacing, font faces, character density, resetting the printer and so on.
+
 
 # How does COPRIS handle the output serial/parallel/USB/etc. connection?
 

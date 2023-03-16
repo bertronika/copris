@@ -1,4 +1,4 @@
-COPRIS(1)                             0.9-505-g6bbfbc2-dirty                            COPRIS(1)
+COPRIS(1)                             0.9-505-gc698c7c-dirty                            COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -15,8 +15,8 @@ DESCRIPTION
 
    Character translation
        COPRIS can load a translation file that defines user-specified characters, not  understood
-       by  printers  - usually multi-byte (UTF-8) ones.  They are swapped with appropriate (or at
-       least similar) locale-specific replacements, defined in the same file.
+       by  printers  - usually multi-byte (UTF-8) ones.  They are swapped (reencoded) with appro-
+       priate, or at least similar locale-specific replacements, defined in the same file.
 
    Printer feature sets
        While COPRIS processes only plain text, some additional markup can be applied  to  it  via
