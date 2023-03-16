@@ -223,6 +223,6 @@ void translate_text(UT_string *copris_text, struct Inifile **trfile)
 	}
 
 	utstring_clear(copris_text);
-	utstring_bincpy(copris_text, utstring_body(translated_text), utstring_len(translated_text));
+	utstring_concat(copris_text, translated_text);
 	utstring_free(translated_text);
 }

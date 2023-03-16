@@ -294,7 +294,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 	// Overwrite input text
 	utstring_clear(copris_text);
-	utstring_bincpy(copris_text, utstring_body(converted_text), utstring_len(converted_text));
+	utstring_concat(copris_text, converted_text);
 	utstring_free(converted_text);
 }
 
