@@ -316,6 +316,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	return 0;
 }
 
+// Helper function for writing to the appropriate output
+static void write_to_output(UT_string *, struct Attribs *);
+
 int main(int argc, char **argv) {
 	// Run-time options (program attributes)
 	struct Attribs attrib;
@@ -417,6 +420,12 @@ int main(int argc, char **argv) {
 	UT_string *copris_text;
 	utstring_new(copris_text);
 
+	if (attrib.copris_flags & HAS_PRSET) {
+		apply_session_commands(copris_text, &prset, SESSION_STARTUP);
+		write_to_output(copris_text, &attrib);
+		utstring_clear(copris_text);
+	}
+
 	// Run the main program loop
 	do {
 		// Stage 1: Read input text
@@ -443,39 +452,25 @@ int main(int argc, char **argv) {
 		//          a printer feature set file
 		if (attrib.copris_flags & HAS_PRSET) {
 			parse_markdown(copris_text, &prset);
-			apply_session_commands(copris_text, &prset);
+			apply_session_commands(copris_text, &prset, SESSION_PRINT);
 		}
 
 		// Stage 5: Write text to the output destination
-		if (attrib.copris_flags & HAS_DESTINATION) {
-			copris_write_file(attrib.destination, copris_text);
-		} else {
-			const char *processed_text = utstring_body(copris_text);
-			size_t text_length = utstring_len(copris_text);
-			if (LOG_ERROR)
-				puts("; BST"); // Begin-Stream-Transcript
-
-			fputs(processed_text, stdout);
-
-			if (LOG_ERROR) {
-				// Print a new line if one's missing in the final text
-				if (processed_text[text_length - 1] != '\n')
-					puts("");
-
-				puts("; EST"); // End-Stream-Transcript
-			}
-		}
+		write_to_output(copris_text, &attrib);
 
 		// Current session's text has been processed, clear it for a new read
 		utstring_clear(copris_text);
 
 	} while (attrib.daemon); /* end of main program loop */
 
+	if (attrib.copris_flags & HAS_PRSET) {
+		apply_session_commands(copris_text, &prset, SESSION_SHUTDOWN);
+		write_to_output(copris_text, &attrib);
+		unload_printer_set_file(&prset);
+	}
+
 	if (attrib.copris_flags & HAS_TRFILE)
 		unload_translation_file(&trfile);
-
-	if (attrib.copris_flags & HAS_PRSET)
-		unload_printer_set_file(&prset);
 
 	utstring_free(copris_text);
 
@@ -483,4 +478,27 @@ int main(int argc, char **argv) {
 		PRINT_MSG("Not running as a daemon, exiting.");
 
 	return 0;
+}
+
+static void write_to_output(UT_string *copris_text, struct Attribs *attrib)
+{
+	if (attrib->copris_flags & HAS_DESTINATION) {
+		copris_write_file(attrib->destination, copris_text);
+	} else {
+		const char *processed_text = utstring_body(copris_text);
+		size_t text_length = utstring_len(copris_text);
+
+		if (LOG_ERROR)
+			puts("; BST"); // Begin-Stream-Transcript
+
+		fputs(processed_text, stdout);
+
+		if (LOG_ERROR) {
+			// Print a new line if one's missing in the final text
+			if (processed_text[text_length - 1] != '\n')
+				puts("");
+
+			puts("; EST"); // End-Stream-Transcript
+		}
+	}
 }

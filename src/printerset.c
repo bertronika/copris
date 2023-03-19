@@ -312,7 +312,8 @@ int dump_printer_set_commands(struct Inifile **prset)
 				break;
 			case 'S':
 				puts("\n# Printing session commands; used before and after printing "
-				     "received text");
+				     "received text,\n"
+				     "# or when COPRIS starts and before it exits.");
 				break;
 			}
 		}
@@ -320,8 +321,8 @@ int dump_printer_set_commands(struct Inifile **prset)
 		size_t command_len = strlen(s->in);
 
 		if ((s->in[0] == 'F' && s->in[command_len - 1] == 'N') ||
-		    (s->in[0] == 'S' && s->in[2] == 'A')) {
-			// *_ON/S_AFTER_* commands with extra padding
+		    (s->in[0] == 'S' && (s->in[3] == 'F' || s->in[6] == 'T'))) {
+			// *_ON/S_AFTER_TEXT/S_AT_STARTUP commands with extra padding
 			printf("; %s  = \n", s->in);
 
 		} else {
@@ -351,11 +352,40 @@ void unload_printer_set_file(struct Inifile **prset)
 		PRINT_MSG("Unloaded printer feature set file (count = %d).", count);
 }
 
-void apply_session_commands(UT_string *copris_text, struct Inifile **prset)
+void apply_session_commands(UT_string *copris_text, struct Inifile **prset, session_t state)
 {
 	struct Inifile *s;
 
-	// Prepend
+	switch(state) {
+	case SESSION_PRINT:
+		HASH_FIND_STR(*prset, "S_AFTER_TEXT", s);
+		break;
+	case SESSION_STARTUP:
+		HASH_FIND_STR(*prset, "S_AT_STARTUP", s);
+		break;
+	case SESSION_SHUTDOWN:
+		HASH_FIND_STR(*prset, "S_AT_SHUTDOWN", s);
+		break;
+	default:
+		assert(false);
+	}
+
+	assert(s != NULL);
+
+	// Append - either when starting/closing COPRIS, or after received text was printed
+	if (*s->out != '\0') {
+		if (LOG_DEBUG)
+			PRINT_MSG("Appending session command %s to the received text.", s->in);
+
+		// Append AFTER_TEXT to 'copris_text'
+		size_t command_len = strlen(s->out);
+		utstring_bincpy(copris_text, s->out, command_len);
+	}
+
+	if (state != SESSION_PRINT)
+		return; // Startup/shutdown command applied, no remaining actions necessary
+
+	// Prepend before received text
 	HASH_FIND_STR(*prset, "S_BEFORE_TEXT", s);
 	assert(s != NULL);
 
@@ -377,18 +407,4 @@ void apply_session_commands(UT_string *copris_text, struct Inifile **prset)
 
 		utstring_free(temp_text);
 	}
-
-	// Append
-	HASH_FIND_STR(*prset, "S_AFTER_TEXT", s);
-	assert(s != NULL);
-
-	if (*s->out != '\0') {
-		if (LOG_DEBUG)
-			PRINT_MSG("Appending session command S_AFTER_TEXT to the received text.");
-
-		// Append AFTER_TEXT to 'copris_text'
-		size_t command_len = strlen(s->out);
-		utstring_bincpy(copris_text, s->out, command_len);
-	}
-
 }

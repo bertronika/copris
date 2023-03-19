@@ -15,6 +15,12 @@ int dump_printer_set_commands(struct Inifile **prset);
 void unload_printer_set_file(struct Inifile **prset);
 
 /*
- * Prepend and append any session commands to 'copris_text', present in 'prset'.
+ * Prepend and append any session commands to 'copris_text', present in 'prset'. Set 'state'
+ * according to the below enumerator.
  */
-void apply_session_commands(UT_string *copris_text, struct Inifile **prset);
+typedef enum session {
+	SESSION_PRINT,    /* Apply before each text chunk gets printed    */
+	SESSION_STARTUP,  /* Apply command once, when COPRIS starts up    */
+	SESSION_SHUTDOWN  /* Apply command once, before COPRIS shuts down */
+} session_t;
+void apply_session_commands(UT_string *copris_text, struct Inifile **prset, session_t state);

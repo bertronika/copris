@@ -1,5 +1,5 @@
 static const char *printer_commands[] = {
-	/* Formatting commands; both parts of a pair must be defined */
+	// Formatting commands; both parts of a pair must be defined.
 	"F_BOLD_ON",
 	"F_BOLD_OFF",
 	"F_ITALIC_ON",
@@ -21,9 +21,12 @@ static const char *printer_commands[] = {
 	"F_LINK_ON",
 	"F_LINK_OFF",
 
-    /* Printing session commands; these will be used before and after printing received text */
-    "S_BEFORE_TEXT",
-    "S_AFTER_TEXT",
+	// Printing session commands; used before and after printing received text,
+	// or when COPRIS starts and before it exits.
+	"S_BEFORE_TEXT",
+	"S_AFTER_TEXT",
+	"S_AT_STARTUP",
+	"S_AT_SHUTDOWN",
 
 	NULL
 };
