@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-03-16" "" "0.9-505-gc698c7c-dirty"
+.TH "COPRIS" "1" "2023-03-19" "" "0.9-509-g40f978e-dirty"
 .hy
 .SH NAME
 .PP
@@ -50,8 +50,8 @@ These may specify printer\[cq]s escape codes for attributes, such as
 bold, italic, double-width text, they may change font faces, sizes,
 spacing and so on.
 COPRIS searches for a subset of Markdown attributes, present in input
-text, and replaces them with printer\[cq]s escape codes, much the same
-as with translation files.
+text, and replaces or enhances them by adding appropriate escape codes
+to the text.
 .SS File format
 .PP
 \f[I]Translation\f[R] and \f[I]printer feature set files\f[R] are
@@ -60,15 +60,23 @@ expected to be in the INI file format:
 .nf
 \f[C]
 # Comment
-[section]
-key = whitespace separated values ; inline comment
+key1 = whitespace separated values
+key2 = whitespace separated values ; inline comment
+\&...
 \f[R]
 .fi
 .PP
-In case you need a \f[V]key\f[R] to resolve to a blank value, set
-\f[V]\[at]\f[R] as the value (e.g.\ if you want to remove instead of
-replace certain characters in the text, or omit rendering some Markdown
-attributes).
+Left-hand keys should be written out as readable ASCII or UTF-8
+characters or strings, right-hand values are expected to be in either
+decimal, octal (prefixed by a \f[V]0\f[R]) or hexadecimal base (prefixed
+with \f[V]0x\f[R]).
+Don\[cq]t prepend zeroes to decimal numbers for alignment, as
+they\[cq]ll be interpreted as octal numbers.
+Instead, use any amount of spaces (or tabulators).
+.PP
+In case you need a \f[V]key\f[R] to resolve to a blank \f[V]value\f[R],
+set \f[V]\[at]\f[R] as the value (e.g.\ if you want to remove certain
+characters in the text, or omit rendering some Markdown attributes).
 .SH OPTIONS
 .TP
 \f[B]-p\f[R], \f[B]--port\f[R] \f[I]NUMBER\f[R]
@@ -150,12 +158,13 @@ copris -p 8080 -d -t slovene.ini -l 100
 .fi
 .PP
 Read local file \f[V]Manual.md\f[R] using the specified printer feature
-set \f[V]epson.ini\f[R] and output formatted text to a USB interface on
-the local computer:
+set \f[V]epson.ini\f[R].
+Remove any character that isn\[cq]t present in the ASCII table.
+Output formatted text to a USB interface on the local computer:
 .IP
 .nf
 \f[C]
-copris -r epson.ini /dev/ttyUSB0 < Manual.md
+copris -r epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
 \f[R]
 .fi
 .SH FILES

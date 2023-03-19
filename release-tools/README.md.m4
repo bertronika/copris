@@ -13,7 +13,7 @@ COPRIS can load a *translation file* that defines user-specified characters, not
 
 ## Printer feature sets
 
-While COPRIS processes only plain text, some additional markup can be applied to it via *printer feature set files*. These may specify printer's escape codes for attributes, such as bold, italic, double-width text, they may change font faces, sizes, spacing and so on. COPRIS searches for a subset of Markdown attributes, present in input text, and replaces them with printer's escape codes, much the same as with translation files.
+While COPRIS processes only plain text, some additional markup can be applied to it via *printer feature set files*. These may specify printer's escape codes for attributes, such as bold, italic, double-width text, they may change font faces, sizes, spacing and so on. COPRIS searches for a subset of Markdown attributes, present in input text, and replaces or enhances them by adding appropriate escape codes to the text.
 
 
 ## File format
@@ -22,11 +22,14 @@ While COPRIS processes only plain text, some additional markup can be applied to
 
 ```ini
 # Comment
-[section]
-key = whitespace separated values ; inline comment
+key1 = whitespace separated values
+key2 = whitespace separated values ; inline comment
+...
 ```
 
-In case you need a `key` to resolve to a blank value, set `@` as the value (e.g. if you want to remove instead of replace certain characters in the text, or omit rendering some Markdown attributes).
+Left-hand keys should be written out as readable ASCII or UTF-8 characters or strings, right-hand values are expected to be in either decimal, octal (prefixed by a `0`) or hexadecimal base (prefixed with `0x`). Don't prepend zeroes to decimal numbers for alignment, as they'll be interpreted as octal numbers. Instead, use any amount of spaces (or tabulators).
+
+In case you need a `key` to resolve to a blank `value`, set `@` as the value (e.g. if you want to remove certain characters in the text, or omit rendering some Markdown attributes).
 m4_ifdef([[[GEN_MANPAGE]]], , [[[m4_dnl -- print if GEN_MANPAGE not defined
 
 
@@ -34,16 +37,20 @@ m4_ifdef([[[GEN_MANPAGE]]], , [[[m4_dnl -- print if GEN_MANPAGE not defined
 
 In the late 1980's and 90's, when small dot-matrix printers were getting common in offices and homes, they usually included only a handful of character sets (English, French, German, Italian, Spanish and such). Languages, whose alphabets required additional letters, had to be incorporated in some way. The solution was to sacrifice some of the ASCII characters. Printers were internally modified - some symbols, such as `~ @ {`, actually printed locale-specific characters. Users could then print localised text without having to send special commands to their printers.
 
-COPRIS allows you to avoid manually swapping characters with the use of *translation files*, consisting of source-destination `key = raw values` definitions. Input text is scanned for occurrences of left-hand *keys*, which are replaced with appropriate right-hand *values*, specified in decimal, hexadecimal or octal bases.
+COPRIS allows you to avoid manually swapping characters with the use of *translation files*, consisting of source-destination `character = character code` definitions. Input text is scanned for occurrences of left-hand *characters*, which are replaced with appropriate right-hand *codes*, specified in decimal, hexadecimal or octal bases.
 
 To use a translation file, specify the `-t/--translate filename.ini` argument in the command line.
 
 
 ## How do I make a translation file?
 
-To determine the codes of replacement characters, have your printer print out its character set. You can often trigger an automatic printout by holding certain buttons while powering it on. Consult the printer's manual for accurate information. Then, count the offset values of wanted characters, helping yourself with the ASCII code table (e.g. the `ascii(7)` man page). Alternatively, run the `printchar.sh` test file, included with COPRIS, and pipe it into the printer. It'll output printable characters, along with their decimal and hexadecimal codes.
+To determine the codes of replacement characters, have your printer print out its character set. You can often trigger an automatic printout by holding certain buttons while powering it on. Consult the printer's manual or the Internet for accurate information. Then, count the offset values of wanted characters and write them out along the character you want to be replaced.
 
-Example excerpt for Slovene characters for Epson LX-300 (distributed by Repro Ljubljana):
+Alternatively, run the `printchar.sh` test file, included with COPRIS, and pipe its output into the printer. It'll output printable characters, along with their decimal and hexadecimal codes. Again, write out the character pairs, separated by an equals sign.
+
+You may be able to avoid this print-and-count procedure by checking out if your language is defined in one of the *code pages* (CP), supported by the printer (again, check documentation). If it does, you may supply a whole code page as the translation file. Some are already provided in the `encodings/` directory, others you'll have to source and convert them for COPRIS manually. **Contributions are always welcome if the encoding is general enough.** But beware, if your code page *is* supported by the printer, it might not be the default one and you'll have to tell the printer which one you want. Read on, the chapter about printer feature set files isn't only about formatting text, it also explains the custom commands that are used for setting up the printer.
+
+Here's an example Slovene excerpt for Epson LX-300. I want left-hand letters to be replaced by raw decimal codes on the right (which will, of course, be rendered as left-hand letters on the printer):
 
 ```ini
 # slovene.ini
@@ -62,7 +69,7 @@ Pass Markdown-formatted text to COPRIS. Before doing that, specify an appropriat
 
 ## How do I make a printer feature set file?
 
-Consult the printer's manual. There should be a section on escape codes. Then, generate a sample printer feature set file (`--dump-commands`, see man page) and append codes to the appropriate commands in either decimal, hexadecimal or octal format, with each one separated by at least one space.
+Consult the printer's manual. There should be a section on escape codes. Then, generate a sample printer feature set file (`copris --dump-commands > my-printer.ini`, see [copris(1) man page](man/copris.1.txt) for details). Uncomment the appropriate commands and append codes to them in either decimal, hexadecimal or octal format, with each one separated by at least one space.
 
 Example from Epson's LX-300 manual, page A-14 (91):
 
@@ -81,7 +88,7 @@ F_ITALIC_ON  = 0x1B 0x34  ; hexadecimal notation, 0x1B = ESC
 F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 ```
 
-The `ascii(7)` man page might come in handy for determining values of various control codes.
+The [ascii(7) man page](https://man7.org/linux/man-pages/man7/ascii.7.html) might come in handy for determining values of various control codes.
 
 
 ### Additional commands
@@ -151,6 +158,6 @@ sudo make install [DESTDIR=...] [PREFIX=...]
 
 `DESTDIR` and `PREFIX` are optional. I'd recommend using a symlink farm manager, such as GNU Stow, installing COPRIS into its own directory (e.g. `make PREFIX=/usr/local/stow/copris`) and then symlinking it into place (e.g. running `sudo stow copris` in `/usr/local/stow`).
 
-By default a non-stripped release binary is built, which includes some debugging symbols for crash diagnosis. There are many more targets present for debugging and development purposes, run `make help` to review them.
+By default a non-stripped release binary is built, which includes some debugging symbols for crash diagnosis. Many more targets are present for debugging and development purposes, run `make help` to review them.
 
 ]]])m4_dnl endif GEN_MANPAGE

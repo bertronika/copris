@@ -1,4 +1,4 @@
-COPRIS(1)                             0.9-505-gc698c7c-dirty                            COPRIS(1)
+COPRIS(1)                             0.9-509-g40f978e-dirty                            COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -23,22 +23,28 @@ DESCRIPTION
        printer  feature set files.  These may specify printer’s escape codes for attributes, such
        as bold, italic, double-width text, they may change font faces, sizes, spacing and so  on.
        COPRIS  searches  for a subset of Markdown attributes, present in input text, and replaces
-       them with printer’s escape codes, much the same as with translation files.
+       or enhances them by adding appropriate escape codes to the text.
 
    File format
        Translation and printer feature set files are expected to be in the INI file format:
 
               # Comment
-              [section]
-              key = whitespace separated values ; inline comment
+              key1 = whitespace separated values
+              key2 = whitespace separated values ; inline comment
+              ...
+
+       Left-hand keys should be written out as readable ASCII or  UTF-8  characters  or  strings,
+       right-hand  values  are expected to be in either decimal, octal (prefixed by a 0) or hexa-
+       decimal base (prefixed with 0x).  Don’t prepend zeroes to decimal numbers  for  alignment,
+       as they’ll be interpreted as octal numbers.  Instead, use any amount of spaces (or tabula-
+       tors).
 
        In case you need a key to resolve to a blank value, set @ as the value (e.g. if  you  want
-       to  remove instead of replace certain characters in the text, or omit rendering some Mark-
-       down attributes).
+       to remove certain characters in the text, or omit rendering some Markdown attributes).
 
 OPTIONS
        -p, --port NUMBER
-              Run COPRIS as a network server on port NUMBER.  Superuser privileges  are  required
+              Run  COPRIS  as a network server on port NUMBER.  Superuser privileges are required
               if NUMBER is less than 1024.
 
        -t, --translate FILE
@@ -61,8 +67,8 @@ OPTIONS
               If limit is active, cut text on NUMBER count instead of discarding the whole chunk.
 
        -R, --remove-non-ascii
-              Remove all characters (or bytes) that aren’t part of the ASCII character  set.   As
-              (old)  dot-matrix printers generally don’t support Unicode-encoded characters, this
+              Remove  all  characters (or bytes) that aren’t part of the ASCII character set.  As
+              (old) dot-matrix printers generally don’t support Unicode-encoded characters,  this
               will both prevent them being wrongly printed, but at the same time possibly corrupt
               the meaning of the text.
 
@@ -70,7 +76,7 @@ OPTIONS
               Show informative status messages.  If specified twice, show even more messages.
 
        -q, --quiet
-              Do  not show any unneccessary messages, except warnings and fatal errors, routed to
+              Do not show any unneccessary messages, except warnings and fatal errors, routed  to
               stderr.  This also omits notes, shown if COPRIS assumes it is not invoked properly.
 
        -h, --help
@@ -79,27 +85,28 @@ OPTIONS
        -V, --version
               Show program version, author and build-time options.
 
-       Do not specify a port number if you want to read from standard input.  Likewise, omit  the
+       Do  not specify a port number if you want to read from standard input.  Likewise, omit the
        output file to have text echoed out to standard output (or piped elsewhere).
 
 EXAMPLES
-       Run  as  a simple server on port 8080, perform no text conversion, output received data to
-       the serial port and exit after one connection.  Note that  superuser  privileges  are  re-
+       Run as a simple server on port 8080, perform no text conversion, output received  data  to
+       the  serial  port  and  exit after one connection.  Note that superuser privileges are re-
        quired if the specified port is smaller than 1024.
 
               copris -p 8080 /dev/ttyS0
 
-       Serve  on port 8080 as a daemon (do not exit after first connection), translate characters
-       using the slovene.ini translation file, limit any incoming text to maximum 100  characters
-       and  print received data to the terminal.  Note that text limit works only when running as
+       Serve on port 8080 as a daemon (do not exit after first connection), translate  characters
+       using  the slovene.ini translation file, limit any incoming text to maximum 100 characters
+       and print received data to the terminal.  Note that text limit works only when running  as
        a server.
 
               copris -p 8080 -d -t slovene.ini -l 100
 
-       Read local file Manual.md using the specified printer feature  set  epson.ini  and  output
-       formatted text to a USB interface on the local computer:
+       Read  local  file Manual.md using the specified printer feature set epson.ini.  Remove any
+       character that isn’t present in the ASCII table.  Output formatted text to a USB interface
+       on the local computer:
 
-              copris -r epson.ini /dev/ttyUSB0 < Manual.md
+              copris -r epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
 
 FILES
        Example translation and printer feature set files can be found in /usr/share/copris.
@@ -107,4 +114,4 @@ FILES
 DEVELOPMENT
        COPRIS’ development repository resides at <https://github.com/bertronika/copris>.
 
-                                            2023-03-16                                  COPRIS(1)
+                                            2023-03-19                                  COPRIS(1)
