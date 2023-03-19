@@ -127,10 +127,14 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
-COPRIS also provides two variables that are sent to the printer before and after printing the
-received text. They are named `S_BEFORE_TEXT` and `S_AFTER_TEXT` respectively. They can be used
-e.g. for setting margins, line spacing, font faces, character density, resetting the printer
-and so on.
+COPRIS also provides two command pairs for sending repetitive settings to the printer. They
+may be used to set margins, line spacing, font face, character density, initialise/reset the
+printer and so on:
+
+- `S_AT_STARTUP` and `S_AT_SHUTDOWN` - sent to the printer once after COPRIS starts and once
+  before it exits
+- `S_BEFORE_TEXT` and `S_AFTER_TEXT` - sent to the printer each time text is received, in
+  order `S_BEFORE_TEXT` - *received text* - `S_AFTER_TEXT`
 
 
 # How does COPRIS handle the output serial/parallel/USB/etc. connection?
