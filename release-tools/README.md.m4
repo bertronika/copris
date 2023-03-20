@@ -123,6 +123,8 @@ The last argument, specified to COPRIS, can either be a character device (e.g. `
 
 # Usage and examples
 
+**Notice:** COPRIS is in active development. Some features are still missing, others have not been thoroughly tested yet. Command line option arguments may change in future. Version 1.0 will be tagged when the feature set will be deemed complete.
+
 m4_include(usage_examples.md.m4)m4_dnl
 
 If you need to debug COPRIS or are curious about its internal status, use the `-v/--verbose` parameter up to two times.

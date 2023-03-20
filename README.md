@@ -173,6 +173,10 @@ markers (`;BST` and `;EST`).
 
 # Usage and examples
 
+**Notice:** COPRIS is in active development. Some features are still missing, others have not
+been thoroughly tested yet. Command line option arguments may change in future. Version 1.0
+will be tagged when the feature set will be deemed complete.
+
 Run as a simple server on port 8080, perform no text conversion, output
 received data to the serial port and exit after one connection. Note
 that superuser privileges are required if the specified port is smaller
