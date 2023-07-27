@@ -1,3 +1,9 @@
+/*
+ * This is a list of every possible command that can be specified in a printer set file.
+ * Printing session commands are independent of the content, formatting commands are
+ * used when parsing Markdown.
+ */
+
 static const char *printer_commands[] = {
 	// Formatting commands; both parts of a pair must be defined.
 	"F_BOLD_ON",
