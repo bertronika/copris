@@ -359,6 +359,7 @@ void apply_session_commands(UT_string *copris_text, struct Inifile **prset, sess
 	switch(state) {
 	case SESSION_PRINT:
 		HASH_FIND_STR(*prset, "S_AFTER_TEXT", s);
+		// S_BEFORE_TEXT is handled later in this function
 		break;
 	case SESSION_STARTUP:
 		HASH_FIND_STR(*prset, "S_AT_STARTUP", s);
