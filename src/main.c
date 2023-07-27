@@ -421,10 +421,16 @@ int main(int argc, char **argv) {
 	UT_string *copris_text;
 	utstring_new(copris_text);
 
+	// Prepend the startup session command
 	if (attrib.copris_flags & HAS_PRSET) {
-		apply_session_commands(copris_text, &prset, SESSION_STARTUP);
-		write_to_output(copris_text, &attrib);
-		utstring_clear(copris_text);
+		int num_of_chars = apply_session_commands(copris_text, &prset, SESSION_STARTUP);
+
+		if (num_of_chars > 0) {
+			write_to_output(copris_text, &attrib);
+			utstring_clear(copris_text);
+		} else if (num_of_chars < 0) {
+			return EXIT_FAILURE; // Negative return value - an error
+		}
 	}
 
 	// Run the main program loop
@@ -464,9 +470,16 @@ int main(int argc, char **argv) {
 
 	} while (attrib.daemon); /* end of main program loop */
 
+	// Append the shutdown session command
 	if (attrib.copris_flags & HAS_PRSET) {
-		apply_session_commands(copris_text, &prset, SESSION_SHUTDOWN);
-		write_to_output(copris_text, &attrib);
+		int num_of_chars = apply_session_commands(copris_text, &prset, SESSION_SHUTDOWN);
+
+		if (num_of_chars > 0) {
+			write_to_output(copris_text, &attrib);
+		} else if (num_of_chars < 0) {
+			return EXIT_FAILURE; // Negative return value - an error
+		}
+
 		unload_printer_set_file(&prset);
 	}
 
