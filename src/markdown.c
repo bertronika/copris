@@ -22,7 +22,7 @@
  * Some inspiration for the syntax is taken from the CommonMark specification, but
  * nothing more. No compliance is guaranteed. You've been warned :)
  *
- * Copyright (C) 2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2022-23 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
@@ -98,9 +98,11 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	int error_in_line = 0;
 	size_t line_char_i = 0;
 
+	bool escaped_char = (text[0] == '\\'); // Detect early escape character
+
 	for (size_t i = 0; text[i] != '\0'; i++) {
 		// Catch horizontal rules ('***'/'---') and copy them to output.
-		if ((i + 3 < text_len && text[i + 3] == '\n') &&
+		if (!escaped_char && (i + 3 < text_len && text[i + 3] == '\n') &&
 		    ((text[i] == '*' && text[i + 1] == '*' && text[i + 2] == '*') ||
 		     (text[i] == '-' && text[i + 1] == '-' && text[i + 2] == '-'))) {
 			text_attribute = RULE;
@@ -108,7 +110,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 		// Emphasis: inline '*'/'_' pairs for italic, '**'/'__' for bold,
 		//           '***'/'___' for both.
-		} else if (text[i] == '*' || text[i] == '_') {
+		} else if (!escaped_char && (text[i] == '*' || text[i] == '_')) {
 			if (i + 1 < text_len && (text[i + 1] == '*' || text[i + 1] == '_')) {
 				if (i + 2 < text_len && (text[i + 2] == '*' || text[i + 2] == '_')) {
 					text_attribute |= ITALIC | BOLD;
@@ -129,7 +131,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 		// Headings: '#' through '####' on a blank line. More than one space after the
 		//           pound sign will be preserved (e.g. to center titles).
-		} else if ((i == 0 || last_char == '\n') &&
+		} else if (!escaped_char && (i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '#')) {
 			text_attribute |= HEADING;
 
@@ -152,7 +154,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 			}
 
 		// Blockquote: '> ' (greater-than sign *and* a space)
-		} else if ((i == 0 || last_char == '\n') &&
+		} else if (!escaped_char && (i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '>' && text[i + 1] == ' ')) {
 			text_attribute = BLOCKQUOTE;
 			blockquote_open = true;
@@ -160,7 +162,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 		// Inline code: "`", and two block code variants: "```" at beginning/end of block
 		//              or "    " (four spaces) on each line.
-		} else if (text[i] == '`' && !code_block_open) {
+		} else if (!escaped_char && text[i] == '`' && !code_block_open) {
 			if (i + 2 < text_len && text[i + 1] == '`' && text[i + 2] == '`') {
 				text_attribute |= CODE_BLOCK;
 				code_block_on = !code_block_on;
@@ -169,13 +171,17 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				text_attribute |= INLINE_CODE;
 				inline_code_on = !inline_code_on;
 			}
-		} else if ((i == 0 || last_char == '\n') && !code_block_on &&
+		} else if (!escaped_char && (i == 0 || last_char == '\n') && !code_block_on &&
 			       (i + 3 < text_len && text[i] == ' ' && text[i + 1] == ' ' &&
 			        text[i + 2] == ' ' && text[i + 3] == ' ')) {
 			text_attribute |= CODE_BLOCK;
 			code_block_open = true;
 			i += 3;
 		}
+
+		// Check for an escape character. If found, skip converting the following markup element.
+		// Note that each character has to be escaped separately.
+		escaped_char = (text[i] == '\\');
 
 		if (text_attribute == NONE) {
 			// Reset open attributes on a new line
