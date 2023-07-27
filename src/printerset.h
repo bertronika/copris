@@ -28,5 +28,8 @@ typedef enum session {
  * Prepend and append to 'copris_text' any session commands, passed on from 'prset'.
  * Session commands are read from printer set file(s) and used for repetitive actions.
  * They are executed on various 'state's, contained in the above 'session_t' enumerated list.
+ *
+ * Return number of characters, appended to 'copris_text' (0 if none were added),
+ * or negative on failure.
  */
-void apply_session_commands(UT_string *copris_text, struct Inifile **prset, session_t state);
+int apply_session_commands(UT_string *copris_text, struct Inifile **prset, session_t state);

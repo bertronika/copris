@@ -352,7 +352,7 @@ void unload_printer_set_file(struct Inifile **prset)
 		PRINT_MSG("Unloaded printer feature set file (count = %d).", count);
 }
 
-void apply_session_commands(UT_string *copris_text, struct Inifile **prset, session_t state)
+int apply_session_commands(UT_string *copris_text, struct Inifile **prset, session_t state)
 {
 	struct Inifile *s;
 
@@ -371,7 +371,7 @@ void apply_session_commands(UT_string *copris_text, struct Inifile **prset, sess
 		assert(false);
 		// We shouldn't reach this spot, but if assert is disabled and a
 		// non-existent state is specified...
-		return;
+		return -1;
 	}
 
 	assert(s != NULL);
@@ -384,10 +384,12 @@ void apply_session_commands(UT_string *copris_text, struct Inifile **prset, sess
 		// Append AFTER_TEXT to 'copris_text'
 		size_t command_len = strlen(s->out);
 		utstring_bincpy(copris_text, s->out, command_len);
+
+		return (int)command_len;
 	}
 
-	if (state != SESSION_PRINT)
-		return; // Startup/shutdown command applied, no remaining actions necessary
+	if (state != SESSION_PRINT) // Below section only applies for SESSION_PRINT
+		return 0; // copris_text was left unmodified
 
 	// Prepend before received text
 	HASH_FIND_STR(*prset, "S_BEFORE_TEXT", s);
@@ -410,5 +412,9 @@ void apply_session_commands(UT_string *copris_text, struct Inifile **prset, sess
 		utstring_concat(copris_text, temp_text);
 
 		utstring_free(temp_text);
+
+		return (int)command_len;
 	}
+
+	return 0; // copris_text was left unmodified
 }
