@@ -368,6 +368,9 @@ void apply_session_commands(UT_string *copris_text, struct Inifile **prset, sess
 		break;
 	default:
 		assert(false);
+		// We shouldn't reach this spot, but if assert is disabled and a
+		// non-existent state is specified...
+		return;
 	}
 
 	assert(s != NULL);
