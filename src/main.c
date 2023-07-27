@@ -49,33 +49,34 @@
  */
 int verbosity = 1;
 
-static void copris_help(void) {
-	puts("Usage: copris [arguments] [printer or output file]\n"
-	     "\n"
-	     "  -p, --port=PORT         Run as a network server on port number PORT\n"
-	     "  -t, --translate=FILE    Enable character translation with definitions\n"
-	     "                          from FILE\n"
-	     "  -r, --printer=FILE      Enable Markdown processing with printer feature\n"
-	     "                          set FILE\n"
-	     "      --dump-commands     Show all possible printer feature set commands\n"
-	     "  -d, --daemon            Do not exit after the first network connection\n"
-	     "  -l, --limit=LIMIT       Discard the whole chunk of text, received from the\n"
-	     "                          network, when it surpasses LIMIT number of bytes\n"
-	     "      --cutoff-limit      If using '--limit', cut text off at exactly LIMIT\n"
-	     "                          number of bytes instead of discarding the whole chunk\n"
-	     "  -R, --remove-non-ascii  Remove all characters outside the ASCII character set\n"
-	     "\n"
-	     "  -v, --verbose           Display diagnostic messages (can be used twice)\n"
-	     "  -q, --quiet             Supress all unnecessary messages, except warnings and\n"
-	     "                          fatal errors\n"
-	     "  -h, --help              Show this argument summary\n"
-	     "  -V, --version           Show program version, author and build-time options\n"
-	     "\n"
-	     "To read from stdin, omit the port argument. To echo data\n"
-	     "to stdout (console/terminal), omit the output file.\n"
-	     "\n"
-	     "Notes will be shown if COPRIS assumes it is not invoked\n"
-	     "correctly, but never when the quiet argument is present.\n");
+static void copris_help(const char *argv0) {
+	printf("Usage: %s [arguments] [printer or output file]\n"
+	       "\n"
+	       "  -p, --port=PORT         Run as a network server on port number PORT\n"
+	       "  -t, --translate=FILE    Enable character translation with definitions\n"
+	       "                          from FILE\n"
+	       "  -r, --printer=FILE      Enable Markdown processing with printer feature\n"
+	       "                          set FILE\n"
+	       "      --dump-commands     Show all possible printer feature set commands\n"
+	       "  -d, --daemon            Do not exit after the first network connection\n"
+	       "  -l, --limit=LIMIT       Discard the whole chunk of text, received from the\n"
+	       "                          network, when it surpasses LIMIT number of bytes\n"
+	       "      --cutoff-limit      If using '--limit', cut text off at exactly LIMIT\n"
+	       "                          number of bytes instead of discarding the whole chunk\n"
+	       "  -R, --remove-non-ascii  Remove all characters outside the ASCII character set\n"
+	       "\n"
+	       "  -v, --verbose           Display diagnostic messages (can be used twice)\n"
+	       "  -q, --quiet             Supress all unnecessary messages, except warnings and\n"
+	       "                          fatal errors\n"
+	       "  -h, --help              Show this argument summary\n"
+	       "  -V, --version           Show program version, author and build-time options\n"
+	       "\n"
+	       "To read from stdin, omit the port argument. To echo data\n"
+	       "to stdout (console/terminal), omit the output file.\n"
+	       "\n"
+	       "Notes will be shown if COPRIS assumes it is not invoked\n"
+	       "correctly, but never when the quiet argument is present.\n",
+	       argv0);
 
 	exit(EXIT_SUCCESS);
 }
@@ -243,7 +244,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			verbosity = 0;
 			break;
 		case 'h':
-			copris_help();
+			copris_help(argv[0]);
 			break;
 		case 'V':
 			copris_version();
