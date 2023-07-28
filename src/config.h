@@ -11,6 +11,6 @@
 
 // Maximum lengths of name and value strings in .ini files
 #ifndef MAX_INIFILE_ELEMENT_LENGTH
-#   define MAX_INIFILE_ELEMENT_LENGTH 48
+#   define MAX_INIFILE_ELEMENT_LENGTH 64
 #endif
 
