@@ -28,7 +28,6 @@
  * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
  *
  * TODO parse underlined headings
- * TODO ignore syntax type in code blocks
  */
 
 #include <stdio.h>
@@ -167,6 +166,11 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				text_attribute |= CODE_BLOCK;
 				code_block_on = !code_block_on;
 				i += 2;
+
+				// Skip the info string (usually for syntax highlighting)
+				while (text[i] != '\n' && i + 1 < text_len)
+					i++;
+
 			} else {
 				text_attribute |= INLINE_CODE;
 				inline_code_on = !inline_code_on;
