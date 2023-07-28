@@ -7,6 +7,7 @@
  *  - 4 levels of headings (denoted with pound signs)
  *  - blockquotes
  *  - inline code and code blocks
+ *  - links, enclosed in angle brackets (and none other)
  *
  * Everything else in the text is left untouched -- white space, lists, rules, line
  * breaks, paragraphs. There's no HTML or other markup/layout engine at the end of
