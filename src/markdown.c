@@ -235,6 +235,8 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 		} else if (text_attribute == BLOCKQUOTE) {
 			INSERT_CODE("F_BLOCKQUOTE_ON");
+			char quote_text[] = "> ";
+			INSERT_TEXT(quote_text);
 			text_attribute &= ~(BLOCKQUOTE);
 
 		} else if (text_attribute == INLINE_CODE) {
