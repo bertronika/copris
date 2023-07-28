@@ -96,7 +96,14 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	static char *heading_off[] = {0, "F_H1_OFF", "F_H2_OFF", "F_H3_OFF", "F_H4_OFF"};
 
 	int current_line = 1;
-	int error_in_line = 0;
+	struct Error_line {
+		int bold;
+		int italic;
+		int inline_code;
+		int code_block;
+		int link;
+	} error_line;
+
 	size_t line_char_i = 0;
 
 	bool escaped_char = (text[0] == '\\'); // Detect early escape character
@@ -230,13 +237,13 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 			INSERT_CODE((italic_on ? "F_ITALIC_ON" : "F_ITALIC_OFF"));
 			text_attribute &= ~(ITALIC);
 			if (italic_on)
-				error_in_line = current_line;
+				error_line.italic = current_line;
 
 		} else if (text_attribute == BOLD) {
 			INSERT_CODE((bold_on ? "F_BOLD_ON" : "F_BOLD_OFF"));
 			text_attribute &= ~(BOLD);
 			if (bold_on)
-				error_in_line = current_line;
+				error_line.bold = current_line;
 
 		} else if (text_attribute == HEADING) {
 			assert(heading_level <= 4);
@@ -253,14 +260,14 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 			INSERT_CODE(inline_code_on ? "F_INLINE_CODE_ON" : "F_INLINE_CODE_OFF");
 			text_attribute &= ~(INLINE_CODE);
 			if (inline_code_on)
-				error_in_line = current_line;
+				error_line.inline_code = current_line;
 
 		} else if (text_attribute == CODE_BLOCK) {
 			INSERT_CODE((code_block_on || code_block_open) ?
 			            "F_CODE_BLOCK_ON" : "F_CODE_BLOCK_OFF");
 			text_attribute &= ~(CODE_BLOCK);
 			if (code_block_on)
-				error_in_line = current_line;
+				error_line.code_block = current_line;
 
 		} else if (text_attribute == RULE) {
 			char rule_text[5];
@@ -275,7 +282,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 			if (link_on) {
 				INSERT_TEXT("<");
 				INSERT_CODE("F_LINK_ON");
-				error_in_line = current_line;
+				error_line.link = current_line;
 			} else {
 				INSERT_CODE("F_LINK_OFF");
 				INSERT_TEXT(">");
@@ -292,43 +299,40 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 		}
 	}
 
-	// Close missing tags
-	if (link_on)
+	// Close missing tags, notify user
+	if (link_on) {
 		INSERT_CODE("F_LINK_OFF");
+		if (LOG_ERROR)
+			PRINT_MSG("Warning: angle brackets still open on EOF, possibly in line %d.",
+					  error_line.link);
+	}
 
-	if (code_block_on)
+	if (code_block_on) {
 		INSERT_CODE("F_CODE_BLOCK_OFF");
-
-	if (inline_code_on)
-		INSERT_CODE("F_INLINE_CODE_OFF");
-
-	if (bold_on)
-		INSERT_CODE("F_BOLD_OFF");
-
-	if (italic_on)
-		INSERT_CODE("F_ITALIC_OFF");
-
-	// Notify about the first occurence. The order matters!
-	if (LOG_ERROR) {
-		if (link_on)
-	        PRINT_MSG("Warning: angle brackets still open on EOF, possibly in line %d.",
-	                  error_in_line);
-
-		else if (code_block_on)
+		if (LOG_ERROR)
 			PRINT_MSG("Warning: code block still open on EOF, possibly in line %d.",
-			          error_in_line);
+			          error_line.code_block);
+	}
 
-		else if (inline_code_on)
+	if (inline_code_on) {
+		INSERT_CODE("F_INLINE_CODE_OFF");
+		if (LOG_ERROR)
 			PRINT_MSG("Warning: inline code still open on EOF, possibly in line %d.",
-			          error_in_line);
+			          error_line.inline_code);
+	}
 
-		else if (bold_on)
+	if (bold_on) {
+		INSERT_CODE("F_BOLD_OFF");
+		if (LOG_ERROR)
 			PRINT_MSG("Warning: bold text still open on EOF, possibly in line %d.",
-			          error_in_line);
+			          error_line.bold);
+	}
 
-		else if (italic_on)
+	if (italic_on) {
+		INSERT_CODE("F_ITALIC_OFF");
+		if (LOG_ERROR)
 			PRINT_MSG("Warning: italic text still open on EOF, possibly in line %d.",
-			          error_in_line);
+			          error_line.italic);
 	}
 
 	// Overwrite input text
