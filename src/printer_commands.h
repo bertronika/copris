@@ -24,8 +24,8 @@ static const char *printer_commands[] = {
 	"F_INLINE_CODE_OFF",
 	"F_CODE_BLOCK_ON",
 	"F_CODE_BLOCK_OFF",
-	"F_LINK_ON",
-	"F_LINK_OFF",
+	"F_ANGLE_BRACKET_ON",
+	"F_ANGLE_BRACKET_OFF",
 
 	// Printing session commands; used before and after printing received text,
 	// or when COPRIS starts and before it exits.

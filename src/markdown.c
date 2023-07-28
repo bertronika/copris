@@ -281,10 +281,10 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 		} else if (text_attribute == LINK) {
 			if (link_on) {
 				INSERT_TEXT("<");
-				INSERT_CODE("F_LINK_ON");
+				INSERT_CODE("F_ANGLE_BRACKET_ON");
 				error_line.link = current_line;
 			} else {
-				INSERT_CODE("F_LINK_OFF");
+				INSERT_CODE("F_ANGLE_BRACKET_OFF");
 				INSERT_TEXT(">");
 			}
 			text_attribute &= ~(LINK);
@@ -301,7 +301,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 	// Close missing tags, notify user
 	if (link_on) {
-		INSERT_CODE("F_LINK_OFF");
+		INSERT_CODE("F_ANGLE_BRACKET_OFF");
 		if (LOG_ERROR)
 			PRINT_MSG("Warning: angle brackets still open on EOF, possibly in line %d.",
 					  error_line.link);
