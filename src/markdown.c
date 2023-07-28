@@ -49,7 +49,8 @@ typedef enum attribute {
 	BLOCKQUOTE  = 1 << 3,
 	INLINE_CODE = 1 << 4,
 	CODE_BLOCK  = 1 << 5,
-	RULE        = 1 << 6
+	RULE        = 1 << 6,
+	LINK        = 1 << 7
 } attribute_t;
 
 #define INSERT_TEXT(string)  \
@@ -81,6 +82,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	bool italic_on = false;
 	bool inline_code_on = false;
 	bool code_block_on = false;
+	bool link_on = false;
 
 	int heading_level = 0;
 	bool code_block_open = false;
@@ -152,7 +154,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 				i += 1;
 			}
 
-		// Blockquote: '> ' (greater-than sign *and* a space)
+		// Blockquote: '> ' (greater-than sign *and* a space) on a new line.
 		} else if (!escaped_char && (i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '>' && text[i + 1] == ' ')) {
 			text_attribute = BLOCKQUOTE;
@@ -181,6 +183,14 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 			text_attribute |= CODE_BLOCK;
 			code_block_open = true;
 			i += 3;
+
+		// Link in angle brackets: inline '<'/'>' pairs
+		} else if (!escaped_char && text[i] == '<' && !code_block_open) {
+			text_attribute = LINK;
+			link_on = true;
+		} else if (!escaped_char && link_on && text[i] == '>' && !code_block_open) {
+			text_attribute = LINK;
+			link_on = false;
 		}
 
 		// Check for an escape character. If found, skip converting the following markup element.
@@ -261,6 +271,16 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 			rule_text[4] = '\0';
 			INSERT_TEXT(rule_text);
 			text_attribute &= ~(RULE);
+		} else if (text_attribute == LINK) {
+			if (link_on) {
+				INSERT_TEXT("<");
+				INSERT_CODE("F_LINK_ON");
+				error_in_line = current_line;
+			} else {
+				INSERT_CODE("F_LINK_OFF");
+				INSERT_TEXT(">");
+			}
+			text_attribute &= ~(LINK);
 		}
 
 		last_char = text[i];
@@ -273,6 +293,9 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	}
 
 	// Close missing tags
+	if (link_on)
+		INSERT_CODE("F_LINK_OFF");
+
 	if (code_block_on)
 		INSERT_CODE("F_CODE_BLOCK_OFF");
 
@@ -287,7 +310,11 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 
 	// Notify about the first occurence. The order matters!
 	if (LOG_ERROR) {
-		if (code_block_on)
+		if (link_on)
+	        PRINT_MSG("Warning: angle brackets still open on EOF, possibly in line %d.",
+	                  error_in_line);
+
+		else if (code_block_on)
 			PRINT_MSG("Warning: code block still open on EOF, possibly in line %d.",
 			          error_in_line);
 
