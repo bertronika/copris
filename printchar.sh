@@ -12,6 +12,11 @@ START_VALUE=${1:-32}
 END_VALUE=${2:-255}
 BREAK_AFTER=5
 
+if [ $1 = "-h" ] || [ $1 = "--help" ]; then
+	sed -n '2,10p' "$0"
+	exit
+fi
+
 if [ $# -le 1 ]; then
 	printf "Printing values between %d and %d.
 Override with %s [START_NUM] [END_NUM], pass optional values in decimal.\n
