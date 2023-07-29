@@ -21,14 +21,16 @@ Press ENTER to continue or Ctrl-C to abort.\n" \
 fi
 
 i=$START_VALUE
+cnt=1
 
 while [ $i -le $END_VALUE ]; do
 	# Skip DEL
 	if [ $i != 127 ]; then
 		printf "0x%X (%3d): '\x$(printf '%x' $i)'  " $i $i
-		[ $((i % BREAK_AFTER)) = 0 ] && printf "\n"
+		[ $((cnt % BREAK_AFTER)) = 0 ] && printf "\n"
 	fi
-	i=$((i+1))
+	i=$((i + 1))
+	cnt=$((cnt + 1))
 done
 
 printf "\n"
