@@ -103,7 +103,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 		int inline_code;
 		int code_block;
 		int link;
-	} error_line;
+	} error_line = {0, 0, 0, 0, 0};
 
 	size_t line_char_i = 0;
 
