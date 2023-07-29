@@ -337,12 +337,12 @@ int main(int argc, char **argv) {
 	if (error)
 		return error;
 
-	if (LOG_DEBUG)
-		PRINT_MSG("COPRIS started with PID %d.", getpid());
-
 	if (argc < 2)
 		PRINT_NOTE("COPRIS won't do much without any arguments. "
 		           "Try using the '--help' option.");
+
+	if (LOG_DEBUG)
+		PRINT_MSG("COPRIS started with PID %d.", getpid());
 
 	if (LOG_INFO)
 		PRINT_MSG("Verbosity level set to %d.", verbosity);
