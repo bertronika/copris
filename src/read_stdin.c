@@ -19,7 +19,8 @@
 
 static size_t read_from_stdin(UT_string *, struct Stats *);
 
-int copris_handle_stdin(UT_string *copris_text) {
+int copris_handle_stdin(UT_string *copris_text)
+{
 	if (LOG_INFO)
 		PRINT_MSG("Trying to read from stdin...");
 
@@ -44,7 +45,8 @@ int copris_handle_stdin(UT_string *copris_text) {
 	return (text_length) ? 0 : -1;
 }
 
-static size_t read_from_stdin(UT_string *copris_text, struct Stats *stats) {
+static size_t read_from_stdin(UT_string *copris_text, struct Stats *stats)
+{
 	char buffer[BUFSIZE];
 	size_t buffer_length = 0;
 

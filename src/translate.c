@@ -26,7 +26,8 @@
 
 static int inih_handler(void *, const char *, const char *, const char *);
 
-int load_translation_file(const char *filename, struct Inifile **trfile) {
+int load_translation_file(const char *filename, struct Inifile **trfile)
+{
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Failed to open translation file.");
@@ -169,7 +170,8 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-void unload_translation_file(struct Inifile **trfile) {
+void unload_translation_file(struct Inifile **trfile)
+{
 	struct Inifile *definition;
 	struct Inifile *tmp;
 	int count = 0;

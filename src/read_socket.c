@@ -41,7 +41,8 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
  */
 #define BACKLOG 2
 
-int copris_socket_listen(int *parentfd, unsigned int portno) {
+int copris_socket_listen(int *parentfd, unsigned int portno)
+{
 	/*
 	 * Create a system socket using the following:
 	 *   AF_INET      IPv4
@@ -105,7 +106,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno) {
 	return 0;
 }
 
-int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib) {
+int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib)
+{
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
 	clientlen = sizeof(clientaddr);
@@ -189,7 +191,8 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *
 }
 
 static int read_from_socket(UT_string *copris_text, int childfd,
-                            struct Stats *stats, struct Attribs *attrib) {
+                            struct Stats *stats, struct Attribs *attrib)
+{
 	char buffer[BUFSIZE];  // Inbound message buffer
 	ssize_t buffer_length; // Return value of a socket operation - number of
 	                       // read bytes if successful
@@ -223,7 +226,8 @@ static int read_from_socket(UT_string *copris_text, int childfd,
 }
 
 static void apply_byte_limit(UT_string *copris_text, int childfd,
-                             struct Stats *stats, struct Attribs *attrib) {
+                             struct Stats *stats, struct Attribs *attrib)
+{
 	const char limit_message[] = "You have sent too much text. Terminating connection.\n";
 
 	ssize_t tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
