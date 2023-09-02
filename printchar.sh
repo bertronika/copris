@@ -12,7 +12,7 @@ START_VALUE=${1:-32}
 END_VALUE=${2:-255}
 BREAK_AFTER=5
 
-if [ $1 = "-h" ] || [ $1 = "--help" ]; then
+if [ "${1}x" = "-hx" ] || [ "${1}x" = "--helpx" ]; then
 	sed -n '2,10p' "$0"
 	exit
 fi
