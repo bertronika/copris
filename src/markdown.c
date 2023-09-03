@@ -3,11 +3,11 @@
  *
  * Why so? Because it only recognises some simple text attributes and doesn't alter
  * any other text layout whatsoever. Attributes include:
- *  - emphasis (bold and italic)
- *  - 4 levels of headings (denoted with pound signs)
- *  - blockquotes
- *  - inline code and code blocks
- *  - links, enclosed in angle brackets (and none other)
+ *  - bold and italic emphasis (up to three asterisks and underscores)
+ *  - 4 levels of headings (pound signs)
+ *  - blockquotes (greater-than signs)
+ *  - inline code and code blocks (one or three backticks/four whitespaces)
+ *  - links, enclosed only in angle brackets (and none other)
  *
  * Everything else in the text is left untouched -- white space, lists, rules, line
  * breaks, paragraphs. There's no HTML or other markup/layout engine at the end of
