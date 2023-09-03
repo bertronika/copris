@@ -118,7 +118,7 @@ It doesn't. It simply outputs the converted text to a specified file (or standar
 
 ## What can be specified as the output?
 
-The last argument, specified to COPRIS, can either be a character device (e.g. `/dev/ttyUSB0`) or a normal text file. COPRIS simply appends any received text to it. If nothing is specified, data will be echoed to the terminal with corresponding `Begin-` and `End-Stream-Transcript` markers (`;BST` and `;EST`).
+The last command line argument can either be a character device (e.g. `/dev/ttyUSB0`) or a normal text file. COPRIS simply appends any received text to it. If nothing is specified, data will be echoed to the terminal with corresponding `Begin-` and `End-Stream-Transcript` markers (`;BST` and `;EST`).
 
 
 # Usage and examples

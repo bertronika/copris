@@ -165,10 +165,10 @@ file is specified), and lets the operating system's kernel do the rest.
 
 ## What can be specified as the output?
 
-The last argument, specified to COPRIS, can either be a character device (e.g. `/dev/ttyUSB0`)
-or a normal text file. COPRIS simply appends any received text to it. If nothing is specified,
-data will be echoed to the terminal with corresponding `Begin-` and `End-Stream-Transcript`
-markers (`;BST` and `;EST`).
+The last command line argument can either be a character device (e.g. `/dev/ttyUSB0`) or a
+normal text file. COPRIS simply appends any received text to it. If nothing is specified, data
+will be echoed to the terminal with corresponding `Begin-` and `End-Stream-Transcript` markers
+(`;BST` and `;EST`).
 
 
 # Usage and examples
@@ -196,7 +196,7 @@ copris -p 8080 -d -t slovene.ini -l 100
 ```
 
 Read local file `Manual.md` using the specified printer feature set
-`epson.ini`. Remove any character that isn't present in the ASCII table.
+`epson.ini`. Remove any character that isn't present in the ASCII character set.
 Output formatted text to a USB interface on the local computer:
 
 ```

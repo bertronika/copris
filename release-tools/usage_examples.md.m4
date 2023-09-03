@@ -18,7 +18,7 @@ copris -p 8080 -d -t slovene.ini -l 100
 ```
 
 Read local file `Manual.md` using the specified printer feature set
-`epson.ini`. Remove any character that isn't present in the ASCII table.
+`epson.ini`. Remove any character that isn't present in the ASCII character set.
 Output formatted text to a USB interface on the local computer:
 
 ```

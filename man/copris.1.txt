@@ -1,4 +1,4 @@
-COPRIS(1)                             0.9-509-g40f978e-dirty                            COPRIS(1)
+COPRIS(1)                             0.9-533-g27531a7-dirty                            COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -103,8 +103,8 @@ EXAMPLES
               copris -p 8080 -d -t slovene.ini -l 100
 
        Read  local  file Manual.md using the specified printer feature set epson.ini.  Remove any
-       character that isn’t present in the ASCII table.  Output formatted text to a USB interface
-       on the local computer:
+       character that isn’t present in the ASCII character set.  Output formatted text to  a  USB
+       interface on the local computer:
 
               copris -r epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
 
@@ -114,4 +114,4 @@ FILES
 DEVELOPMENT
        COPRIS’ development repository resides at <https://github.com/bertronika/copris>.
 
-                                            2023-03-19                                  COPRIS(1)
+                                            2023-09-03                                  COPRIS(1)
