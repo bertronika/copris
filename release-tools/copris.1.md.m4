@@ -16,10 +16,7 @@ m4_changequote(`[[[', `]]]')m4_dnl
 
 # DESCRIPTION
 
-m4_define([[[GEN_MANPAGE]]])m4_dnl
-m4_changequote`'m4_dnl
-m4_include(README.md.m4)m4_dnl
-m4_changequote(`[[[', `]]]')m4_dnl
+m4_include(common-description.md.m4)m4_dnl
 
 
 # OPTIONS
@@ -77,9 +74,7 @@ elsewhere).
 
 # EXAMPLES
 
-m4_changequote`'m4_dnl
 m4_include(usage_examples.md.m4)m4_dnl
-m4_changequote(`[[[', `]]]')m4_dnl
 
 
 # FILES
