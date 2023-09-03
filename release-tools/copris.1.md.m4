@@ -74,7 +74,7 @@ elsewhere).
 
 # EXAMPLES
 
-m4_include(usage_examples.md.m4)m4_dnl
+m4_include(common-usage.md.m4)m4_dnl
 
 
 # FILES

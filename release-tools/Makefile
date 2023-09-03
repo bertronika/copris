@@ -9,10 +9,10 @@ all: readme manpage
 readme: $(README)
 manpage: $(MANPAGE) $(MANPAGE).txt
 
-$(README): README.md.m4 usage_examples.md.m4 common-description.md.m4
+$(README): README.md.m4 common-description.md.m4 common-usage.md.m4
 	m4 -PEE README.md.m4 | fmt -s -w 100 > $@
 
-$(MANPAGE): copris.1.md.m4 usage_examples.md.m4 common-description.md.m4
+$(MANPAGE): copris.1.md.m4 common-description.md.m4 common-usage.md.m4
 	m4 -PEE copris.1.md.m4 | pandoc --standalone --to man > $@
 
 $(MANPAGE).txt: $(MANPAGE)
