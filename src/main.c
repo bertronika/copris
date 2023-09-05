@@ -52,14 +52,15 @@ int verbosity = 1;
 static void copris_help(const char *argv0) {
 	printf("Usage: %s [arguments] [printer or output file]\n"
 	       "\n"
-	       "  -p, --port=PORT         Run as a network server on port number PORT\n"
-	       "  -t, --translate=FILE    Enable character translation with definitions\n"
+	       "  -p, --port PORT         Run as a network server on port number PORT\n"
+	       "  -e, --encoding FILE     Recode received text with encoding definitions\n"
 	       "                          from FILE\n"
-	       "  -r, --printer=FILE      Enable Markdown processing with printer feature\n"
-	       "                          set FILE\n"
-	       "      --dump-commands     Show all possible printer feature set commands\n"
+	       "  -f, --feature FILE      Process Markdown formatting in received text and\n"
+	       "                          use session commands according to printer feature\n"
+	       "                          definitions from FILE\n"
+	       "      --dump-commands     Show all possible printer feature definitions\n"
 	       "  -d, --daemon            Do not exit after the first network connection\n"
-	       "  -l, --limit=LIMIT       Discard the whole chunk of text, received from the\n"
+	       "  -l, --limit LIMIT       Discard the whole chunk of text, received from the\n"
 	       "                          network, when it surpasses LIMIT number of bytes\n"
 	       "      --cutoff-limit      If using '--limit', cut text off at exactly LIMIT\n"
 	       "                          number of bytes instead of discarding the whole chunk\n"
@@ -96,8 +97,8 @@ static void copris_version(void) {
 static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
 		{"port",             required_argument, NULL, 'p'},
-		{"translate",        required_argument, NULL, 't'},
-		{"printer",          required_argument, NULL, 'r'},
+		{"encoding",         required_argument, NULL, 'e'},
+		{"feature",          required_argument, NULL, 'f'},
 		{"dump-commands",    no_argument,       NULL, ','},
 		{"daemon",           no_argument,       NULL, 'd'},
 		{"limit",            required_argument, NULL, 'l'},
@@ -118,7 +119,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'Printer
 	// set is missing.' instead of 'option requires an argument -- 'r')
-	while ((c = getopt_long(argc, argv, ":p:dt:r:l:RvqhV", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":p:de:f:l:RvqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
@@ -146,7 +147,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->portno = (unsigned int)temp_portno;
 			break;
 		}
-		case 't': {
+		case 'e': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised characters in translation file name (%s). "
 				                "Perhaps you forgot to specify the file?", optarg);
@@ -173,7 +174,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->copris_flags |= HAS_TRFILE;
 			break;
 		}
-		case 'r': {
+		case 'f': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised character in printer feature set name (%s). "
 				                "Perhaps you forgot to specify the set?", optarg);
@@ -253,9 +254,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			if (optopt == 'p')
 				PRINT_ERROR_MSG("You must specify a port number.");
 			else if (optopt == 't')
-				PRINT_ERROR_MSG("You must specify a translation file.");
+				PRINT_ERROR_MSG("You must specify an encoding file.");
 			else if (optopt == 'r')
-				PRINT_ERROR_MSG("You must specify a printer feature set file.");
+				PRINT_ERROR_MSG("You must specify a printer feature file.");
 			else if (optopt == 'l')
 				PRINT_ERROR_MSG("You must specify a limit number.");
 			else
@@ -366,31 +367,31 @@ int main(int argc, char **argv) {
 	if (attrib.daemon && LOG_DEBUG)
 		PRINT_MSG("Daemon mode enabled.");
 
-	// Load a translation file
+	// Load an encoding file
 	if (attrib.copris_flags & HAS_TRFILE) {
 		error = load_translation_file(attrib.trfile, &trfile);
 		if (error) {
 			if (verbosity)
 				return EXIT_FAILURE;
 
-			// Missing printer feature sets are not a fatal error when --quiet
+			// Missing encoding files are not a fatal error when --quiet
 			unload_translation_file(&trfile);
 			attrib.copris_flags &= ~HAS_TRFILE;
-			PRINT_ERROR_MSG("Continuing without character translation.");
+			PRINT_ERROR_MSG("Continuing without character recoding.");
 		}
 	}
 
-	// Load a printer feature set file
+	// Load a printer feature file
 	if (attrib.copris_flags & HAS_PRSET) {
 		error = load_printer_set_file(attrib.prset, &prset);
 		if (error) {
 			if (verbosity)
 				return EXIT_FAILURE;
 
-			// Missing translation files are as well not a fatal error in quiet mode
+			// Missing printer feature files are as well not a fatal error in quiet mode
 			unload_printer_set_file(&prset);
 			attrib.copris_flags &= ~HAS_PRSET;
-			PRINT_ERROR_MSG("Continuing without Markdown conversion.");
+			PRINT_ERROR_MSG("Continuing without printer features.");
 		}
 	}
 

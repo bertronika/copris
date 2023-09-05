@@ -25,16 +25,16 @@ m4_include(common-description.md.m4)m4_dnl
 : Run COPRIS as a network server on port *NUMBER*. Superuser
   privileges are required if *NUMBER* is less than 1024.
 
-**-t**, **\--translate** *FILE*
-: Enable character translation with definitions from character translation
+**-e**, **\--encoding** *FILE*
+: Recode characters in received text according to encoding definitions from encoding
   *FILE*.
 
-**-r**, **\--printer** *FILE*
-: Enable Markdown parsing with definitions from printer feature set
-  *FILE*.
+**-f**, **\--feature** *FILE*
+: Process Markdown formatting in received text and apply session commands with
+  definitions from printer feature *FILE*.
 
 **\--dump-commands**
-: Show all possible printer feature set commands in INI file format
+: Show all possible printer feature commands in INI file format
   (e.g. to be piped into a new printer feature set file you are making).
 
 **-d**, **\--daemon**

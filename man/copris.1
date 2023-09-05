@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-09-05" "" "0.9-537-g7d5b398-dirty"
+.TH "COPRIS" "1" "2023-09-06" "" "0.9-539-g6ac4902-dirty"
 .hy
 .SH NAME
 .PP
@@ -141,17 +141,17 @@ F_H3_ON = \[at]             ; ditto
 Run COPRIS as a network server on port \f[I]NUMBER\f[R].
 Superuser privileges are required if \f[I]NUMBER\f[R] is less than 1024.
 .TP
-\f[B]-t\f[R], \f[B]--translate\f[R] \f[I]FILE\f[R]
-Enable character translation with definitions from character translation
-\f[I]FILE\f[R].
+\f[B]-e\f[R], \f[B]--encoding\f[R] \f[I]FILE\f[R]
+Recode characters in received text according to encoding definitions
+from encoding \f[I]FILE\f[R].
 .TP
-\f[B]-r\f[R], \f[B]--printer\f[R] \f[I]FILE\f[R]
-Enable Markdown parsing with definitions from printer feature set
-\f[I]FILE\f[R].
+\f[B]-f\f[R], \f[B]--feature\f[R] \f[I]FILE\f[R]
+Process Markdown formatting in received text and apply session commands
+with definitions from printer feature \f[I]FILE\f[R].
 .TP
 \f[B]--dump-commands\f[R]
-Show all possible printer feature set commands in INI file format
-(e.g.\ to be piped into a new printer feature set file you are making).
+Show all possible printer feature commands in INI file format (e.g.\ to
+be piped into a new printer feature set file you are making).
 .TP
 \f[B]-d\f[R], \f[B]--daemon\f[R]
 If running as a network server, do not exit after the first connection.
@@ -217,7 +217,7 @@ Note that text limit works only when running as a server.
 .IP
 .nf
 \f[C]
-copris -p 8080 -d -t slovene.ini -l 100
+copris -p 8080 -d -e slovene.ini -l 100
 \f[R]
 .fi
 .PP
@@ -228,7 +228,7 @@ Output formatted text to a USB interface on the local computer:
 .IP
 .nf
 \f[C]
-copris -r epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
+copris -f epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
 \f[R]
 .fi
 .SH DEVELOPMENT
