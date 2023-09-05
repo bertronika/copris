@@ -77,12 +77,6 @@ elsewhere).
 m4_include(common-usage.md.m4)m4_dnl
 
 
-# FILES
-
-Example translation and printer feature set files can be found in
-`/usr/share/copris`.
-
-
 # DEVELOPMENT
 
 COPRIS' development repository resides at <https://github.com/bertronika/copris>.

@@ -3,43 +3,45 @@ m4_changequote(`[[[', `]]]')m4_dnl
 
 m4_include(common-description.md.m4)m4_dnl
 
-# Why translate characters?
+# How do I make an encoding file?
 
-In the late 1980's and 90's, when small dot-matrix printers were getting common in offices and homes, they usually included only a handful of character sets (English, French, German, Italian, Spanish and such). Languages, whose alphabets required additional letters, had to be incorporated in some way. The solution was to sacrifice some of the ASCII characters. Printers were internally modified - some symbols, such as `~ @ {`, actually printed locale-specific characters. Users could then print localised text without having to send special commands to their printers.
+Firstly, check if COPRIS already includes one for your locale (`encodings/` directory).
 
-COPRIS allows you to avoid manually swapping characters with the use of *translation files*, consisting of source-destination `character = character code` definitions. Input text is scanned for occurrences of left-hand *characters*, which are replaced with appropriate right-hand *codes*, specified in decimal, hexadecimal or octal bases.
+If not, you can search the Internet for a code page table/listing with characters and their numberical values, which you can then manually convert to an appropriate format.
 
-To use a translation file, specify the `-t/--translate filename.ini` argument in the command line.
+As a fallback, to at least figure out the character codes of your character set, run the `printchar.sh` test script, included with COPRIS, and pipe its output into the printer. It'll output printable characters, along with their decimal and hexadecimal values.
 
+The format of an encoding file is simple. Start the line by entering a human-readable character, either via your keyboard or copied from somewhere else. Follow by an equals sign (optionally surrounded by spaces). Then, enter the numberical value of that character which your printer will understand.
 
-## How do I make a translation file?
-
-To determine the codes of replacement characters, have your printer print out its character set. You can often trigger an automatic printout by holding certain buttons while powering it on. Consult the printer's manual or the Internet for accurate information. Then, count the offset values of wanted characters and write them out along the character you want to be replaced.
-
-Alternatively, run the `printchar.sh` test file, included with COPRIS, and pipe its output into the printer. It'll output printable characters, along with their decimal and hexadecimal codes. Again, write out the character pairs, separated by an equals sign.
-
-You may be able to avoid this print-and-count procedure by checking out if your language is defined in one of the *code pages* (CP), supported by the printer (again, check documentation). If it does, you may supply a whole code page as the translation file. Some are already provided in the `encodings/` directory, others you'll have to source and convert them for COPRIS manually. **Contributions are always welcome if the encoding is general enough.** But beware, if your code page *is* supported by the printer, it might not be the default one and you'll have to tell the printer which one you want. Read on, the chapter about printer feature set files isn't only about formatting text, it also explains the custom commands that are used for setting up the printer.
-
-Here's an example Slovene excerpt for Epson LX-300. I want left-hand letters to be replaced by raw decimal codes on the right (which will, of course, be rendered as left-hand letters on the printer):
+Here's an example excerpt of the YUSCII encoding:
 
 ```ini
-# slovene.ini
-Č = 94   ; replacing ^
-Ž = 64   ; replacing @
-Š = 123  ; replacing {
+# Left-hand letters are readable to us, however, their UTF-8 codes
+# are unknown to the printer.  Therefore, COPRIS replaces them with
+# the right-hand hexadecimal codes.
+Č = 0x5E  ; replacing ^
+Ž = 0x40  ; replacing @
+Š = 0x7B  ; replacing [
 ```
 
-You might have noticed that some commonly used characters are now unavailable. Luckily, printer character sets often consist of additional characters (Greek letters, box drawing and maths symbols etc.), which can be also specified in a translation file to imitate the lost ones.
+You might have noticed that YUSCII overrides some ASCII characters. Luckily, printer character sets often consist of additional characters (Greek letters, box drawing and maths symbols etc.), which can be also specified in an encoding file to imitate the lost ones:
+
+```ini
+^ = 0x27  ; replacement is an acute accent
+@ = 0xE8  ; replacement is the Greek letter Phi
+...
+```
+
+Have you made an encoding file COPRIS doesn't yet include? Contributions are always welcome!
+
+You may find out that your printer supports a code page, appropriate for your locale, but it isn't selected by default when you turn it on. Read on, the chapter about printer feature files isn't only about formatting text, it also explains the custom commands that are used for setting up the printer.
 
 
-# How can I apply formatting to text?
+# How do I make a printer feature file?
 
-Pass Markdown-formatted text to COPRIS. Before doing that, specify an appropriate printer feature set file with the `-r/--printer filename.ini` argument. Note that COPRIS will *not* modify the layout of the text, but only apply formatting attributes from commands, present in the feature set file.
+As with encoding files, COPRIS might have the right one in the `feature-files/` directory. If the file name seems appropriate, check the first few lines of the file to see if your printer is supported.
 
-
-## How do I make a printer feature set file?
-
-Consult the printer's manual. There should be a section on escape codes. Then, generate a sample printer feature set file (`copris --dump-commands > my-printer.ini`, see [copris(1) man page](man/copris.1.txt) for details). Uncomment the appropriate commands and append codes to them in either decimal, hexadecimal or octal format, with each one separated by at least one space.
+Else, consult the printer's manual. There should be a section on escape codes. Generate a sample printer feature set file (`copris --dump-commands > my-printer.ini`, see [copris(1) man page](man/copris.1.txt) for details). Uncomment the appropriate commands and append values from the manual, in the same way as with encoding files.
 
 Example from Epson's LX-300 manual, page A-14 (91):
 
@@ -50,7 +52,7 @@ ESC 4   52     34     Select Italic Mode
 ESC 5   53     35     Cancel Italic Mode
 ```
 
-Corresponding printer set file:
+The corresponding printer feature file lines are:
 
 ```ini
 # lx300.ini
@@ -58,12 +60,10 @@ F_ITALIC_ON  = 0x1B 0x34  ; hexadecimal notation, 0x1B = ESC
 F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 ```
 
-The [ascii(7) man page](https://man7.org/linux/man-pages/man7/ascii.7.html) might come in handy for determining values of various control codes.
 
+## Variables and custom commands
 
-### Additional commands
-
-You can use existing commands as variables, as long as you define the command *before* using it as a variable. Furthermore, you may define your own variables and use them in existing commands. For COPRIS to recognise them, they must be prefixed with `C_`. Variables may be interweaved with commands.
+You can use existing command names as variables, as long as you define the command *before* using it as a variable. Furthermore, you may define your own variables and use them in existing commands. For COPRIS to recognise them, they must be prefixed with `C_`! Variables may be interweaved with commands.
 
 ```ini
 # lx300.ini - continued
@@ -73,7 +73,7 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
-COPRIS also provides two command pairs for sending repetitive settings to the printer. They may be used to set margins, line spacing, font face, character density, initialise/reset the printer and so on:
+COPRIS also provides two command pairs for sending repetitive settings to the printer. They may be used to set the code page, text margins, line spacing, font face, character density, initialise/reset the printer and so on:
 
 - `S_AT_STARTUP` and `S_AT_SHUTDOWN` - sent to the printer once after COPRIS starts and once
   before it exits
@@ -88,12 +88,10 @@ It doesn't. It simply outputs the converted text to a specified file (or standar
 
 ## What can be specified as the output?
 
-The last command line argument can either be a character device (e.g. `/dev/ttyUSB0`) or a normal text file. COPRIS simply appends any received text to it. If nothing is specified, data will be echoed to the terminal with corresponding `Begin-` and `End-Stream-Transcript` markers (`;BST` and `;EST`).
+The last command line argument, output destination, can either be a character device (e.g. `/dev/usb/lp0`) or a normal text file. COPRIS simply appends any received text to it. If nothing is specified, data will be echoed to the terminal with corresponding `Begin-` and `End-Stream-Transcript` markers (`;BST` and `;EST`).
 
 
 # Usage and examples
-
-**Notice:** COPRIS is in active development. Some features are still missing, others have not been thoroughly tested yet. Command line option arguments may change in future. Version 1.0 will be tagged when the feature set will be deemed complete.
 
 m4_include(common-usage.md.m4)m4_dnl
 
@@ -108,7 +106,7 @@ COPRIS will show informative status messages and notes, if it assumes it is not 
 
 # Building and installation
 
-COPRIS requires, apart from a standard C library, three additional libraries:
+COPRIS requires, apart from a standard C library, three additional packages:
 
 - pkg-config or pkgconf for the compilation process
 - uthash ([Repology][1], [upstream][2])
