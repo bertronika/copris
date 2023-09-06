@@ -141,7 +141,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 		// Headings: '#' through '####' on a blank line. More than one space after the
 		//           pound sign will be preserved (e.g. to center titles).
 		} else if (!escaped_char && (i == 0 || last_char == '\n') &&
-		           (i + 1 < text_len && text[i] == '#')) {
+		           (i + 1 < text_len && text[i] == '#' && text[i + 1] == ' ')) {
 			text_attribute |= HEADING;
 
 			if (i + 2 < text_len && text[i + 1] == '#') {
@@ -157,7 +157,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 					heading_level = 2;
 					i += 2;
 				}
-			} else if (text[i + 1] == ' ') {
+			} else {
 				heading_level = 1;
 				i += 1;
 			}
@@ -247,7 +247,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 				error_line.bold = current_line;
 
 		} else if (text_attribute == HEADING) {
-			assert(heading_level <= 4);
+			assert(heading_level > 0 && heading_level <= 4);
 			INSERT_CODE(heading_on[heading_level]);
 			text_attribute &= ~(HEADING);
 
