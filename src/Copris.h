@@ -12,13 +12,13 @@
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                  */
-	bool daemon;         /* Run continuously                               */
-	size_t limitnum;     /* Limit received number of bytes                 */
+	bool daemon;         /* True if COPRIS runs continuously               */
+	size_t limitnum;     /* Maximum allowed number of received bytes       */
 
 	int copris_flags;    /* Flags regarding user-specified arguments       */
-	char *prset;         /* Printer feature set name                       */
-	char *trfile;        /* Translation file location                      */
-	char *destination;   /* Output file (printer)                          */
+	char *prset;         /* Name of the printer feature file               */
+	char *trfile;        /* Name of the encoding file                      */
+	char *destination;   /* Output device or file                          */
 };
 
 struct Stats {

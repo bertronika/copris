@@ -134,9 +134,9 @@ the file name seems appropriate, check the first few lines of the file to see if
 is supported.
 
 Else, consult the printer's manual. There should be a section on escape codes. Generate a
-sample printer feature set file (`copris --dump-commands > my-printer.ini`, see [copris(1)
-man page](man/copris.1.txt) for details). Uncomment the appropriate commands and append values
-from the manual, in the same way as with encoding files.
+sample printer feature file (`copris --dump-commands > my-printer.ini`, see [copris(1) man
+page](man/copris.1.txt) for details). Uncomment the appropriate commands and append values from
+the manual, in the same way as with encoding files.
 
 Example from Epson's LX-300 manual, page A-14 (91):
 
@@ -201,7 +201,7 @@ nothing is specified, data will be echoed to the terminal with corresponding `Be
 been thoroughly tested yet. Command line option arguments may change in future. Version 1.0
 will be tagged when the feature set will be deemed complete.
 
-Run as a simple server on port 8080, perform no text conversion, output received data to the
+Run as a simple server on port 8080, perform no text recoding, output received data to the
 serial port and exit after one connection. Note that superuser privileges are required if the
 specified port is smaller than 1024.
 
@@ -209,17 +209,17 @@ specified port is smaller than 1024.
 copris -p 8080 /dev/ttyS0
 ```
 
-Serve on port 8080 as a daemon (do not exit after first connection), translate characters using
-the `slovene.ini` translation file, limit any incoming text to maximum 100 characters and print
+Serve on port 8080 as a daemon (do not exit after first connection), recode text using the
+`slovene.ini` encoding file, limit any incoming text to a maximum of 100 characters and print
 received data to the terminal. Note that text limit works only when running as a server.
 
 ```
 copris -p 8080 -d -e slovene.ini -l 100
 ```
 
-Read local file `Manual.md` using the specified printer feature set `epson.ini`. Remove any
-character that isn't present in the ASCII character set. Output formatted text to a USB interface
-on the local computer:
+Read local file `Manual.md` using the printer feature file `epson.ini`. Remove any character
+that isn't present in the ASCII character set. Output formatted text to a USB interface on the
+local computer:
 
 ```
 copris -f epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md

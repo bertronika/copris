@@ -149,7 +149,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		}
 		case 'e': {
 			if (*optarg == '-') {
-				PRINT_ERROR_MSG("Unrecognised characters in translation file name (%s). "
+				PRINT_ERROR_MSG("Unrecognised characters in encoding file name (%s). "
 				                "Perhaps you forgot to specify the file?", optarg);
 				return 1;
 			}
@@ -160,7 +160,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
 			if (max_path_len == -1) {
-				PRINT_SYSTEM_ERROR("pathconf", "Error querying translation file.");
+				PRINT_SYSTEM_ERROR("pathconf", "Error querying encoding file.");
 				return 1;
 			}
 
@@ -176,8 +176,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		}
 		case 'f': {
 			if (*optarg == '-') {
-				PRINT_ERROR_MSG("Unrecognised character in printer feature set name (%s). "
-				                "Perhaps you forgot to specify the set?", optarg);
+				PRINT_ERROR_MSG("Unrecognised character in printer feature file name (%s). "
+				                "Perhaps you forgot to specify the file?", optarg);
 				return 1;
 			}
 
@@ -185,7 +185,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
 			if (max_path_len == -1) {
-				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer feature set file.");
+				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer feature file.");
 				return 1;
 			}
 
@@ -325,7 +325,7 @@ int main(int argc, char **argv) {
 	// Run-time options (program attributes)
 	struct Attribs attrib;
 
-	// Translation file and printer feature set hash structures
+	// Encoding and printer feature file hash structures
 	struct Inifile *trfile, *prset;
 
 	attrib.portno       = 0;  // If 0, read from stdin
@@ -448,7 +448,7 @@ int main(int argc, char **argv) {
 		if (utstring_len(copris_text) == 0)
 			continue; // Do not attempt to write/display nothing
 
-		// Stage 2: Translate selected characters in text with a translation file
+		// Stage 2: Recode text with an encoding file
 		if (attrib.copris_flags & HAS_TRFILE)
 			translate_text(copris_text, &trfile);
 
@@ -456,8 +456,7 @@ int main(int argc, char **argv) {
 		if (attrib.copris_flags & FILTER_NON_ASCII)
 			filter_non_ascii(copris_text);
 
-		// Stage 4: Handle Markdown in text and printing session commands with
-		//          a printer feature set file
+		// Stage 4: Handle Markdown and session commands with a printer feature file
 		if (attrib.copris_flags & HAS_PRSET) {
 			parse_markdown(copris_text, &prset);
 			apply_session_commands(copris_text, &prset, SESSION_PRINT);

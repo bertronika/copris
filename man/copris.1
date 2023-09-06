@@ -14,19 +14,19 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-09-06" "" "0.9-539-g6ac4902-dirty"
+.TH "COPRIS" "1" "2023-09-06" "" "0.9-540-gf6ae379-dirty"
 .hy
 .SH NAME
 .PP
 \f[B]copris\f[R] - a converting printer server
 .SH SYNOPSIS
 .PP
-\f[B]copris\f[R] [\f[I]options\f[R]] [\f[I]printer\f[R] or \f[I]output
-file\f[R]]
+\f[B]copris\f[R] [\f[I]options\f[R]] [\f[I]printer device\f[R] or
+\f[I]output file\f[R]]
 .PD 0
 .P
 .PD
-\f[B]copris\f[R] \f[B]--dump-commands\f[R] > new_printer_set.ini
+\f[B]copris\f[R] \f[B]--dump-commands\f[R] > new_feature_file.ini
 .SH DESCRIPTION
 .PP
 COPRIS is a printer server and text conversion program that bridges the
@@ -151,7 +151,7 @@ with definitions from printer feature \f[I]FILE\f[R].
 .TP
 \f[B]--dump-commands\f[R]
 Show all possible printer feature commands in INI file format (e.g.\ to
-be piped into a new printer feature set file you are making).
+be piped into a new printer feature file you are making).
 .TP
 \f[B]-d\f[R], \f[B]--daemon\f[R]
 If running as a network server, do not exit after the first connection.
@@ -198,7 +198,7 @@ yet.
 Command line option arguments may change in future.
 Version 1.0 will be tagged when the feature set will be deemed complete.
 .PP
-Run as a simple server on port 8080, perform no text conversion, output
+Run as a simple server on port 8080, perform no text recoding, output
 received data to the serial port and exit after one connection.
 Note that superuser privileges are required if the specified port is
 smaller than 1024.
@@ -210,9 +210,9 @@ copris -p 8080 /dev/ttyS0
 .fi
 .PP
 Serve on port 8080 as a daemon (do not exit after first connection),
-translate characters using the \f[V]slovene.ini\f[R] translation file,
-limit any incoming text to maximum 100 characters and print received
-data to the terminal.
+recode text using the \f[V]slovene.ini\f[R] encoding file, limit any
+incoming text to a maximum of 100 characters and print received data to
+the terminal.
 Note that text limit works only when running as a server.
 .IP
 .nf
@@ -221,8 +221,8 @@ copris -p 8080 -d -e slovene.ini -l 100
 \f[R]
 .fi
 .PP
-Read local file \f[V]Manual.md\f[R] using the specified printer feature
-set \f[V]epson.ini\f[R].
+Read local file \f[V]Manual.md\f[R] using the printer feature file
+\f[V]epson.ini\f[R].
 Remove any character that isn\[cq]t present in the ASCII character set.
 Output formatted text to a USB interface on the local computer:
 .IP

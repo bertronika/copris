@@ -63,8 +63,8 @@ extern int verbosity;
  * PRINT_SYSTEM_ERROR(name, msg);
  *           Passes 'msg' to PRINT_ERROR_MSG(), and 'name' to perror().
  *           Example:
- *               PRINT_SYSTEM_ERROR("fopen", "Error opening translation file.");
- *               -> src/translate.c: 33: Error opening translation file.
+ *               PRINT_SYSTEM_ERROR("fopen", "Error opening encoding file.");
+ *               -> src/translate.c: 33: Error opening encoding file.
  *               -> fopen: No such file or directory
  */
 

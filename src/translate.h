@@ -1,11 +1,11 @@
 /*
- * Load translation file 'filename' into a hash table, passed by 'prset'.
+ * Load encoding file 'filename' into a hash table, passed by 'prset'.
  * Return 0 on success.
  */
 int load_translation_file(const char *filename, struct Inifile **trfile);
 
 /*
- * Unload translation hash table, passed on by 'trfile'.
+ * Unload encoding hash table, passed on by 'trfile'.
  */
 void unload_translation_file(struct Inifile **trfile);
 

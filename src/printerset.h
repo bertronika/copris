@@ -1,5 +1,5 @@
 /*
- * Load printer set file 'filename' into an internal hash table, passed on by 'prset'.
+ * Load printer feature file 'filename' into an internal hash table, passed on by 'prset'.
  * Return 0 on success or negative on failure, together with an error message.
  */
 int load_printer_set_file(const char *filename, struct Inifile **prset);
@@ -11,7 +11,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset);
 int dump_printer_set_commands(struct Inifile **prset);
 
 /*
- * Unload internal printer set hash table, passed on by 'prset'.
+ * Unload internal printer feature hash table, passed on by 'prset'.
  */
 void unload_printer_set_file(struct Inifile **prset);
 
@@ -26,7 +26,7 @@ typedef enum session {
 
 /*
  * Prepend and append to 'copris_text' any session commands, passed on from 'prset'.
- * Session commands are read from printer set file(s) and used for repetitive actions.
+ * Session commands are read from printer feature file(s) and used for repetitive actions.
  * They are executed on various 'state's, contained in the above 'session_t' enumerated list.
  *
  * Return number of characters, appended to 'copris_text' (0 if none were added),

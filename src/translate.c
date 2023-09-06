@@ -1,5 +1,5 @@
 /*
- * Translation file handling and text conversion
+ * Encoding file handling and text conversion
  *
  * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
@@ -30,12 +30,12 @@ int load_translation_file(const char *filename, struct Inifile **trfile)
 {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
-		PRINT_SYSTEM_ERROR("fopen", "Failed to open translation file.");
+		PRINT_SYSTEM_ERROR("fopen", "Failed to open encoding file.");
 		return -1;
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("Parsing translation file '%s':", filename);
+		PRINT_MSG("Parsing encoding file '%s':", filename);
 
 	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
 	*trfile = NULL;
@@ -62,10 +62,10 @@ int load_translation_file(const char *filename, struct Inifile **trfile)
 	int definition_count = HASH_COUNT(*trfile);
 
 	if (LOG_INFO)
-		PRINT_MSG("Loaded %d translation file definitions.", definition_count);
+		PRINT_MSG("Loaded %d encoding file definitions.", definition_count);
 
 	if (definition_count < 1)
-		PRINT_NOTE("Your translation file appears to be empty.");
+		PRINT_NOTE("Your encoding file appears to be empty.");
 
 	error = 0;
 
@@ -74,7 +74,7 @@ int load_translation_file(const char *filename, struct Inifile **trfile)
 	close_file: {
 		int tmperr = fclose(file);
 		if (tmperr != 0) {
-			PRINT_SYSTEM_ERROR("close", "Failed to close translation file.");
+			PRINT_SYSTEM_ERROR("close", "Failed to close encoding file.");
 			return -1;
 		}
 	}
@@ -183,7 +183,7 @@ void unload_translation_file(struct Inifile **trfile)
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("Unloaded translation file (count = %d).", count);
+		PRINT_MSG("Unloaded encoding file (count = %d).", count);
 }
 
 void translate_text(UT_string *copris_text, struct Inifile **trfile)

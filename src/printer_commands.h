@@ -1,5 +1,5 @@
 /*
- * This is a list of every possible command that can be specified in a printer set file.
+ * This is a list of every possible command that can be specified in a printer feature file.
  * Printing session commands are independent of the content, formatting commands are
  * used when parsing Markdown.
  */

@@ -10,8 +10,8 @@ m4_changequote(`[[[', `]]]')m4_dnl
 
 # SYNOPSIS
 
-| **copris** \[*options*\] \[*printer* or *output file*\]
-| **copris** **\--dump-commands** > new_printer_set.ini
+| **copris** \[*options*\] \[*printer device* or *output file*\]
+| **copris** **\--dump-commands** > new_feature_file.ini
 
 
 # DESCRIPTION
@@ -35,7 +35,7 @@ m4_include(common-description.md.m4)m4_dnl
 
 **\--dump-commands**
 : Show all possible printer feature commands in INI file format
-  (e.g. to be piped into a new printer feature set file you are making).
+  (e.g. to be piped into a new printer feature file you are making).
 
 **-d**, **\--daemon**
 : If running as a network server, do not exit after the first connection.

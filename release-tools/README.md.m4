@@ -41,7 +41,7 @@ You may find out that your printer supports a code page, appropriate for your lo
 
 As with encoding files, COPRIS might have the right one in the `feature-files/` directory. If the file name seems appropriate, check the first few lines of the file to see if your printer is supported.
 
-Else, consult the printer's manual. There should be a section on escape codes. Generate a sample printer feature set file (`copris --dump-commands > my-printer.ini`, see [copris(1) man page](man/copris.1.txt) for details). Uncomment the appropriate commands and append values from the manual, in the same way as with encoding files.
+Else, consult the printer's manual. There should be a section on escape codes. Generate a sample printer feature file (`copris --dump-commands > my-printer.ini`, see [copris(1) man page](man/copris.1.txt) for details). Uncomment the appropriate commands and append values from the manual, in the same way as with encoding files.
 
 Example from Epson's LX-300 manual, page A-14 (91):
 
