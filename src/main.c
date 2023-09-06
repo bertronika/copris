@@ -117,8 +117,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	long max_path_len;  // For filenames
 
 	// Putting a colon in front of the options disables the built-in error reporting
-	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'Printer
-	// set is missing.' instead of 'option requires an argument -- 'r')
+	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'You must
+	// specify a printer feature file.' instead of 'option requires an argument -- 'r')
 	while ((c = getopt_long(argc, argv, ":p:de:f:l:RvqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
@@ -253,9 +253,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		case ':':
 			if (optopt == 'p')
 				PRINT_ERROR_MSG("You must specify a port number.");
-			else if (optopt == 't')
+			else if (optopt == 'e')
 				PRINT_ERROR_MSG("You must specify an encoding file.");
-			else if (optopt == 'r')
+			else if (optopt == 'f')
 				PRINT_ERROR_MSG("You must specify a printer feature file.");
 			else if (optopt == 'l')
 				PRINT_ERROR_MSG("You must specify a limit number.");
