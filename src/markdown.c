@@ -144,25 +144,27 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 		// Headings: '#' through '####' on a blank line. More than one space after the
 		//           pound sign will be preserved (e.g. to center titles).
 		} else if (NOT_IN_CODE && !escaped_char && (i == 0 || last_char == '\n') &&
-		           (i + 1 < text_len && text[i] == '#' && text[i + 1] == ' ')) {
-			text_attribute |= HEADING;
-
+		           (i + 1 < text_len && text[i] == '#')) {
 			if (i + 2 < text_len && text[i + 1] == '#') {
 				if (i + 3 < text_len && text[i + 2] == '#') {
 					if (i + 4 < text_len && text[i + 3] == '#' && text[i + 4] == ' ') {
 						heading_level = 4;
 						i += 4;
+						text_attribute |= HEADING;
 					} else if (text[i + 3] == ' ') {
 						heading_level = 3;
 						i += 3;
+						text_attribute |= HEADING;
 					}
 				} else if (text[i + 2] == ' ') {
 					heading_level = 2;
 					i += 2;
+					text_attribute |= HEADING;
 				}
-			} else {
+			} else if (text[i + 1] == ' ') {
 				heading_level = 1;
 				i += 1;
+				text_attribute |= HEADING;
 			}
 
 		// Blockquote: '> ' (greater-than sign *and* a space) on a new line.
