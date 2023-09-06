@@ -20,7 +20,7 @@
 
 #include "Copris.h"
 #include "debug.h"
-#include "translate.h"
+#include "recode.h"
 #include "utf8.h"
 #include "parse_value.h"
 

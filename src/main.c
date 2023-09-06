@@ -34,7 +34,7 @@
 
 #include "read_socket.h"
 #include "read_stdin.h"
-#include "translate.h"
+#include "recode.h"
 #include "printerset.h"
 #include "markdown.h"
 #include "filters.h"

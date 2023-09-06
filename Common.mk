@@ -13,7 +13,7 @@ LDFLAGS   ?=
 # Dynamic libraries to be linked
 LIBRARIES = inih
 
-SOURCES = utf8.c writer.c parse_value.c read_stdin.c translate.c read_socket.c \
+SOURCES = utf8.c writer.c parse_value.c read_stdin.c recode.c read_socket.c \
           printerset.c markdown.c filters.c main.c
 
 # Additional compiler and linker library flags
