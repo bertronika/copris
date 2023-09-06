@@ -24,7 +24,7 @@
 #include "parse_value.h"
 
 int parse_all_to_commands(const char *value, size_t value_len,
-                          UT_string *parsed_value, struct Inifile **prset)
+                          UT_string *parsed_value, struct Inifile **features)
 {
 	char *value_copy = strndup(value, value_len + 1);
 	CHECK_MALLOC(value_copy);
@@ -38,7 +38,7 @@ int parse_all_to_commands(const char *value, size_t value_len,
 		if (token[0] == 'C' || token[0] == 'F') {
 			// Value is a variable
 			struct Inifile *s;
-			HASH_FIND_STR(*prset, token, s);
+			HASH_FIND_STR(*features, token, s);
 			if (s == NULL) {
 				PRINT_ERROR_MSG("Internal variable '%s' does not exist. If it is a custom "
 				                "command, make sure it has the 'C_' prefix.", token);

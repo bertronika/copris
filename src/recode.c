@@ -26,7 +26,7 @@
 
 static int inih_handler(void *, const char *, const char *, const char *);
 
-int load_translation_file(const char *filename, struct Inifile **trfile)
+int load_translation_file(const char *filename, struct Inifile **encoding)
 {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
@@ -38,9 +38,9 @@ int load_translation_file(const char *filename, struct Inifile **trfile)
 		PRINT_MSG("Parsing encoding file '%s':", filename);
 
 	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
-	*trfile = NULL;
+	*encoding = NULL;
 
-	int parse_error = ini_parse_file(file, inih_handler, trfile);
+	int parse_error = ini_parse_file(file, inih_handler, encoding);
 
 	// If there's a parse error, properly close the file before exiting
 	int error = -1;
@@ -59,7 +59,7 @@ int load_translation_file(const char *filename, struct Inifile **trfile)
 		goto close_file;
 	}
 
-	int definition_count = HASH_COUNT(*trfile);
+	int definition_count = HASH_COUNT(*encoding);
 
 	if (LOG_INFO)
 		PRINT_MSG("Loaded %d encoding file definitions.", definition_count);
@@ -170,14 +170,14 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-void unload_translation_file(struct Inifile **trfile)
+void unload_translation_file(struct Inifile **encoding)
 {
 	struct Inifile *definition;
 	struct Inifile *tmp;
 	int count = 0;
 
-	HASH_ITER(hh, *trfile, definition, tmp) {
-		HASH_DEL(*trfile, definition);
+	HASH_ITER(hh, *encoding, definition, tmp) {
+		HASH_DEL(*encoding, definition);
 		free(definition);
 		count++;
 	}
@@ -186,7 +186,7 @@ void unload_translation_file(struct Inifile **trfile)
 		PRINT_MSG("Unloaded encoding file (count = %d).", count);
 }
 
-void translate_text(UT_string *copris_text, struct Inifile **trfile)
+void translate_text(UT_string *copris_text, struct Inifile **encoding)
 {
 	UT_string *translated_text;
 	utstring_new(translated_text);
@@ -209,7 +209,7 @@ void translate_text(UT_string *copris_text, struct Inifile **trfile)
 		}
 		input_char[input_len] = '\0';
 
-		HASH_FIND_STR(*trfile, input_char, s);
+		HASH_FIND_STR(*encoding, input_char, s);
 		if (s) {
 			// Definition found
 			output_len = strlen(s->out);

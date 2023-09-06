@@ -170,8 +170,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 // 				return 1;
 // 			}
 
-			attrib->trfile = optarg;
-			attrib->copris_flags |= HAS_TRFILE;
+			attrib->encoding_file = optarg;
+			attrib->copris_flags |= HAS_ENCODING;
 			break;
 		}
 		case 'f': {
@@ -195,13 +195,13 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 // 				return 1;
 // 			}
 
-			attrib->prset = optarg;
-			attrib->copris_flags |= HAS_PRSET;
+			attrib->feature_file = optarg;
+			attrib->copris_flags |= HAS_FEATURES;
 			break;
 		}
 		case ',': {
-			struct Inifile *prset;
-			exit(dump_printer_set_commands(&prset));
+			struct Inifile *features;
+			exit(dump_printer_set_commands(&features));
 		}
 		case 'd':
 			attrib->daemon = true;
@@ -325,8 +325,8 @@ int main(int argc, char **argv) {
 	// Run-time options (program attributes)
 	struct Attribs attrib;
 
-	// Encoding and printer feature file hash structures
-	struct Inifile *trfile, *prset;
+	// Encoding and printer features hash structures
+	struct Inifile *encoding, *features;
 
 	attrib.portno       = 0;  // If 0, read from stdin
 	attrib.daemon       = false;
@@ -368,29 +368,29 @@ int main(int argc, char **argv) {
 		PRINT_MSG("Daemon mode enabled.");
 
 	// Load an encoding file
-	if (attrib.copris_flags & HAS_TRFILE) {
-		error = load_translation_file(attrib.trfile, &trfile);
+	if (attrib.copris_flags & HAS_ENCODING) {
+		error = load_translation_file(attrib.encoding_file, &encoding);
 		if (error) {
 			if (verbosity)
 				return EXIT_FAILURE;
 
 			// Missing encoding files are not a fatal error when --quiet
-			unload_translation_file(&trfile);
-			attrib.copris_flags &= ~HAS_TRFILE;
+			unload_translation_file(&encoding);
+			attrib.copris_flags &= ~HAS_ENCODING;
 			PRINT_ERROR_MSG("Continuing without character recoding.");
 		}
 	}
 
 	// Load a printer feature file
-	if (attrib.copris_flags & HAS_PRSET) {
-		error = load_printer_set_file(attrib.prset, &prset);
+	if (attrib.copris_flags & HAS_FEATURES) {
+		error = load_printer_set_file(attrib.feature_file, &features);
 		if (error) {
 			if (verbosity)
 				return EXIT_FAILURE;
 
 			// Missing printer feature files are as well not a fatal error in quiet mode
-			unload_printer_set_file(&prset);
-			attrib.copris_flags &= ~HAS_PRSET;
+			unload_printer_set_file(&features);
+			attrib.copris_flags &= ~HAS_FEATURES;
 			PRINT_ERROR_MSG("Continuing without printer features.");
 		}
 	}
@@ -423,8 +423,8 @@ int main(int argc, char **argv) {
 	utstring_new(copris_text);
 
 	// Prepend the startup session command
-	if (attrib.copris_flags & HAS_PRSET) {
-		int num_of_chars = apply_session_commands(copris_text, &prset, SESSION_STARTUP);
+	if (attrib.copris_flags & HAS_FEATURES) {
+		int num_of_chars = apply_session_commands(copris_text, &features, SESSION_STARTUP);
 
 		if (num_of_chars > 0) {
 			write_to_output(copris_text, &attrib);
@@ -449,17 +449,17 @@ int main(int argc, char **argv) {
 			continue; // Do not attempt to write/display nothing
 
 		// Stage 2: Recode text with an encoding file
-		if (attrib.copris_flags & HAS_TRFILE)
-			translate_text(copris_text, &trfile);
+		if (attrib.copris_flags & HAS_ENCODING)
+			translate_text(copris_text, &encoding);
 
 		// Stage 3: Filter text
 		if (attrib.copris_flags & FILTER_NON_ASCII)
 			filter_non_ascii(copris_text);
 
 		// Stage 4: Handle Markdown and session commands with a printer feature file
-		if (attrib.copris_flags & HAS_PRSET) {
-			parse_markdown(copris_text, &prset);
-			apply_session_commands(copris_text, &prset, SESSION_PRINT);
+		if (attrib.copris_flags & HAS_FEATURES) {
+			parse_markdown(copris_text, &features);
+			apply_session_commands(copris_text, &features, SESSION_PRINT);
 		}
 
 		// Stage 5: Write text to the output destination
@@ -471,8 +471,8 @@ int main(int argc, char **argv) {
 	} while (attrib.daemon); /* end of main program loop */
 
 	// Append the shutdown session command
-	if (attrib.copris_flags & HAS_PRSET) {
-		int num_of_chars = apply_session_commands(copris_text, &prset, SESSION_SHUTDOWN);
+	if (attrib.copris_flags & HAS_FEATURES) {
+		int num_of_chars = apply_session_commands(copris_text, &features, SESSION_SHUTDOWN);
 
 		if (num_of_chars > 0) {
 			write_to_output(copris_text, &attrib);
@@ -480,11 +480,11 @@ int main(int argc, char **argv) {
 			return EXIT_FAILURE; // Negative return value - an error
 		}
 
-		unload_printer_set_file(&prset);
+		unload_printer_set_file(&features);
 	}
 
-	if (attrib.copris_flags & HAS_TRFILE)
-		unload_translation_file(&trfile);
+	if (attrib.copris_flags & HAS_ENCODING)
+		unload_translation_file(&encoding);
 
 	utstring_free(copris_text);
 

@@ -31,9 +31,9 @@ static int initialise_commands(struct Inifile **);
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_command_pairs(const char *, struct Inifile **);
 
-int load_printer_set_file(const char *filename, struct Inifile **prset)
+int load_printer_set_file(const char *filename, struct Inifile **features)
 {
-	int error = initialise_commands(prset);
+	int error = initialise_commands(features);
 	if (error)
 		return error;
 
@@ -47,7 +47,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 		PRINT_MSG("Parsing printer feature file '%s':", filename);
 
 	int command_count = 0;
-	int parse_error = ini_parse_file(file, inih_handler, prset);
+	int parse_error = ini_parse_file(file, inih_handler, features);
 
 	// If there's a parse error, properly close the file before exiting
 	error = -1;
@@ -68,7 +68,7 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 
 	// Count commands that were defined by the user
 	struct Inifile *s;
-	for (s = *prset; s != NULL; s = s->hh.next) {
+	for (s = *features; s != NULL; s = s->hh.next) {
 		if (*s->out != '\0')
 			command_count++;
 	}
@@ -92,23 +92,23 @@ int load_printer_set_file(const char *filename, struct Inifile **prset)
 	}
 
 	if (!error && command_count > 0)
-		error = validate_command_pairs(filename, prset);
+		error = validate_command_pairs(filename, features);
 
 	return error;
 }
 
-// Initialise the prset struct with predefined names and empty strings as values.
-static int initialise_commands(struct Inifile **prset)
+// Initialise the features struct with predefined names and empty strings as values.
+static int initialise_commands(struct Inifile **features)
 {
 	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
-	*prset = NULL;
+	*features = NULL;
 	struct Inifile *s;
 	int command_count = 0;
 
 	for (int i = 0; printer_commands[i] != NULL; i++) {
 		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
 		// better be safe. Better check this with a unit test (TODO).
-		HASH_FIND_STR(*prset, printer_commands[i], s);
+		HASH_FIND_STR(*features, printer_commands[i], s);
 		assert(s == NULL);
 
 		// Insert the (unique) name
@@ -118,7 +118,7 @@ static int initialise_commands(struct Inifile **prset)
 		// Each name gets an empty value, to be filled later from the configuration file
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
 		*s->out = '\0';
-		HASH_ADD_STR(*prset, in, s);
+		HASH_ADD_STR(*features, in, s);
 
 		command_count++;
 	}
@@ -164,11 +164,11 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	struct Inifile **prset = (struct Inifile**)user;
+	struct Inifile **features = (struct Inifile**)user;
 	struct Inifile *s;
 
 	// Check if command name exists. If not, validate its name and add it to the table.
-	HASH_FIND_STR(*prset, name, s);
+	HASH_FIND_STR(*features, name, s);
 	if (s == NULL) {
 		if (name[0] != 'C' || name[1] != '_') {
 			PRINT_ERROR_MSG("Name '%s' is unknown. If you'd like to define a custom "
@@ -181,7 +181,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		CHECK_MALLOC(s);
 
 		memcpy(s->in, name, name_len);
-		HASH_ADD_STR(*prset, in, s);
+		HASH_ADD_STR(*features, in, s);
 	}
 
 	// Check if a command was already set
@@ -195,7 +195,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		utstring_new(parsed_value);
 
 		// Resolve variables to numbers and numbers to command values
-		element_count = parse_all_to_commands(value, value_len, parsed_value, prset);
+		element_count = parse_all_to_commands(value, value_len, parsed_value, features);
 
 		if (element_count == -1) {
 			PRINT_ERROR_MSG("Failure while processing command '%s'.", name);
@@ -230,7 +230,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 }
 
 // Check if part of a command pair is missing (every *_ON has a *_OFF and vice-versa)
-static int validate_command_pairs(const char *filename, struct Inifile **prset)
+static int validate_command_pairs(const char *filename, struct Inifile **features)
 {
 	struct Inifile *s;
 
@@ -246,7 +246,7 @@ static int validate_command_pairs(const char *filename, struct Inifile **prset)
 		              printer_commands[i][command_len - 1] == 'N');
 
 		// Check if the command was user-defined in the printer feature file
-		HASH_FIND_STR(*prset, printer_commands[i], s);
+		HASH_FIND_STR(*features, printer_commands[i], s);
 		assert(s != NULL);
 		if (*s->out == '\0')
 			continue; /* Looks like it's not */
@@ -265,7 +265,7 @@ static int validate_command_pairs(const char *filename, struct Inifile **prset)
 			command_pair[command_len - 1] = '\0';
 		}
 
-		HASH_FIND_STR(*prset, command_pair, s);
+		HASH_FIND_STR(*features, command_pair, s);
 		assert(s != NULL);
 		// No value, meaning no pair was found
 		if (*s->out == '\0') {
@@ -286,9 +286,9 @@ static int validate_command_pairs(const char *filename, struct Inifile **prset)
 	return 0;
 }
 
-int dump_printer_set_commands(struct Inifile **prset)
+int dump_printer_set_commands(struct Inifile **features)
 {
-	int error = initialise_commands(prset);
+	int error = initialise_commands(features);
 	if (error)
 		return error;
 
@@ -300,7 +300,7 @@ int dump_printer_set_commands(struct Inifile **prset)
 	     "#  C_UNDERLINE_ON = 0x1B 0x2D 0x31\n"
 	     "#  C_RESET_PRINTER = C_MARGIN_3CM C_SIZE_10CPI  ; both must be previously defined\n");
 
-	for (s = *prset; s != NULL; s = s->hh.next) {
+	for (s = *features; s != NULL; s = s->hh.next) {
 		if (*s->in != code_prefix) {
 			code_prefix = *s->in;
 			switch (code_prefix) {
@@ -336,14 +336,14 @@ int dump_printer_set_commands(struct Inifile **prset)
 	return 0;
 }
 
-void unload_printer_set_file(struct Inifile **prset)
+void unload_printer_set_file(struct Inifile **features)
 {
 	struct Inifile *command;
 	struct Inifile *tmp;
 	int count = 0;
 
-	HASH_ITER(hh, *prset, command, tmp) {
-		HASH_DEL(*prset, command);
+	HASH_ITER(hh, *features, command, tmp) {
+		HASH_DEL(*features, command);
 		free(command);
 		count++;
 	}
@@ -352,20 +352,20 @@ void unload_printer_set_file(struct Inifile **prset)
 		PRINT_MSG("Unloaded printer feature file (count = %d).", count);
 }
 
-int apply_session_commands(UT_string *copris_text, struct Inifile **prset, session_t state)
+int apply_session_commands(UT_string *copris_text, struct Inifile **features, session_t state)
 {
 	struct Inifile *s;
 
 	switch(state) {
 	case SESSION_PRINT:
-		HASH_FIND_STR(*prset, "S_AFTER_TEXT", s);
+		HASH_FIND_STR(*features, "S_AFTER_TEXT", s);
 		// S_BEFORE_TEXT is handled later in this function
 		break;
 	case SESSION_STARTUP:
-		HASH_FIND_STR(*prset, "S_AT_STARTUP", s);
+		HASH_FIND_STR(*features, "S_AT_STARTUP", s);
 		break;
 	case SESSION_SHUTDOWN:
-		HASH_FIND_STR(*prset, "S_AT_SHUTDOWN", s);
+		HASH_FIND_STR(*features, "S_AT_SHUTDOWN", s);
 		break;
 	default:
 		assert(false);
@@ -392,7 +392,7 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **prset, sessi
 		return 0; // copris_text was left unmodified
 
 	// Prepend before received text
-	HASH_FIND_STR(*prset, "S_BEFORE_TEXT", s);
+	HASH_FIND_STR(*features, "S_BEFORE_TEXT", s);
 	assert(s != NULL);
 
 	if (*s->out != '\0') {

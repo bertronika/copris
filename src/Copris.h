@@ -5,8 +5,8 @@
 #include "config.h"
 
 #define HAS_DESTINATION  (1 << 0)
-#define HAS_TRFILE       (1 << 1)
-#define HAS_PRSET        (1 << 2)
+#define HAS_ENCODING     (1 << 1)
+#define HAS_FEATURES     (1 << 2)
 #define MUST_CUTOFF      (1 << 3)
 #define FILTER_NON_ASCII (1 << 4)
 
@@ -16,9 +16,10 @@ struct Attribs {
 	size_t limitnum;     /* Maximum allowed number of received bytes       */
 
 	int copris_flags;    /* Flags regarding user-specified arguments       */
-	char *prset;         /* Name of the printer feature file               */
-	char *trfile;        /* Name of the encoding file                      */
+
 	char *destination;   /* Output device or file                          */
+	char *encoding_file; /* Name of the encoding file                      */
+	char *feature_file;  /* Name of the printer feature file               */
 };
 
 struct Stats {
@@ -37,4 +38,3 @@ struct Inifile {
 	char out[MAX_INIFILE_ELEMENT_LENGTH];  /* item (value) */
 	UT_hash_handle hh;
 };
-

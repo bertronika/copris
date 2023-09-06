@@ -58,7 +58,7 @@ typedef enum attribute {
         utstring_bincpy(converted_text, string, (sizeof string) - 1)
 
 #define INSERT_CODE(string)  \
-        insert_code_helper(string, prset, converted_text)
+        insert_code_helper(string, features, converted_text)
 
 static void insert_code_helper(const char *, struct Inifile **, UT_string *);
 
@@ -72,7 +72,7 @@ static void insert_code_helper(const char *, struct Inifile **, UT_string *);
  * The latter two aren't touched by this function, but shall not be mistakenly
  * parsed as bold/italic.
  */
-void parse_markdown(UT_string *copris_text, struct Inifile **prset)
+void parse_markdown(UT_string *copris_text, struct Inifile **features)
 {
 	// Create a temporary string
 	UT_string *converted_text;
@@ -342,10 +342,10 @@ void parse_markdown(UT_string *copris_text, struct Inifile **prset)
 	utstring_free(converted_text);
 }
 
-static void insert_code_helper(const char *code, struct Inifile **prset, UT_string *text)
+static void insert_code_helper(const char *code, struct Inifile **features, UT_string *text)
 {
 	struct Inifile *s;
-	HASH_FIND_STR(*prset, code, s);
+	HASH_FIND_STR(*features, code, s);
 
 	assert(s != NULL);
 
