@@ -60,8 +60,8 @@ typedef enum attribute {
 #define INSERT_CODE(string)  \
         insert_code_helper(string, features, converted_text)
 
-#define NOT_IN_CODE          \
-        (!inline_code_on && !code_block_on && !code_block_open)
+#define MARKUP_ALLOWED       \
+        (!inline_code_on && !code_block_on && !code_block_open && !link_on)
 
 static void insert_code_helper(const char *, struct Inifile **, UT_string *);
 
@@ -122,7 +122,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 
 		// Emphasis: inline '*'/'_' pairs for italic, '**'/'__' for bold,
 		//           '***'/'___' for both.
-		} else if (NOT_IN_CODE && !escaped_char && (text[i] == '*' || text[i] == '_')) {
+		} else if (MARKUP_ALLOWED && !escaped_char && (text[i] == '*' || text[i] == '_')) {
 			if (i + 1 < text_len && (text[i + 1] == '*' || text[i + 1] == '_')) {
 				if (i + 2 < text_len && (text[i + 2] == '*' || text[i + 2] == '_')) {
 					text_attribute |= ITALIC | BOLD;
@@ -143,7 +143,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 
 		// Headings: '#' through '####' on a blank line. More than one space after the
 		//           pound sign will be preserved (e.g. to center titles).
-		} else if (NOT_IN_CODE && !escaped_char && (i == 0 || last_char == '\n') &&
+		} else if (MARKUP_ALLOWED && !escaped_char && (i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '#')) {
 			if (i + 2 < text_len && text[i + 1] == '#') {
 				if (i + 3 < text_len && text[i + 2] == '#') {
@@ -168,7 +168,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 			}
 
 		// Blockquote: '> ' (greater-than sign *and* a space) on a new line.
-		} else if (NOT_IN_CODE && !escaped_char && (i == 0 || last_char == '\n') &&
+		} else if (MARKUP_ALLOWED && !escaped_char && (i == 0 || last_char == '\n') &&
 		           (i + 1 < text_len && text[i] == '>' && text[i + 1] == ' ')) {
 			text_attribute = BLOCKQUOTE;
 			blockquote_open = true;
@@ -198,7 +198,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 			i += 3;
 
 		// Link in angle brackets: inline '<'/'>' pairs
-		} else if (NOT_IN_CODE && !escaped_char && text[i] == '<' && !code_block_open) {
+		} else if (MARKUP_ALLOWED && !escaped_char && text[i] == '<' && !code_block_open) {
 			text_attribute = LINK;
 			link_on = true;
 		} else if (!escaped_char && link_on && text[i] == '>' && !code_block_open) {
