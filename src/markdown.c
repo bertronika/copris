@@ -114,11 +114,11 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 
 	for (size_t i = 0; text[i] != '\0'; i++) {
 		// Catch horizontal rules ('***'/'---') and copy them to output.
-		if (!escaped_char && (i + 3 < text_len && text[i + 3] == '\n') &&
-		    ((text[i] == '*' && text[i + 1] == '*' && text[i + 2] == '*') ||
-		     (text[i] == '-' && text[i + 1] == '-' && text[i + 2] == '-'))) {
+		if (!escaped_char && (i + 4 < text_len && text[i + 4] == '\n' && text[i] == '\n') &&
+		    ((text[i + 1] == '*' && text[i + 2] == '*' && text[i + 3] == '*') ||
+		     (text[i + 1] == '-' && text[i + 2] == '-' && text[i + 3] == '-'))) {
 			text_attribute = RULE;
-			i += 3;
+			i += 4;
 
 		// Emphasis: inline '*'/'_' pairs for italic, '**'/'__' for bold,
 		//           '***'/'___' for both.
@@ -274,12 +274,13 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 				error_line.code_block = current_line;
 
 		} else if (text_attribute == RULE) {
-			char rule_text[5];
-			rule_text[0] = text[i - 3];
-			rule_text[1] = rule_text[0];
-			rule_text[2] = rule_text[0];
-			rule_text[3] = '\n';
-			rule_text[4] = '\0';
+			char rule_text[6];
+			rule_text[0] = text[i - 4]; // \n
+			rule_text[1] = text[i - 3]; // -
+			rule_text[2] = text[i - 2]; // -
+			rule_text[3] = text[i - 1]; // -
+			rule_text[4] = text[i];     // \n
+			rule_text[5] = '\0';
 			INSERT_TEXT(rule_text);
 			text_attribute &= ~(RULE);
 		} else if (text_attribute == LINK) {
