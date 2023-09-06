@@ -23,7 +23,7 @@
 #include "Copris.h"
 #include "config.h"
 #include "debug.h"
-#include "printerset.h"
+#include "features.h"
 #include "printer_commands.h"
 #include "parse_value.h"
 
