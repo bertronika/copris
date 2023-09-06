@@ -31,7 +31,7 @@ static int initialise_commands(struct Inifile **);
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_command_pairs(const char *, struct Inifile **);
 
-int load_printer_set_file(const char *filename, struct Inifile **features)
+int load_printer_feature_file(const char *filename, struct Inifile **features)
 {
 	int error = initialise_commands(features);
 	if (error)
@@ -286,7 +286,7 @@ static int validate_command_pairs(const char *filename, struct Inifile **feature
 	return 0;
 }
 
-int dump_printer_set_commands(struct Inifile **features)
+int dump_printer_feature_commands(struct Inifile **features)
 {
 	int error = initialise_commands(features);
 	if (error)
@@ -336,7 +336,7 @@ int dump_printer_set_commands(struct Inifile **features)
 	return 0;
 }
 
-void unload_printer_set_file(struct Inifile **features)
+void unload_printer_feature_file(struct Inifile **features)
 {
 	struct Inifile *command;
 	struct Inifile *tmp;

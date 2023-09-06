@@ -201,7 +201,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		}
 		case ',': {
 			struct Inifile *features;
-			exit(dump_printer_set_commands(&features));
+			exit(dump_printer_feature_commands(&features));
 		}
 		case 'd':
 			attrib->daemon = true;
@@ -383,13 +383,13 @@ int main(int argc, char **argv) {
 
 	// Load a printer feature file
 	if (attrib.copris_flags & HAS_FEATURES) {
-		error = load_printer_set_file(attrib.feature_file, &features);
+		error = load_printer_feature_file(attrib.feature_file, &features);
 		if (error) {
 			if (verbosity)
 				return EXIT_FAILURE;
 
 			// Missing printer feature files are as well not a fatal error in quiet mode
-			unload_printer_set_file(&features);
+			unload_printer_feature_file(&features);
 			attrib.copris_flags &= ~HAS_FEATURES;
 			PRINT_ERROR_MSG("Continuing without printer features.");
 		}
@@ -480,7 +480,7 @@ int main(int argc, char **argv) {
 			return EXIT_FAILURE; // Negative return value - an error
 		}
 
-		unload_printer_set_file(&features);
+		unload_printer_feature_file(&features);
 	}
 
 	if (attrib.copris_flags & HAS_ENCODING)
