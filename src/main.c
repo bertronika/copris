@@ -369,13 +369,13 @@ int main(int argc, char **argv) {
 
 	// Load an encoding file
 	if (attrib.copris_flags & HAS_ENCODING) {
-		error = load_translation_file(attrib.encoding_file, &encoding);
+		error = load_encoding_file(attrib.encoding_file, &encoding);
 		if (error) {
 			if (verbosity)
 				return EXIT_FAILURE;
 
 			// Missing encoding files are not a fatal error when --quiet
-			unload_translation_file(&encoding);
+			unload_encoding_file(&encoding);
 			attrib.copris_flags &= ~HAS_ENCODING;
 			PRINT_ERROR_MSG("Continuing without character recoding.");
 		}
@@ -450,7 +450,7 @@ int main(int argc, char **argv) {
 
 		// Stage 2: Recode text with an encoding file
 		if (attrib.copris_flags & HAS_ENCODING)
-			translate_text(copris_text, &encoding);
+			recode_text(copris_text, &encoding);
 
 		// Stage 3: Filter text
 		if (attrib.copris_flags & FILTER_NON_ASCII)
@@ -484,7 +484,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (attrib.copris_flags & HAS_ENCODING)
-		unload_translation_file(&encoding);
+		unload_encoding_file(&encoding);
 
 	utstring_free(copris_text);
 

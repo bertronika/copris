@@ -1,5 +1,5 @@
 /*
- * Encoding file handling and text conversion
+ * Encoding file handling and text recoding
  *
  * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
@@ -26,7 +26,7 @@
 
 static int inih_handler(void *, const char *, const char *, const char *);
 
-int load_translation_file(const char *filename, struct Inifile **encoding)
+int load_encoding_file(const char *filename, struct Inifile **encoding)
 {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
@@ -170,7 +170,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-void unload_translation_file(struct Inifile **encoding)
+void unload_encoding_file(struct Inifile **encoding)
 {
 	struct Inifile *definition;
 	struct Inifile *tmp;
@@ -186,10 +186,10 @@ void unload_translation_file(struct Inifile **encoding)
 		PRINT_MSG("Unloaded encoding file (count = %d).", count);
 }
 
-void translate_text(UT_string *copris_text, struct Inifile **encoding)
+void recode_text(UT_string *copris_text, struct Inifile **encoding)
 {
-	UT_string *translated_text;
-	utstring_new(translated_text);
+	UT_string *recoded_text;
+	utstring_new(recoded_text);
 
 	char *original = utstring_body(copris_text);
 
@@ -220,11 +220,11 @@ void translate_text(UT_string *copris_text, struct Inifile **encoding)
 			memcpy(output_char, input_char, output_len);
 		}
 
-		utstring_bincpy(translated_text, output_char, output_len);
+		utstring_bincpy(recoded_text, output_char, output_len);
 		original += input_len;
 	}
 
 	utstring_clear(copris_text);
-	utstring_concat(copris_text, translated_text);
-	utstring_free(translated_text);
+	utstring_concat(copris_text, recoded_text);
+	utstring_free(recoded_text);
 }
