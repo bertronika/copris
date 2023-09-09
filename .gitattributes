@@ -1,2 +1,5 @@
 # Specify that .h files are C headers
 *.h linguist-language=C
+
+# Prefix encoding file template isn't normal text
+template-prefix.raw binary
