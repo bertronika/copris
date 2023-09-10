@@ -38,7 +38,6 @@
 #include "feature.h"
 #include "markdown.h"
 #include "filters.h"
-#include "writer.h"
 #include "main-helpers.h"
 
 /*
@@ -335,9 +334,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	return 0;
 }
 
-// Helper function for writing to the appropriate output
-static void write_to_output(UT_string *, struct Attribs *);
-
 int main(int argc, char **argv) {
 	// Run-time options (program attributes)
 	struct Attribs attrib;
@@ -524,27 +520,4 @@ int main(int argc, char **argv) {
 		PRINT_MSG("Not running as a daemon, exiting.");
 
 	return 0;
-}
-
-static void write_to_output(UT_string *copris_text, struct Attribs *attrib)
-{
-	if (attrib->copris_flags & HAS_DESTINATION) {
-		copris_write_file(attrib->destination, copris_text);
-	} else {
-		const char *processed_text = utstring_body(copris_text);
-		size_t text_length = utstring_len(copris_text);
-
-		if (LOG_ERROR)
-			puts("; BST"); // Begin-Stream-Transcript
-
-		fputs(processed_text, stdout);
-
-		if (LOG_ERROR) {
-			// Print a new line if one's missing in the final text
-			if (processed_text[text_length - 1] != '\n')
-				puts("");
-
-			puts("; EST"); // End-Stream-Transcript
-		}
-	}
 }
