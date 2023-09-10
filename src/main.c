@@ -29,7 +29,6 @@
 #include <utstring.h> /* uthash library - dynamic strings */
 
 #include "debug.h"
-#include "config.h"
 #include "Copris.h"
 
 #include "read_socket.h"

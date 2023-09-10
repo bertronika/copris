@@ -13,7 +13,6 @@
 #include <utstring.h> /* uthash library - dynamic strings */
 
 #include "Copris.h"
-#include "config.h"
 #include "debug.h"
 #include "read_stdin.h"
 
