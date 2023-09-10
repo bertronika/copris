@@ -392,7 +392,7 @@ int main(int argc, char **argv) {
 					return EXIT_FAILURE;
 
 				// Missing encoding files are not a fatal error when --quiet
-				unload_encoding_file(&encoding);
+				unload_encoding_commands(&encoding);
 				attrib.copris_flags &= ~HAS_ENCODING;
 				PRINT_ERROR_MSG("Continuing without character recoding.");
 			}
@@ -412,7 +412,7 @@ int main(int argc, char **argv) {
 					return EXIT_FAILURE;
 
 				// Missing printer feature files are as well not a fatal error in quiet mode
-				unload_printer_feature_file(&features);
+				unload_printer_feature_commands(&features);
 				attrib.copris_flags &= ~HAS_FEATURES;
 				PRINT_ERROR_MSG("Continuing without printer features.");
 			}
@@ -504,12 +504,12 @@ int main(int argc, char **argv) {
 			return EXIT_FAILURE; // Negative return value - an error
 		}
 
-		unload_printer_feature_file(&features);
+		unload_printer_feature_commands(&features);
 		free_filenames(attrib.feature_files, attrib.feature_file_count);
 	}
 
 	if (attrib.copris_flags & HAS_ENCODING) {
-		unload_encoding_file(&encoding);
+		unload_encoding_commands(&encoding);
 		free_filenames(attrib.encoding_files, attrib.encoding_file_count);
 	}
 

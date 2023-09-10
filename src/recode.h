@@ -7,7 +7,7 @@ int load_encoding_file(const char *filename, struct Inifile **encoding);
 /*
  * Unload encoding hash table, passed on by 'encoding'.
  */
-void unload_encoding_file(struct Inifile **encoding);
+void unload_encoding_commands(struct Inifile **encoding);
 
 /*
  * Take input text 'copris_text' and recode it according to definitions, passed on by

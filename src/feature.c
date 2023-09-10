@@ -327,7 +327,7 @@ int dump_printer_feature_commands(struct Inifile **features)
 	return 0;
 }
 
-void unload_printer_feature_file(struct Inifile **features)
+void unload_printer_feature_commands(struct Inifile **features)
 {
 	struct Inifile *command;
 	struct Inifile *tmp;
@@ -340,7 +340,7 @@ void unload_printer_feature_file(struct Inifile **features)
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("Unloaded printer feature file (count = %d).", count);
+		PRINT_MSG("Unloaded printer feature commands (count = %d).", count);
 }
 
 int apply_session_commands(UT_string *copris_text, struct Inifile **features, session_t state)

@@ -18,7 +18,7 @@ int dump_printer_feature_commands(struct Inifile **features);
 /*
  * Unload internal printer feature hash table, passed on by 'features'.
  */
-void unload_printer_feature_file(struct Inifile **features);
+void unload_printer_feature_commands(struct Inifile **features);
 
 /*
  * List of possible internal states that trigger session commands (see function below),

@@ -167,20 +167,20 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	return COPRIS_PARSE_SUCCESS;
 }
 
-void unload_encoding_file(struct Inifile **encoding)
+void unload_encoding_commands(struct Inifile **encoding)
 {
-	struct Inifile *definition;
+	struct Inifile *command;
 	struct Inifile *tmp;
 	int count = 0;
 
-	HASH_ITER(hh, *encoding, definition, tmp) {
-		HASH_DEL(*encoding, definition);
-		free(definition);
+	HASH_ITER(hh, *encoding, command, tmp) {
+		HASH_DEL(*encoding, command);
+		free(command);
 		count++;
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("Unloaded encoding file (count = %d).", count);
+		PRINT_MSG("Unloaded encoding commands (count = %d).", count);
 }
 
 void recode_text(UT_string *copris_text, struct Inifile **encoding)
