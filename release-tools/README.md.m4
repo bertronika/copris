@@ -61,7 +61,7 @@ F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 ```
 
 
-## Variables and custom commands
+## Variables, custom and session commands
 
 You can use existing command names as variables, as long as you define the command *before* using it as a variable. Furthermore, you may define your own variables and use them in existing commands. For COPRIS to recognise them, they must be prefixed with `C_`! Variables may be interweaved with commands.
 
@@ -73,7 +73,7 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
-COPRIS also provides two command pairs for sending repetitive settings to the printer. They may be used to set the code page, text margins, line spacing, font face, character density, initialise/reset the printer and so on:
+COPRIS also provides **session commands**: two command pairs for sending repetitive settings to the printer. They may be used to set the code page, text margins, line spacing, font face, character density, initialise/reset the printer and so on:
 
 - `S_AT_STARTUP` and `S_AT_SHUTDOWN` - sent to the printer once after COPRIS starts and once
   before it exits

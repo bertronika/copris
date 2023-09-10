@@ -1,11 +1,10 @@
 /*
  * This is a list of every possible command that can be specified in a printer feature file.
- * Printing session commands are independent of the content, formatting commands are
- * used when parsing Markdown.
  */
 
 static const char *printer_commands[] = {
 	// Formatting commands; both parts of a pair must be defined.
+	// These map to Markdown attributes.
 	"F_BOLD_ON",
 	"F_BOLD_OFF",
 	"F_ITALIC_ON",
@@ -27,7 +26,7 @@ static const char *printer_commands[] = {
 	"F_ANGLE_BRACKET_ON",
 	"F_ANGLE_BRACKET_OFF",
 
-	// Printing session commands; used before and after printing received text,
+	// Session commands; used before and after printing received text,
 	// or when COPRIS starts and before it exits.
 	"S_BEFORE_TEXT",
 	"S_AFTER_TEXT",

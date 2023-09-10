@@ -304,8 +304,7 @@ int dump_printer_feature_commands(struct Inifile **features)
 				puts("# Text formatting commands; both parts of a pair must be defined.");
 				break;
 			case 'S':
-				puts("\n# Printing session commands; used before and after printing "
-				     "received text,\n"
+				puts("\n# Session commands; used before and after printing received text,\n"
 				     "# or when COPRIS starts and before it exits.");
 				break;
 			}
