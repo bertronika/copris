@@ -11,7 +11,7 @@ If not, you can search the Internet for a code page table/listing with character
 
 As a fallback, to at least figure out the character codes of your character set, run the `printchar.sh` test script, included with COPRIS, and pipe its output into the printer. It'll output printable characters, along with their decimal and hexadecimal values.
 
-The format of an encoding file is simple. Start the line by entering a human-readable character, either via your keyboard or copied from somewhere else. Follow by an equals sign (optionally surrounded by spaces). Then, enter the numberical value of that character which your printer will understand.
+The format of an encoding file is simple. Start the line by entering a human-readable character, either via your keyboard or copied from somewhere else. Follow by an equals sign (optionally surrounded by spaces). Then, enter the numerical value of that character which your printer will understand.
 
 Here's an example excerpt of the YUSCII encoding:
 

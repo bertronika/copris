@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-09-06" "" "0.9-540-gf6ae379-dirty"
+.TH "COPRIS" "1" "2023-09-10" "" "0.9-569-gda120c7-dirty"
 .hy
 .SH NAME
 .PP
@@ -142,12 +142,14 @@ Run COPRIS as a network server on port \f[I]NUMBER\f[R].
 Superuser privileges are required if \f[I]NUMBER\f[R] is less than 1024.
 .TP
 \f[B]-e\f[R], \f[B]--encoding\f[R] \f[I]FILE\f[R]
-Recode characters in received text according to encoding definitions
-from encoding \f[I]FILE\f[R].
+Recode characters in received text according to definitions from
+encoding \f[I]FILE\f[R].
+This option can be specified multiple times.
 .TP
 \f[B]-f\f[R], \f[B]--feature\f[R] \f[I]FILE\f[R]
 Process Markdown formatting in received text and apply session commands
-with definitions from printer feature \f[I]FILE\f[R].
+according to commands from printer feature \f[I]FILE\f[R].
+This option can be specified multiple times.
 .TP
 \f[B]--dump-commands\f[R]
 Show all possible printer feature commands in INI file format (e.g.\ to

@@ -95,7 +95,7 @@ output printable characters, along with their decimal and hexadecimal values.
 
 The format of an encoding file is simple. Start the line by entering a human-readable character,
 either via your keyboard or copied from somewhere else. Follow by an equals sign (optionally
-surrounded by spaces). Then, enter the numberical value of that character which your printer
+surrounded by spaces). Then, enter the numerical value of that character which your printer
 will understand.
 
 Here's an example excerpt of the YUSCII encoding:

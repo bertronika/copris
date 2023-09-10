@@ -26,12 +26,13 @@ m4_include(common-description.md.m4)m4_dnl
   privileges are required if *NUMBER* is less than 1024.
 
 **-e**, **\--encoding** *FILE*
-: Recode characters in received text according to encoding definitions from encoding
-  *FILE*.
+: Recode characters in received text according to definitions from encoding
+  *FILE*. This option can be specified multiple times.
 
 **-f**, **\--feature** *FILE*
-: Process Markdown formatting in received text and apply session commands with
-  definitions from printer feature *FILE*.
+: Process Markdown formatting in received text and apply session commands
+  according to commands from printer feature *FILE*. This option can be
+  specified multiple times.
 
 **\--dump-commands**
 : Show all possible printer feature commands in INI file format
