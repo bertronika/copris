@@ -470,19 +470,19 @@ int main(int argc, char **argv) {
 		if (utstring_len(copris_text) == 0)
 			continue; // Do not attempt to write/display nothing
 
-		// Stage 2: Recode text with an encoding file
-		if (attrib.copris_flags & HAS_ENCODING)
-			recode_text(copris_text, &encoding);
-
-		// Stage 3: Filter text
-		if (attrib.copris_flags & FILTER_NON_ASCII)
-			filter_non_ascii(copris_text);
-
-		// Stage 4: Handle Markdown and session commands with a printer feature file
+		// Stage 2: Handle Markdown and session commands with a printer feature file
 		if (attrib.copris_flags & HAS_FEATURES) {
 			parse_markdown(copris_text, &features);
 			apply_session_commands(copris_text, &features, SESSION_PRINT);
 		}
+
+		// Stage 3: Recode text with an encoding file
+		if (attrib.copris_flags & HAS_ENCODING)
+			recode_text(copris_text, &encoding);
+
+		// Stage 4: Filter text
+		if (attrib.copris_flags & FILTER_NON_ASCII)
+			filter_non_ascii(copris_text);
 
 		// Stage 5: Write text to the output destination
 		write_to_output(copris_text, &attrib);
