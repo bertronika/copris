@@ -119,9 +119,12 @@ extern int verbosity;
     } while (0)
 
 
+/*
+ * Check return value of malloc() and similar functions.
+ * Terminate program on error.
+ */
 #define CHECK_MALLOC(var)                \
     if (var == NULL) {                   \
         PRINT_ERROR_MSG("Memory allocation error."); \
-        exit(-1);                        \
+        exit(EXIT_FAILURE);              \
     }
-
