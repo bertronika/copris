@@ -68,7 +68,7 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 	}
 
 	if (LOG_INFO)
-		PRINT_MSG("Loaded %d printer feature commands.", command_count);
+		PRINT_MSG("Loaded %d printer feature commands from '%s'.", command_count, filename);
 
 	if (command_count < 1)
 		PRINT_NOTE("Your printer feature file appears to be empty.");
