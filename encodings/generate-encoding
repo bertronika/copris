@@ -13,8 +13,8 @@ fi
 
 iconv --from-code="$CODEPAGE" \
       --to-code="UTF-8" \
-	  -c -o "$TEMPFILE" \
-	  template-prefix.raw || exit 1
+      -c -o "$TEMPFILE" \
+      template-prefix.raw || exit 1
 
 {
 	printf '# Character set %s
@@ -28,8 +28,8 @@ iconv --from-code="$CODEPAGE" \
 
 # Explain invisible characters
 sed -e "/"$'\xC2'$'\xAD'"/ s/$/ ; SHY (soft hyphen)/" \
-	-e "/"$'\xC2'$'\xA0'"/ s/$/ ; NBSP (non-breaking space)/" \
-	"${TEMPFILE}.ini" > "${CODEPAGE}.ini"
+    -e "/"$'\xC2'$'\xA0'"/ s/$/ ; NBSP (non-breaking space)/" \
+    "${TEMPFILE}.ini" > "${CODEPAGE}.ini"
 
 printf "Generated file '%s.ini'.\n" "$CODEPAGE"
 
