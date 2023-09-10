@@ -39,6 +39,7 @@
 #include "markdown.h"
 #include "filters.h"
 #include "writer.h"
+#include "main-helpers.h"
 
 /*
  * Verbosity levels:
@@ -170,7 +171,15 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 // 				return 1;
 // 			}
 
-			attrib->encoding_file = optarg;
+			if (attrib->encoding_file_count == NUM_OF_INPUT_FILES) {
+				PRINT_ERROR_MSG("Too many encoding files were provided. Either "
+				                "combine some of them or recompile COPRIS with a "
+				                "bigger NUM_OF_INPUT_FILES parameter.");
+				return 1;
+			}
+
+			append_file_name(optarg, attrib->encoding_files, attrib->encoding_file_count);
+			attrib->encoding_file_count++;
 			attrib->copris_flags |= HAS_ENCODING;
 			break;
 		}
@@ -195,7 +204,15 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 // 				return 1;
 // 			}
 
-			attrib->feature_file = optarg;
+			if (attrib->feature_file_count == NUM_OF_INPUT_FILES) {
+				PRINT_ERROR_MSG("Too many printer feature files were provided. Either "
+				                "combine some of them or recompile COPRIS with a "
+				                "bigger NUM_OF_INPUT_FILES parameter.");
+				return 1;
+			}
+
+			append_file_name(optarg, attrib->feature_files, attrib->feature_file_count);
+			attrib->feature_file_count++;
 			attrib->copris_flags |= HAS_FEATURES;
 			break;
 		}
@@ -326,12 +343,16 @@ int main(int argc, char **argv) {
 	struct Attribs attrib;
 
 	// Encoding and printer features hash structures
-	struct Inifile *encoding, *features;
+	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
+	struct Inifile *encoding = NULL, *features = NULL;
 
 	attrib.portno       = 0;  // If 0, read from stdin
 	attrib.daemon       = false;
 	attrib.limitnum     = 0;
 	attrib.copris_flags = 0x00;
+
+	attrib.encoding_file_count = 0;
+	attrib.feature_file_count  = 0;
 
 	// Parse command line arguments
 	int error = parse_arguments(argc, argv, &attrib);
@@ -369,29 +390,37 @@ int main(int argc, char **argv) {
 
 	// Load an encoding file
 	if (attrib.copris_flags & HAS_ENCODING) {
-		error = load_encoding_file(attrib.encoding_file, &encoding);
-		if (error) {
-			if (verbosity)
-				return EXIT_FAILURE;
+		for (int i = 0; i < attrib.encoding_file_count; i++) {
+			error = load_encoding_file(attrib.encoding_files[i], &encoding);
+			if (error) {
+				if (verbosity)
+					return EXIT_FAILURE;
 
-			// Missing encoding files are not a fatal error when --quiet
-			unload_encoding_file(&encoding);
-			attrib.copris_flags &= ~HAS_ENCODING;
-			PRINT_ERROR_MSG("Continuing without character recoding.");
+				// Missing encoding files are not a fatal error when --quiet
+				unload_encoding_file(&encoding);
+				attrib.copris_flags &= ~HAS_ENCODING;
+				PRINT_ERROR_MSG("Continuing without character recoding.");
+			}
 		}
 	}
 
 	// Load a printer feature file
 	if (attrib.copris_flags & HAS_FEATURES) {
-		error = load_printer_feature_file(attrib.feature_file, &features);
-		if (error) {
-			if (verbosity)
-				return EXIT_FAILURE;
+		error = initialise_commands(&features);
+		if (error)
+			return EXIT_FAILURE;
 
-			// Missing printer feature files are as well not a fatal error in quiet mode
-			unload_printer_feature_file(&features);
-			attrib.copris_flags &= ~HAS_FEATURES;
-			PRINT_ERROR_MSG("Continuing without printer features.");
+		for (int i = 0; i < attrib.feature_file_count; i++) {
+			error = load_printer_feature_file(attrib.feature_files[i], &features);
+			if (error) {
+				if (verbosity)
+					return EXIT_FAILURE;
+
+				// Missing printer feature files are as well not a fatal error in quiet mode
+				unload_printer_feature_file(&features);
+				attrib.copris_flags &= ~HAS_FEATURES;
+				PRINT_ERROR_MSG("Continuing without printer features.");
+			}
 		}
 	}
 
@@ -481,10 +510,13 @@ int main(int argc, char **argv) {
 		}
 
 		unload_printer_feature_file(&features);
+		free_filenames(attrib.feature_files, attrib.feature_file_count);
 	}
 
-	if (attrib.copris_flags & HAS_ENCODING)
+	if (attrib.copris_flags & HAS_ENCODING) {
 		unload_encoding_file(&encoding);
+		free_filenames(attrib.encoding_files, attrib.encoding_file_count);
+	}
 
 	utstring_free(copris_text);
 

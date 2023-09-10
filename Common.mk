@@ -14,7 +14,7 @@ LDFLAGS   ?=
 LIBRARIES = inih
 
 SOURCES = utf8.c writer.c parse_value.c read_stdin.c recode.c read_socket.c \
-          feature.c markdown.c filters.c main.c
+          feature.c markdown.c filters.c main-helpers.c main.c
 
 # Additional compiler and linker library flags
 CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"

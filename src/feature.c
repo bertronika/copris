@@ -27,16 +27,11 @@
 #include "printer_commands.h"
 #include "parse_value.h"
 
-static int initialise_commands(struct Inifile **);
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_command_pairs(const char *, struct Inifile **);
 
 int load_printer_feature_file(const char *filename, struct Inifile **features)
 {
-	int error = initialise_commands(features);
-	if (error)
-		return error;
-
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Failed to open printer feature file.");
@@ -50,7 +45,7 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 	int parse_error = ini_parse_file(file, inih_handler, features);
 
 	// If there's a parse error, properly close the file before exiting
-	error = -1;
+	int error = -1;
 
 	// Negative return number - can be either:
 	// -1  Error opening file - we've already handled this
@@ -97,11 +92,8 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 	return error;
 }
 
-// Initialise the features struct with predefined names and empty strings as values.
-static int initialise_commands(struct Inifile **features)
+int initialise_commands(struct Inifile **features)
 {
-	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
-	*features = NULL;
 	struct Inifile *s;
 	int command_count = 0;
 

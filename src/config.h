@@ -14,3 +14,8 @@
 #   define MAX_INIFILE_ELEMENT_LENGTH 64
 #endif
 
+// Number of each encoding and printer feature files that
+// can be loaded simultaneously
+#ifndef NUM_OF_INPUT_FILES
+#   define NUM_OF_INPUT_FILES 16
+#endif

@@ -5,6 +5,11 @@
 int load_printer_feature_file(const char *filename, struct Inifile **features);
 
 /*
+ * Initialise the 'features' struct with predefined names and empty strings as values.
+ */
+int initialise_commands(struct Inifile **features);
+
+/*
  * Print out all known printer commands in an INI-style format to stdout.
  * Return 0 on success or negative on failure, together with an error message.
  */

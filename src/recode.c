@@ -37,9 +37,6 @@ int load_encoding_file(const char *filename, struct Inifile **encoding)
 	if (LOG_DEBUG)
 		PRINT_MSG("Parsing encoding file '%s':", filename);
 
-	// 'Your hash must be declared as a NULL-initialized pointer to your structure.'
-	*encoding = NULL;
-
 	int parse_error = ini_parse_file(file, inih_handler, encoding);
 
 	// If there's a parse error, properly close the file before exiting

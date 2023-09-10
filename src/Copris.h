@@ -11,15 +11,17 @@
 #define FILTER_NON_ASCII (1 << 4)
 
 struct Attribs {
-	unsigned int portno; /* Listening port of this server                  */
-	bool daemon;         /* True if COPRIS runs continuously               */
-	size_t limitnum;     /* Maximum allowed number of received bytes       */
+	unsigned int portno; /* Listening port of this server                        */
+	bool daemon;         /* True if COPRIS runs continuously                     */
+	size_t limitnum;     /* Maximum allowed number of received bytes             */
 
-	int copris_flags;    /* Flags regarding user-specified arguments       */
+	char *encoding_files[NUM_OF_INPUT_FILES]; /* Names of encoding files         */
+	int encoding_file_count;                  /* Number of encoding file names   */
+	char *feature_files[NUM_OF_INPUT_FILES];  /* Names of printer feature files  */
+	int feature_file_count;                   /* Number of feature file names    */
 
-	char *destination;   /* Output device or file                          */
-	char *encoding_file; /* Name of the encoding file                      */
-	char *feature_file;  /* Name of the printer feature file               */
+	int copris_flags;    /* Flags regarding user-specified arguments             */
+	char *destination;   /* Output device or file                                */
 };
 
 struct Stats {
