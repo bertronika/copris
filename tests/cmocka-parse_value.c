@@ -10,7 +10,7 @@
 int verbosity = 0;
 
 #define CALL_PARSE(value) \
-        parse_numbers_to_commands(value, parsed_value, (sizeof parsed_value) - 1)
+        parse_number_string(value, parsed_value, (sizeof parsed_value) - 1)
 
 // Check if a valid string value is parsed correctly
 static void parse_value_correct(void **state)

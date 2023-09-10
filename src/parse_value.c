@@ -57,8 +57,8 @@ int parse_all_to_commands(const char *value, size_t value_len,
 		} else {
 			// Value is a number
 			char parsed_token[MAX_INIFILE_ELEMENT_LENGTH];
-			int new_value_len = parse_numbers_to_commands(token, parsed_token,
-			                                              (sizeof parsed_token) - 1);
+			int new_value_len = parse_number_string(token, parsed_token,
+			                                        (sizeof parsed_token) - 1);
 
 			if (new_value_len == -1) {
 				problem = true;
@@ -79,7 +79,7 @@ int parse_all_to_commands(const char *value, size_t value_len,
 	return element_count;
 }
 
-int parse_numbers_to_commands(const char *value, char *parsed_value, int parsed_value_len)
+int parse_number_string(const char *value, char *parsed_value, int parsed_value_len)
 {
 	const char *valuepos = value;
 	char *endptr;   // Remaining text to be converted
