@@ -1,6 +1,8 @@
 /*
  * Printer feature file handling and text formatting
  *
+ * Terminology note: printer feature files consist of commands.
+ *
  * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the

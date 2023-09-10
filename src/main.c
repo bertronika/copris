@@ -56,8 +56,8 @@ static void copris_help(const char *argv0) {
 	       "                          from FILE\n"
 	       "  -f, --feature FILE      Process Markdown formatting in received text and\n"
 	       "                          use session commands according to printer feature\n"
-	       "                          definitions from FILE\n"
-	       "      --dump-commands     Show all possible printer feature definitions\n"
+	       "                          commands from FILE\n"
+	       "      --dump-commands     Show all possible printer feature commands\n"
 	       "  -d, --daemon            Do not exit after the first network connection\n"
 	       "  -l, --limit LIMIT       Discard the whole chunk of text, received from the\n"
 	       "                          network, when it surpasses LIMIT number of bytes\n"
@@ -392,7 +392,7 @@ int main(int argc, char **argv) {
 					return EXIT_FAILURE;
 
 				// Missing encoding files are not a fatal error when --quiet
-				unload_encoding_commands(&encoding);
+				unload_encoding_definitions(&encoding);
 				attrib.copris_flags &= ~HAS_ENCODING;
 				PRINT_ERROR_MSG("Continuing without character recoding.");
 			}
@@ -509,7 +509,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (attrib.copris_flags & HAS_ENCODING) {
-		unload_encoding_commands(&encoding);
+		unload_encoding_definitions(&encoding);
 		free_filenames(attrib.encoding_files, attrib.encoding_file_count);
 	}
 
