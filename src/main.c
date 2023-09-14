@@ -221,7 +221,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			break;
 		}
 		case ',': {
-			struct Inifile *features;
+			struct Inifile *features = NULL;
 			exit(dump_printer_feature_commands(&features));
 		}
 		case 'd':
