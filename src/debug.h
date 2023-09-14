@@ -101,10 +101,8 @@ extern int verbosity;
         if (!verbosity)                  \
             break;                       \
                                          \
-        if (LOG_INFO)                    \
-            PRINT_LOCATION(stdout);      \
-        else                             \
-            fputs("Note: ", stdout);     \
+        PRINT_LOCATION(stdout);          \
+        fputs("Note: ", stdout);         \
                                          \
         puts(str);                       \
     } while (0)
