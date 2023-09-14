@@ -17,7 +17,8 @@ if [ "${1}x" = "-hx" ] || [ "${1}x" = "--helpx" ]; then
 	exit
 fi
 
-if [ $# -le 1 ]; then
+# If script is running through a pipe, omit confirmation message
+if [ $# -le 1 ] && [ -t 1 ]; then
 	printf "Printing values between %d and %d.
 Override with %s [START_NUM] [END_NUM], pass optional values in decimal.\n
 Press ENTER to continue or Ctrl-C to abort.\n" \
