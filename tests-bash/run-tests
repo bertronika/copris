@@ -1,0 +1,144 @@
+#!/bin/bash -u
+# Various checks for COPRIS, complimenting the Cmocka unit tests.
+
+# To perform all checks, run this file without any arguments. Specify
+# one argument (eg. 'fail') to stop at first failure.
+
+. ansi_colours.in
+
+COLUMNS="$(tput cols)"
+MARGIN="$((COLUMNS / 3))"
+
+COPRIS="../copris"
+COPRISDBG="../copris_dbg"
+COPRIS_OUTPUT="/tmp/copris_run-tests"
+COPRIS_STDERR="/tmp/copris_run-tests_stderr"
+FEATURE_ASCII="../feature-files/diag-ascii.ini"
+
+TERMINATE_ARGUMENT="${1:--}"
+EXIT_CODE=0
+
+terminate() {
+	EXIT_CODE=1
+	[[ "$TERMINATE_ARGUMENT" != "-" ]] && exit "$EXIT_CODE" || printf "\n"
+}
+
+print_warning() {
+	printf '%s%s%s%s\n' "$YELLOW" "WARNING:" "$NORM" " $1"
+	shift
+	while (( $# > 0 )); do
+		# Keep the "WARNING: " indentation
+		printf "         %s\n" "$1"
+		shift
+	done
+}
+
+print_pass() {
+	printf '%s%s%s\n' "$GREEN" "pass" "$NORM"
+}
+
+print_fail() {
+	printf '%s%s%s\n' "$RED" "fail" "$NORM"
+}
+
+check_for_expected_output() {
+	ARGS="$1"
+	TEST_NAME="$2"
+	CMDLINE=(${COPRISDBG} ${ARGS})
+	DIFF_RESULT=
+	CMD_STATUS=
+
+	IFS=- read -r PREFIX GROUP TITLE <<< "$TEST_NAME"
+	GROUP_LEN="${#GROUP}"
+	TITLE_LEN="${#TITLE}"
+
+	printf 'Checking group %s%s%s, test %s%s%s.' \
+		"$BOLD" "${GROUP^}" "$NORM" \
+		"$BOLD" "${TITLE^}" "$NORM"
+	printf ' %.0s' $(seq 1 $((COLUMNS - GROUP_LEN - TITLE_LEN - 28 - MARGIN)))
+
+	:> "$COPRIS_OUTPUT"
+	"${CMDLINE[@]}" < "${TEST_NAME}.md" "$COPRIS_OUTPUT" >/dev/null 2> "$COPRIS_STDERR"
+	CMD_STATUS=$?
+
+    if DIFF_RESULT="$(diff --color=always "$TEST_NAME.exp" "$COPRIS_OUTPUT" 2>&1)"; then
+        print_pass
+    else
+        print_fail
+		printf ' %scmdline:%s %s < %s\n' "$YELLOW" "$NORM" "${CMDLINE[*]}" "${TEST_NAME}.md"
+		if [[ -s "$COPRIS_STDERR" ]]; then
+			printf ' %sstderr:%s \n' "$YELLOW" "$NORM"
+			cat "$COPRIS_STDERR" # TODO not ideal, what if stderr appears on success?
+			printf ' %s-------%s \n' "$YELLOW" "$NORM"
+		fi
+
+		if (( CMD_STATUS == 0 )); then
+			printf ' program output is in green, expected test output is in red\n'
+	        printf '%s\n' "$DIFF_RESULT"
+		fi
+		terminate
+    fi
+}
+
+compare_files() {
+	DESCRIPTION="$1"
+	DESC_LEN="${#DESCRIPTION}"
+	STRING1="$2"
+	STRING2="$3"
+
+	printf 'Checking if %s%s%s.' "$BOLD" "$DESCRIPTION" "$NORM"
+	printf ' %.0s' $(seq 1 $((COLUMNS - DESC_LEN - 18 - MARGIN)))
+
+	if DIFF_RESULT="$(diff --color=always "$STRING1" "$STRING2" 2>&1)"; then
+		print_pass
+	else
+		print_fail
+		printf ' red is %s, green is %s\n' "$STRING1" "$STRING2"
+		printf '%s\n' "$DIFF_RESULT"
+		terminate
+	fi
+}
+
+### BEGIN TESTS
+
+# Check if copris executable is present
+if [[ ! -x "$COPRISDBG" ]]; then
+	print_warning "Executable does not exist, building."
+	printf '—%.0s' $(seq 1 $((COLUMNS))); printf '\n'
+	make -C .. debug
+	printf '—%.0s' $(seq 1 $((COLUMNS))); printf '\n'
+	printf '\n'
+fi
+
+# Check if test files exist
+NUM_OF_INPUT_FILES="$(find . -name 't-*.md' -printf f | wc -c)"
+NUM_OF_OUTPUT_FILES="$(find . -name 't-*.exp' -printf f | wc -c)"
+
+if (( NUM_OF_INPUT_FILES != NUM_OF_OUTPUT_FILES )); then
+	print_warning "Number of input test files ($NUM_OF_INPUT_FILES) does not match the" \
+	              "number of output test files ($NUM_OF_OUTPUT_FILES). Perhaps you need" \
+				  "to (re)generate them?"
+fi
+
+# check_for_expected_output <program arguments> <test file without extension>
+check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-emphasis"
+check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-headings"
+check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-quotes"
+check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-code"
+check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-links"
+check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-escape"
+
+# compare_files <description> <first file> <second file>
+compare_files "git tag and VERSION values match" \
+              <(git describe --tags --abbrev=0) ../VERSION
+
+MAX_FILENAME_LENGTH="$(grep -Po '#define MAX_FILENAME_LENGTH \K[0-9]+' ../src/debug.h)"
+compare_files "any source file names exceed MAX_FILENAME_LENGTH of ${MAX_FILENAME_LENGTH}" \
+              <(cd .. && ls -1 src/*.c | strings -n $((MAX_FILENAME_LENGTH + 1))) /dev/null
+			  # + 1 accounts for a new line
+
+#compare_files "any program strings are longer than 80 characters" \
+#              <(strings -d -n 80 "$COPRISDBG" | grep -v -e GNU -e GCC) /dev/null
+
+
+exit "$EXIT_CODE"

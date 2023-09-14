@@ -1,0 +1,52 @@
+#!/bin/bash -u
+# Regenerate '.md' input files to '.exp' test files (expected output).
+
+# Run this file without any arguments. It'll prompt you interactively.
+
+. ansi_colours.in
+
+COLUMNS="$(tput cols)"
+
+COPRIS="../copris"
+COPRISDBG="../copris_dbg"
+COPRIS_OUTPUT="/tmp/copris_regen-test-files"
+
+for f in t-*.md; do
+	INPUT_FILENAME_LEN="${#f}"
+	OUTPUT_FILENAME="${f%.md}.exp"
+
+	# If test file exists and is newer than the input file, skip regeneration.
+	if [[ -f "$OUTPUT_FILENAME" ]] && [[ "$OUTPUT_FILENAME" -nt "$f" ]]; then
+		printf "Test already exists for '%s'.\n" "$f"
+		continue
+	fi
+
+	# Generate output file
+	CMDLINE=(${COPRISDBG} -q -f ../feature-files/diag-ascii.ini)
+	"${CMDLINE[@]}" < "$f" >| "$COPRIS_OUTPUT"
+
+	# Draw a separator line with the input file name
+	printf '— %s ' "$f"
+	printf '—%.0s' $(seq 1 $((COLUMNS - INPUT_FILENAME_LEN - 3))); printf '\n'
+
+	# Display input and (to-be-user-evaluated) output files. User then
+	# decides if the output is worthy of being a test file.
+	printf "%s%s%s\n" "$BOLD" "Input:" "${NORM}${YELLOW}"
+	cat "$f"
+	printf "%s%s%s\n" "${NORM}${BOLD}" "Output:" "${NORM}${CYAN}"
+	cat "$COPRIS_OUTPUT"
+	printf "%s\n" "$NORM"
+
+	read -n1 -p "Satisfactory? (skip with 'n', quit with 'q') " -r -s DECISION
+	printf "\n"
+
+	if [[ $DECISION =~ [qQ] ]]; then
+		exit
+	elif [[ $DECISION =~ [nN] ]]; then
+		printf "Skipping.\n"
+	else
+		# Write output file, substitute '.md' extension with '.exp'
+		printf "Writing output file '%s'.\n" "$OUTPUT_FILENAME"
+		cp "$COPRIS_OUTPUT" "$OUTPUT_FILENAME"
+	fi
+done

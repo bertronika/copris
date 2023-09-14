@@ -1,0 +1,12 @@
+There should be \*no emphasis\* in \*\*this line\*\*.
+\_Or this line\_.
+
+\# Not a heading
+
+\#\# Ditto
+
+\> No quoting.
+
+&+c;Monospaced \`string&-c;
+
+\`Not monospaced\`

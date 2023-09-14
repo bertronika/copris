@@ -1,0 +1,9 @@
+#!/bin/sh
+
+RED="[0;31m"
+GREEN="[0;32m"
+CYAN="[0;36m"
+YELLOW="[0;33m"
+
+BOLD="[1m"
+NORM="[0m"

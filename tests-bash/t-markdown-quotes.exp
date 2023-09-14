@@ -1,0 +1,15 @@
+&+Q;> Error messages received after running copris with -t brasil.ini argument:&-Q;
+&+Q;> &-Q;
+&+Q;> > Value '192' in '192' is out of bounds.&-Q;
+&+Q;> > Value '193' in '193' is out of bounds.&-Q;
+&+Q;> > Value '194' in '194' is out of bounds.&-Q;
+&+Q;> > ...&-Q;
+&+Q;> &-Q;
+&+Q;> I tried with hexadecimal values too and recieved the same "out of bounds" massage.&-Q;
+
+It appears you've hit an unintended limitation. Currently, the parser only works with numbers up to 127 (the maximum of a signed char), which is obviously unwanted.
+
+&+Q;> I would appreciate to know what I am doing wrong and if there is any limitation using characters above 126.&-Q;
+
+I'll amend the problem, time permitting. I'll update this issue for you to test it.
+

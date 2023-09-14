@@ -1,0 +1,30 @@
+&+H1;Heading 1&-H1;
+
+&+H2;Heading 2&-H2;
+
+&+H3;Heading 3&-H3;
+
+&+H4;Heading 4&-H4;
+
+#not-title
+##not-title
+###not-title
+####not-title
+
+&+H1;   Spaces preserved&-H1;
+
+&+H1;&+I;Italic&-I; title&-H1;
+&+H1;&+I;Italic&-I; title&-H1;
+&+H1;Title &+I;italic&-I;&-H1;
+&+H1;Title &+I;italic&-I;&-H1;
+
+&+H1;&+B;Bold&-B; title&-H1;
+&+H1;&+B;Bold&-B; title&-H1;
+&+H1;Title &+B;bold&-B;&-H1;
+&+H1;Title &+B;bold&-B;&-H1;
+
+#&+B;Only bold&-B;
+##&+I;Only italic&-I;
+
+&+H1;&+c;Code&-c; in heading&-H1;
+&+H1;Heading with &+c;code&-c;&-H1;

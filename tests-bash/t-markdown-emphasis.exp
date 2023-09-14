@@ -1,0 +1,30 @@
+Text with &+I;italic&-I;, &+B;bold&-B; and &+B;&+I;combined&-I;&-B; emphasis in between.
+Text with &+I;italic&-I;, &+B;bold&-B; and &+B;&+I;combined&-I;&-B; emphasis in between.
+
+---
+
+&+I;Italic emphasis&-I; in front.
+&+B;Bold emphasis&-B; in front.
+&+B;&+I;Combined emphasis&-I;&-B; in front.
+
+&+I;Italic emphasis&-I; in front.
+&+B;Bold emphasis&-B; in front.
+&+B;&+I;Combined emphasis&-I;&-B; in front.
+
+---
+
+End of line with &+I;italic emphasis.&-I;
+End of line with &+B;bold emphasis.&-B;
+End of line with &+B;&+I;combined emphasis.&-I;&-B;
+
+End of line with &+I;italic emphasis.&-I;
+End of line with &+B;bold emphasis.&-B;
+End of line with &+B;&+I;combined emphasis.&-I;&-B;
+
+---
+
+&+B;Bold emphasis with &+I;italic&-I; inbetween.&-B;
+&+I;Italic emphasis with &+B;bold&-B; inbetween.&-I;
+
+&+B;Bold emphasis with &+I;italic&-I; inbetween.&-B;
+&+I;Italic emphasis with &+B;bold&-B; inbetween.&-I;
