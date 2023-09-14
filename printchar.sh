@@ -22,7 +22,7 @@ if [ $# -le 1 ]; then
 Override with %s [START_NUM] [END_NUM], pass optional values in decimal.\n
 Press ENTER to continue or Ctrl-C to abort.\n" \
 	$START_VALUE $END_VALUE "$0" >&2
-	read
+	read CONFIRMATION
 fi
 
 i=$START_VALUE
