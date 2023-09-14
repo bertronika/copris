@@ -23,7 +23,7 @@ void append_file_name(char *filename, char **filenames, int count)
 	size_t filename_len = strlen(filename);
 
 	filenames[count] = malloc(filename_len + 1);
-	CHECK_MALLOC(filenames);
+	CHECK_MALLOC(filenames[count]);
 
 	memcpy(filenames[count], filename, filename_len + 1);
 }
