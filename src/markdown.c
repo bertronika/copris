@@ -167,12 +167,15 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 				text_attribute |= HEADING;
 			}
 
-		// Blockquote: '> ' (greater-than sign *and* a space) on a new line.
-		} else if (MARKUP_ALLOWED && !escaped_char && (i == 0 || last_char == '\n') &&
-		           (i + 1 < text_len && text[i] == '>' && text[i + 1] == ' ')) {
+		// Blockquote: '> ' or '>\n' on a new line.
+		} else if (MARKUP_ALLOWED && !escaped_char && (i == 0 || last_char == '\n') && (
+		           i + 1 < text_len && text[i] == '>' &&
+		           (text[i + 1] == ' ' || text[i + 1] == '\n'))) {
 			text_attribute = BLOCKQUOTE;
 			blockquote_open = true;
-			i += 1;
+
+			if (text[i + 1] != '\n') // Keep blockquotes without any text
+				i += 1;
 
 		// Inline code: "`", and two block code variants: "```" at beginning/end of block
 		//              or "    " (four spaces) on each line.
