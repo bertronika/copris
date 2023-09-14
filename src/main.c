@@ -53,6 +53,8 @@ static void copris_help(const char *argv0) {
 	       "\n"
 	       "  -p, --port PORT         Run as a network server on port number PORT\n"
 	       "  -e, --encoding FILE     Recode received text with encoding FILE\n"
+	       "  -E, --ENCODING FILE     Same as -e, but don't stop if encoding FILE doesn't\n"
+	       "                          catch every multi-byte character\n"
 	       "  -f, --feature FILE      Process Markdown in received text and use session\n"
 	       "                          commands according to printer feature FILE\n"
 	       "      --dump-commands     Show all possible printer feature commands\n"
@@ -95,6 +97,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
 		{"port",             required_argument, NULL, 'p'},
 		{"encoding",         required_argument, NULL, 'e'},
+		{"ENCODING",         required_argument, NULL, 'E'},
 		{"feature",          required_argument, NULL, 'f'},
 		{"dump-commands",    no_argument,       NULL, ','},
 		{"daemon",           no_argument,       NULL, 'd'},
@@ -116,7 +119,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'You must
 	// specify a printer feature file.' instead of 'option requires an argument -- 'r')
-	while ((c = getopt_long(argc, argv, ":p:de:f:l:RvqhV", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":p:de:E:f:l:RvqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
@@ -144,7 +147,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->portno = (unsigned int)temp_portno;
 			break;
 		}
-		case 'e': {
+		case 'e':
+		case 'E': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised characters in encoding file name (%s). "
 				                "Perhaps you forgot to specify the file?", optarg);
@@ -177,6 +181,10 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			append_file_name(optarg, attrib->encoding_files, attrib->encoding_file_count);
 			attrib->encoding_file_count++;
 			attrib->copris_flags |= HAS_ENCODING;
+
+			if (c == 'E')
+				attrib->copris_flags |= ENCODING_NO_STOP;
+
 			break;
 		}
 		case 'f': {
@@ -394,6 +402,9 @@ int main(int argc, char **argv) {
 				attrib.copris_flags &= ~HAS_ENCODING;
 				PRINT_ERROR_MSG("Continuing without character recoding.");
 			}
+
+			if ((attrib.copris_flags & ENCODING_NO_STOP) && LOG_INFO)
+				PRINT_MSG("Forcing recoding even in case of missing encoding definitions.");
 		}
 	}
 
@@ -477,8 +488,25 @@ int main(int argc, char **argv) {
 		}
 
 		// Stage 3: Recode text with an encoding file
-		if (attrib.copris_flags & HAS_ENCODING)
-			recode_text(copris_text, &encoding);
+		if (attrib.copris_flags & HAS_ENCODING) {
+			error = recode_text(copris_text, &encoding);
+
+			// Terminate on error only if user hasn't forced recoding with '-E'
+			// TODO tell socket
+			if (error && !(attrib.copris_flags & ENCODING_NO_STOP)) {
+				char error_msg[] = "One or more multi-byte characters, not handled by "
+				                   "encoding file(s), were received. If this is the intended "
+				                   "behaviour, specify the file(s) with option -E/--ENCODING "
+				                   "instead.";
+
+				if (verbosity) {
+					PRINT_MSG("%s", error_msg);
+					return EXIT_FAILURE;
+				}
+
+				PRINT_NOTE(error_msg);
+			}
+		}
 
 		// Stage 4: Filter text
 		if (attrib.copris_flags & FILTER_NON_ASCII)

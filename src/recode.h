@@ -12,5 +12,7 @@ void unload_encoding_definitions(struct Inifile **encoding);
 /*
  * Take input text 'copris_text' and recode it according to definitions, passed on by
  * 'encoding' hash table. Put recoded text into 'copris_text', overwriting previous content.
+ * Return 0 on success or nonzero if text contained characters, not present in the 'encoding'
+ * hash table.
  */
-void recode_text(UT_string *copris_text, struct Inifile **encoding);
+int recode_text(UT_string *copris_text, struct Inifile **encoding);

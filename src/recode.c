@@ -185,11 +185,12 @@ void unload_encoding_definitions(struct Inifile **encoding)
 		PRINT_MSG("Unloaded encoding definitions (count = %d).", count);
 }
 
-void recode_text(UT_string *copris_text, struct Inifile **encoding)
+int recode_text(UT_string *copris_text, struct Inifile **encoding)
 {
 	UT_string *recoded_text;
 	utstring_new(recoded_text);
 
+	int error = 0;
 	char *original = utstring_body(copris_text);
 
 	while (*original) {
@@ -217,6 +218,9 @@ void recode_text(UT_string *copris_text, struct Inifile **encoding)
 			// Definition not found, copy original
 			output_len = input_len;
 			memcpy(output_char, input_char, output_len);
+			if (input_len > 1) {
+				error = 1; // Warn user if multi-byte characters are really wanted
+			}
 		}
 
 		utstring_bincpy(recoded_text, output_char, output_len);
@@ -226,4 +230,6 @@ void recode_text(UT_string *copris_text, struct Inifile **encoding)
 	utstring_clear(copris_text);
 	utstring_concat(copris_text, recoded_text);
 	utstring_free(recoded_text);
+
+	return error;
 }
