@@ -31,7 +31,7 @@ cnt=1
 while [ $i -le $END_VALUE ]; do
 	# Skip DEL
 	if [ $i != 127 ]; then
-		printf "0x%X (%3d): '\x$(printf '%x' $i)'  " $i $i
+		printf "0x%X (%3d): '\\$(printf '%o' $i)'  " $i $i
 		[ $((cnt % BREAK_AFTER)) = 0 ] && printf "\n"
 	fi
 	i=$((i + 1))
