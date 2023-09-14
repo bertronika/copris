@@ -356,11 +356,11 @@ int main(int argc, char **argv) {
 		PRINT_NOTE("COPRIS won't do much without any arguments. "
 		           "Try using the '--help' option.");
 
-	if (LOG_DEBUG)
-		PRINT_MSG("COPRIS started with PID %d.", getpid());
-
 	if (LOG_INFO)
 		PRINT_MSG("Verbosity level set to %d.", verbosity);
+
+	if (LOG_DEBUG)
+		PRINT_MSG("COPRIS started with PID %d.", getpid());
 
 	// If no port number was specified by the user, assume input from stdin
 	bool is_stdin = false;
