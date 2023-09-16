@@ -109,10 +109,10 @@ extern int verbosity;
 
 // The (void)errno statement is added as a check to ensure
 // errno.h is included in the file.
-#define PRINT_SYSTEM_ERROR(name, msg)    \
+#define PRINT_SYSTEM_ERROR(name, ...)    \
     do {                                 \
         (void)errno; /* is missing */    \
-        PRINT_ERROR_MSG(msg);            \
+        PRINT_ERROR_MSG(__VA_ARGS__);    \
         perror(name);                    \
     } while (0)
 
