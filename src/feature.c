@@ -370,7 +370,7 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 
 	// Append - either when starting/closing COPRIS, or after received text was printed
 	if (*s->out != '\0') {
-		if (LOG_DEBUG)
+		if (LOG_INFO)
 			PRINT_MSG("Appending session command %s to the received text.", s->in);
 
 		// Append AFTER_TEXT to 'copris_text'
@@ -388,7 +388,7 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 	assert(s != NULL);
 
 	if (*s->out != '\0') {
-		if (LOG_DEBUG)
+		if (LOG_INFO)
 			PRINT_MSG("Prepending session command S_BEFORE_TEXT to the received text.");
 
 		UT_string *temp_text;
