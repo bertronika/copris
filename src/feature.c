@@ -42,11 +42,10 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 	if (LOG_DEBUG)
 		PRINT_MSG("Parsing printer feature file '%s':", filename);
 
-	int command_count = 0;
 	int parse_error = ini_parse_file(file, inih_handler, features);
 
-	// If there's a parse error, properly close the file before exiting
-	int error = -1;
+	int error = -1;        // If there's a parse error, properly close the file before exiting
+	int command_count = 0; // Defined here as there are goto's below
 
 	// Negative return number - can be either:
 	// -1  Error opening file - we've already handled this
@@ -69,8 +68,9 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 			command_count++;
 	}
 
-	if (LOG_INFO)
-		PRINT_MSG("Loaded %d printer feature commands from '%s'.", command_count, filename);
+//	TODO - accurate command count
+//	if (LOG_INFO)
+//		PRINT_MSG("Loaded %d printer feature commands from '%s'.", command_count, filename);
 
 	if (command_count < 1)
 		PRINT_NOTE("Your printer feature file appears to be empty.");
