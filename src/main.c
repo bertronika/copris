@@ -295,22 +295,22 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		}
 	} /* end of getopt */
 
-	// Check if there's no last argument - destination file name
+	// Check if there's no last argument - output file name
 	if (argv[optind] == NULL)
-		goto no_destination;
+		goto no_output_file;
 
-	// Parse the destination file name. Note that only the first argument is accepted.
+	// Parse the output file name. Note that only the first argument is accepted.
 	// If it equals '-', assume standard output.
 	if (*argv[optind] == '-') {
-		PRINT_NOTE("Found '-' as the destination name, redirecting text to standard output.\n"
-		           "COPRIS does not use '-' to denote reading from standard input. Omit "
-		           "the destination argument instead.");
+		PRINT_NOTE("Found '-' as the output file name, redirecting text to standard output.\n"
+		           "COPRIS does not use '-' to denote reading from standard input. To do that, "
+		           "simply omit the last argument.");
 	} else {
 		errno = 0; /* pathconf() needs errno to be reset */
 		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
 
 		if (max_path_len == -1) {
-			PRINT_SYSTEM_ERROR("pathconf", "Error querying destination '%s'.", argv[optind]);
+			PRINT_SYSTEM_ERROR("pathconf", "Error querying output file '%s'.", argv[optind]);
 			return 1;
 		}
 
@@ -322,20 +322,20 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 
 		int tmperr = access(argv[optind], W_OK);
 		if (tmperr != 0) {
-			PRINT_SYSTEM_ERROR("access", "Unable to write to output file/printer. Does "
-			                             "it exist, with appropriate permissions?");
+			PRINT_SYSTEM_ERROR("access", "Unable to write to output file. Does it "
+			                             "exist, with appropriate permissions?");
 			return 1;
 		}
 
-		attrib->destination = argv[optind];
-		attrib->copris_flags |= HAS_DESTINATION;
+		attrib->output_file = argv[optind];
+		attrib->copris_flags |= HAS_OUTPUT_FILE;
 
 		if (argv[++optind] != NULL)
-			PRINT_NOTE("Multiple destination file names detected; only the first one "
+			PRINT_NOTE("Multiple output file names detected; only the first one "
 			           "will be used.");
 	}
 
-	no_destination:
+	no_output_file:
 	return 0;
 }
 
@@ -437,8 +437,8 @@ int main(int argc, char **argv) {
 	if (LOG_INFO) {
 		PRINT_LOCATION(stdout);
 		printf("Data stream will be sent to ");
-		if (attrib.copris_flags & HAS_DESTINATION)
-			printf("%s.\n", attrib.destination);
+		if (attrib.copris_flags & HAS_OUTPUT_FILE)
+			printf("%s.\n", attrib.output_file);
 		else
 			printf("stdout.\n");
 	}

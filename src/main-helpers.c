@@ -37,8 +37,8 @@ void free_filenames(char **filenames, int count)
 
 void write_to_output(UT_string *copris_text, struct Attribs *attrib)
 {
-	if (attrib->copris_flags & HAS_DESTINATION) {
-		copris_write_file(attrib->destination, copris_text);
+	if (attrib->copris_flags & HAS_OUTPUT_FILE) {
+		copris_write_file(attrib->output_file, copris_text);
 	} else {
 		const char *processed_text = utstring_body(copris_text);
 		size_t text_length = utstring_len(copris_text);

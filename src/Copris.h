@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#define HAS_DESTINATION  (1 << 0)
+#define HAS_OUTPUT_FILE  (1 << 0)
 #define HAS_ENCODING     (1 << 1)
 #define HAS_FEATURES     (1 << 2)
 #define MUST_CUTOFF      (1 << 3)
@@ -22,7 +22,7 @@ struct Attribs {
 	int feature_file_count;                   /* Number of feature file names    */
 
 	int copris_flags;    /* Flags regarding user-specified arguments             */
-	char *destination;   /* Output device or file                                */
+	char *output_file;   /* Name of output file/device                           */
 };
 
 struct Stats {
