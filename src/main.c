@@ -161,7 +161,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
 			if (max_path_len == -1) {
-				PRINT_SYSTEM_ERROR("pathconf", "Error querying encoding file.");
+				PRINT_SYSTEM_ERROR("pathconf", "Error querying encoding file '%s'.", optarg);
 				return 1;
 			}
 
@@ -198,7 +198,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			max_path_len = pathconf(optarg, _PC_PATH_MAX);
 
 			if (max_path_len == -1) {
-				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer feature file.");
+				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer feature file '%s'.", optarg);
 				return 1;
 			}
 
@@ -310,7 +310,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		max_path_len = pathconf(argv[optind], _PC_PATH_MAX);
 
 		if (max_path_len == -1) {
-			PRINT_SYSTEM_ERROR("pathconf", "Error querying your chosen destination.");
+			PRINT_SYSTEM_ERROR("pathconf", "Error querying destination '%s'.", argv[optind]);
 			return 1;
 		}
 

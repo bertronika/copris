@@ -35,7 +35,7 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
-		PRINT_SYSTEM_ERROR("fopen", "Failed to open printer feature file.");
+		PRINT_SYSTEM_ERROR("fopen", "Failed to open printer feature file '%s'.", filename);
 		return -1;
 	}
 
@@ -82,7 +82,7 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 	close_file: {
 		int tmperr = fclose(file);
 		if (tmperr != 0) {
-			PRINT_SYSTEM_ERROR("close", "Failed to close printer feature file.");
+			PRINT_SYSTEM_ERROR("fclose", "Failed to close printer feature file '%s'.", filename);
 			return -1;
 		}
 	}

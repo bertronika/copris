@@ -32,7 +32,7 @@ int load_encoding_file(const char *filename, struct Inifile **encoding)
 {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
-		PRINT_SYSTEM_ERROR("fopen", "Failed to open encoding file.");
+		PRINT_SYSTEM_ERROR("fopen", "Failed to open encoding file '%s'.", filename);
 		return -1;
 	}
 
@@ -73,7 +73,7 @@ int load_encoding_file(const char *filename, struct Inifile **encoding)
 	close_file: {
 		int tmperr = fclose(file);
 		if (tmperr != 0) {
-			PRINT_SYSTEM_ERROR("close", "Failed to close encoding file.");
+			PRINT_SYSTEM_ERROR("fclose", "Failed to close encoding file '%s'.", filename);
 			return -1;
 		}
 	}

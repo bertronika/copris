@@ -25,12 +25,12 @@ int copris_write_file(const char *dest, UT_string *copris_text)
 	// Open destination file, set for (a)ppending text to it
 	FILE *file_ptr = fopen(dest, "a");
 	if (file_ptr == NULL) {
-		PRINT_SYSTEM_ERROR("fopen", "Failed to open output file.");
+		PRINT_SYSTEM_ERROR("fopen", "Failed to open output file '%s'.", dest);
 		return -1;
 	}
 		
 	if (LOG_DEBUG)
-		PRINT_MSG("Output file opened.");
+		PRINT_MSG("Output file '%s' opened.", dest);
 
 	size_t written_text_length = fwrite(utstring_body(copris_text), 1, text_length, file_ptr);
 
@@ -45,12 +45,12 @@ int copris_write_file(const char *dest, UT_string *copris_text)
 	// Flush streams to file and close it
 	int tmperr = fclose(file_ptr);
 	if (tmperr != 0) {
-		PRINT_SYSTEM_ERROR("fclose", "Failed to close the output file.");
+		PRINT_SYSTEM_ERROR("fclose", "Failed to close output file '%s'.", dest);
 		return -1;
 	}
 
 	if (LOG_DEBUG)
-		PRINT_MSG("Output file closed.");
+		PRINT_MSG("Output file '%s' closed.", dest);
 	
 	return error;
 }
