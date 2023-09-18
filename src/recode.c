@@ -28,6 +28,8 @@
 
 static int inih_handler(void *, const char *, const char *, const char *);
 
+bool error_known = false;
+
 int load_encoding_file(const char *filename, struct Inifile **encoding)
 {
 	FILE *file = fopen(filename, "r");
@@ -55,6 +57,10 @@ int load_encoding_file(const char *filename, struct Inifile **encoding)
 	// Positive return number - returned error is a line number
 	if (parse_error > 0) {
 		PRINT_ERROR_MSG("'%s': (first) fault on line %d.", filename, parse_error);
+
+		if (!error_known) // Error unknown, perhaps it is a INI section problem
+			PRINT_ERROR_MSG("Have you used a '[' character for a name? Escape it "
+			                "with a backslash.");
 		goto close_file;
 	}
 
@@ -101,12 +107,14 @@ static int inih_handler(void *user, const char *section, const char *name, const
 
 	if (name_len == 0 || value_len == 0) {
 		PRINT_ERROR_MSG("Found an entry with either no name or no value.");
+		error_known = true;
 		return COPRIS_PARSE_FAILURE;
 	}
 
 	if (value_len > MAX_INIFILE_ELEMENT_LENGTH) {
 		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
+		error_known = true;
 		return COPRIS_PARSE_FAILURE;
 	}
 
@@ -114,6 +122,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	if (codepoint_count > 1) {
 		if (name[0] != '\\' || codepoint_count > 2) {
 			PRINT_ERROR_MSG("'%s': name has more than one character.", name);
+			error_known = true;
 			return COPRIS_PARSE_FAILURE;
 		}
 		name++; // Name was escaped, omit the escape character
@@ -146,6 +155,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		if (element_count == -1) {
 			PRINT_ERROR_MSG("Failure while processing value for '%s'.", name);
 			free(s);
+			error_known = true;
 			return COPRIS_PARSE_FAILURE;
 		}
 
