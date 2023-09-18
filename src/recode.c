@@ -110,9 +110,13 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
-	if (utf8_count_codepoints(name, 2) > 1) {
-		PRINT_ERROR_MSG("'%s': name has more than one character.", name);
-		return COPRIS_PARSE_FAILURE;
+	size_t codepoint_count = utf8_count_codepoints(name, 2);
+	if (codepoint_count > 1) {
+		if (name[0] != '\\' || codepoint_count > 2) {
+			PRINT_ERROR_MSG("'%s': name has more than one character.", name);
+			return COPRIS_PARSE_FAILURE;
+		}
+		name++; // Name was escaped, omit the escape character
 	}
 
 	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
