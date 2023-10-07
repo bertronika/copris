@@ -13,8 +13,17 @@ LDFLAGS   ?=
 # Dynamic libraries to be linked
 LIBRARIES = inih
 
-SOURCES = utf8.c writer.c parse_value.c read_stdin.c recode.c read_socket.c \
-          feature.c markdown.c filters.c main-helpers.c main.c
+# Object files, all except main.o
+OBJECTS = src/feature.o       \
+          src/filters.o       \
+          src/main-helpers.o  \
+          src/markdown.o      \
+          src/parse_value.o   \
+          src/read_socket.o   \
+          src/read_stdin.o    \
+          src/recode.o        \
+          src/utf8.o          \
+          src/writer.o
 
 # Additional compiler and linker library flags
 CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"

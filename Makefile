@@ -31,10 +31,10 @@ DESTDIR ?=
 INSTALL ?= install -p
 
 # Object and dependency files for release and debug builds
-OBJS_REL := $(SOURCES:%.c=src/%_rel.o)
-DEPS_REL := $(SOURCES:%.c=src/%_rel.d)
-OBJS_DBG := $(SOURCES:%.c=src/%_dbg.o)
-DEPS_DBG := $(SOURCES:%.c=src/%_dbg.d)
+OBJS_REL := $(OBJECTS:%.o=%_rel.o)
+DEPS_REL := $(OBJECTS:%.o=%_rel.d)
+OBJS_DBG := $(OBJECTS:%.o=%_dbg.o)
+DEPS_DBG := $(OBJECTS:%.o=%_dbg.d)
 
 # Cppcheck settings. Note that 'style' includes 'warning', 'performance' and 'portability'.
 CPPCHECK_DIR   = cppcheck_report
@@ -55,14 +55,14 @@ debug:   copris_dbg
 # $^  The names of all the prerequisites, with spaces between them.
 
 # Compile the release binary
-copris: $(OBJS_REL)
+copris: $(OBJS_REL) src/main_rel.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
 %_rel.o: %.c
 	$(CC) $(CFLAGS) $(RELFLAGS) -MMD -MP -c $< -o $@
 
 # Compile the debug binary
-copris_dbg: $(OBJS_DBG)
+copris_dbg: $(OBJS_DBG) src/main_dbg.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
 %_dbg.o: %.c
@@ -97,8 +97,8 @@ install: copris man/copris.1
 	$(INSTALL) -m644 man/copris.1 $(DESTDIR)$(MANDIR)/man1
 
 clean:
-	rm -f $(OBJS_REL) $(DEPS_REL)
-	rm -f $(OBJS_DBG) $(DEPS_DBG)
+	rm -f $(OBJS_REL) $(DEPS_REL) src/main_rel.o
+	rm -f $(OBJS_DBG) $(DEPS_DBG) src/main_dbg.o
 
 distclean: clean
 	rm -f copris copris_dbg
