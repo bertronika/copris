@@ -99,9 +99,7 @@ int parse_number_string(const char *value, char *parsed_value, int parsed_value_
 		if (valuepos == endptr) {
 			PRINT_ERROR_MSG("Found unrecognised character(s) '%s'. Make sure your values "
 			                "consist only of space-separated decimal, hexadecimal or octal "
-			                "numbers, or variable names, prefixed either with 'F_' or 'C_'. "
-			                "Consult the README or the man page for more information.",
-			                valuepos);
+			                "numbers.", valuepos);
 
 			return -1;
 		}
