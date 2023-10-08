@@ -31,8 +31,8 @@
 #include "debug.h"
 #include "Copris.h"
 
-#include "read_socket.h"
-#include "read_stdin.h"
+#include "socket_io.h"
+#include "stream_io.h"
 #include "recode.h"
 #include "feature.h"
 #include "markdown.h"

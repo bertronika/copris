@@ -11,7 +11,7 @@ include ../Common.mk
 LIBRARIES += cmocka
 
 # List of sources that have unit tests (sorted by approximate complexity)
-TESTED_SOURCES = parse_value.c utf8.c read_stdin.c read_socket.c
+TESTED_SOURCES = parse_value.c utf8.c stream_io.c socket_io.c
 
 # List of mocked functions for unit tests
 MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write \
@@ -25,7 +25,7 @@ CFLAGS    += $(DBGFLAGS) $(DEFINES) -fno-builtin-printf -fno-builtin-fprintf \
 MOCKFLAGS := $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
 
 TEST_BINARIES  := $(TESTED_SOURCES:%.c=cmocka-%)
-SOURCE_OBJECTS := $(filter-out src_main.o,$(SOURCES:%.c=src_%.o))
+SOURCE_OBJECTS := $(OBJECTS:src/%.o=src_%.o)
 TESTED_OBJECTS := $(TESTED_SOURCES:%.c=src_%.o)
 TEST_GCDA      := $(TESTED_SOURCES:%.c=src_%.gcda)
 

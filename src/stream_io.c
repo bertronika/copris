@@ -14,7 +14,7 @@
 
 #include "Copris.h"
 #include "debug.h"
-#include "read_stdin.h"
+#include "stream_io.h"
 
 static size_t read_from_stdin(UT_string *, struct Stats *);
 

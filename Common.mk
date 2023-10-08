@@ -19,8 +19,8 @@ OBJECTS = src/feature.o       \
           src/main-helpers.o  \
           src/markdown.o      \
           src/parse_value.o   \
-          src/read_socket.o   \
-          src/read_stdin.o    \
+          src/socket_io.o     \
+          src/stream_io.o     \
           src/recode.o        \
           src/utf8.o          \
           src/writer.o

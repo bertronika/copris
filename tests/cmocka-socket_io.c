@@ -6,7 +6,7 @@
 #include <utstring.h>
 
 #include "../src/Copris.h"
-#include "../src/read_socket.h"
+#include "../src/socket_io.h"
 
 int verbosity = 0;
 int parentfd  = 0;

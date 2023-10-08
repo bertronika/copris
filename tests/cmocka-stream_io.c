@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <utstring.h>
 
-#include "../src/read_stdin.h"
+#include "../src/stream_io.h"
 
 int verbosity = 0;
 
