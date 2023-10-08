@@ -42,10 +42,10 @@ CPPCHECK_XML   = $(CPPCHECK_DIR)/report.xml
 CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
 
 # Targets that do not produce an eponymous file
-.PHONY: release debug install clean distclean help \
+.PHONY: check-if-tagged release debug install clean distclean help \
         check analyse analyse-cppcheck analyse-cppcheck-html
 
-all:     copris
+all:   | check-if-tagged release
 release: copris
 debug:   copris_dbg
 
@@ -53,6 +53,14 @@ debug:   copris_dbg
 # $@  The file name of the target of the rule.
 # $<  The name of the first prerequisite.
 # $^  The names of all the prerequisites, with spaces between them.
+
+check-if-tagged:
+	@test -n "$$(git tag --points-at HEAD || echo 1)"                               || ( \
+	echo "Warning: It seems you are trying to build COPRIS from the master branch,"   && \
+	echo "         which may contain untested and non-functional features. Instead, " && \
+	echo "         download a numbered release or checkout a tag in the repository."  && \
+	echo -e "\nTo proceed anyway, run make with the appropriate recipe.\n"            && \
+	false )
 
 # Compile the release binary
 copris: $(OBJS_REL) src/main_rel.o
