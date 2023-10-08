@@ -101,7 +101,7 @@ clean:
 	rm -f $(OBJS_DBG) $(DEPS_DBG) src/main_dbg.o
 
 distclean: clean
-	rm -f copris copris_dbg
+	rm -f copris copris_dbg intercopris intercopris_dbg
 	rm -fr $(CPPCHECK_DIR)
 	$(MAKE) -C tests/ clean
 
@@ -109,3 +109,11 @@ help:
 	head -n 19 $(firstword $(MAKEFILE_LIST)); \
 	grep -m 4 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS|LDFLAGS)' Common.mk
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
+
+intercopris: src/intercopris.c \
+             src/parse_value_rel.o src/writer_rel.o src/feature_rel.o src/main-helpers_rel.o
+	$(CC) $(CFLAGS) $(RELFLAGS) $^ $(LDFLAGS) $(shell pkg-config --cflags --libs readline) -o $@
+
+intercopris_dbg: src/intercopris.c \
+                 src/parse_value_dbg.o src/writer_dbg.o src/feature_dbg.o src/main-helpers_dbg.o
+	$(CC) $(CFLAGS) $(DBGFLAGS) $^ $(LDFLAGS) $(shell pkg-config --cflags --libs readline) -o $@

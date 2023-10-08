@@ -4,6 +4,10 @@
 # Release and debug executables
 copris
 copris_dbg
+intercopris
+intercopris_dbg
+
+intercopris_history
 
 # Cppcheck's report directory
 cppcheck_report/
