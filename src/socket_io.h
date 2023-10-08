@@ -13,3 +13,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno);
  */
 int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib);
 
+/*
+ * Send 'message', prepended by 'copris: ', to socket, pointed to by 'childfd'.
+ * Return a (always) positive number on success, negative on error.
+ */
+int send_to_socket(int childfd, const char *message);

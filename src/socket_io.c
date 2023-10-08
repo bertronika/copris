@@ -189,6 +189,23 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *
 	return 0;
 }
 
+int send_to_socket(int childfd, const char *message)
+{
+	UT_string *full_message;
+	utstring_new(full_message);
+	utstring_printf(full_message, "copris: %s\n", message);
+
+	ssize_t buffer_length = write(childfd, utstring_body(full_message),
+	                              utstring_len(full_message) - 1);
+
+	if (buffer_length == -1)
+		PRINT_SYSTEM_ERROR("write", "Error sending text to socket.");
+
+	utstring_free(full_message);
+
+	return buffer_length;
+}
+
 static int read_from_socket(UT_string *copris_text, int childfd,
                             struct Stats *stats, struct Attribs *attrib)
 {
@@ -228,11 +245,7 @@ static void apply_byte_limit(UT_string *copris_text, int childfd,
                              struct Stats *stats, struct Attribs *attrib)
 {
 	const char limit_message[] = "You have sent too much text. Terminating connection.\n";
-
-	ssize_t tmperr = write(childfd, limit_message, (sizeof limit_message) - 1);
-	if (tmperr == -1)
-		PRINT_SYSTEM_ERROR("write", "Error sending termination " /* LCOV_EXCL_LINE */
-		                            "text to socket.");
+	send_to_socket(childfd, limit_message);
 
 	stats->size_limit_active = true;
 
