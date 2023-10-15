@@ -125,7 +125,9 @@ static int inih_handler(void *user, const char *section, const char *name, const
 			error_known = true;
 			return COPRIS_PARSE_FAILURE;
 		}
-		name++; // Name was escaped, omit the escape character
+		// A character in name was escaped; omit it from the string
+		name++;
+		name_len--;
 	}
 
 	struct Inifile **file = (struct Inifile**)user;  // Passed from caller
