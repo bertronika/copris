@@ -118,14 +118,31 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		return COPRIS_PARSE_FAILURE;
 	}
 
+	// Inih cannot parse escaped equals signs and will split the definition at the first
+	// sign, leaving only '\' as the name. Detect that and tell user that '\e' can be
+	// used instead.
+	if (name[0] == '\\' && value[0] == '=') {
+		PRINT_ERROR_MSG("An escaped equals sign was detected. Since COPRIS cannot parse it "
+		                "properly, replace it with '\\e' in the encoding file.");
+		error_known = true;
+		return COPRIS_PARSE_FAILURE;
+	}
+
 	size_t codepoint_count = utf8_count_codepoints(name, 2);
+	bool equals_sign = false;
 	if (codepoint_count > 1) {
+		// Multiple characters found, do they consist from a backslash and a single character?
 		if (name[0] != '\\' || codepoint_count > 2) {
 			PRINT_ERROR_MSG("'%s': name has more than one character.", name);
 			error_known = true;
 			return COPRIS_PARSE_FAILURE;
 		}
-		// A character in name was escaped; omit it from the string
+
+		// Detect '\e', our escape character that represents the equals sign
+		if (name[1] == 'e' || name[1] == 'E')
+			equals_sign = true;
+
+		// A character in name was escaped; omit the backslash from the string
 		name++;
 		name_len--;
 	}
@@ -142,7 +159,12 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		s = malloc(sizeof *s);
 		CHECK_MALLOC(s);
 
-		memcpy(s->in, name, name_len + 1);
+		if (!equals_sign) {
+			memcpy(s->in, name, name_len + 1);
+		} else {
+			s->in[0] = '=';
+			s->in[1] = '\0';
+		}
 		HASH_ADD_STR(*file, in, s);
 	}
 
