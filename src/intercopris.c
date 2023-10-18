@@ -112,22 +112,31 @@ int main(int argc, char **argv)
 	utstring_new(output_text);
 
 	// Print usage instructions
-	puts(ESC_BOLD "Welcome to Interactive COPRIS\n" ESC_NORM);
-	puts("Use '" ESC_BOLD "q" ESC_NORM "', '" ESC_BOLD "quit" ESC_NORM
+	puts(" " ESC_BOLD "Welcome to Interactive COPRIS\n" ESC_NORM
+	     " Enter commands in hexadecimal, decimal or octal notation, as you\n"
+	     " would in a COPRIS feature file. To print characters as text\n"
+	     " instead, start your line with '" ESC_BOLD "t" ESC_NORM
+	     " ' or '" ESC_BOLD "text" ESC_NORM " '.\n");
+
+	puts(" Use '" ESC_BOLD "q" ESC_NORM "', '" ESC_BOLD "quit" ESC_NORM
 	     "' or " ESC_BOLD "Ctrl-D" ESC_NORM " to quit.");
-	puts("Enter '" ESC_BOLD "h" ESC_NORM "' or '" ESC_BOLD "hex" ESC_NORM
-	     "' to enable echoing parsed hexadecimal output to terminal.");
+	puts(" Enter '" ESC_BOLD "h" ESC_NORM "' or '" ESC_BOLD "hex" ESC_NORM
+	     "' to echo parsed hexadecimal output to terminal.");
 
 	if (use_history_file)
-		puts("Enter '" ESC_BOLD "l" ESC_NORM"' or '" ESC_BOLD "last" ESC_NORM
+		puts(" Enter '" ESC_BOLD "l" ESC_NORM"' or '" ESC_BOLD "last" ESC_NORM
 		     "' to review most recently used commands.");
 
 	if (features)
-		puts("Enter '" ESC_BOLD "d" ESC_NORM "' or '" ESC_BOLD "dump" ESC_NORM
+		puts(" Enter '" ESC_BOLD "d" ESC_NORM "' or '" ESC_BOLD "dump" ESC_NORM
 		     "' for a listing of loaded printer feature commands.");
 
+	puts("\n Use the " ESC_BOLD "TAB" ESC_NORM
+	     " key to complete a partially entered command, or to\n"
+	     " list all possible ones.");
+
 	if (output_device == NULL)
-		puts("\nNo output device provided; echoing input text to terminal.");
+		puts("\n No output device provided; echoing input text to terminal.");
 
 	// Init Readline
 	using_history();
@@ -136,6 +145,7 @@ int main(int argc, char **argv)
 	ADD_RL_COMMAND("exit");
 	ADD_RL_COMMAND("hex");
 	ADD_RL_COMMAND("last");
+	ADD_RL_COMMAND("text");
 	ADD_RL_COMMAND("quit");
 
 	// TODO: create a history file automatically?
@@ -216,18 +226,41 @@ int main(int argc, char **argv)
 			continue;
 		}
 
+		bool text_entry = false;
+		if (strncasecmp(input_ptr, "text", 4) == 0 || strncasecmp(input_ptr, "t", 1) == 0) {
+			if (input_ptr[1] == ' ') {
+				input_ptr += 2;  // Skip cmd and leading whitespace
+			} else if (input_ptr[4] == ' ') {
+				input_ptr += 5;  // Ditto
+			} else {
+				puts("This command is not understood. Be sure there's a space between it "
+				     "and the text.");
+				continue;
+			}
+			text_entry = true;
+		}
+
+		// User's command valid, add it to history
 		add_history(input);
 		command_count++;
 
-		// Parse user's command line, interpret variables, if any
+		// Parse command line, interpret variables, if any
 		utstring_clear(output_text);
-		int element_count = parse_all_to_commands(input, strlen(input), output_text, &features);
 
-		// Check for failure. If found, remember the erroneous command only
-		// until the next one is entered.
-		if (element_count == -1) {
-			previous_cmd_had_error = true;
-			continue;
+		int element_count = 0;
+		if (!text_entry) {
+			element_count = parse_all_to_commands(input_ptr, strlen(input_ptr),
+			                                      output_text, &features);
+
+			// Check for failure. If found, remember the erroneous command only
+			// until the next one is entered.
+			if (element_count == -1) {
+				previous_cmd_had_error = true;
+				continue;
+			}
+		} else {
+			element_count = strlen(input_ptr);
+			utstring_bincpy(output_text, input_ptr, element_count);
 		}
 
 		if (print_hex) // Prefix 'hex: '
