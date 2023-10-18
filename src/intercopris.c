@@ -222,8 +222,12 @@ int main(int argc, char **argv)
 
 			struct Inifile *s;
 			for (s = features; s != NULL; s = s->hh.next) {
-				if (*s->out != '\0')
-					printf("%s = %s\n", s->in, s->out);
+				if (*s->out != '\0') {
+					printf("%16s = ", s->in);
+					for (int i = 0; s->out[i] != '\0'; i++)
+						printf("0x%X ", s->out[i] & 0xFF);
+					puts("");
+				}
 			}
 			continue;
 		}
