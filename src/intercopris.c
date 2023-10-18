@@ -113,19 +113,35 @@ int main(int argc, char **argv)
 
 	// Print usage instructions
 	puts(" " ESC_BOLD "Welcome to Interactive COPRIS\n" ESC_NORM
-	     " Enter commands in hexadecimal, decimal or octal notation, as you\n"
-	     " would in a COPRIS feature file. To print characters as text\n"
-	     " instead, start your line with '" ESC_BOLD "t" ESC_NORM
-	     " ' or '" ESC_BOLD "text" ESC_NORM " '.\n");
-
-	puts(" Use '" ESC_BOLD "q" ESC_NORM "', '" ESC_BOLD "quit" ESC_NORM
-	     "' or " ESC_BOLD "Ctrl-D" ESC_NORM " to quit.");
-	puts(" Enter '" ESC_BOLD "h" ESC_NORM "' or '" ESC_BOLD "hex" ESC_NORM
-	     "' to echo parsed hexadecimal output to terminal.");
+	     " Enter commands in hexadecimal, decimal or octal notation, as you would\n"
+	     " in a COPRIS feature file. To print characters as text instead, start your\n"
+	     " line with '"
+			ESC_BOLD "t" ESC_NORM
+			" ' or '"
+			ESC_BOLD "text" ESC_NORM
+			" '. Prefix any comments with '"
+			ESC_BOLD "#" ESC_NORM
+			"' or '"
+			ESC_BOLD ";" ESC_NORM
+			"'.\n"
+		 "\n"
+		 " Use '"
+			ESC_BOLD "q" ESC_NORM
+			"', '"
+			ESC_BOLD "quit" ESC_NORM
+			"' or "
+			ESC_BOLD "Ctrl-D" ESC_NORM
+			" to quit.\n"
+		 " Enter '"
+			ESC_BOLD "h" ESC_NORM
+			"' or '"
+			ESC_BOLD "hex" ESC_NORM
+			"' to echo parsed hexadecimal output to terminal.");
 
 	if (use_history_file)
 		puts(" Enter '" ESC_BOLD "l" ESC_NORM"' or '" ESC_BOLD "last" ESC_NORM
-		     "' to review most recently used commands.");
+		     "' to review most recently used commands. Comments,\n"
+		     " prefixed with a number sign, will be saved to history.");
 
 	if (features)
 		puts(" Enter '" ESC_BOLD "d" ESC_NORM "' or '" ESC_BOLD "dump" ESC_NORM
@@ -186,8 +202,8 @@ int main(int argc, char **argv)
 		while (isspace(*input_ptr))
 			input_ptr++;
 
-		// Ignore blank lines
-		if (*input_ptr == '\0')
+		// Ignore blank lines and semicolon-prefixed comments
+		if (*input_ptr == '\0' || *input_ptr == ';')
 			continue;
 
 		if (strncasecmp(input_ptr, "quit", 4) == 0 || strcasecmp(input_ptr, "q") == 0 ||
@@ -242,6 +258,11 @@ int main(int argc, char **argv)
 
 		// User's command valid, add it to history
 		add_history(input);
+
+		// Number-sign-prefixed comments go to history as well
+		if (*input_ptr == '#')
+			continue;
+
 		command_count++;
 
 		// Parse command line, interpret variables, if any
