@@ -284,8 +284,8 @@ int main(int argc, char **argv)
 				continue;
 			}
 		} else {
-			element_count = strlen(input_ptr);
-			utstring_bincpy(output_text, input_ptr, element_count);
+			utstring_printf(output_text, "%s\n", input_ptr);
+			element_count = utstring_len(output_text);
 		}
 
 		if (print_hex) // Prefix 'hex: '
