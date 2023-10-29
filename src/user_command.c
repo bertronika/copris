@@ -93,10 +93,12 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 		// Check if the command exists
 		HASH_FIND_STR(*features, parsed_cmd, s);
 		if (!s) {
+			// If not, skip it and increment the text iterator
+			*text_pos += original_cmd_len;
 			if (LOG_ERROR)
 				PRINT_MSG("Found command notation '$%s', but the command is not defined.",
 						  parsed_cmd + 2);
-			return -1;
+			return ERROR;
 		}
 	}
 

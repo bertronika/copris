@@ -11,6 +11,7 @@
 
 typedef enum user_action {
 	NO_ACTION,
+	ERROR,
 	DISABLE_MARKDOWN,
 	DISABLE_COMMANDS
 } user_action_t;
