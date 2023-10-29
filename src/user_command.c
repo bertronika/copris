@@ -18,7 +18,7 @@
 #include "debug.h"
 #include "user_command.h"
 
-static user_action_t substitute_with_command(UT_string *copris_text, int text_pos,
+static user_action_t substitute_with_command(UT_string *copris_text, size_t *text_pos,
                                              const char *parsed_cmd, int original_cmd_len,
                                              struct Inifile **features);
 
@@ -30,7 +30,7 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 	if (LOG_DEBUG)
 		PRINT_MSG("Searching for user feature commands.");
 
-	for (size_t i = 0; text[i] != '\0'; i++) {
+	for (size_t i = 0; text[i] != '\0';) {
 		if (text[i] == USER_CMD_SYMBOL) {
 			// Prepare a string for a possible command
 			char possible_cmd[MAX_INIFILE_ELEMENT_LENGTH] = "C_";
@@ -63,16 +63,21 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 			memcpy(possible_cmd_ptr, &text[i + 1], possible_cmd_len - 1);
 
 			// Try to substitute command text with an actual command
-			retval = substitute_with_command(copris_text, i,
+			retval = substitute_with_command(copris_text, &i,
 			                                 possible_cmd, possible_cmd_len,
 			                                 features);
+		} else {
+			// Increment only if no command has been detected.
+			// The iterator is updated manually on a command
+			// substitution (previous text + command length).
+			i++;
 		}
 	}
 
 	return retval;
 }
 
-static user_action_t substitute_with_command(UT_string *copris_text, int text_pos,
+static user_action_t substitute_with_command(UT_string *copris_text, size_t *text_pos,
                                              const char *parsed_cmd, int original_cmd_len,
                                              struct Inifile **features)
 {
@@ -109,25 +114,34 @@ static user_action_t substitute_with_command(UT_string *copris_text, int text_po
 	//  - text_after_cmd
 	UT_string *text_before_cmd;
 	utstring_new(text_before_cmd);
-	utstring_bincpy(text_before_cmd, utstring_body(copris_text), text_pos);
+	utstring_bincpy(text_before_cmd, utstring_body(copris_text), *text_pos);
 
 	UT_string *text_after_cmd;
 	utstring_new(text_after_cmd);
 	utstring_bincpy(text_after_cmd,
-	                utstring_body(copris_text) + utstring_len(text_before_cmd) + original_cmd_len,
-	                utstring_len(copris_text) - utstring_len(text_before_cmd) - original_cmd_len);
+	                utstring_body(copris_text)
+	              + utstring_len(text_before_cmd)
+	              + original_cmd_len
+	              + 1, /* leading whitespace */
+	                utstring_len(copris_text)
+	              - utstring_len(text_before_cmd)
+	              - original_cmd_len
+	              - 1 /* trailing whitespace */);
 
 	utstring_clear(copris_text);
-
 	utstring_concat(copris_text, text_before_cmd);
 
+	size_t cmd_len = 0;
 	// If a special command was found, omit it from the output.
 	// If a command was found, but is empty, also omit it.
-	if (retval == NO_ACTION && *s->out != '\0')
-		utstring_bincpy(copris_text, s->out, strlen(s->out));
+	if (retval == NO_ACTION && *s->out != '\0') {
+		cmd_len = strlen(s->out);
+		utstring_bincpy(copris_text, s->out, cmd_len);
+	}
 
 	utstring_concat(copris_text, text_after_cmd);
 
+	*text_pos = utstring_len(text_before_cmd) + cmd_len;
 	utstring_free(text_before_cmd);
 	utstring_free(text_after_cmd);
 
