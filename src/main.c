@@ -88,10 +88,13 @@ static void copris_version(void) {
 	printf("COPRIS version %s\n"
 	       "(C) 2020-23 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Build-time options\n"
-	       "  Text buffer size:                 %5d bytes\n"
-	       "  Maximum .ini file element length: %5d bytes\n"
+	       "  Text buffer size:                     %4d bytes\n"
+	       "  Maximum .ini file element length:     %4d bytes\n"
+	       "  Maximum number of each encoding and\n"
+	       "  feature files that can be loaded:     %4d\n"
+	       "  Symbol for invoking feature commands:  '%c'\n"
 	       "\n",
-	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH);
+	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, NUM_OF_INPUT_FILES, USER_CMD_SYMBOL);
 
 	exit(EXIT_SUCCESS);
 }
