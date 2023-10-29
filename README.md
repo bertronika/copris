@@ -171,6 +171,12 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
+You may want to use a custom command in your text without wrapping it in some Markdown attribute
+and then setting that attribute to the wanted command. You may invoke custom commands by writing
+them out in the text file without their `C_` prefix, prepending a specific symbol to them
+(which is shown when running `copris --version`). Ie., if the symbol is `$` and your command is
+`C_SERIF`, `$SERIF` is used to invoke it.
+
 COPRIS also provides **session commands**: two command pairs for sending repetitive settings
 to the printer. They may be used to set the code page, text margins, line spacing, font face,
 character density, initialise/reset the printer and so on:
@@ -217,12 +223,12 @@ received data to the terminal. Note that text limit works only when running as a
 copris -p 8080 -d -e slovene.ini -l 100
 ```
 
-Read local file `Manual.md` using the printer feature file `epson.ini`. Remove any character
-that isn't present in the ASCII character set. Output formatted text to a USB interface on the
-local computer:
+Read local file `font-showcase.md` using the printer feature file `epson-escp.ini`. Interpret
+any possible user commands, found in the local file. Output formatted text to an USB printer
+interface on the local computer:
 
 ```
-copris -f epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
+copris -f epson-escp.ini -c /dev/usb/lp0 < font-showcase.md
 ```
 
 If you need to debug COPRIS or are curious about its internal status, use the `-v/--verbose`

@@ -13,8 +13,8 @@ Serve on port 8080 as a daemon (do not exit after first connection), recode text
 copris -p 8080 -d -e slovene.ini -l 100
 ```
 
-Read local file `Manual.md` using the printer feature file `epson.ini`. Remove any character that isn't present in the ASCII character set. Output formatted text to a USB interface on the local computer:
+Read local file `font-showcase.md` using the printer feature file `epson-escp.ini`. Interpret any possible user commands, found in the local file. Output formatted text to an USB printer interface on the local computer:
 
 ```
-copris -f epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
+copris -f epson-escp.ini -c /dev/usb/lp0 < font-showcase.md
 ```

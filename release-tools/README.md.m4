@@ -73,6 +73,8 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
+You may want to use a custom command in your text without wrapping it in some Markdown attribute and then setting that attribute to the wanted command. You may invoke custom commands by writing them out in the text file without their `C_` prefix, prepending a specific symbol to them (which is shown when running `copris --version`). Ie., if the symbol is `$` and your command is `C_SERIF`, `$SERIF` is used to invoke it.
+
 COPRIS also provides **session commands**: two command pairs for sending repetitive settings to the printer. They may be used to set the code page, text margins, line spacing, font face, character density, initialise/reset the printer and so on:
 
 - `S_AT_STARTUP` and `S_AT_SHUTDOWN` - sent to the printer once after COPRIS starts and once

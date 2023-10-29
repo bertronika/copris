@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-09-14" "" "0.9-578-gd95fe24-dirty"
+.TH "COPRIS" "1" "2023-10-29" "" "0.9-615-gc30d31b-dirty"
 .hy
 .SH NAME
 .PP
@@ -156,6 +156,12 @@ Process Markdown formatting in received text and apply session commands
 according to commands from printer feature \f[I]FILE\f[R].
 This option can be specified multiple times.
 .TP
+\f[B]-c\f[R], \f[B]--parse-commands\f[R]
+If a printer feature file is being used, recognise feature commands in
+received text and apply them.
+Commands must be prefixed with a predefined symbol, which is shown when
+invoking \f[V]copris --version\f[R].
+.TP
 \f[B]--dump-commands\f[R]
 Show all possible printer feature commands in INI file format (e.g.\ to
 be piped into a new printer feature file you are making).
@@ -228,14 +234,14 @@ copris -p 8080 -d -e slovene.ini -l 100
 \f[R]
 .fi
 .PP
-Read local file \f[V]Manual.md\f[R] using the printer feature file
-\f[V]epson.ini\f[R].
-Remove any character that isn\[cq]t present in the ASCII character set.
-Output formatted text to a USB interface on the local computer:
+Read local file \f[V]font-showcase.md\f[R] using the printer feature
+file \f[V]epson-escp.ini\f[R].
+Interpret any possible user commands, found in the local file.
+Output formatted text to an USB printer interface on the local computer:
 .IP
 .nf
 \f[C]
-copris -f epson.ini --remove-non-ascii /dev/ttyUSB0 < Manual.md
+copris -f epson-escp.ini -c /dev/usb/lp0 < font-showcase.md
 \f[R]
 .fi
 .SH DEVELOPMENT
