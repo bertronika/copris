@@ -19,3 +19,9 @@
 #ifndef NUM_OF_INPUT_FILES
 #   define NUM_OF_INPUT_FILES 16
 #endif
+
+// Symbol for prefixing invocations of feature commands
+// in text
+#ifndef USER_CMD_SYMBOL
+#   define USER_CMD_SYMBOL '$'
+#endif

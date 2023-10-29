@@ -10,6 +10,7 @@
 #define MUST_CUTOFF      (1 << 3)
 #define FILTER_NON_ASCII (1 << 4)
 #define ENCODING_NO_STOP (1 << 5)
+#define USER_COMMANDS    (1 << 6)
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                        */

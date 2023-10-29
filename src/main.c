@@ -38,6 +38,7 @@
 #include "markdown.h"
 #include "filters.h"
 #include "main-helpers.h"
+#include "user_command.h"
 
 /*
  * Verbosity levels:
@@ -57,6 +58,8 @@ static void copris_help(const char *argv0) {
 	       "                          catch every multi-byte character\n"
 	       "  -f, --feature FILE      Process Markdown in received text and use session\n"
 	       "                          commands according to printer feature FILE\n"
+	       "  -c, --parse-commands    If using '--feature', recognise printer feature\n"
+	       "                          command invocations in received text (prefixed by %c)\n"
 	       "      --dump-commands     Show all possible printer feature commands\n"
 	       "  -d, --daemon            Do not exit after the first network connection\n"
 	       "  -l, --limit LIMIT       Discard the whole chunk of text, received from the\n"
@@ -76,7 +79,7 @@ static void copris_help(const char *argv0) {
 	       "\n"
 	       "Notes will be shown if COPRIS assumes it is not invoked\n"
 	       "correctly, but never when the quiet argument is present.\n",
-	       argv0);
+	       argv0, USER_CMD_SYMBOL);
 
 	exit(EXIT_SUCCESS);
 }
@@ -99,6 +102,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{"encoding",         required_argument, NULL, 'e'},
 		{"ENCODING",         required_argument, NULL, 'E'},
 		{"feature",          required_argument, NULL, 'f'},
+		{"parse-commands",   no_argument,       NULL, 'c'},
 		{"dump-commands",    no_argument,       NULL, ','},
 		{"daemon",           no_argument,       NULL, 'd'},
 		{"limit",            required_argument, NULL, 'l'},
@@ -119,7 +123,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'You must
 	// specify a printer feature file.' instead of 'option requires an argument -- 'r')
-	while ((c = getopt_long(argc, argv, ":p:de:E:f:l:RvqhV", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":p:e:E:f:cdl:RvqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
@@ -220,6 +224,9 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->copris_flags |= HAS_FEATURES;
 			break;
 		}
+		case 'c':
+			attrib->copris_flags |= USER_COMMANDS;
+			break;
 		case ',': {
 			struct Inifile *features = NULL;
 			exit(dump_printer_feature_commands(&features));
@@ -428,6 +435,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if (attrib.copris_flags & USER_COMMANDS && !(attrib.copris_flags & HAS_FEATURES)) {
+	    attrib.copris_flags &= ~(USER_COMMANDS);
+		PRINT_NOTE("User feature commands cannot be parsed if there's no printer feature "
+		           "file loaded.");
+	}
+
 	if (attrib.limitnum > 0 && LOG_DEBUG)
 		PRINT_MSG("Limiting incoming data to %zu bytes.", attrib.limitnum);
 	
@@ -483,6 +496,10 @@ int main(int argc, char **argv) {
 
 		// Stage 2: Handle Markdown and session commands with a printer feature file
 		if (attrib.copris_flags & HAS_FEATURES) {
+			// Parse user commands in text
+			if (attrib.copris_flags & USER_COMMANDS)
+				parse_user_commands(copris_text, &features);
+
 			parse_markdown(copris_text, &features);
 			apply_session_commands(copris_text, &features, SESSION_PRINT);
 		}
