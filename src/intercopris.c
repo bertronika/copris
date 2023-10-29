@@ -49,11 +49,11 @@ int verbosity = 3;
 int verbosity = 1;
 #endif
 
-char **completer(const char *text, int start, int end);
-char *complete_possible_commands(const char *text, int state);
+static char **completer(const char *text, int start, int end);
+static char *complete_possible_commands(const char *text, int state);
 static int load_feature_file(const char *filename, struct Inifile **features);
-void hex_dump(const char *string, int length, bool mixed);
-void print_help(const char *argv0);
+static void hex_dump(const char *string, int length, bool mixed);
+static void print_help(const char *argv0);
 
 // List of possible commands, suggested by Readline's tab completion
 char *possible_commands[100];
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-char **completer(const char *text, int start, int end)
+static char **completer(const char *text, int start, int end)
 {
 	(void)start;
 	(void)end;
@@ -335,7 +335,7 @@ char **completer(const char *text, int start, int end)
 	return rl_completion_matches(text, complete_possible_commands);
 }
 
-char *complete_possible_commands(const char *text, int state)
+static char *complete_possible_commands(const char *text, int state)
 {
 	static int cmd_index, cmd_len;
 	char *cmd_name;
@@ -374,7 +374,7 @@ static int load_feature_file(const char *filename, struct Inifile **features)
 }
 
 
-void hex_dump(const char *string, int length, bool mixed)
+static void hex_dump(const char *string, int length, bool mixed)
 {
 	(mixed) ? fputs(" cmd: ", stdout) : fputs(" hex: ", stdout);
 
@@ -389,7 +389,7 @@ void hex_dump(const char *string, int length, bool mixed)
 	puts("");
 }
 
-void print_help(const char *argv0)
+static void print_help(const char *argv0)
 {
 	printf("Usage: %s [-f FILE] [-hn] [output file]\n"
 	       "\n"
