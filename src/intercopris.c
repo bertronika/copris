@@ -51,11 +51,13 @@ int verbosity = 1;
 
 char **completer(const char *text, int start, int end);
 char *complete_possible_commands(const char *text, int state);
+static int load_feature_file(const char *filename, struct Inifile **features);
 void hex_dump(const char *string, int length, bool mixed);
 void print_help(const char *argv0);
 
 // List of possible commands, suggested by Readline's tab completion
 char *possible_commands[100];
+int comp_cmd_count = 0;
 
 // Helper for adding commands to the above array. It recycles
 // 'append_file_name' from COPRIS' argument parsing.
@@ -71,25 +73,16 @@ int main(int argc, char **argv)
 	int c;
 	int error;
 	bool use_history_file = true;
-	int comp_cmd_count = 0;
+	const char *feature_file = NULL;
 	struct Inifile *features = NULL;
 
 	while ((c = getopt(argc, argv, "f:hn")) != -1) {
 		switch (c) {
 		case 'f':
-			error = initialise_commands(&features);
+			feature_file = optarg;
+			error = load_feature_file(feature_file, &features);
 			if (error)
 				return EXIT_FAILURE;
-
-			error = load_printer_feature_file(optarg, &features);
-			if (error)
-				return EXIT_FAILURE;
-
-			struct Inifile *s;
-			for (s = features; s != NULL; s = s->hh.next) {
-				if (*s->out != '\0') // Load only non-empty commands
-					ADD_RL_COMMAND(s->in);
-			}
 
 			break;
 		case 'h':
@@ -148,8 +141,10 @@ int main(int argc, char **argv)
 		     " prefixed with a number sign, will be saved to history.");
 
 	if (features)
-		puts(" Enter '" ESC_BOLD "d" ESC_NORM "' or '" ESC_BOLD "dump" ESC_NORM
-		     "' for a listing of loaded printer feature commands.");
+		puts("\n Enter '" ESC_BOLD "d" ESC_NORM "' or '" ESC_BOLD "dump" ESC_NORM
+		     "' for a listing of loaded printer feature commands,\n"
+		     " and '" ESC_BOLD "r" ESC_NORM "' or '" ESC_BOLD "reload" ESC_NORM
+		     "' to reevaluate the printer feature file.");
 
 	puts("\n Use the " ESC_BOLD "TAB" ESC_NORM
 	     " key to complete a partially entered command, or to\n"
@@ -165,6 +160,7 @@ int main(int argc, char **argv)
 	ADD_RL_COMMAND("exit");
 	ADD_RL_COMMAND("hex");
 	ADD_RL_COMMAND("last");
+	ADD_RL_COMMAND("reload");
 	ADD_RL_COMMAND("text");
 	ADD_RL_COMMAND("quit");
 
@@ -234,6 +230,18 @@ int main(int argc, char **argv)
 				}
 			}
 			continue;
+		}
+
+		if (strncasecmp(input_ptr, "reload", 6) == 0 || strcasecmp(input_ptr, "r") == 0) {
+			unload_printer_feature_commands(&features);
+			free_filenames(possible_commands, comp_cmd_count);
+			comp_cmd_count = 0;
+			if (load_feature_file(feature_file, &features) == 0) {
+				continue;
+			} else {
+				features = NULL;
+				break;
+			}
 		}
 
 		if (strncasecmp(input_ptr, "last", 4) == 0 || strcasecmp(input_ptr, "l") == 0) {
@@ -344,6 +352,27 @@ char *complete_possible_commands(const char *text, int state)
 
 	return NULL;
 }
+
+static int load_feature_file(const char *filename, struct Inifile **features)
+{
+	*features = NULL;
+	int error = initialise_commands(features);
+	if (error)
+		return error;
+
+	error = load_printer_feature_file(filename, features);
+	if (error)
+		return error;
+
+	struct Inifile *s;
+	for (s = *features; s != NULL; s = s->hh.next) {
+		if (*s->out != '\0') // Load only non-empty commands
+			ADD_RL_COMMAND(s->in);
+	}
+
+	return error;
+}
+
 
 void hex_dump(const char *string, int length, bool mixed)
 {
