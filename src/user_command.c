@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <strings.h>
 
 #include <utstring.h> /* uthash library - dynamic strings  */
 
@@ -17,11 +18,11 @@
 #include "debug.h"
 #include "user_command.h"
 
-static int substitute_with_command(UT_string *copris_text, int text_pos,
-                                   const char *parsed_cmd, int original_cmd_len,
-                                   struct Inifile **features);
+static user_action_t substitute_with_command(UT_string *copris_text, int text_pos,
+                                             const char *parsed_cmd, int original_cmd_len,
+                                             struct Inifile **features);
 
-int parse_user_commands(UT_string *copris_text, struct Inifile **features)
+user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features)
 {
 	const char *text = utstring_body(copris_text);
 
@@ -61,29 +62,48 @@ int parse_user_commands(UT_string *copris_text, struct Inifile **features)
 			memcpy(possible_cmd_ptr, &text[i + 1], possible_cmd_len - 1);
 
 			// Try to substitute command text with an actual command
-			substitute_with_command(copris_text, i, possible_cmd, possible_cmd_len, features);
+			user_action_t retval = substitute_with_command(copris_text, i,
+			                                               possible_cmd, possible_cmd_len,
+			                                               features);
+
+			if (retval != NO_ERROR)
+				return retval;
 		}
 	}
 
-	return 0;
+	return NO_ERROR;
 }
 
-static int substitute_with_command(UT_string *copris_text, int text_pos,
-                                   const char *parsed_cmd, int original_cmd_len,
-                                   struct Inifile **features)
+static user_action_t substitute_with_command(UT_string *copris_text, int text_pos,
+                                             const char *parsed_cmd, int original_cmd_len,
+                                             struct Inifile **features)
 {
-	// Check if the command exists
+	user_action_t retval = NO_ERROR;
 	struct Inifile *s;
-	HASH_FIND_STR(*features, parsed_cmd, s);
-	if (!s) {
-		if (LOG_ERROR)
-			PRINT_MSG("Found command notation '$%s', but the command is not defined.",
-					  parsed_cmd + 2);
-		return -1;
+
+	// Check for the special command
+	if (strcasecmp(parsed_cmd, "C_NO_MARKDOWN") == 0) {
+		retval = DISABLE_MARKDOWN;
+	} else if (strcasecmp(parsed_cmd, "C_NO_COMMANDS") == 0) {
+		retval = DISABLE_COMMANDS;
+	} else {
+		// Check if the command exists
+		HASH_FIND_STR(*features, parsed_cmd, s);
+		if (!s) {
+			if (LOG_ERROR)
+				PRINT_MSG("Found command notation '$%s', but the command is not defined.",
+						  parsed_cmd + 2);
+			return -1;
+		}
 	}
 
-	if (LOG_INFO)
-		PRINT_MSG("Found $%s.", parsed_cmd + 2);
+	if (LOG_INFO) {
+		if (retval != NO_ERROR) {
+			PRINT_MSG("Found special command $%s.", parsed_cmd + 2);
+		} else {
+			PRINT_MSG("Found $%s.", parsed_cmd + 2);
+		}
+	}
 
 	// Split copris_text into two parts, add command value (which can be empty) in between:
 	//  - text_before_cmd
@@ -102,12 +122,16 @@ static int substitute_with_command(UT_string *copris_text, int text_pos,
 	utstring_clear(copris_text);
 
 	utstring_concat(copris_text, text_before_cmd);
-	if (*s->out != '\0')
+
+	// If a special command was found, omit it from the output.
+	// If a command was found, but is empty, also omit it.
+	if (retval == NO_ERROR && *s->out != '\0')
 		utstring_bincpy(copris_text, s->out, strlen(s->out));
+
 	utstring_concat(copris_text, text_after_cmd);
 
 	utstring_free(text_before_cmd);
 	utstring_free(text_after_cmd);
 
-	return 0;
+	return retval;
 }

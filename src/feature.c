@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
+#include <strings.h>
 
 #include <ini.h>      /* inih library - .ini file parser   */
 #include <uthash.h>   /* uthash library - hash table       */
@@ -154,6 +155,11 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	if (value_len >= MAX_INIFILE_ELEMENT_LENGTH) {
 		PRINT_ERROR_MSG("'%s': value length exceeds maximum of %zu bytes.", value,
 		                (size_t)MAX_INIFILE_ELEMENT_LENGTH);
+		return COPRIS_PARSE_FAILURE;
+	}
+
+	if (strcasecmp(name, "C_NO_MARKDOWN") == 0 || strcasecmp(name, "C_NO_COMMANDS") == 0) {
+		PRINT_ERROR_MSG("'%s': command name is reserved and cannot be used.", name);
 		return COPRIS_PARSE_FAILURE;
 	}
 
