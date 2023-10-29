@@ -43,7 +43,11 @@
 #define ESC_NORM "\x1B[0m"
 
 // TODO: Add a -v switch?
+#ifdef DEBUG
+int verbosity = 3;
+#else
 int verbosity = 1;
+#endif
 
 char **completer(const char *text, int start, int end);
 char *complete_possible_commands(const char *text, int state);
