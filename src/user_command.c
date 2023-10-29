@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <strings.h>
+#include <assert.h>
 
 #include <utstring.h> /* uthash library - dynamic strings  */
 
@@ -59,6 +60,7 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 				}
 			}
 
+			assert(possible_cmd_len > 0);
 			// + 1 to omit leading USER_CMD_SYMBOL, -1 to omit trailing whitespace
 			memcpy(possible_cmd_ptr, &text[i + 1], possible_cmd_len - 1);
 
