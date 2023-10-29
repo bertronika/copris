@@ -499,11 +499,12 @@ int main(int argc, char **argv) {
 
 		// Stage 2: Handle Markdown and session commands with a printer feature file
 		if (attrib.copris_flags & HAS_FEATURES) {
+			user_action_t action = NO_ACTION;
 			// Parse user commands in text
 			if (attrib.copris_flags & USER_COMMANDS)
-				error = parse_user_commands(copris_text, &features);
+				action = parse_user_commands(copris_text, &features);
 
-			if (error != DISABLE_MARKDOWN)
+			if (action != DISABLE_MARKDOWN)
 				parse_markdown(copris_text, &features);
 
 			apply_session_commands(copris_text, &features, SESSION_PRINT);

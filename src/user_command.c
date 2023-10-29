@@ -25,6 +25,7 @@ static user_action_t substitute_with_command(UT_string *copris_text, int text_po
 user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features)
 {
 	const char *text = utstring_body(copris_text);
+	user_action_t retval = NO_ACTION;
 
 	if (LOG_DEBUG)
 		PRINT_MSG("Searching for user feature commands.");
@@ -62,23 +63,20 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 			memcpy(possible_cmd_ptr, &text[i + 1], possible_cmd_len - 1);
 
 			// Try to substitute command text with an actual command
-			user_action_t retval = substitute_with_command(copris_text, i,
-			                                               possible_cmd, possible_cmd_len,
-			                                               features);
-
-			if (retval != NO_ERROR)
-				return retval;
+			retval = substitute_with_command(copris_text, i,
+			                                 possible_cmd, possible_cmd_len,
+			                                 features);
 		}
 	}
 
-	return NO_ERROR;
+	return retval;
 }
 
 static user_action_t substitute_with_command(UT_string *copris_text, int text_pos,
                                              const char *parsed_cmd, int original_cmd_len,
                                              struct Inifile **features)
 {
-	user_action_t retval = NO_ERROR;
+	user_action_t retval = NO_ACTION;
 	struct Inifile *s;
 
 	// Check for the special command
@@ -98,7 +96,7 @@ static user_action_t substitute_with_command(UT_string *copris_text, int text_po
 	}
 
 	if (LOG_INFO) {
-		if (retval != NO_ERROR) {
+		if (retval != NO_ACTION) {
 			PRINT_MSG("Found special command $%s.", parsed_cmd + 2);
 		} else {
 			PRINT_MSG("Found $%s.", parsed_cmd + 2);
@@ -125,7 +123,7 @@ static user_action_t substitute_with_command(UT_string *copris_text, int text_po
 
 	// If a special command was found, omit it from the output.
 	// If a command was found, but is empty, also omit it.
-	if (retval == NO_ERROR && *s->out != '\0')
+	if (retval == NO_ACTION && *s->out != '\0')
 		utstring_bincpy(copris_text, s->out, strlen(s->out));
 
 	utstring_concat(copris_text, text_after_cmd);

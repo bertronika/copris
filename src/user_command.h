@@ -4,13 +4,13 @@
  * 'features' hash table, substitute them with commands from 'features'.
  *
  * Return values (user_action_t):
- * - NO_ERROR on success
+ * - NO_ACTION on success
  * - DISABLE_MARKDOWN when "$NO_MARKDOWN" was found
  * - DISABLE_COMMANDS when "$NO_COMMANDS" was found
  */
 
 typedef enum user_action {
-	NO_ERROR,
+	NO_ACTION,
 	DISABLE_MARKDOWN,
 	DISABLE_COMMANDS
 } user_action_t;
