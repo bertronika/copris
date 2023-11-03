@@ -32,18 +32,23 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 		PRINT_MSG("Searching for user feature commands.");
 
 	for (size_t i = 0; text[i] != '\0';) {
-		if (text[i] == USER_CMD_SYMBOL) {
+		// Detect USER_CMD_SYMBOL in text, but not if it is standalone
+		if (text[i] == USER_CMD_SYMBOL && text[i + 1] != '\0' && !isspace(text[i + 1])) {
 			// Prepare a string for a possible command
 			char possible_cmd[MAX_INIFILE_ELEMENT_LENGTH] = "C_";
 			char *possible_cmd_ptr = possible_cmd + 2; // Account for 'C_' prefix
 
-			// Length of a possible command (up to a whitespace char)
+			// Length of a possible USER_CMD_SYMBOL-prefixed command (up to a whitespace char)
 			size_t possible_cmd_len = 0;
 
 			// String pointer for moving locally through the command
 			const char *text_tmp = &text[i];
 
 			while (!isspace(*text_tmp)) {
+				// If there's a punctuation character, also stop parsing the command
+				if (possible_cmd_len > 0 && ispunct(*text_tmp))
+					break;
+
 				// Whitespace character not yet found, increase possible command length
 				// and move to the next character
 				possible_cmd_len++;
@@ -60,8 +65,8 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 				}
 			}
 
+			// + 1 on string and - 1 on its length to omit USER_CMD_SYMBOL
 			assert(possible_cmd_len > 0);
-			// + 1 to omit leading USER_CMD_SYMBOL, -1 to omit trailing whitespace
 			memcpy(possible_cmd_ptr, &text[i + 1], possible_cmd_len - 1);
 
 			// Try to substitute command text with an actual command
@@ -86,7 +91,7 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	user_action_t retval = NO_ACTION;
 	struct Inifile *s;
 
-	// Check for the special command
+	// Check for special commands
 	if (strcasecmp(parsed_cmd, "C_NO_MARKDOWN") == 0) {
 		retval = DISABLE_MARKDOWN;
 	} else if (strcasecmp(parsed_cmd, "C_NO_COMMANDS") == 0) {
@@ -112,26 +117,53 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 		}
 	}
 
-	// Split copris_text into two parts, add command value (which can be empty) in between:
-	//  - text_before_cmd
-	//  - cmd
-	//  - text_after_cmd
+	// Split copris_text into two parts - before and after the command.
+	// Strip up to one blank space before and after the variable.
 	UT_string *text_before_cmd;
 	utstring_new(text_before_cmd);
-	utstring_bincpy(text_before_cmd, utstring_body(copris_text), *text_pos);
+
+	int leading_whitespace_before = 0; // Leading whitespace before the command
+
+	if (*text_pos > 0 && isspace(copris_text->d[*text_pos - 1]))
+		leading_whitespace_before = 1;
+
+	// Copy all text up to the command. Omit up to one space before it.
+	utstring_bincpy(text_before_cmd,
+	                utstring_body(copris_text),
+	                *text_pos - leading_whitespace_before);
 
 	UT_string *text_after_cmd;
 	utstring_new(text_after_cmd);
-	utstring_bincpy(text_after_cmd,
-	                utstring_body(copris_text)
-	              + utstring_len(text_before_cmd)
-	              + original_cmd_len
-	              + 1, /* leading whitespace */
-	                utstring_len(copris_text)
-	              - utstring_len(text_before_cmd)
-	              - original_cmd_len
-	              - 1 /* trailing whitespace */);
 
+	// Copy all text after the command. Omit up to one space around it.
+	char *text_after_cmd_body = utstring_body(copris_text)
+	                          + utstring_len(text_before_cmd)
+	                          + original_cmd_len + leading_whitespace_before;
+
+	size_t text_after_cmd_len = utstring_len(copris_text)
+	                          - utstring_len(text_before_cmd)
+	                          - original_cmd_len;
+
+	int leading_whitespace_after  = 0;
+	int trailing_whitespace_after = 0;
+
+	if (!leading_whitespace_before && isspace(text_after_cmd_body[0]))
+		leading_whitespace_after = 1;
+
+	if (isspace(text_after_cmd_body[text_after_cmd_len - 1]))
+		trailing_whitespace_after = 1;
+
+	assert(text_after_cmd_body + leading_whitespace_after != NULL);
+	utstring_bincpy(text_after_cmd,
+	                text_after_cmd_body
+	              + leading_whitespace_after,
+	                text_after_cmd_len
+	              - trailing_whitespace_after);
+
+	// Assemble new copris_text in the following order:
+	//  - text_before_cmd
+	//  - cmd               (command value which can be empty)
+	//  - text_after_cmd
 	utstring_clear(copris_text);
 	utstring_concat(copris_text, text_before_cmd);
 
@@ -145,7 +177,11 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 
 	utstring_concat(copris_text, text_after_cmd);
 
+	// copris_text, passed into this function, was modified. Notify
+	// parse_user_commands() of the new length, consisting of the length
+	// of text before the command and the length of the inserted command.
 	*text_pos = utstring_len(text_before_cmd) + cmd_len;
+
 	utstring_free(text_before_cmd);
 	utstring_free(text_after_cmd);
 
