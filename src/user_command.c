@@ -136,9 +136,9 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	utstring_new(text_after_cmd);
 
 	// Copy all text after the command. Omit up to one space around it.
-	char *text_after_cmd_body = utstring_body(copris_text)
-	                          + utstring_len(text_before_cmd)
-	                          + original_cmd_len + leading_whitespace_before;
+	const char *text_after_cmd_body = utstring_body(copris_text)
+	                                + utstring_len(text_before_cmd)
+	                                + original_cmd_len + leading_whitespace_before;
 
 	size_t text_after_cmd_len = utstring_len(copris_text)
 	                          - utstring_len(text_before_cmd)

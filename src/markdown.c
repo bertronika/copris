@@ -92,9 +92,9 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 	bool code_block_open = false;
 	bool blockquote_open = false;
 
-	char *text      = utstring_body(copris_text);
+	const char *text = utstring_body(copris_text);
 	size_t text_len = utstring_len(copris_text);
-	char last_char  = ' ';
+	char last_char = ' ';
 
 	static char *heading_on[]  = {0, "F_H1_ON", "F_H2_ON", "F_H3_ON", "F_H4_ON"};
 	static char *heading_off[] = {0, "F_H1_OFF", "F_H2_OFF", "F_H3_OFF", "F_H4_OFF"};

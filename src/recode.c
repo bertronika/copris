@@ -230,7 +230,7 @@ int recode_text(UT_string *copris_text, struct Inifile **encoding)
 	utstring_new(recoded_text);
 
 	int error = 0;
-	char *original = utstring_body(copris_text);
+	const char *original = utstring_body(copris_text);
 
 	while (*original) {
 		char input_char[UTF8_MAX_LENGTH + 1];
