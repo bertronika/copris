@@ -502,7 +502,7 @@ int main(int argc, char **argv) {
 
 		// Stage 2: Handle Markdown and session commands with a printer feature file
 		if (attrib.copris_flags & HAS_FEATURES) {
-			user_action_t action = NO_ACTION;
+			parse_action_t action = NO_ACTION;
 			// Parse user commands in text
 			if (attrib.copris_flags & USER_COMMANDS)
 				action = parse_user_commands(copris_text, &features);

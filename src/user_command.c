@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include <strings.h>
 #include <assert.h>
@@ -20,15 +21,16 @@
 #include "parse_value.h"
 #include "user_command.h"
 
-static user_action_t substitute_with_command(UT_string *copris_text, size_t *text_pos,
-                                             const char *parsed_cmd, int original_cmd_len,
-                                             struct Inifile **features);
+static parse_action_t substitute_with_command(UT_string *copris_text, size_t *text_pos,
+                                              const char *parsed_cmd, int original_cmd_len,
+                                              struct Inifile **features);
 static int ispunct_custom(int c);
 
-user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features)
+parse_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features)
 {
 	const char *text = utstring_body(copris_text);
-	user_action_t retval = NO_ACTION;
+	parse_action_t action = NO_ACTION;
+	bool disable_markdown = false;
 
 	// First, we must explicitly check if the text should be parsed for user commands.
 	// Deciding factor is inclusion of one of the following commands at the beginning
@@ -36,10 +38,10 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 	if (strncasecmp(text, "$ENABLE_COMMANDS", 16) != 0 &&
 	    strncasecmp(text, "$ENABLE_CMD", 11) != 0 &&
 	    strncasecmp(text, "$CMD", 4) != 0) {
-		if (LOG_DEBUG)
+		if (LOG_INFO)
 			PRINT_MSG("No '$ENABLE_COMMANDS' found, not parsing user commands.");
 
-		return DISABLE_COMMANDS;
+		return NO_ACTION;
 	}
 
 	if (LOG_DEBUG)
@@ -71,7 +73,6 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 						          "too long to be parsed.");
 						PRINT_MSG(" %.*s", MAX_INIFILE_ELEMENT_LENGTH, text);
 					}
-					return ERROR;
 				}
 			}
 
@@ -84,9 +85,12 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 			memcpy(possible_cmd_ptr, &text[i + 1], possible_cmd_len - 1);
 
 			// Try to substitute command text with an actual command
-			retval = substitute_with_command(copris_text, &i,
+			action = substitute_with_command(copris_text, &i,
 			                                 possible_cmd, possible_cmd_len,
 			                                 features);
+
+			if (action == DISABLE_MARKDOWN)
+				disable_markdown = true;
 		} else {
 			// Increment only if no command has been detected.
 			// The iterator is updated manually on a command
@@ -95,27 +99,29 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 		}
 	}
 
-	return retval;
+	return (disable_markdown) ? DISABLE_MARKDOWN : NO_ACTION;
 }
 
-static user_action_t substitute_with_command(UT_string *copris_text, size_t *text_pos,
-                                             const char *parsed_cmd, int original_cmd_len,
-                                             struct Inifile **features)
+static parse_action_t substitute_with_command(UT_string *copris_text, size_t *text_pos,
+                                              const char *parsed_cmd, int original_cmd_len,
+                                              struct Inifile **features)
 {
-	user_action_t retval = NO_ACTION;
-	struct Inifile *s;
+	parse_action_t action = NO_ACTION;
+	struct Inifile *s = NULL;
+	bool disable_markdown = false;
 
-	// Check for special commands
+	// Check for $DISABLE_MARKDOWN
 	if (strcasecmp(parsed_cmd, "C_DISABLE_MARKDOWN") == 0) {
-		retval = DISABLE_MARKDOWN;
-	} else if (strcasecmp(parsed_cmd, "C_DISABLE_COMMANDS") == 0) {
-		retval = DISABLE_COMMANDS;
+		disable_markdown = true;
+		action = DISABLE_MARKDOWN;
+	// Check for a $#comment
 	} else if (parsed_cmd[2] == '#') {
-		retval = SKIP_CMD;
+		action = SKIP_CMD;
+	// Check for the user command trigger
 	} else if (strcasecmp(parsed_cmd, "C_ENABLE_COMMANDS") == 0 ||
 	           strcasecmp(parsed_cmd, "C_ENABLE_CMD") == 0 ||
 	           strcasecmp(parsed_cmd, "C_CMD") == 0) {
-		retval = SKIP_CMD;
+		action = SKIP_CMD;
 	} else {
 		// Check if the command exists
 		HASH_FIND_STR(*features, parsed_cmd, s);
@@ -125,16 +131,13 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 			if (LOG_ERROR)
 				PRINT_MSG("Found command notation '$%s', but the command is not defined.",
 						  parsed_cmd + 2);
-			return ERROR;
+			return NO_ACTION;
 		}
 	}
 
 	if (LOG_INFO) {
-		if (retval == DISABLE_MARKDOWN || retval == DISABLE_COMMANDS) {
-			PRINT_MSG("Found special command $%s.", parsed_cmd + 2);
-		} else if (retval == NO_ACTION) {
+		if (action != SKIP_CMD)
 			PRINT_MSG("Found $%s.", parsed_cmd + 2);
-		}
 	}
 
 	// Split copris_text into two parts - before and after the command.
@@ -189,9 +192,8 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 
 	size_t cmd_len = 0;
 
-	// If a special command was found, omit it from the output.
-	// If a command was found, but is empty, also omit it.
-	if (retval == NO_ACTION) {
+	if (action != SKIP_CMD && action != DISABLE_MARKDOWN) {
+		// If a command was found, but is empty, omit it
 		if (s != NULL && *s->out != '\0') {
 			// Add the command
 			cmd_len = strlen(s->out);
@@ -205,9 +207,7 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 				utstring_bincpy(copris_text, parsed_value, element_count);
 			} else {
 				if (LOG_ERROR)
-					PRINT_MSG("Number notation '$%s' was skipped.",
-							  parsed_cmd + 2);
-				retval = ERROR;
+					PRINT_MSG("Number notation '$%s' was skipped.", parsed_cmd + 2);
 			}
 		}
 	}
@@ -222,7 +222,7 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	utstring_free(text_before_cmd);
 	utstring_free(text_after_cmd);
 
-	return retval;
+	return (disable_markdown) ? DISABLE_MARKDOWN : NO_ACTION;
 }
 
 static int ispunct_custom(int c)

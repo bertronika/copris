@@ -3,26 +3,24 @@
  * commands, prefixed by USER_CMD_SYMBOL. If found commands exist in
  * 'features' hash table, substitute them with commands from 'features'.
  *
+ * If none of
+ *   > $ENABLE_COMMANDS
+ *   > $ENABLE_CMD
+ *   > $CMD
+ * are found at the beginning of 'copris_text', command parsing
+ * doesn't commence.
+ *
+ * Comments in text ($#comment_text) are skipped.
+ *
  * Return values (user_action_t):
  * - NO_ACTION on success
- * - ERROR on partial/complete failure
- * - COMMENT when a comment was encountered and skipped ($#comment_text)
- * - DISABLE_MARKDOWN when "$DISABLE_MARKDOWN" was found
- * - DISABLE_COMMANDS when:
- *   + None of
- *     > $ENABLE_COMMANDS
- *     > $ENABLE_CMD
- *     > $CMD
- *     were found at the beginning of 'copris_text'
- *   + "$DISABLE_MARKDOWN" was found somewhere in 'copris_text'
+ * - DISABLE_MARKDOWN when "$DISABLE_MARKDOWN" was found in 'copris_text'
  */
 
-typedef enum user_action {
+typedef enum parse_action {
 	NO_ACTION,
-	ERROR,
 	SKIP_CMD,
-	DISABLE_MARKDOWN,
-	DISABLE_COMMANDS
-} user_action_t;
+	DISABLE_MARKDOWN
+} parse_action_t;
 
-user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features);
+parse_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features);
