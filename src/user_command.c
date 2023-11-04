@@ -30,6 +30,18 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 	const char *text = utstring_body(copris_text);
 	user_action_t retval = NO_ACTION;
 
+	// First, we must explicitly check if the text should be parsed for user commands.
+	// Deciding factor is inclusion of one of the following commands at the beginning
+	// of the received text:
+	if (strncasecmp(text, "$ENABLE_COMMANDS", 16) != 0 &&
+	    strncasecmp(text, "$ENABLE_CMD", 11) != 0 &&
+	    strncasecmp(text, "$CMD", 4) != 0) {
+		if (LOG_DEBUG)
+			PRINT_MSG("No '$ENABLE_COMMANDS' found, not parsing user commands.");
+
+		return DISABLE_COMMANDS;
+	}
+
 	if (LOG_DEBUG)
 		PRINT_MSG("Searching for user feature commands.");
 
@@ -94,12 +106,16 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	struct Inifile *s;
 
 	// Check for special commands
-	if (strcasecmp(parsed_cmd, "C_NO_MARKDOWN") == 0) {
+	if (strcasecmp(parsed_cmd, "C_DISABLE_MARKDOWN") == 0) {
 		retval = DISABLE_MARKDOWN;
-	} else if (strcasecmp(parsed_cmd, "C_NO_COMMANDS") == 0) {
+	} else if (strcasecmp(parsed_cmd, "C_DISABLE_COMMANDS") == 0) {
 		retval = DISABLE_COMMANDS;
 	} else if (parsed_cmd[2] == '#') {
-		retval = COMMENT;
+		retval = SKIP_CMD;
+	} else if (strcasecmp(parsed_cmd, "C_ENABLE_COMMANDS") == 0 ||
+	           strcasecmp(parsed_cmd, "C_ENABLE_CMD") == 0 ||
+	           strcasecmp(parsed_cmd, "C_CMD") == 0) {
+		retval = SKIP_CMD;
 	} else {
 		// Check if the command exists
 		HASH_FIND_STR(*features, parsed_cmd, s);
@@ -114,9 +130,9 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	}
 
 	if (LOG_INFO) {
-		if (retval != NO_ACTION) {
+		if (retval == DISABLE_MARKDOWN || retval == DISABLE_COMMANDS) {
 			PRINT_MSG("Found special command $%s.", parsed_cmd + 2);
-		} else {
+		} else if (retval == NO_ACTION) {
 			PRINT_MSG("Found $%s.", parsed_cmd + 2);
 		}
 	}

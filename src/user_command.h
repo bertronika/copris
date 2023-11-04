@@ -7,14 +7,20 @@
  * - NO_ACTION on success
  * - ERROR on partial/complete failure
  * - COMMENT when a comment was encountered and skipped ($#comment_text)
- * - DISABLE_MARKDOWN when "$NO_MARKDOWN" was found
- * - DISABLE_COMMANDS when "$NO_COMMANDS" was found
+ * - DISABLE_MARKDOWN when "$DISABLE_MARKDOWN" was found
+ * - DISABLE_COMMANDS when:
+ *   + None of
+ *     > $ENABLE_COMMANDS
+ *     > $ENABLE_CMD
+ *     > $CMD
+ *     were found at the beginning of 'copris_text'
+ *   + "$DISABLE_MARKDOWN" was found somewhere in 'copris_text'
  */
 
 typedef enum user_action {
 	NO_ACTION,
 	ERROR,
-	COMMENT,
+	SKIP_CMD,
 	DISABLE_MARKDOWN,
 	DISABLE_COMMANDS
 } user_action_t;
