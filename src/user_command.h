@@ -5,6 +5,8 @@
  *
  * Return values (user_action_t):
  * - NO_ACTION on success
+ * - ERROR on partial/complete failure
+ * - COMMENT when a comment was encountered and skipped ($#comment_text)
  * - DISABLE_MARKDOWN when "$NO_MARKDOWN" was found
  * - DISABLE_COMMANDS when "$NO_COMMANDS" was found
  */
@@ -12,6 +14,7 @@
 typedef enum user_action {
 	NO_ACTION,
 	ERROR,
+	COMMENT,
 	DISABLE_MARKDOWN,
 	DISABLE_COMMANDS
 } user_action_t;

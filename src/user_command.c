@@ -17,11 +17,13 @@
 #include "Copris.h"
 #include "config.h"
 #include "debug.h"
+#include "parse_value.h"
 #include "user_command.h"
 
 static user_action_t substitute_with_command(UT_string *copris_text, size_t *text_pos,
                                              const char *parsed_cmd, int original_cmd_len,
                                              struct Inifile **features);
+static int ispunct_custom(int c);
 
 user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features)
 {
@@ -32,21 +34,17 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 		PRINT_MSG("Searching for user feature commands.");
 
 	for (size_t i = 0; text[i] != '\0';) {
-		// Detect USER_CMD_SYMBOL in text, but not if it is standalone
+		// Detect USER_CMD_SYMBOL in text, if other characters follow it
 		if (text[i] == USER_CMD_SYMBOL && text[i + 1] != '\0' && !isspace(text[i + 1])) {
-			// Prepare a string for a possible command
-			char possible_cmd[MAX_INIFILE_ELEMENT_LENGTH] = "C_";
-			char *possible_cmd_ptr = possible_cmd + 2; // Account for 'C_' prefix
+			// String pointer for moving locally through the command
+			const char *text_tmp = &text[i];
 
 			// Length of a possible USER_CMD_SYMBOL-prefixed command (up to a whitespace char)
 			size_t possible_cmd_len = 0;
 
-			// String pointer for moving locally through the command
-			const char *text_tmp = &text[i];
-
 			while (!isspace(*text_tmp)) {
-				// If there's a punctuation character, also stop parsing the command
-				if (possible_cmd_len > 0 && ispunct(*text_tmp))
+				// If there's a punctuation character, stop parsing the command
+				if (possible_cmd_len > 0 && ispunct_custom(*text_tmp))
 					break;
 
 				// Whitespace character not yet found, increase possible command length
@@ -54,18 +52,22 @@ user_action_t parse_user_commands(UT_string *copris_text, struct Inifile **featu
 				possible_cmd_len++;
 				text_tmp++;
 
-				// Subtract 2 for 'C_' prefix
 				if (possible_cmd_len >= MAX_INIFILE_ELEMENT_LENGTH - 2) {
+					// (subtract 2 for 'C_' prefix)
 					if (LOG_ERROR) {
 						PRINT_MSG("Found command notation in following line, but it is "
 						          "too long to be parsed.");
 						PRINT_MSG(" %.*s", MAX_INIFILE_ELEMENT_LENGTH, text);
 					}
-					return -1;
+					return ERROR;
 				}
 			}
 
-			// + 1 on string and - 1 on its length to omit USER_CMD_SYMBOL
+			// Prepare a string for a possible command
+			char possible_cmd[MAX_INIFILE_ELEMENT_LENGTH] = "C_";
+			char *possible_cmd_ptr = possible_cmd + 2; // Account for 'C_' prefix
+
+			// + 1 character on string and - 1 on its length to omit USER_CMD_SYMBOL
 			assert(possible_cmd_len > 0);
 			memcpy(possible_cmd_ptr, &text[i + 1], possible_cmd_len - 1);
 
@@ -96,10 +98,12 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 		retval = DISABLE_MARKDOWN;
 	} else if (strcasecmp(parsed_cmd, "C_NO_COMMANDS") == 0) {
 		retval = DISABLE_COMMANDS;
+	} else if (parsed_cmd[2] == '#') {
+		retval = COMMENT;
 	} else {
 		// Check if the command exists
 		HASH_FIND_STR(*features, parsed_cmd, s);
-		if (!s) {
+		if (!s && !isdigit(parsed_cmd[2])) {
 			// If not, skip it and increment the text iterator
 			*text_pos += original_cmd_len;
 			if (LOG_ERROR)
@@ -144,8 +148,8 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	                          - utstring_len(text_before_cmd)
 	                          - original_cmd_len;
 
-	int leading_whitespace_after  = 0;
-	int trailing_whitespace_after = 0;
+	int leading_whitespace_after  = 0; // leading/
+	int trailing_whitespace_after = 0; // trailing whitespace after the command
 
 	if (!leading_whitespace_before && isspace(text_after_cmd_body[0]))
 		leading_whitespace_after = 1;
@@ -168,11 +172,28 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	utstring_concat(copris_text, text_before_cmd);
 
 	size_t cmd_len = 0;
+
 	// If a special command was found, omit it from the output.
 	// If a command was found, but is empty, also omit it.
-	if (retval == NO_ACTION && *s->out != '\0') {
-		cmd_len = strlen(s->out);
-		utstring_bincpy(copris_text, s->out, cmd_len);
+	if (retval == NO_ACTION) {
+		if (s != NULL && *s->out != '\0') {
+			// Add the command
+			cmd_len = strlen(s->out);
+			utstring_bincpy(copris_text, s->out, cmd_len);
+		} else {
+			// Parse the supposed number and add it
+			char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
+			int element_count = parse_number_string(parsed_cmd + 2,
+			                                        parsed_value, (sizeof parsed_value) - 1);
+			if (element_count != -1) {
+				utstring_bincpy(copris_text, parsed_value, element_count);
+			} else {
+				if (LOG_ERROR)
+					PRINT_MSG("Number notation '$%s' was skipped.",
+							  parsed_cmd + 2);
+				retval = ERROR;
+			}
+		}
 	}
 
 	utstring_concat(copris_text, text_after_cmd);
@@ -186,4 +207,40 @@ static user_action_t substitute_with_command(UT_string *copris_text, size_t *tex
 	utstring_free(text_after_cmd);
 
 	return retval;
+}
+
+static int ispunct_custom(int c)
+{
+	switch (c) { // Omitted: $ _ { } #
+	case '!':
+	case '"':
+	case '%':
+	case '&':
+	case '\'':
+	case '(':
+	case ')':
+	case '*':
+	case '+':
+	case ',':
+	case '-':
+	case '.':
+	case '/':
+	case ':':
+	case ';':
+	case '<':
+	case '=':
+	case '>':
+	case '?':
+	case '@':
+	case '[':
+	case '\\':
+	case ']':
+	case '^':
+	case '`':
+	case '|':
+	case '~':
+		return 1;
+	}
+
+	return 0;
 }
