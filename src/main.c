@@ -81,7 +81,7 @@ static void copris_help(const char *argv0) {
 	       "correctly, but never when the quiet argument is present.\n"
 	       "\n"
 	       "If --parse-commands is enabled, received text should begin with either\n"
-	       "$ENABLE_COMMANDS, $ENABLE_CMD or $CMD.",
+	       "$ENABLE_COMMANDS, $ENABLE_CMD or $CMD.\n",
 	       argv0, USER_CMD_SYMBOL);
 
 	exit(EXIT_SUCCESS);
