@@ -13,7 +13,7 @@ LDFLAGS   ?=
 # Dynamic libraries to be linked
 LIBRARIES = inih
 
-# Object files, all except main.o
+# Object files
 OBJECTS = src/feature.o       \
           src/filters.o       \
           src/main-helpers.o  \
@@ -24,7 +24,8 @@ OBJECTS = src/feature.o       \
           src/recode.o        \
           src/user_command.o  \
           src/utf8.o          \
-          src/writer.o
+          src/writer.o        \
+          src/main.o          \
 
 # Additional compiler and linker library flags
 CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"

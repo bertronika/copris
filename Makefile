@@ -63,14 +63,14 @@ check-if-tagged:
 	false )
 
 # Compile the release binary
-copris: $(OBJS_REL) src/main_rel.o
+copris: $(OBJS_REL)
 	$(CC) $^ $(LDFLAGS) -o $@
 
 %_rel.o: %.c
 	$(CC) $(CFLAGS) $(RELFLAGS) -MMD -MP -c $< -o $@
 
 # Compile the debug binary
-copris_dbg: $(OBJS_DBG) src/main_dbg.o
+copris_dbg: $(OBJS_DBG)
 	$(CC) $^ $(LDFLAGS) -o $@
 
 %_dbg.o: %.c
