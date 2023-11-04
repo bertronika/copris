@@ -78,7 +78,10 @@ static void copris_help(const char *argv0) {
 	       "to stdout (console/terminal), omit the output file.\n"
 	       "\n"
 	       "Notes will be shown if COPRIS assumes it is not invoked\n"
-	       "correctly, but never when the quiet argument is present.\n",
+	       "correctly, but never when the quiet argument is present.\n"
+	       "\n"
+	       "If --parse-commands is enabled, received text should begin with either\n"
+	       "$ENABLE_COMMANDS, $ENABLE_CMD or $CMD.",
 	       argv0, USER_CMD_SYMBOL);
 
 	exit(EXIT_SUCCESS);

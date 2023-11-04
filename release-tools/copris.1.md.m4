@@ -42,7 +42,9 @@ m4_include(common-description.md.m4)m4_dnl
 **-c**, **\--parse-commands**
 : If a printer feature file is being used, recognise feature commands in
   received text and apply them. Commands must be prefixed with a predefined
-  symbol, which is shown when invoking `copris --version`.
+  symbol, which is shown when invoking `copris --version`. This feature only
+  works when the *received text starts with* `$ENABLE_COMMANDS`,
+  `$ENABLE_CMD` or `$CMD`.
 
 **\--dump-commands**
 : Show all possible printer feature commands in INI file format

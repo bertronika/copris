@@ -1,4 +1,4 @@
-COPRIS(1)                             0.9‐615‐gc30d31b‐dirty                            COPRIS(1)
+COPRIS(1)                             0.9‐627‐gb6d9283‐dirty                            COPRIS(1)
 
 NAME
        copris ‐ a converting printer server
@@ -107,7 +107,8 @@ OPTIONS
        ‐c, ‐‐parse‐commands
               If a printer feature file is being used, recognise  feature  commands  in  received
               text  and apply them.  Commands must be prefixed with a predefined symbol, which is
-              shown when invoking copris ‐‐version.
+              shown when invoking copris ‐‐version.  This feature only works  when  the  received
+              text starts with $ENABLE_COMMANDS, $ENABLE_CMD or $CMD.
 
        ‐‐dump‐commands
               Show all possible printer feature commands in INI file format (e.g. to be piped in‐
@@ -123,8 +124,8 @@ OPTIONS
               If limit is active, cut text on NUMBER count instead of discarding the whole chunk.
 
        ‐R, ‐‐remove‐non‐ascii
-              Remove all characters (or bytes) that aren’t part of the ASCII character  set.   As
-              (old)  dot‐matrix printers generally don’t support Unicode‐encoded characters, this
+              Remove  all  characters (or bytes) that aren’t part of the ASCII character set.  As
+              (old) dot‐matrix printers generally don’t support Unicode‐encoded characters,  this
               will both prevent them being wrongly printed, but at the same time possibly corrupt
               the meaning of the text.
 
@@ -132,7 +133,7 @@ OPTIONS
               Show informative status messages.  If specified twice, show even more messages.
 
        ‐q, ‐‐quiet
-              Do not show any unneccessary messages, except warnings and fatal errors, routed  to
+              Do  not show any unneccessary messages, except warnings and fatal errors, routed to
               stderr.  This also omits notes, shown if COPRIS assumes it is not invoked properly.
 
        ‐h, ‐‐help
@@ -141,12 +142,12 @@ OPTIONS
        ‐V, ‐‐version
               Show program version, author and build‐time options.
 
-       Do  not specify a port number if you want to read from standard input.  Likewise, omit the
+       Do not specify a port number if you want to read from standard input.  Likewise, omit  the
        output file to have text echoed out to standard output (or piped elsewhere).
 
 EXAMPLES
        Notice: COPRIS is in active development.  Some features are still missing, others have not
-       been thoroughly tested yet.  Command line option arguments may change in future.   Version
+       been  thoroughly tested yet.  Command line option arguments may change in future.  Version
        1.0 will be tagged when the feature set will be deemed complete.
 
        Run as a simple server on port 8080, perform no text recoding, output received data to the
@@ -156,14 +157,14 @@ EXAMPLES
               copris ‐p 8080 /dev/ttyS0
 
        Serve on port 8080 as a daemon (do not exit after first connection), recode text using the
-       slovene.ini  encoding  file,  limit  any  incoming text to a maximum of 100 characters and
-       print received data to the terminal.  Note that text limit works only when  running  as  a
+       slovene.ini encoding file, limit any incoming text to a  maximum  of  100  characters  and
+       print  received  data  to the terminal.  Note that text limit works only when running as a
        server.
 
               copris ‐p 8080 ‐d ‐e slovene.ini ‐l 100
 
        Read local file font‐showcase.md using the printer feature file epson‐escp.ini.  Interpret
-       any  possible  user  commands,  found  in the local file.  Output formatted text to an USB
+       any possible user commands, found in the local file.  Output  formatted  text  to  an  USB
        printer interface on the local computer:
 
               copris ‐f epson‐escp.ini ‐c /dev/usb/lp0 < font‐showcase.md
@@ -171,4 +172,4 @@ EXAMPLES
 DEVELOPMENT
        COPRIS’ development repository resides at <https://github.com/bertronika/copris>.
 
-                                            2023‐10‐29                                  COPRIS(1)
+                                            2023‐11‐04                                  COPRIS(1)

@@ -156,7 +156,7 @@ F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 ```
 
 
-## Variables, custom and session commands
+## Variables. Custom, user and session commands
 
 You can use existing command names as variables, as long as you define the command *before*
 using it as a variable. Furthermore, you may define your own variables and use them in existing
@@ -171,11 +171,11 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
-You may want to use a custom command in your text without wrapping it in some Markdown attribute
-and then setting that attribute to the wanted command. You may invoke custom commands by writing
-them out in the text file without their `C_` prefix, prepending a specific symbol to them
-(which is shown when running `copris --version`). Ie., if the symbol is `$` and your command is
-`C_SERIF`, `$SERIF` is used to invoke it.
+You, as a user, can invoke a custom command from within the text. Specify the `-c` argument
+when running COPRIS and begin your text with one of the following commands: `$ENABLE_COMMANDS`,
+`$ENABLE_CMD` or `$CMD`. You may then invoke commands in the text file with omitting their
+`C_` prefix and prepending a dollar sign symbol to them. I.e., if your command is `C_SERIF`,
+`$SERIF` is used in text to invoke it.
 
 COPRIS also provides **session commands**: two command pairs for sending repetitive settings
 to the printer. They may be used to set the code page, text margins, line spacing, font face,

@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-10-29" "" "0.9-615-gc30d31b-dirty"
+.TH "COPRIS" "1" "2023-11-04" "" "0.9-627-gb6d9283-dirty"
 .hy
 .SH NAME
 .PP
@@ -161,6 +161,8 @@ If a printer feature file is being used, recognise feature commands in
 received text and apply them.
 Commands must be prefixed with a predefined symbol, which is shown when
 invoking \f[V]copris --version\f[R].
+This feature only works when the \f[I]received text starts with\f[R]
+\f[V]$ENABLE_COMMANDS\f[R], \f[V]$ENABLE_CMD\f[R] or \f[V]$CMD\f[R].
 .TP
 \f[B]--dump-commands\f[R]
 Show all possible printer feature commands in INI file format (e.g.\ to
