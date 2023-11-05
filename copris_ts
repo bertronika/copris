@@ -1,0 +1,15 @@
+#!/bin/sh -u
+# shellcheck disable=SC2068
+
+# Run 'copris_dbg' with a timestamp prepended to each line.
+# Specify arguments as usual.
+# Requires ts(1) from moreutils and stdbuf(1) from GNU coreutils.
+
+TSCMD=ts
+#TSCMD=moreutils_ts
+
+COPRIS_DIR="$(dirname "$0")"
+
+# Use 'stdbuf' to flush each line of text. Otherwise, all of COPRIS'
+# text would get buffered and echoed only when it would exit.
+stdbuf -oL "$COPRIS_DIR"/copris_dbg $@ | $TSCMD #"%Y-%m-%d %H:%M:%S"
