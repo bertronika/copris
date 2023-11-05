@@ -15,7 +15,6 @@ LIBRARIES = inih
 
 # Object files
 OBJECTS = src/feature.o       \
-          src/filters.o       \
           src/main-helpers.o  \
           src/markdown.o      \
           src/parse_value.o   \
