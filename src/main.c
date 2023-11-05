@@ -36,7 +36,6 @@
 #include "recode.h"
 #include "feature.h"
 #include "markdown.h"
-#include "filters.h"
 #include "main-helpers.h"
 #include "user_command.h"
 
@@ -66,7 +65,6 @@ static void copris_help(const char *argv0) {
 	       "                          network, when it surpasses LIMIT number of bytes\n"
 	       "      --cutoff-limit      If using '--limit', cut text off at exactly LIMIT\n"
 	       "                          number of bytes instead of discarding the whole chunk\n"
-	       "  -R, --remove-non-ascii  Remove all characters outside the ASCII character set\n"
 	       "\n"
 	       "  -v, --verbose           Display diagnostic messages (can be used twice)\n"
 	       "  -q, --quiet             Supress all unnecessary messages, except warnings and\n"
@@ -113,7 +111,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{"daemon",           no_argument,       NULL, 'd'},
 		{"limit",            required_argument, NULL, 'l'},
 		{"cutoff-limit",     no_argument,       NULL, '.'},
-		{"remove-non-ascii", no_argument,       NULL, 'R'},
 		{"verbose",          no_argument,       NULL, 'v'},
 		{"quiet",            no_argument,       NULL, 'q'},
 		{"help",             no_argument,       NULL, 'h'},
@@ -129,7 +126,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'You must
 	// specify a printer feature file.' instead of 'option requires an argument -- 'r')
-	while ((c = getopt_long(argc, argv, ":p:e:E:f:cdl:RvqhV", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":p:e:E:f:cdl:vqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
@@ -265,9 +262,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->limitnum = (size_t)temp_limit;
 			break;
 		}
-		case 'R':
-			attrib->copris_flags |= FILTER_NON_ASCII;
-			break;
 		case '.':
 			attrib->copris_flags |= MUST_CUTOFF;
 			break;
@@ -534,11 +528,7 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		// Stage 4: Filter text
-		if (attrib.copris_flags & FILTER_NON_ASCII)
-			filter_non_ascii(copris_text);
-
-		// Stage 5: Write text to the output destination
+		// Stage 4: Write text to the output destination
 		write_to_output(copris_text, &attrib);
 
 		// Current session's text has been processed, clear it for a new read
