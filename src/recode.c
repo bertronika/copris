@@ -38,8 +38,8 @@ int load_encoding_file(const char *filename, struct Inifile **encoding)
 		return -1;
 	}
 
-	if (LOG_DEBUG)
-		PRINT_MSG("Parsing encoding file '%s':", filename);
+	if (LOG_INFO)
+		PRINT_MSG("Loading encoding file '%s'.", filename);
 
 	int parse_error = ini_parse_file(file, inih_handler, encoding);
 
