@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "COPRIS" "1" "2023-11-04" "" "0.9-627-gb6d9283-dirty"
+.TH "COPRIS" "1" "2023-11-05" "" "0.9-634-g008f9d1-dirty"
 .hy
 .SH NAME
 .PP
@@ -178,13 +178,6 @@ If running as a network server, limit number of received bytes to
 \f[B]--cutoff-limit\f[R]
 If limit is active, cut text on \f[I]NUMBER\f[R] count instead of
 discarding the whole chunk.
-.TP
-\f[B]-R\f[R], \f[B]--remove-non-ascii\f[R]
-Remove all characters (or bytes) that aren\[cq]t part of the ASCII
-character set.
-As (old) dot-matrix printers generally don\[cq]t support Unicode-encoded
-characters, this will both prevent them being wrongly printed, but at
-the same time possibly corrupt the meaning of the text.
 .TP
 \f[B]-v\f[R], \f[B]--verbose\f[R]
 Show informative status messages.

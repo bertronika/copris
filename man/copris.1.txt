@@ -1,4 +1,4 @@
-COPRIS(1)                             0.9‐627‐gb6d9283‐dirty                            COPRIS(1)
+COPRIS(1)                             0.9‐634‐g008f9d1‐dirty                            COPRIS(1)
 
 NAME
        copris ‐ a converting printer server
@@ -123,12 +123,6 @@ OPTIONS
        ‐‐cutoff‐limit
               If limit is active, cut text on NUMBER count instead of discarding the whole chunk.
 
-       ‐R, ‐‐remove‐non‐ascii
-              Remove  all  characters (or bytes) that aren’t part of the ASCII character set.  As
-              (old) dot‐matrix printers generally don’t support Unicode‐encoded characters,  this
-              will both prevent them being wrongly printed, but at the same time possibly corrupt
-              the meaning of the text.
-
        ‐v, ‐‐verbose
               Show informative status messages.  If specified twice, show even more messages.
 
@@ -172,4 +166,4 @@ EXAMPLES
 DEVELOPMENT
        COPRIS’ development repository resides at <https://github.com/bertronika/copris>.
 
-                                            2023‐11‐04                                  COPRIS(1)
+                                            2023‐11‐05                                  COPRIS(1)
