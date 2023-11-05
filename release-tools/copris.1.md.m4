@@ -1,4 +1,4 @@
-% COPRIS(1) | m4_esyscmd(`git describe --tags --dirty 2>/dev/null || cat ../VERSION')m4_dnl
+% COPRIS(1) | m4_esyscmd(`git describe --dirty 2>/dev/null || cat ../VERSION')m4_dnl
 %
 % m4_esyscmd(`date --iso-8601')m4_dnl
 m4_changequote(`[[[', `]]]')m4_dnl

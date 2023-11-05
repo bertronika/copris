@@ -1,5 +1,5 @@
 # Get latest version tag if in a tagged git repository, else from a local file
-VERSION = $(shell git describe --tags --dirty 2>/dev/null || cat VERSION)
+VERSION = $(shell git describe --dirty 2>/dev/null || cat VERSION)
 
 # Default, overridable build flags (REL = release, DBG = debug)
 USERFLAGS ?=

@@ -130,7 +130,7 @@ check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-escape"
 
 # compare_files <description> <first file> <second file>
 compare_files "git tag and VERSION values match" \
-              <(git describe --tags --abbrev=0) ../VERSION
+              <(git describe --abbrev=0) ../VERSION
 
 MAX_FILENAME_LENGTH="$(grep -Po '#define MAX_FILENAME_LENGTH \K[0-9]+' ../src/debug.h)"
 compare_files "any source file names exceed MAX_FILENAME_LENGTH of ${MAX_FILENAME_LENGTH}" \
