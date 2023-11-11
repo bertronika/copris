@@ -125,11 +125,10 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, int *childfd,
 
 	// Prevent more than one connection if not a daemon
 	if (!attrib->daemon) {
-		tmperr = close(*parentfd);
-		if (tmperr != 0) {
-			PRINT_SYSTEM_ERROR("close", "Failed to close the parent connection.");
-			return -1;
-		}
+		tmperr = close_socket(*parentfd, "parent");
+
+		if (tmperr != 0)
+			return tmperr;
 	}
 
 	// Get host info (IP, hostname) of the client (TODO gai_strerror)

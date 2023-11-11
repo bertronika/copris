@@ -556,6 +556,13 @@ int main(int argc, char **argv) {
 		free_filenames(attrib.encoding_files, attrib.encoding_file_count);
 	}
 
+	// Close the global parent socket
+	if (!is_stdin) {
+		error = close_socket(parentfd, "parent");
+		if (error)
+			return EXIT_FAILURE;
+	}
+
 	utstring_free(copris_text);
 
 	if (!is_stdin && LOG_DEBUG)
