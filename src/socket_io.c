@@ -161,13 +161,6 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, int *childfd,
 	if (read_error)
 		return -1;
 
-	// Close the current connection
-	tmperr = close(childfd);
-	if (tmperr != 0) {
-		PRINT_SYSTEM_ERROR("close", "Failed to close the child connection.");
-		return -1;
-	}
-
 	if (LOG_ERROR) {
 		if (LOG_INFO)
 			PRINT_LOCATION(stdout);

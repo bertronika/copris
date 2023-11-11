@@ -535,6 +535,13 @@ int main(int argc, char **argv) {
 		// Current session's text has been processed, clear it for a new read
 		utstring_clear(copris_text);
 
+		// Close the current session's socket
+		if (!is_stdin) {
+			error = close_socket(childfd, "child");
+			if (error)
+				return EXIT_FAILURE;
+		}
+
 	} while (attrib.daemon); /* end of main program loop */
 
 	// Append the shutdown session command
