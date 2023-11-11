@@ -66,9 +66,8 @@ int load_encoding_file(const char *filename, struct Inifile **encoding)
 
 	int definition_count = HASH_COUNT(*encoding);
 
-//	TODO - accurate definition count
-//	if (LOG_INFO)
-//		PRINT_MSG("Loaded %d encoding file definitions from '%s'.", definition_count, filename);
+	if (LOG_INFO)
+		PRINT_MSG("Loaded %d definitions from encoding file '%s'.", definition_count, filename);
 
 	if (definition_count < 1)
 		PRINT_NOTE("Your encoding file appears to be empty.");
