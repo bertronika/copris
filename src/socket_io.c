@@ -105,7 +105,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno)
 	return 0;
 }
 
-int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib)
+int copris_handle_socket(UT_string *copris_text, int *parentfd, int *childfd,
+                         struct Attribs *attrib)
 {
 	struct sockaddr_in clientaddr;  // Client's address
 	socklen_t clientlen;            // (Byte) size of client's address (sockaddr)
@@ -113,8 +114,8 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *
 	int tmperr;
 
 	// Wait for a connection request, accept it and pass it on as a child socket
-	int childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
-	if (childfd == -1) {
+	*childfd = accept(*parentfd, (struct sockaddr *)&clientaddr, &clientlen);
+	if (*childfd == -1) {
 		PRINT_SYSTEM_ERROR("accept", "Failed to accept the connection.");
 		return -1;
 	}
@@ -157,7 +158,7 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *
 
 	// Read text from socket and process it
 	struct Stats stats = STATS_INIT;
-	int read_error = read_from_socket(copris_text, childfd, &stats, attrib);
+	int read_error = read_from_socket(copris_text, *childfd, &stats, attrib);
 	if (read_error)
 		return -1;
 

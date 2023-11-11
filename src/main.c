@@ -458,6 +458,7 @@ int main(int argc, char **argv) {
 
 	// Open socket and listen if not reading from stdin
 	int parentfd = 0;
+	int childfd = 0;
 	if (!is_stdin) {
 		error = copris_socket_listen(&parentfd, attrib.portno);
 		if (error)
@@ -486,7 +487,7 @@ int main(int argc, char **argv) {
 		if (is_stdin) {
 			copris_handle_stdin(copris_text);
 		} else {
-			error = copris_handle_socket(copris_text, &parentfd, &attrib);
+			error = copris_handle_socket(copris_text, &parentfd, &childfd, &attrib);
 			if (error)
 				return EXIT_FAILURE;
 		}

@@ -11,7 +11,8 @@ int copris_socket_listen(int *parentfd, unsigned int portno);
  * program's global attributes 'attrib'.
  * Return 0 on success.
  */
-int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib);
+int copris_handle_socket(UT_string *copris_text, int *parentfd, int *childfd,
+                         struct Attribs *attrib);
 
 /*
  * Close socket with descriptor 'fd'. Pass type, either "parent" or "child",
