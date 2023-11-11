@@ -564,7 +564,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Close the global parent socket
-	if (!is_stdin) {
+	if (!is_stdin && attrib.daemon) {
 		error = close_socket(parentfd, "parent");
 		if (error)
 			return EXIT_FAILURE;
