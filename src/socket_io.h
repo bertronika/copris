@@ -14,6 +14,13 @@ int copris_socket_listen(int *parentfd, unsigned int portno);
 int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *attrib);
 
 /*
+ * Close socket with descriptor 'fd'. Pass type, either "parent" or "child",
+ * to 'socket_type'.
+ * Return 0 on success.
+ */
+int close_socket(int fd, const char *socket_type);
+
+/*
  * Send 'message', prepended by 'copris: ', to socket, pointed to by 'childfd'.
  * Return a (always) positive number on success, negative on error.
  */

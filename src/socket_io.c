@@ -189,6 +189,20 @@ int copris_handle_socket(UT_string *copris_text, int *parentfd, struct Attribs *
 	return 0;
 }
 
+int close_socket(int fd, const char *socket_type)
+{
+	if (LOG_DEBUG)
+		PRINT_MSG("Closing %s socket.", socket_type);
+
+	int error = close(fd);
+	if (error != 0) {
+		PRINT_SYSTEM_ERROR("close", "Failed to close %s socket.", socket_type);
+		return -1;
+	}
+
+	return 0;
+}
+
 int send_to_socket(int childfd, const char *message)
 {
 	UT_string *full_message;
