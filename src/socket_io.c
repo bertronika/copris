@@ -203,7 +203,7 @@ int send_to_socket(int childfd, const char *message)
 	utstring_printf(full_message, "copris: %s\n", message);
 
 	ssize_t buffer_length = write(childfd, utstring_body(full_message),
-	                              utstring_len(full_message) - 1);
+	                              utstring_len(full_message));
 
 	if (buffer_length == -1)
 		PRINT_SYSTEM_ERROR("write", "Error sending text to socket.");
