@@ -1,21 +1,21 @@
 
-# Build system for COPRIS
-# Common targets (you don't need to specify one for a regular release build):
-#   - release     build the release build (executable name 'copris')
-#   - debug       build the debugging build (executable name 'copris_dbg')
-#   - install     install a copy of the release build with samples and documentation
-#   - clean       remove object and dependency files
-#   - distclean   remove object, dependency, binary and temporary test files
-#   - help        print this text
+## Build system for COPRIS
+## Common targets (you don't need to specify one for a regular release build):
+##   - release     build the release build (executable name 'copris')
+##   - debug       build the debugging build (executable name 'copris_dbg')
+##   - install     install a copy of the release build with samples and documentation
+##   - clean       remove object and dependency files
+##   - distclean   remove object, dependency, binary and temporary test files
+##   - help        print this text
 
-# Code analysis targets (more are present in 'tests/Makefile'):
-#   - check                   build and run unit tests
-#   - analyse                 analyse object files with with GCC's static analyser
-#   - analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
-#   - analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
+## Code analysis targets (more are present in 'tests/Makefile'):
+##   - check                   build and run unit tests
+##   - analyse                 analyse object files with with GCC's static analyser
+##   - analyse-cppcheck        analyse codebase with Cppcheck, print results to stdout
+##   - analyse-cppcheck-html   analyse codebase with Cppcheck, generate a HTML report
 
-# You may use the USERFLAGS variable to specify custom compiler/linker flags
-# e.g.  make USERFLAGS=-std=c99 debug
+## You may use the USERFLAGS variable to specify custom compiler/linker flags
+## e.g.  make USERFLAGS=-std=c99 debug
 
 # GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
@@ -126,6 +126,6 @@ distclean: clean
 	$(MAKE) -C tests/ clean
 
 help:
-	head -n 19 $(firstword $(MAKEFILE_LIST)); \
-	grep -m 4 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS|LDFLAGS)' Makefile-common.mk
+	@grep -A 1 '^##' Makefile; \
+	 grep -F -m 4 -B 1 -A 2 'FLAGS' Makefile-common.mk
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
