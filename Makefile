@@ -96,13 +96,14 @@ $(CPPCHECK_DIR)/index.html: src/
 	cppcheck-htmlreport --file=$(CPPCHECK_XML) --report-dir=$(CPPCHECK_DIR)
 
 # Intercopris binary
+intercopris intercopris_dbg: LDFLAGS += -lreadline
 intercopris: src/feature_rel.o src/main-helpers_rel.o src/parse_value_rel.o src/writer_rel.o \
              src/intercopris_rel.o
-	$(CC) $^ $(LDFLAGS) -lreadline -o $@
+	$(CC) $^ $(LDFLAGS) -o $@
 
 intercopris_dbg: src/feature_dbg.o src/main-helpers_dbg.o src/parse_value_dbg.o src/writer_dbg.o \
                  src/intercopris_dbg.o
-	$(CC) $^ $(LDFLAGS) -lreadline -o $@
+	$(CC) $^ $(LDFLAGS) -o $@
 
 # Building intercopris requires linking to readline
 src/intercopris_rel.o src/intercopris_dbg.o: LIBRARIES += readline
