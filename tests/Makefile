@@ -7,7 +7,7 @@
 #   - clean                   remove compiled object and binary files
 #   - help                    show this text
 
-include ../Common.mk
+include ../Makefile-common.mk
 LIBRARIES += cmocka
 
 # List of sources that have unit tests (sorted by approximate complexity)

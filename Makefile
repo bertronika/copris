@@ -19,7 +19,7 @@
 
 # GNU Make docs: https://www.gnu.org/software/make/manual/html_node/index.html
 
-include Common.mk
+include Makefile-common.mk
 
 # Installation directories
 PREFIX  ?= /usr/local
@@ -127,5 +127,5 @@ distclean: clean
 
 help:
 	head -n 19 $(firstword $(MAKEFILE_LIST)); \
-	grep -m 4 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS|LDFLAGS)' Common.mk
+	grep -m 4 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS|LDFLAGS)' Makefile-common.mk
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
