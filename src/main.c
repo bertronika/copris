@@ -513,14 +513,18 @@ int main(int argc, char **argv) {
 			error = recode_text(copris_text, &encoding);
 
 			// Terminate on error only if user hasn't forced recoding with '-E'
-			// TODO tell socket
+			// TODO: telling the remote user to use -E isn't helpful
 			if (error && !(attrib.copris_flags & ENCODING_NO_STOP)) {
-				char error_msg[] = "One or more multi-byte characters, not handled by "
-				                   "encoding file(s), were received. If this is the intended "
-				                   "behaviour, specify the file(s) with option -E/--ENCODING "
-				                   "instead.";
+				const char error_msg[] =
+				        "One or more multi-byte characters, not handled by "
+				        "encoding file(s), were received. If this is the intended "
+				        "behaviour, specify the file(s) with option -E/--ENCODING "
+				        "instead.";
 
 				if (verbosity) {
+					if (!is_stdin)
+						send_to_socket(childfd, error_msg);
+
 					PRINT_MSG("%s", error_msg);
 					return EXIT_FAILURE;
 				}
