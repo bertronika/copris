@@ -95,6 +95,18 @@ $(CPPCHECK_DIR)/index.html: src/
 	cppcheck $(CPPCHECK_FLAGS) --xml src/ 2>$(CPPCHECK_XML)
 	cppcheck-htmlreport --file=$(CPPCHECK_XML) --report-dir=$(CPPCHECK_DIR)
 
+# Intercopris binary
+intercopris: src/feature_rel.o src/main-helpers_rel.o src/parse_value_rel.o src/writer_rel.o \
+             src/intercopris_rel.o
+	$(CC) $^ $(LDFLAGS) -lreadline -o $@
+
+intercopris_dbg: src/feature_dbg.o src/main-helpers_dbg.o src/parse_value_dbg.o src/writer_dbg.o \
+                 src/intercopris_dbg.o
+	$(CC) $^ $(LDFLAGS) -lreadline -o $@
+
+# Building intercopris requires linking to readline
+src/intercopris_rel.o src/intercopris_dbg.o: LIBRARIES += readline
+
 # Automatic dependency tracking (-MMD -MP). If a header file is
 # changed, only the files including it will be recompiled.
 -include $(DEPS_REL) $(DEPS_DBG)
@@ -105,8 +117,8 @@ install: copris man/copris.1
 	$(INSTALL) -m644 man/copris.1 $(DESTDIR)$(MANDIR)/man1
 
 clean:
-	rm -f $(OBJS_REL) $(DEPS_REL) src/main_rel.o
-	rm -f $(OBJS_DBG) $(DEPS_DBG) src/main_dbg.o
+	rm -f $(OBJS_REL) $(DEPS_REL) src/intercopris_rel.o src/intercopris_rel.d
+	rm -f $(OBJS_DBG) $(DEPS_DBG) src/intercopris_dbg.o src/intercopris_dbg.d
 
 distclean: clean
 	rm -f copris copris_dbg intercopris intercopris_dbg
@@ -117,11 +129,3 @@ help:
 	head -n 19 $(firstword $(MAKEFILE_LIST)); \
 	grep -m 4 -C 1 -E '(CFLAGS|RELFLAGS|DBGFLAGS|LDFLAGS)' Common.mk
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
-
-intercopris: src/intercopris.c \
-             src/parse_value_rel.o src/writer_rel.o src/feature_rel.o src/main-helpers_rel.o
-	$(CC) $(CFLAGS) $(RELFLAGS) $^ $(LDFLAGS) $(shell pkg-config --cflags --libs readline) -o $@
-
-intercopris_dbg: src/intercopris.c \
-                 src/parse_value_dbg.o src/writer_dbg.o src/feature_dbg.o src/main-helpers_dbg.o
-	$(CC) $(CFLAGS) $(DBGFLAGS) $^ $(LDFLAGS) $(shell pkg-config --cflags --libs readline) -o $@

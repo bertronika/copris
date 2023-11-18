@@ -24,7 +24,7 @@ OBJECTS = src/feature.o       \
           src/user_command.o  \
           src/utf8.o          \
           src/writer.o        \
-          src/main.o          \
+          src/main.o
 
 # Additional compiler and linker library flags
 CFLAGS  += $(shell pkg-config --cflags $(LIBRARIES)) -DVERSION=\"$(VERSION)\"
