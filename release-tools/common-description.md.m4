@@ -23,7 +23,7 @@ Many printers support commands (escape codes) for formatting printed text (e.g. 
 - up to 4 levels of *headings* via number signs (`#`, `##`, `###`, `####`)
 - *blockquotes* via greater-than signs and a space (`> `)
 - *inline code* via single backticks (`` ` ``)
-- *code blocks* via triple backticks (`` ``` ``) or four spaces
+- *code blocks* via triple backticks (`` ``` ``) -- or four spaces, but those are disabled by default
 - *links* via angle brackets (`< >`)
 
 Any command can be bound to mentioned attributes. If desired, bold emphasis can trigger double-width text, headings may change the font face or size and links can be made underlined. There are no limits, as long as your *printer feature file* contains commands that are understood by the printer (or any other destination device).

@@ -6,8 +6,10 @@
  *  - bold and italic emphasis (up to three asterisks and underscores)
  *  - 4 levels of headings (pound signs)
  *  - blockquotes (greater-than signs)
- *  - inline code and code blocks (one or three backticks/four whitespaces)
+ *  - inline code and code blocks (one or three backticks/four whitespaces [*])
  *  - links, enclosed only in angle brackets (and none other)
+ *
+ *  [*] Code blocks with four whitespaces are disabled by default, check 'config.h'.
  *
  * Everything else in the text is left untouched -- white space, lists, rules, line
  * breaks, paragraphs. There's no HTML or other markup/layout engine at the end of
@@ -193,13 +195,14 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 				text_attribute |= INLINE_CODE;
 				inline_code_on = !inline_code_on;
 			}
+#ifndef DISABLE_WHITESPACE_CODE_BLOCK
 		} else if (!escaped_char && (i == 0 || last_char == '\n') && !code_block_on &&
 			       (i + 3 < text_len && text[i] == ' ' && text[i + 1] == ' ' &&
 			        text[i + 2] == ' ' && text[i + 3] == ' ')) {
 			text_attribute |= CODE_BLOCK;
 			code_block_open = true;
 			i += 3;
-
+#endif
 		// Link in angle brackets: inline '<'/'>' pairs
 		} else if (MARKUP_ALLOWED && !escaped_char && text[i] == '<' && !code_block_open) {
 			text_attribute = LINK;

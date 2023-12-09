@@ -38,7 +38,8 @@ invoked by following Markdown attributes:
 - up to 4 levels of *headings* via number signs (`#`, `##`, `###`, `####`)
 - *blockquotes* via greater-than signs and a space (`> `)
 - *inline code* via single backticks (`` ` ``)
-- *code blocks* via triple backticks (`` ``` ``) or four spaces
+- *code blocks* via triple backticks (`` ``` ``) -- or four spaces, but those are disabled
+by default
 - *links* via angle brackets (`< >`)
 
 Any command can be bound to mentioned attributes. If desired, bold emphasis can trigger
