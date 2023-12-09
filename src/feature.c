@@ -373,20 +373,22 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 
 	assert(s != NULL);
 
+	int num_of_characters = 0; // Number of additional characters in copris_text
+
 	// Append - either when starting/closing COPRIS, or after received text was printed
 	if (*s->out != '\0') {
 		if (LOG_INFO)
-			PRINT_MSG("Sending session command %s.", s->in);
+			PRINT_MSG("Adding session command %s.", s->in);
 
 		// Append AFTER_TEXT to 'copris_text'
 		size_t command_len = strlen(s->out);
 		utstring_bincpy(copris_text, s->out, command_len);
 
-		return (int)command_len;
+		num_of_characters += command_len;
 	}
 
 	if (state != SESSION_PRINT) // Below section only applies for SESSION_PRINT
-		return 0; // copris_text was left unmodified
+		return num_of_characters;
 
 	// Prepend before received text
 	HASH_FIND_STR(*features, "S_BEFORE_TEXT", s);
@@ -394,7 +396,7 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 
 	if (*s->out != '\0') {
 		if (LOG_INFO)
-			PRINT_MSG("Sending session command S_BEFORE_TEXT.");
+			PRINT_MSG("Adding session command S_BEFORE_TEXT.");
 
 		UT_string *temp_text;
 		utstring_new(temp_text);
@@ -410,8 +412,8 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 
 		utstring_free(temp_text);
 
-		return (int)command_len;
+		num_of_characters += command_len;
 	}
 
-	return 0; // copris_text was left unmodified
+	return num_of_characters;
 }
