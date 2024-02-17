@@ -18,9 +18,17 @@ static void parse_value_correct(void **state)
 	(void)state;
 	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
 
+	// Check if numbers in various bases get properly parsed
 	int count = CALL_PARSE("0102 101 0x72 0x74");
 	assert_int_equal(count, 4);
 	assert_string_equal(parsed_value, "Bert");
+
+	// Check if a NUL value gets properly parsed
+	count = CALL_PARSE("0x01 0x00 0x01");
+	assert_int_equal(count, 3);
+
+	char raw_values[] = { 0x01, 0x00, 0x01 };
+	assert_memory_equal(parsed_value, raw_values, count);
 }
 
 // Check if invalid string values throw errors
