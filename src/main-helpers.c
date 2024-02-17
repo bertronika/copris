@@ -40,12 +40,7 @@ void write_to_output(UT_string *copris_text, struct Attribs *attrib)
 	if (attrib->copris_flags & HAS_OUTPUT_FILE) {
 		copris_write_file(attrib->output_file, copris_text);
 	} else {
-		if (LOG_ERROR)
-			puts("; BST"); // Begin-Stream-Transcript
-
-		fputs(utstring_body(copris_text), stdout);
-
-		if (LOG_ERROR)
-			puts("; EST"); // End-Stream-Transcript
+		copris_write_stdout(copris_text);
 	}
+	// TODO handle return codes
 }

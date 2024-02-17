@@ -1,7 +1,7 @@
 /*
- * File writing interface
+ * Output writing interfaces
  *
- * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020-2024 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
@@ -51,5 +51,29 @@ int copris_write_file(const char *output_file, UT_string *copris_text)
 	if (LOG_DEBUG)
 		PRINT_MSG("Output file '%s' closed.", output_file);
 	
+	return error;
+}
+
+int copris_write_stdout(UT_string *copris_text)
+{
+	int error = 0;
+	size_t text_length = utstring_len(copris_text);
+
+	if (LOG_ERROR)
+		puts("; BST"); // Begin-Stream-Transcript
+
+	size_t written_text_length = fwrite(utstring_body(copris_text), 1, text_length, stdout);
+
+	if (LOG_ERROR)
+		puts("; EST"); // End-Stream-Transcript
+
+	if (written_text_length < text_length) {
+		PRINT_ERROR_MSG("fwrite: Failure while writing to stdout; "
+		                "not enough bytes transferred.");
+		error = -1;
+	} else if (LOG_INFO) {
+		PRINT_MSG("Appended %zu byte(s) to stdout.", written_text_length);
+	}
+
 	return error;
 }
