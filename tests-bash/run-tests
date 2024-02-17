@@ -142,6 +142,7 @@ check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-quotes"
 check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-code"
 check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-links"
 check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-escape"
+check_for_expected_output "-f t-feature_file-nul.ini" "t-feature_file-nul"
 
 # compare_files <description> <first file> <second file>
 compare_files "git tag and VERSION values match" \
