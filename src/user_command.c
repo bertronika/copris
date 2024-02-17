@@ -194,10 +194,9 @@ static parse_action_t substitute_with_command(UT_string *copris_text, size_t *te
 
 	if (action != SKIP_CMD && action != DISABLE_MARKDOWN) {
 		// If a command was found, but is empty, omit it
-		if (s != NULL && *s->out != '\0') {
+		if (s != NULL && s->out_len > 0) {
 			// Add the command
-			cmd_len = strlen(s->out);
-			utstring_bincpy(copris_text, s->out, cmd_len);
+			utstring_bincpy(copris_text, s->out, s->out_len);
 		} else {
 			// Parse the supposed number and add it
 			char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];

@@ -65,7 +65,7 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 	// Count commands that were defined by the user
 	struct Inifile *s;
 	for (s = *features; s != NULL; s = s->hh.next) {
-		if (*s->out != '\0')
+		if (s->out_len > 0)
 			command_count++;
 	}
 
@@ -110,7 +110,6 @@ int initialise_commands(struct Inifile **features)
 
 		// Each name gets an empty value, to be filled later from the configuration file
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
-		*s->out = '\0';
 		s->out_len = 0;
 		HASH_ADD_STR(*features, in, s);
 
@@ -184,7 +183,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	}
 
 	// Check if a command was already set
-	bool command_overwriten = (*s->out != '\0');
+	bool command_overwriten = (s->out_len > 0);
 
 	int element_count = 0;
 
@@ -207,6 +206,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		utstring_free(parsed_value);
 	} else {
 		*s->out = '@';
+		s->out_len = 1;
 	}
 
 	if (LOG_DEBUG) {
@@ -249,7 +249,7 @@ static int validate_command_pairs(const char *filename, struct Inifile **feature
 		// Check if the command was user-defined in the printer feature file
 		HASH_FIND_STR(*features, printer_commands[i], s);
 		assert(s != NULL);
-		if (*s->out == '\0')
+		if (s->out_len == 0)
 			continue; /* Looks like it's not */
 
 		// Get command's pair - swap suffix _ON with _OFF or vice versa
@@ -268,8 +268,9 @@ static int validate_command_pairs(const char *filename, struct Inifile **feature
 
 		HASH_FIND_STR(*features, command_pair, s);
 		assert(s != NULL);
-		// No value, meaning no pair was found
-		if (*s->out == '\0') {
+
+		// No pair was found
+		if (s->out_len == 0) {
 			PRINT_ERROR_MSG("'%s': command '%s' is missing its pair '%s'. Either "
 			                "add one, or define it as empty using '@' as the value.",
 			                filename, printer_commands[i], command_pair);
@@ -277,7 +278,7 @@ static int validate_command_pairs(const char *filename, struct Inifile **feature
 			return -1;
 		// '@' found, meaning the command is empty on purpose
 		} else if (*s->out == '@') {
-			*s->out = '\0';
+			s->out_len = 0;
 		}
 	}
 
@@ -379,15 +380,14 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 	int num_of_characters = 0; // Number of additional characters in copris_text
 
 	// Append - either when starting/closing COPRIS, or after received text was printed
-	if (*s->out != '\0') {
+	if (s->out_len > 0) {
 		if (LOG_INFO)
 			PRINT_MSG("Adding session command %s.", s->in);
 
 		// Append AFTER_TEXT to 'copris_text'
-		size_t command_len = strlen(s->out);
-		utstring_bincpy(copris_text, s->out, command_len);
+		utstring_bincpy(copris_text, s->out, s->out_len);
 
-		num_of_characters += command_len;
+		num_of_characters += s->out_len;
 	}
 
 	if (state != SESSION_PRINT) // Below section only applies for SESSION_PRINT
@@ -397,7 +397,7 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 	HASH_FIND_STR(*features, "S_BEFORE_TEXT", s);
 	assert(s != NULL);
 
-	if (*s->out != '\0') {
+	if (s->out_len > 0) {
 		if (LOG_INFO)
 			PRINT_MSG("Adding session command S_BEFORE_TEXT.");
 
@@ -405,8 +405,7 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 		utstring_new(temp_text);
 
 		// Begin the temporary string with BEFORE_TEXT, append received text
-		size_t command_len = strlen(s->out);
-		utstring_bincpy(temp_text, s->out, command_len);
+		utstring_bincpy(temp_text, s->out, s->out_len);
 		utstring_concat(temp_text, copris_text);
 
 		// Move temporary text to 'copris_text'
@@ -415,7 +414,7 @@ int apply_session_commands(UT_string *copris_text, struct Inifile **features, se
 
 		utstring_free(temp_text);
 
-		num_of_characters += command_len;
+		num_of_characters += s->out_len;
 	}
 
 	return num_of_characters;

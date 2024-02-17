@@ -43,16 +43,15 @@ int parse_all_to_commands(const char *value, size_t value_len,
 				PRINT_ERROR_MSG("Internal variable '%s' does not exist. If it is a custom "
 				                "command, make sure it has the 'C_' prefix.", token);
 				problem = true;
-			} else if (*s->out == '\0') {
+			} else if (s->out_len == 0) {
 				PRINT_ERROR_MSG("Variable '%s' does not (yet) exist. Custom command "
 				                "should be specified after it.", token);
 				problem = true;
 			} else {
-				int new_value_len = (int)strlen(s->out);
 				variable_count++;
 
-				utstring_bincpy(parsed_value, s->out, new_value_len);
-				element_count += new_value_len;
+				utstring_bincpy(parsed_value, s->out, s->out_len);
+				element_count += s->out_len;
 			}
 		} else {
 			// Value is a number
