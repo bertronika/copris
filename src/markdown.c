@@ -364,6 +364,5 @@ static void insert_code_helper(const char *code, struct Inifile **features, UT_s
 	if (*s->out == '\0')
 		return;
 
-	size_t code_len = strlen(s->out);
-	utstring_bincpy(text, s->out, code_len);
+	utstring_bincpy(text, s->out, s->out_len);
 }

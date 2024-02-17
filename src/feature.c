@@ -111,6 +111,7 @@ int initialise_commands(struct Inifile **features)
 		// Each name gets an empty value, to be filled later from the configuration file
 		memccpy(s->in, printer_commands[i], '\0', MAX_INIFILE_ELEMENT_LENGTH);
 		*s->out = '\0';
+		s->out_len = 0;
 		HASH_ADD_STR(*features, in, s);
 
 		command_count++;
@@ -202,6 +203,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		}
 
 		memcpy(s->out, utstring_body(parsed_value), element_count + 1);
+		s->out_len = element_count;
 		utstring_free(parsed_value);
 	} else {
 		*s->out = '@';
@@ -216,6 +218,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 			printf(" %s = %s =>", s->in, value);
 			for (int i = 0; i < element_count; i++)
 				printf(" 0x%X", (unsigned int)(s->out[i] & 0xFF));
+			printf(" (%d)", element_count);
 		}
 
 		if (command_overwriten)

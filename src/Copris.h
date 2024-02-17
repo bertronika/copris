@@ -39,5 +39,6 @@ static const struct Stats STATS_INIT = {
 struct Inifile {
 	char in[MAX_INIFILE_ELEMENT_LENGTH];   /* key (name)   */
 	char out[MAX_INIFILE_ELEMENT_LENGTH];  /* item (value) */
+	size_t out_len; /* Value length (in case of NUL bytes) */
 	UT_hash_handle hh;
 };
