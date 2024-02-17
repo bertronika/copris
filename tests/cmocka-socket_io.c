@@ -9,7 +9,9 @@
 #include "../src/socket_io.h"
 
 int verbosity = 0;
-int parentfd  = 0;
+
+int parentfd = 0;
+int childfd  = 0;
 struct Attribs attrib;
 
 static void expected_stats(size_t sizeof_bytes, int chunks)
@@ -24,7 +26,7 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
         will_return_maybe(__wrap_read, NULL); \
         const char result[] = str
 #define VERIFY                                \
-        int error = copris_handle_socket(copris_text, &parentfd, &attrib); \
+        int error = copris_handle_socket(copris_text, &parentfd, &childfd, &attrib); \
         expected_stats(sizeof result, 2);     \
                                               \
         assert_false(error);                  \
@@ -43,7 +45,7 @@ static void read_two_chunks(void **state)
 	will_return(__wrap_read, input_2);
 	will_return_maybe(__wrap_read, NULL);  // signal EOF
 
-	int error = copris_handle_socket(copris_text, &parentfd, &attrib);
+	int error = copris_handle_socket(copris_text, &parentfd, &childfd, &attrib);
 
 	assert_false(error);
 	assert_string_equal(utstring_body(copris_text), result);
