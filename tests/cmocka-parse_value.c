@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <utstring.h>
 
+#include "../src/Copris.h"
 #include "../src/parse_value.h"
 
 int verbosity = 0;

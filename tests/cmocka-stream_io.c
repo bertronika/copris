@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <utstring.h>
 
+#include "../src/Copris.h"
 #include "../src/stream_io.h"
 
 int verbosity = 0;
