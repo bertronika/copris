@@ -12,14 +12,6 @@ if (tmperr != 0) {
 }
 ```
 
----
-
-    Å = 0xC5                ; for an encoding file
-    F_BOLD_OFF = 0x1B 0x45  ; for a printer feature file
-    F_H3_ON = @             ; ditto
-
----
-
 Symbols in code blocks `should *not* # be __converted__`.
 
 ```

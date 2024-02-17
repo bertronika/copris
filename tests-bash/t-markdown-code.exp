@@ -10,14 +10,6 @@ if (tmperr != 0) {
 	return -1;
 }
 &-C;
----
-
-&+C;Å = 0xC5                ; for an encoding file&-C;
-&+C;F_BOLD_OFF = 0x1B 0x45  ; for a printer feature file&-C;
-&+C;F_H3_ON = @             ; ditto&-C;
-
----
-
 Symbols in code blocks &+c;should *not* # be __converted__&-c;.
 
 &+C;This **shouldn't work**.
