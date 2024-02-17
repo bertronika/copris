@@ -84,19 +84,31 @@ check_for_expected_output() {
 }
 
 compare_files() {
+	BINARY=0
+	if [[ "$1" == "binary" ]]; then
+		BINARY=1
+		shift
+	fi
+
 	DESCRIPTION="$1"
+	FILE1="$2"
+	FILE2="$3"
 	DESC_LEN="${#DESCRIPTION}"
-	STRING1="$2"
-	STRING2="$3"
 
 	printf 'Checking if %s%s%s.' "$BOLD" "$DESCRIPTION" "$NORM"
 	printf ' %.0s' $(seq 1 $((COLUMNS - DESC_LEN - 18 - MARGIN)))
 
-	if DIFF_RESULT="$(diff --color=always "$STRING1" "$STRING2" 2>&1)"; then
+	if [[ $BINARY ]]; then
+		DIFF_RESULT="$(diff --color=always <(od -tx1 $FILE1) <(od -tx1 $FILE2) 2>&1)"
+	else
+		DIFF_RESULT="$(diff --color=always "$FILE1" "$FILE2" 2>&1)"
+	fi
+
+	if [[ $? == 0 ]]; then
 		print_pass
 	else
 		print_fail
-		printf ' red is %s, green is %s\n' "$STRING1" "$STRING2"
+		printf ' red is %s, green is %s\n' "$FILE1" "$FILE2"
 		printf '%s\n' "$DIFF_RESULT"
 		terminate
 	fi
