@@ -11,8 +11,11 @@ MARGIN="$((COLUMNS / 3))"
 
 COPRIS="../copris"
 COPRISDBG="../copris_dbg"
-COPRIS_OUTPUT="/tmp/copris_run-tests"
-COPRIS_STDERR="/tmp/copris_run-tests_stderr"
+
+COPRIS_STDOUT="/tmp/copris_run-tests_stdout.txt"
+COPRIS_STDERR="/tmp/copris_run-tests_stderr.txt"
+COPRIS_FILE="/tmp/copris_run-tests.out"
+
 FEATURE_ASCII="../feature-files/diag-ascii.ini"
 
 TERMINATE_ARGUMENT="${1:--}"
@@ -57,11 +60,11 @@ check_for_expected_output() {
 		"$BOLD" "${TITLE^}" "$NORM"
 	printf ' %.0s' $(seq 1 $((COLUMNS - GROUP_LEN - TITLE_LEN - 28 - MARGIN)))
 
-	:> "$COPRIS_OUTPUT"
-	"${CMDLINE[@]}" < "${TEST_NAME}.md" "$COPRIS_OUTPUT" >/dev/null 2> "$COPRIS_STDERR"
+	:> "$COPRIS_STDOUT"
+	"${CMDLINE[@]}" < "${TEST_NAME}.md" "$COPRIS_STDOUT" >/dev/null 2> "$COPRIS_STDERR"
 	CMD_STATUS=$?
 
-    if DIFF_RESULT="$(diff --color=always "$TEST_NAME.exp" "$COPRIS_OUTPUT" 2>&1)"; then
+    if DIFF_RESULT="$(diff --color=always "$TEST_NAME.exp" "$COPRIS_STDOUT" 2>&1)"; then
         print_pass
     else
         print_fail
