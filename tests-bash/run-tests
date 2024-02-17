@@ -145,12 +145,12 @@ check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-escape"
 
 # compare_files <description> <first file> <second file>
 compare_files "git tag and VERSION values match" \
-              <(git describe --abbrev=0) ../VERSION
+              <(git describe --abbrev=0 || exit 1) ../VERSION
 
-MAX_FILENAME_LENGTH="$(grep -Po '#define MAX_FILENAME_LENGTH \K[0-9]+' ../src/debug.h)"
+MAX_FILENAME_LENGTH="$(grep -Po '#define MAX_FILENAME_LENGTH \K[0-9]+' ../src/debug.h || exit 1)"
 compare_files "any source file names exceed MAX_FILENAME_LENGTH of ${MAX_FILENAME_LENGTH}" \
               <(cd .. && ls -1 src/*.c | strings -n $((MAX_FILENAME_LENGTH + 1))) /dev/null
-			  # + 1 accounts for a new line
+              # + 1 accounts for a new line
 
 #compare_files "any program strings are longer than 80 characters" \
 #              <(strings -d -n 80 "$COPRISDBG" | grep -v -e GNU -e GCC) /dev/null
