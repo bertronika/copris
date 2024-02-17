@@ -25,7 +25,7 @@ CFLAGS    += $(DBGFLAGS) $(DEFINES) -fno-builtin-printf -fno-builtin-fprintf \
 MOCKFLAGS := $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
 
 TEST_BINARIES  := $(TESTED_SOURCES:%.c=cmocka-%)
-SOURCE_OBJECTS := $(OBJECTS:src/%.o=src_%.o)
+SOURCE_OBJECTS := $(filter-out src_main.o,$(OBJECTS:src/%.o=src_%.o))
 TESTED_OBJECTS := $(TESTED_SOURCES:%.c=src_%.o)
 TEST_GCDA      := $(TESTED_SOURCES:%.c=src_%.gcda)
 
