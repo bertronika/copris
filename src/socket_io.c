@@ -1,7 +1,7 @@
 /*
  * Stream socket (TCP) server for receiving text over the network
  *
- * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.

@@ -1,6 +1,6 @@
 /*
  * COPRIS - a converting printer server
- * Copyright (C) 2020-2023 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2020 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -25,7 +25,7 @@
  * Some inspiration for the syntax is taken from the CommonMark specification, but
  * nothing more. No compliance is guaranteed. You've been warned :)
  *
- * Copyright (C) 2022-23 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
+ * Copyright (C) 2022 Nejc Bertoncelj <nejc at bertoncelj.eu.org>
  *
  * This file is part of COPRIS, a converting printer server, licensed under the
  * GNU GPLv3 or later. See files 'main.c' and 'COPYING' for more details.
