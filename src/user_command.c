@@ -16,7 +16,6 @@
 #include <utstring.h> /* uthash library - dynamic strings  */
 
 #include "Copris.h"
-#include "config.h"
 #include "debug.h"
 #include "parse_value.h"
 #include "user_command.h"
