@@ -11,5 +11,6 @@ void free_filenames(char **filenames, int count);
 
 /*
  * Write 'copris_text' to the appropriate output, specified in 'attrib'.
+ * Return zero on success, nonzero on failure.
  */
-void write_to_output(UT_string *copris_text, struct Attribs *attrib);
+int write_to_output(UT_string *copris_text, struct Attribs *attrib);

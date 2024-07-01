@@ -534,7 +534,9 @@ int main(int argc, char **argv) {
 		}
 
 		// Stage 4: Write text to the output destination
-		write_to_output(copris_text, &attrib);
+		error = write_to_output(copris_text, &attrib);
+		if (error)
+			return EXIT_FAILURE;
 
 		// Current session's text has been processed, clear it for a new read
 		utstring_clear(copris_text);

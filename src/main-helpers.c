@@ -35,12 +35,15 @@ void free_filenames(char **filenames, int count)
 	}
 }
 
-void write_to_output(UT_string *copris_text, struct Attribs *attrib)
+int write_to_output(UT_string *copris_text, struct Attribs *attrib)
 {
+	int error;
+
 	if (attrib->copris_flags & HAS_OUTPUT_FILE) {
-		copris_write_file(attrib->output_file, copris_text);
+		error = copris_write_file(attrib->output_file, copris_text);
 	} else {
-		copris_write_stdout(copris_text);
+		error = copris_write_stdout(copris_text);
 	}
-	// TODO handle return codes
+
+	return error;
 }
