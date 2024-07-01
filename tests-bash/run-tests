@@ -4,7 +4,7 @@
 # To perform all checks, run this file without any arguments. Specify
 # one argument (eg. 'fail') to stop at first failure.
 
-. ansi_colours.in
+. ansi_colours.in || exit 1
 
 COLUMNS="$(tput cols)"
 MARGIN="$((COLUMNS / 3))"
