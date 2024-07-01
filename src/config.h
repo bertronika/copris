@@ -30,3 +30,7 @@
 #ifndef USER_CMD_SYMBOL
 #   define USER_CMD_SYMBOL '$'
 #endif
+
+// Uncomment the following line to overwrite the output
+// file instead of appending to it:
+// #define OVERWRITE_OUTPUT_FILE

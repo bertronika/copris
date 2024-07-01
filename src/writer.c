@@ -14,13 +14,21 @@
 
 #include <utstring.h> /* uthash library - dynamic strings */
 
+#include "config.h"
 #include "debug.h"
 #include "writer.h"
+
+// Mode for fopen(3), configured in config.h
+#ifdef OVERWRITE_OUTPUT_FILE
+#   define FOPEN_MODE "w"
+#else
+#   define FOPEN_MODE "a"
+#endif
 
 int copris_write_file(const char *output_file, UT_string *copris_text)
 {
 	// Open output file, set for (a)ppending text to it
-	FILE *file_ptr = fopen(output_file, "a");
+	FILE *file_ptr = fopen(output_file, FOPEN_MODE);
 	if (file_ptr == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Failed to open output file '%s'.", output_file);
 		return -1;
