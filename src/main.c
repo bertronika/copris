@@ -87,7 +87,7 @@ static void copris_help(const char *argv0) {
 
 static void copris_version(void) {
 	printf("COPRIS version %s\n"
-	       "(C) 2020-23 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
+	       "(C) 2020-2024 Nejc Bertoncelj <nejc at bertoncelj.eu.org>\n\n"
 	       "Build-time options\n"
 	       "  Text buffer size:                     %4d bytes\n"
 	       "  Maximum .ini file element length:     %4d bytes\n"
