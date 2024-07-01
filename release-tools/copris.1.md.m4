@@ -29,8 +29,8 @@ m4_include(common-description.md.m4)m4_dnl
 : Recode characters in received text according to definitions from encoding
   *FILE*. This option can be specified multiple times.
 
-**-E**, **\--ENCODING** *FILE*
-: Same as **-e**, but do not terminate the program if received text
+**\--ignore-missing**
+: If recoding characters, do not terminate the program if received text
   contains any possibly unwanted multi-byte characters that were
   not handled by specified *FILE*s.
 

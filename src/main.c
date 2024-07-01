@@ -53,8 +53,8 @@ static void copris_help(const char *argv0) {
 	       "\n"
 	       "  -p, --port PORT         Run as a network server on port number PORT\n"
 	       "  -e, --encoding FILE     Recode received text with encoding FILE\n"
-	       "  -E, --ENCODING FILE     Same as -e, but don't stop if encoding FILE doesn't\n"
-	       "                          catch every multi-byte character\n"
+	       "      --ignore-missing    If using '--encoding', don't stop if FILE doesn't\n"
+	       "                          catch every multi-byte character in input text\n"
 	       "  -f, --feature FILE      Process Markdown in received text and use session\n"
 	       "                          commands according to printer feature FILE\n"
 	       "  -c, --parse-commands    If using '--feature', recognise printer feature\n"
@@ -104,7 +104,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	static struct option long_options[] = {
 		{"port",             required_argument, NULL, 'p'},
 		{"encoding",         required_argument, NULL, 'e'},
-		{"ENCODING",         required_argument, NULL, 'E'},
+		{"ignore-missing",   no_argument,       NULL, '<'},
 		{"feature",          required_argument, NULL, 'f'},
 		{"parse-commands",   no_argument,       NULL, 'c'},
 		{"dump-commands",    no_argument,       NULL, ','},
@@ -126,7 +126,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'You must
 	// specify a printer feature file.' instead of 'option requires an argument -- 'r')
-	while ((c = getopt_long(argc, argv, ":p:e:E:f:cdl:vqhV", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":p:e:f:cdl:vqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
@@ -154,8 +154,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->portno = (unsigned int)temp_portno;
 			break;
 		}
-		case 'e':
-		case 'E': {
+		case 'e': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised characters in encoding file name (%s). "
 				                "Perhaps you forgot to specify the file?", optarg);
@@ -189,11 +188,11 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->encoding_file_count++;
 			attrib->copris_flags |= HAS_ENCODING;
 
-			if (c == 'E')
-				attrib->copris_flags |= ENCODING_NO_STOP;
-
 			break;
 		}
+		case '<':
+			attrib->copris_flags |= ENCODING_NO_STOP;
+			break;
 		case 'f': {
 			if (*optarg == '-') {
 				PRINT_ERROR_MSG("Unrecognised character in printer feature file name (%s). "
@@ -512,14 +511,12 @@ int main(int argc, char **argv) {
 		if (attrib.copris_flags & HAS_ENCODING) {
 			error = recode_text(copris_text, &encoding);
 
-			// Terminate on error only if user hasn't forced recoding with '-E'
-			// TODO: telling the remote user to use -E isn't helpful
+			// Terminate on error only if user hasn't forced recoding
 			if (error && !(attrib.copris_flags & ENCODING_NO_STOP)) {
 				const char error_msg[] =
 				        "One or more multi-byte characters, not handled by "
 				        "encoding file(s), were received. If this is the intended "
-				        "behaviour, specify the file(s) with option -E/--ENCODING "
-				        "instead.";
+				        "behaviour, run COPRIS with --ignore-missing.";
 
 				if (verbosity) {
 					if (!is_stdin)
