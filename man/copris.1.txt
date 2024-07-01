@@ -1,67 +1,65 @@
-COPRIS(1)                             0.9‐653‐g4bf6fbd‐dirty                            COPRIS(1)
+COPRIS(1)                              0.9-671-g0e84ae0-dirty                             COPRIS(1)
 
 NAME
-       copris ‐ a converting printer server
+       copris - a converting printer server
 
 SYNOPSIS
        copris [options] [printer device or output file]
-       copris ‐‐dump‐commands > new_feature_file.ini
+       copris --dump-commands > new_feature_file.ini
 
 DESCRIPTION
-       COPRIS  is  a printer server and text conversion program that bridges the gap between mod‐
-       ern, UTF‐8‐encoded, Markdown‐formatted text and (older) dot‐matrix and thermal printers.
+       COPRIS  is a printer server and text conversion program that bridges the gap between modern,
+       UTF-8-encoded, Markdown-formatted text and (older) dot-matrix and thermal printers.
 
-       When provided with the appropriate configuration files and  options,  COPRIS  reads  plain
-       text  from  a local source or the network (with a built‐in TCP socket server), applies op‐
-       tional processing methods to it and sends it to the destination device (or file).
+       When provided with the appropriate configuration files and options, COPRIS reads plain  text
+       from  a  local  source  or the network (with a built-in TCP socket server), applies optional
+       processing methods to it and sends it to the destination device (or file).
 
        Two main text processing methods stand out in COPRIS; they are:
 
    Character recoding via encoding files
-       Older printers usually don’t support multi‐byte UTF‐8‐encoded text.  Rather, they use code
-       pages and customised character sets which may vary between different  manufacturers.   CO‐
-       PRIS  can load a character encoding file that is used to recode received text.  By writing
-       or selecting a premade one for your printer and locale, you allow COPRIS  to  recode  (re‐
-       place)  received  characters  with  appropriate  locale‐specific  ones, understood by your
-       printer.
+       Older printers usually don’t support multi-byte UTF-8-encoded text.  Rather, they  use  code
+       pages  and customised character sets which may vary between different manufacturers.  COPRIS
+       can load a character encoding file that is used to recode received text.  By writing or  se‐
+       lecting  a premade one for your printer and locale, you allow COPRIS to recode (replace) re‐
+       ceived characters with appropriate locale-specific ones, understood by your printer.
 
-       This is particulary useful in cases where printer distributors swapped  lesser‐used  ASCII
-       characters  (such  as ~ @ {) with those from the national alphabet, so they could be typed
-       out directly from the non‐localised keyboard.  By finding  similar‐looking  characters  in
+       This is particulary useful in cases where printer  distributors  swapped  lesser-used  ASCII
+       characters (such as ~ @ {) with those from the national alphabet, so they could be typed out
+       directly  from  the  non-localised  keyboard.   By  finding  similar-looking  characters  in
        printer’s character set, you may, crudely, regain those lost characters.
 
-       However,  encoding files aren’t tied only to locale conversions, you may use them to remap
-       any character.  Examples include typographic quotation marks, em dashes, copyright  symbol
+       However, encoding files aren’t tied only to locale conversions, you may use  them  to  remap
+       any  character.   Examples  include typographic quotation marks, em dashes, copyright symbol
        and others, commonly found in character sets of various printers.
 
    Markdown formatting via printer feature files
-       Many  printers support commands (escape codes) for formatting printed text (e.g. Epson has
-       its ESC/P control language).  COPRIS can read a printer feature file that  specifies  such
+       Many printers support commands (escape codes) for formatting printed  text  (e.g. Epson  has
+       its  ESC/P  control  language).   COPRIS can read a printer feature file that specifies such
        commands, invoked by following Markdown attributes:
 
        • bold and italic emphasis via asterisks (*, **, ***) or underscores (_, __, ___)
 
        • up to 4 levels of headings via number signs (#, ##, ###, ####)
 
-       • blockquotes via greater‐than signs and a space (> )
+       • blockquotes via greater-than signs and a space (> )
 
        • inline code via single backticks (`)
 
-       • code  blocks  via triple backticks (```) – or four spaces, but those are disabled by de‐
-         fault
+       • code blocks via triple backticks (```) – or four spaces, but those are disabled by default
 
        • links via angle brackets (< >)
 
-       Any command can be bound to mentioned attributes.  If desired, bold emphasis  can  trigger
-       double‐width  text, headings may change the font face or size and links can be made under‐
-       lined.  There are no limits, as long as your printer feature file contains  commands  that
-       are understood by the printer (or any other destination device).
+       Any command can be bound to mentioned attributes.  If desired,  bold  emphasis  can  trigger
+       double-width  text,  headings  may change the font face or size and links can be made under‐
+       lined.  There are no limits, as long as your printer feature file contains commands that are
+       understood by the printer (or any other destination device).
 
-       You might have noticed that only a subset of the Markdown specification is supported.  CO‐
-       PRIS intentionally doesn’t alter text layout (white space, paragraphs etc.), since there’s
-       no  markup/layout  engine.  You may freely format your input plain‐text files to your lik‐
-       ing, and COPRIS will preserve the spacing and newlines (just be warned about four  leading
-       spaces triggering a code block).
+       You might have noticed that only a subset of the Markdown specification is  supported.   CO‐
+       PRIS  intentionally  doesn’t alter text layout (white space, paragraphs etc.), since there’s
+       no markup/layout engine.  You may freely format your input plain-text files to your  liking,
+       and  COPRIS will preserve the spacing and newlines (just be warned about four leading spaces
+       triggering a code block).
 
           *   *   *   *   *
 
@@ -73,13 +71,13 @@ DESCRIPTION
               key2 = whitespace separated values ; inline comment
               ...
 
-       Left‐hand  keys  should be written out directly as UTF‐8 characters or strings, right‐hand
-       values are expected to be in either decimal, octal (prefixed by a 0) or  hexadecimal  base
-       (prefixed  with 0x).  Don’t prepend zeroes to decimal numbers for alignment, as they’ll be
+       Left-hand keys should be written out directly as UTF-8  characters  or  strings,  right-hand
+       values  are  expected  to  be in either decimal, octal (prefixed by a 0) or hexadecimal base
+       (prefixed with 0x).  Don’t prepend zeroes to decimal numbers for alignment,  as  they’ll  be
        interpreted as octal numbers.  Instead, use any amount of spaces (or tabulators).
 
-       In case you need a key to resolve to a blank value, set @ as the value (e.g. if  you  want
-       to remove certain characters from the text, or omit rendering some Markdown attributes).
+       In  case you need a key to resolve to a blank value, set @ as the value (e.g. if you want to
+       remove certain characters from the text, or omit rendering some Markdown attributes).
 
        Here are some examples:
 
@@ -88,83 +86,81 @@ DESCRIPTION
               F_H3_ON = @             ; ditto
 
 OPTIONS
-       ‐p, ‐‐port NUMBER
-              Run  COPRIS  as a network server on port NUMBER.  Superuser privileges are required
-              if NUMBER is less than 1024.
+       -p, --port NUMBER
+              Run COPRIS as a network server on port NUMBER.  Superuser privileges are required  if
+              NUMBER is less than 1024.
 
-       ‐e, ‐‐encoding FILE
-              Recode characters in received text according to  definitions  from  encoding  FILE.
-              This option can be specified multiple times.
+       -e, --encoding FILE
+              Recode characters in received text according to definitions from encoding FILE.  This
+              option can be specified multiple times.
 
-       ‐E, ‐‐ENCODING FILE
-              Same as ‐e, but do not terminate the program if received text contains any possibly
-              unwanted multi‐byte characters that were not handled by specified FILEs.
+       --ignore-missing
+              If  recoding  characters,  do not terminate the program if received text contains any
+              possibly unwanted multi-byte characters that were not handled by specified FILEs.
 
-       ‐f, ‐‐feature FILE
-              Process  Markdown  formatting in received text and apply session commands according
-              to commands from printer feature FILE.   This  option  can  be  specified  multiple
-              times.
+       -f, --feature FILE
+              Process Markdown formatting in received text and apply session commands according  to
+              commands from printer feature FILE.  This option can be specified multiple times.
 
-       ‐c, ‐‐parse‐commands
-              If  a  printer  feature  file is being used, recognise feature commands in received
-              text and apply them.  Commands must be prefixed with a predefined symbol, which  is
-              shown  when  invoking  copris ‐‐version.  This feature only works when the received
-              text starts with $ENABLE_COMMANDS, $ENABLE_CMD or $CMD.
+       -c, --parse-commands
+              If  a printer feature file is being used, recognise feature commands in received text
+              and apply them.  Commands must be prefixed with a predefined symbol, which  is  shown
+              when  invoking  copris  --version.   This  feature  only works when the received text
+              starts with $ENABLE_COMMANDS, $ENABLE_CMD or $CMD.
 
-       ‐‐dump‐commands
-              Show all possible printer feature commands in INI file  format  (e.g. to  be  piped
-              into a new printer feature file you are making).
+       --dump-commands
+              Show all possible printer feature commands in INI file format (e.g. to be piped  into
+              a new printer feature file you are making).
 
-       ‐d, ‐‐daemon
+       -d, --daemon
               If running as a network server, do not exit after the first connection.
 
-       ‐l, ‐‐limit NUMBER
+       -l, --limit NUMBER
               If running as a network server, limit number of received bytes to NUMBER.
 
-       ‐‐cutoff‐limit
+       --cutoff-limit
               If limit is active, cut text on NUMBER count instead of discarding the whole chunk.
 
-       ‐v, ‐‐verbose
+       -v, --verbose
               Show informative status messages.  If specified twice, show even more messages.
 
-       ‐q, ‐‐quiet
-              Do  not show any unneccessary messages, except warnings and fatal errors, routed to
+       -q, --quiet
+              Do  not  show  any unneccessary messages, except warnings and fatal errors, routed to
               stderr.  This also omits notes, shown if COPRIS assumes it is not invoked properly.
 
-       ‐h, ‐‐help
+       -h, --help
               Show a short option summary.
 
-       ‐V, ‐‐version
-              Show program version, author and build‐time options.
+       -V, --version
+              Show program version, author and build-time options.
 
-       Do not specify a port number if you want to read from standard input.  Likewise, omit  the
+       Do not specify a port number if you want to read from standard input.   Likewise,  omit  the
        output file to have text echoed out to standard output (or piped elsewhere).
 
 EXAMPLES
-       Notice: COPRIS is in active development.  Some features are still missing, others have not
-       been  thoroughly tested yet.  Command line option arguments may change in future.  Version
+       Notice:  COPRIS  is in active development.  Some features are still missing, others have not
+       been thoroughly tested yet.  Command line option arguments may change  in  future.   Version
        1.0 will be tagged when the feature set will be deemed complete.
 
-       Run as a simple server on port 8080, perform no text recoding, output received data to the
-       serial port and exit after one connection.  Note that superuser privileges are required if
+       Run  as  a simple server on port 8080, perform no text recoding, output received data to the
+       serial port and exit after one connection.  Note that superuser privileges are  required  if
        the specified port is smaller than 1024.
 
-              copris ‐p 8080 /dev/ttyS0
+              copris -p 8080 /dev/ttyS0
 
-       Serve on port 8080 as a daemon (do not exit after first connection), recode text using the
-       slovene.ini encoding file, limit any incoming text to a  maximum  of  100  characters  and
-       print  received  data  to the terminal.  Note that text limit works only when running as a
-       server.
+       Serve  on  port 8080 as a daemon (do not exit after first connection), recode text using the
+       slovene.ini encoding file, limit any incoming text to a maximum of 100 characters and  print
+       received data to the terminal.  Note that text limit works only when running as a server.
 
-              copris ‐p 8080 ‐d ‐e slovene.ini ‐l 100
+              copris -p 8080 -d -e slovene.ini -l 100
 
-       Read local file font‐showcase.md using the printer feature file epson‐escp.ini.  Interpret
-       any possible user commands, found in the local file.  Output  formatted  text  to  an  USB
+       Read  local  file font-showcase.md using the printer feature file epson-escp.ini.  Interpret
+       any possible user commands, found in the local  file.   Output  formatted  text  to  an  USB
        printer interface on the local computer:
 
-              copris ‐f epson‐escp.ini ‐c /dev/usb/lp0 < font‐showcase.md
+              copris -f epson-escp.ini -c /dev/usb/lp0 < font-showcase.md
 
 DEVELOPMENT
        COPRIS’ development repository resides at ⟨https://github.com/bertronika/copris⟩.
 
-                                            2023‐12‐09                                  COPRIS(1)
+                                             2024-07-01                                   COPRIS(1)
