@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <utstring.h> /* uthash library - dynamic strings */
 
@@ -22,6 +23,13 @@ int copris_handle_stdin(UT_string *copris_text)
 {
 	if (LOG_INFO)
 		PRINT_MSG("Trying to read from stdin...");
+
+	// Switch standard input to binary mode
+	FILE *reopen_status = freopen(NULL, "rb", stdin);
+	if (reopen_status == NULL) {
+		PRINT_SYSTEM_ERROR("freopen", "Error reopening standard input as binary.");
+		return -1;
+	}
 
 	// Check if Copris is invoked standalone, outside of a pipe. That is usually
 	// unwanted, since the user has specified reading from stdin, and the only
@@ -49,19 +57,23 @@ static size_t read_from_stdin(UT_string *copris_text, struct Stats *stats)
 	char buffer[BUFSIZE];
 	size_t buffer_length = 0;
 
-	// fgets() stops on error or at EOF (triggered with Ctrl-D),
-	// reads up to BUFSIZE - 1 bytes of text and terminates it.
-	while (fgets(buffer, BUFSIZE, stdin) != NULL) {
-		buffer_length = strlen(buffer);
+	for (;;) {
+		// Read (binary) data byte by byte from standard input until exhaustion or error
+		buffer_length = fread(buffer, 1, BUFSIZE, stdin);
 
-		// Note that strlen() doesn't count the ending null byte. This isn't
-		// a problem, since utstring_bincpy() terminates its internal string
-		// after appending to it.
+		if (ferror(stdin)) {
+			PRINT_SYSTEM_ERROR("fread", "Error reading from standard input");
+			break;
+		}
+
+		if (buffer_length == 0)
+			break;
+
+		// Append data, count statistics
 		utstring_bincpy(copris_text, buffer, buffer_length);
-
 		stats->chunks++;
 		stats->sum += buffer_length; // TODO - possible overflow?
 	}
 
-	return buffer_length;
+	return stats->sum;
 }
