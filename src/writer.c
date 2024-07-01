@@ -21,8 +21,10 @@
 // Mode for fopen(3), configured in config.h
 #ifdef OVERWRITE_OUTPUT_FILE
 #   define FOPEN_MODE "w"
+#   define MODE_TEXT  "Written"
 #else
 #   define FOPEN_MODE "a"
+#   define MODE_TEXT  "Appended"
 #endif
 
 int copris_write_file(const char *output_file, UT_string *copris_text)
@@ -46,7 +48,7 @@ int copris_write_file(const char *output_file, UT_string *copris_text)
 		                "not enough bytes transferred.");
 		error = -1;
 	} else if (LOG_INFO) {
-		PRINT_MSG("Appended %zu byte(s) to %s.", written_text_length, output_file);
+		PRINT_MSG(MODE_TEXT " %zu byte(s) to %s.", written_text_length, output_file);
 	}
 
 	// Flush streams to file and close it
