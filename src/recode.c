@@ -231,19 +231,19 @@ int recode_text(UT_string *copris_text, struct Inifile **encoding)
 	int error = 0;
 	const char *original = utstring_body(copris_text);
 
-	while (*original) {
+	for (size_t i = 0; i < utstring_len(copris_text);) {
 		char input_char[UTF8_MAX_LENGTH + 1];
 		size_t input_len;
 		char output_char[MAX_INIFILE_ELEMENT_LENGTH];
 		size_t output_len;
 		struct Inifile *s;
 
-		if (UTF8_IS_MULTIBYTE(*original)) {
-			input_len = utf8_codepoint_length(*original);
-			memcpy(input_char, original, input_len);
+		if (UTF8_IS_MULTIBYTE(original[i])) {
+			input_len = utf8_codepoint_length(original[i]);
+			memcpy(input_char, &original[i], input_len);
 		} else {
 			input_len = 1;
-			input_char[0] = *original;
+			input_char[0] = original[i];
 		}
 		input_char[input_len] = '\0';
 
@@ -262,7 +262,7 @@ int recode_text(UT_string *copris_text, struct Inifile **encoding)
 		}
 
 		utstring_bincpy(recoded_text, output_char, output_len);
-		original += input_len;
+		i += input_len;
 	}
 
 	utstring_clear(copris_text);
