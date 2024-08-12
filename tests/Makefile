@@ -33,7 +33,7 @@ TESTED_OBJECTS := $(TESTED_SOURCES:%.c=src_%.o)
 all: run-cmocka-standalone
 
 run-cmocka-standalone: $(TEST_BINARIES)
-	for test in $^; do echo "./$$test"; ./$$test || exit 1; done
+	for test in $^; do echo "./$$test"; ./$$test 2>/dev/null || exit 1; done
 
 run-cmocka-prove: $(TEST_BINARIES)
 	CMOCKA_MESSAGE_OUTPUT=tap prove -f $(addprefix ./,$^)
