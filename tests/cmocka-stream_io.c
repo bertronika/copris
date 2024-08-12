@@ -122,6 +122,17 @@ static void read_4byte_char(void **state)
 	VERIFY;
 }
 
+// Read a string with a null value
+static void read_with_null_value(void **state)
+{
+	UT_string *copris_text = *state;
+
+	INPUT ("aaa\0bbb");
+	RESULT("aaa\0bbb");
+
+	VERIFY;
+}
+
 
 static int setup_utstring(void **state)
 {
@@ -155,12 +166,13 @@ int main(int argc, char **argv)
 	(void)argv;
 
 	const struct CMUnitTest tests[] = {
-		cmocka_unit_test_teardown(stdin_read_no_text,    clear_utstring),
-		cmocka_unit_test_teardown(read_two_chunks,       clear_utstring),
+		cmocka_unit_test_teardown(stdin_read_no_text, clear_utstring),
+		cmocka_unit_test_teardown(read_two_chunks,  clear_utstring),
 		cmocka_unit_test_teardown(read_2byte_char,  clear_utstring),
 		cmocka_unit_test_teardown(read_3byte_char1, clear_utstring),
 		cmocka_unit_test_teardown(read_3byte_char2, clear_utstring),
-		cmocka_unit_test(read_4byte_char)
+		cmocka_unit_test_teardown(read_4byte_char,  clear_utstring),
+		cmocka_unit_test(read_with_null_value)
 	};
 
 	return cmocka_run_group_tests_name("stream_io.c", tests, setup_utstring, teardown_utstring);
