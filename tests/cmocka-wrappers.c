@@ -128,6 +128,7 @@ ssize_t __wrap_write(int fd, const void *buf, size_t count)
 	return count;
 }
 
+/*
 int __real_printf(const char *format, ...);
 int __wrap_printf(const char *format, ...)
 {
@@ -161,3 +162,4 @@ int __wrap_fputs(const char *s, FILE *stream)
 
 	return 1;
 }
+*/

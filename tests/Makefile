@@ -13,14 +13,15 @@ LIBRARIES += cmocka
 TESTED_SOURCES = parse_value.c utf8.c stream_io.c socket_io.c
 
 # List of mocked functions for unit tests
-MOCKS = fgets isatty accept close getnameinfo inet_ntoa read write \
-        printf fprintf puts fputs
+MOCKS = isatty accept close getnameinfo inet_ntoa read write \
+        fgets fread ferror
+# puts fputs printf fprintf
 
 # Tests build configuration
 DEFINES = -DUNIT_TESTS -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10
 
-CFLAGS    += $(DBGFLAGS) $(DEFINES) -fno-builtin-printf -fno-builtin-fprintf \
-             -fno-builtin-puts -fno-builtin-fputs
+CFLAGS    += $(DBGFLAGS) $(DEFINES)
+# -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-puts -fno-builtin-fputs
 MOCKFLAGS := $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
 
 TEST_BINARIES  := $(TESTED_SOURCES:%.c=cmocka-%)
