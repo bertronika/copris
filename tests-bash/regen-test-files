@@ -3,7 +3,7 @@
 
 # Run this file without any arguments. It'll prompt you interactively.
 
-. ansi_colours.in
+. ansi_colours.in || exit 1
 
 COLUMNS="$(tput cols)"
 

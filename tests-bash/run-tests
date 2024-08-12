@@ -98,7 +98,7 @@ compare_files() {
 	printf 'Checking if %s%s%s.' "$BOLD" "$DESCRIPTION" "$NORM"
 	printf ' %.0s' $(seq 1 $((COLUMNS - DESC_LEN - 18 - MARGIN)))
 
-	if [[ $BINARY ]]; then
+	if [[ $BINARY == 1 ]]; then
 		DIFF_RESULT="$(diff --color=always <(od -tx1 $FILE1) <(od -tx1 $FILE2) 2>&1)"
 	else
 		DIFF_RESULT="$(diff --color=always "$FILE1" "$FILE2" 2>&1)"
@@ -121,8 +121,7 @@ if [[ ! -x "$COPRISDBG" ]]; then
 	print_warning "Executable does not exist, building."
 	printf '—%.0s' $(seq 1 $((COLUMNS))); printf '\n'
 	make -C .. debug
-	printf '—%.0s' $(seq 1 $((COLUMNS))); printf '\n'
-	printf '\n'
+	printf '—%.0s' $(seq 1 $((COLUMNS))); printf '\n\n'
 fi
 
 # Check if test files exist
@@ -132,7 +131,7 @@ NUM_OF_OUTPUT_FILES="$(find . -name 't-*.exp' -printf f | wc -c)"
 if (( NUM_OF_INPUT_FILES != NUM_OF_OUTPUT_FILES )); then
 	print_warning "Number of input test files ($NUM_OF_INPUT_FILES) does not match the" \
 	              "number of output test files ($NUM_OF_OUTPUT_FILES). Perhaps you need" \
-				  "to (re)generate them?"
+	              "to (re)generate them?"
 fi
 
 touch $COPRIS_FILE || exit 1
@@ -141,7 +140,7 @@ $COPRISDBG $COPRIS_FILE < t-null-byte >/dev/null
 compare_files binary "null values go through" t-null-byte $COPRIS_FILE
 
 $COPRISDBG $COPRIS_FILE -f t-feature_file-nul.ini < t-feature_file-nul.md >/dev/null
-compare_files binary "null values go through with -f" t-feature_file-nul.exp $COPRIS_FILE
+compare_files binary "null values go through with a feature file" t-feature_file-nul.exp $COPRIS_FILE
 
 # check_for_expected_output <program arguments> <test file without extension>
 check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-emphasis"
