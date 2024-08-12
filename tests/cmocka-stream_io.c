@@ -21,7 +21,7 @@ static void stdin_read_no_text(void **state)
 {
 	UT_string *copris_text = *state;
 
-	will_return(__wrap_fgets, NULL); /* Signal an EOF */
+	will_return(__wrap_fread, NULL); /* Signal an EOF */
 
 	int no_text_read = copris_handle_stdin(copris_text);
 	expected_stats(1, 0);
@@ -31,9 +31,10 @@ static void stdin_read_no_text(void **state)
 }
 
 #define INPUT(str)                        \
-        will_return(__wrap_fgets, str)
+        will_return(__wrap_fread, str);   \
+        will_return(__wrap_fread, (sizeof str) - 1)
 #define RESULT(str)                       \
-        will_return(__wrap_fgets, NULL);  \
+        will_return(__wrap_fread, NULL);  \
         const char result[] = str
 #define VERIFY                            \
         int error = copris_handle_stdin(copris_text); \
@@ -51,9 +52,11 @@ static void read_two_chunks(void **state)
 	const char input_2[] = "DDD";
     const char result[]  = "aaaBBBcccDDD";
 
-	will_return(__wrap_fgets, input_1);
-	will_return(__wrap_fgets, input_2);
-	will_return(__wrap_fgets, NULL);  // signal EOF
+	will_return(__wrap_fread, input_1);
+	will_return(__wrap_fread, (sizeof input_1) - 1);
+	will_return(__wrap_fread, input_2);
+	will_return(__wrap_fread, (sizeof input_2) - 1);
+	will_return(__wrap_fread, NULL);    // signal EOF
 
 	int error = copris_handle_stdin(copris_text);
 	expected_stats(sizeof result, 2);

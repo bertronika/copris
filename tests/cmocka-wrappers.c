@@ -39,8 +39,55 @@ char *__wrap_fgets(char *buffer, int buffer_size, FILE *stream)
 	return buffer;
 }
 
+size_t __real_fread(void *ptr, size_t size, size_t nmemb, FILE* stream);
+size_t __wrap_fread(void *ptr, size_t size, size_t nmemb, FILE* stream)
+{
+	(void)stream;
+
+	// Should always receive 1 byte at a time
+	assert_int_equal(size, 1);
+
+	char *read_data = mock_ptr_type(char *);
+	size_t data_size = 0;
+
+	if (read_data == NULL) {
+		return 0;
+	} else {
+		data_size = mock_type(size_t);
+	}
+
+	// Check if test value fits into the buffer
+	assert_in_range(data_size, 0, nmemb);
+
+	memcpy(ptr, read_data, data_size);
+
+	return data_size;
+}
+
+FILE *__real_freopen(const char pathname, const char mode, FILE *stream);
+FILE *__wrap_freopen(const char pathname, const char mode, FILE *stream)
+{
+	(void)pathname;
+	(void)mode;
+	(void)stream;
+
+	FILE *f = stdin; // Placeholder FILE pointer that won't be NULL
+
+	return f;
+}
+
+int __real_ferror(FILE *stream);
+int __wrap_ferror(FILE *stream)
+{
+	(void)stream;
+
+	// Pretend there's no error
+	return 0;
+}
+
 int __real_isatty(int fd);
-int __wrap_isatty(int fd) {
+int __wrap_isatty(int fd)
+{
 	(void)fd;
 
 	// Pretend we're always running non-interactively
