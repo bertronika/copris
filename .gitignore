@@ -14,7 +14,3 @@ cppcheck_report/
 
 # Tests files
 tests/cmocka-*
-tests/*.gcno
-tests/*.gcda
-tests/coverage.info
-tests/coverage_report/

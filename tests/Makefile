@@ -3,7 +3,6 @@
 # Possible targets:
 #   - run-cmocka-standalone   run cmocka unit tests
 #   - run-cmocka-prove        run cmocka unit tests through Perl's prove
-#   - coverage                run cmocka unit tests and check sources coverage
 #   - clean                   remove compiled object and binary files
 #   - help                    show this text
 
@@ -27,9 +26,8 @@ MOCKFLAGS := $(foreach MOCK,$(MOCKS),-Wl,--wrap=$(MOCK))
 TEST_BINARIES  := $(TESTED_SOURCES:%.c=cmocka-%)
 SOURCE_OBJECTS := $(filter-out src_main.o,$(OBJECTS:src/%.o=src_%.o))
 TESTED_OBJECTS := $(TESTED_SOURCES:%.c=src_%.o)
-TEST_GCDA      := $(TESTED_SOURCES:%.c=src_%.gcda)
 
-.PHONY: all run-cmocka-standalone run-cmocka-prove coverage clean help
+.PHONY: all run-cmocka-standalone run-cmocka-prove clean help
 .SECONDARY: $(SOURCE_OBJECTS) cmocka-wrappers.o
 all: run-cmocka-standalone
 
@@ -41,40 +39,19 @@ run-cmocka-prove: $(TEST_BINARIES)
 
 # Test binaries
 cmocka-%: $(SOURCE_OBJECTS) cmocka-%.o cmocka-wrappers.o
-	$(CC) $(MOCKFLAGS) --coverage $^ $(LDFLAGS) -o $@
+	$(CC) $(MOCKFLAGS) $^ $(LDFLAGS) -o $@
 
-# Source objects with coverage instrumentation
+# Source objects
 src_%.o: ../src/%.c
-	$(CC) $(CFLAGS) --coverage -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Tests objects
 cmocka-%.o: cmocka-%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Test coverage
-coverage: coverage_report/src/index.html
-	#
-	# Report generated at file://$(realpath $<)
-	#
-
-# Generate a HTML coverage report
-coverage_report/src/index.html: coverage.info
-	mkdir -p coverage_report/
-	genhtml $< --legend --output-directory coverage_report/
-
-# Generate a text coverage report, including only tested files
-coverage.info: $(TEST_GCDA)
-	lcov --capture --directory . --base-directory ../src --no-external --output-file $@ \
-	$(foreach SRC,$(TESTED_SOURCES),--include $(realpath ../src/$(SRC)))
-
-# Run instrumented test binaries with maximum verbosity
-src_%.gcda: cmocka-%
-	./$< -v -v -v
-
 clean:
 	rm -f $(TEST_BINARIES) $(SOURCE_OBJECTS) cmocka-wrappers.o
-	rm -fr coverage_report/ coverage.info *.gcda *.gcno
 
 help:
-	head -n 9 $(firstword $(MAKEFILE_LIST))
+	head -n 8 $(firstword $(MAKEFILE_LIST))
 	# Compiler flags for tests: $(CFLAGS)
