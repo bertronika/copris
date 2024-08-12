@@ -45,36 +45,23 @@ static void stdin_read_no_text(void **state)
         assert_string_equal(utstring_body(copris_text), result)
 
 // Read two chunks of ASCII text
-// This function is written without any macros, ones below use them.
 static void read_two_chunks(void **state)
 {
 	UT_string *copris_text = *state;
-	const char input_1[] = "aaaBBBccc";
-	const char input_2[] = "DDD";
-    const char result[]  = "aaaBBBcccDDD";
+	INPUT("aaaBBBccc");
+	INPUT("DDD");
+	RESULT("aaaBBBcccDDD");
 
-	will_return(__wrap_fread, input_1);
-	will_return(__wrap_fread, (sizeof input_1) - 1);
-	will_return(__wrap_fread, input_2);
-	will_return(__wrap_fread, (sizeof input_2) - 1);
-	will_return(__wrap_fread, NULL);    // signal EOF
-
-	int error = copris_handle_stdin(copris_text);
-	expected_stats(sizeof result, 2);
-
-	assert_false(error);
-	assert_string_equal(utstring_body(copris_text), result);
+	VERIFY;
 }
 
 // Read a string with a 2-byte multibyte character split between two reads
 static void read_2byte_char(void **state)
 {
 	UT_string *copris_text = *state;
-	const char input_1[] = {'a', 'a', 'a', 'B', 'B', 'B', 'c' ,'c', '\xC4', '\0'};
-	const char input_2[] = {'\x8D', '\0'};
 
-	INPUT (input_1);
-	INPUT (input_2);
+	INPUT("aaaBBBcc\xC4");
+	INPUT("\x8D");
 	RESULT("aaaBBBccč");
 
 	VERIFY;
@@ -84,11 +71,9 @@ static void read_2byte_char(void **state)
 static void read_3byte_char1(void **state)
 {
 	UT_string *copris_text = *state;
-	const char input_1[] = {'a', 'a', 'a', 'B', 'B', 'B', 'c' ,'c', '\xE2', '\0'};
-	const char input_2[] = {'\x82', '\xAC', '\0'};
 
-	INPUT (input_1);
-	INPUT (input_2);
+	INPUT("aaaBBBcc\xE2");
+	INPUT("\x82\xAC");
 	RESULT("aaaBBBcc€");
 
 	VERIFY;
@@ -98,11 +83,9 @@ static void read_3byte_char1(void **state)
 static void read_3byte_char2(void **state)
 {
 	UT_string *copris_text = *state;
-	const char input_1[] = {'a', 'a', 'a', 'B', 'B', 'B', 'c', '\xE2', '\x82', '\0'};
-	const char input_2[] = {'\xAC', '\0'};
 
-	INPUT (input_1);
-	INPUT (input_2);
+	INPUT("aaaBBBc\xE2\x82");
+	INPUT("\xAC");
 	RESULT("aaaBBBc€");
 
 	VERIFY;
@@ -112,11 +95,9 @@ static void read_3byte_char2(void **state)
 static void read_4byte_char(void **state)
 {
 	UT_string *copris_text = *state;
-	const char input_1[] = {'a', 'a', 'a', 'B', 'B', 'B', 'c' ,'c', '\xF0', '\0'};
-	const char input_2[] = {'\x9F', '\x84', '\x8C', '\0'};
 
-	INPUT (input_1);
-	INPUT (input_2);
+	INPUT("aaaBBBcc\xF0");
+	INPUT("\x9F\x84\x8C");
 	RESULT("aaaBBBcc🄌");
 
 	VERIFY;
