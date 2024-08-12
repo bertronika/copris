@@ -21,7 +21,8 @@ static void expected_stats(size_t sizeof_bytes, int chunks)
 }
 
 #define INPUT(str)                            \
-        will_return(__wrap_read, str)
+        will_return(__wrap_read, str);        \
+        will_return(__wrap_read, (sizeof str) - 1)
 #define RESULT(str)                           \
         will_return_maybe(__wrap_read, NULL); \
         const char result[] = str
@@ -42,7 +43,9 @@ static void read_two_chunks(void **state)
 	const char result[]  = "aaaBBBcccDDD";
 
 	will_return(__wrap_read, input_1);
+	will_return(__wrap_read, sizeof input_1 - 1);
 	will_return(__wrap_read, input_2);
+	will_return(__wrap_read, sizeof input_2 - 1);
 	will_return_maybe(__wrap_read, NULL);  // signal EOF
 
 	int error = copris_handle_socket(copris_text, &parentfd, &childfd, &attrib);

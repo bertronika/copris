@@ -50,6 +50,7 @@ size_t __wrap_fread(void *ptr, size_t size, size_t nmemb, FILE* stream)
 	char *read_data = mock_ptr_type(char *);
 	size_t data_size = 0;
 
+	// NULL signals an EOF
 	if (read_data == NULL) {
 		return 0;
 	} else {
@@ -60,6 +61,29 @@ size_t __wrap_fread(void *ptr, size_t size, size_t nmemb, FILE* stream)
 	assert_in_range(data_size, 0, nmemb);
 
 	memcpy(ptr, read_data, data_size);
+
+	return data_size;
+}
+
+ssize_t __real_read(int fd, void *buffer, size_t count);
+ssize_t __wrap_read(int fd, void *buffer, size_t count)
+{
+	(void)fd;
+
+	char *read_data = mock_ptr_type(char *);
+	size_t data_size = 0;
+
+	// NULL signals an EOF
+	if (read_data == NULL) {
+		return 0;
+	} else {
+		data_size = mock_type(size_t);
+	}
+
+	// Check if the test value fits into the buffer (BUFSIZE)
+	assert_in_range(data_size, 0, count);
+
+	memcpy(buffer, read_data, data_size);
 
 	return data_size;
 }
@@ -139,30 +163,6 @@ char *__wrap_inet_ntoa(void)
 	memccpy(inet_buffer, "127.0.0.1", '\0', 18);
 
 	return inet_buffer;
-}
-
-ssize_t __real_read(int fd, void *buffer, size_t count);
-ssize_t __wrap_read(int fd, void *buffer, size_t count)
-{
-	(void)fd;
-
-	char *read_data = mock_type(char *);
-
-	// NULL signals an EOF
-	if (read_data == NULL)
-		return 0;
-
-	size_t data_len = strlen(read_data);
-	// strlen() isn't strictly the right function, as read() accepts any binary
-	// data, not just strings. However, for the use case of COPRIS, it should
-	// be adequate.
-
-	// Check if the test value fits into the buffer (BUFSIZE)
-	assert_in_range(data_len, 0, count);
-
-	memcpy(buffer, read_data, data_len);
-
-	return data_len;
 }
 
 ssize_t __real_write(int fd, const void *buf, size_t count);
