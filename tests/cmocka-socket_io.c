@@ -110,6 +110,17 @@ static void read_4byte_char(void **state)
 	VERIFY;
 }
 
+// Read a string with a null value
+static void read_with_null_value(void **state)
+{
+	UT_string *copris_text = *state;
+
+	INPUT ("aaa\0bbb");
+	RESULT("aaa\0bbb");
+
+	VERIFY;
+}
+
 #define MUST_DISCARD 0x00
 
 // Check if text gets discarded properly
@@ -229,6 +240,7 @@ int main(int argc, char **argv)
 		cmocka_unit_test_teardown(read_3byte_char1,             clear_utstring),
 		cmocka_unit_test_teardown(read_3byte_char2,             clear_utstring),
 		cmocka_unit_test_teardown(read_4byte_char,              clear_utstring),
+		cmocka_unit_test_teardown(read_with_null_value,         clear_utstring),
 		cmocka_unit_test_teardown(byte_limit_discard,           clear_utstring),
 		cmocka_unit_test_teardown(byte_limit_discard_not,       clear_utstring),
 		cmocka_unit_test_teardown(byte_limit_cutoff,            clear_utstring),
