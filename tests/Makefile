@@ -1,10 +1,10 @@
 
-# Unit tests for COPRIS
-# Possible targets:
-#   - run-cmocka-standalone   run cmocka unit tests
-#   - run-cmocka-prove        run cmocka unit tests through Perl's prove
-#   - clean                   remove compiled object and binary files
-#   - help                    show this text
+## Unit tests for COPRIS
+## Possible targets:
+##   - run-cmocka-standalone   run cmocka unit tests
+##   - run-cmocka-prove        run cmocka unit tests through Perl's prove
+##   - clean                   remove compiled object and binary files
+##   - help                    show this text
 
 include ../Makefile-common.mk
 LIBRARIES += cmocka
@@ -53,5 +53,5 @@ clean:
 	rm -f $(TEST_BINARIES) $(SOURCE_OBJECTS) cmocka-wrappers.o
 
 help:
-	head -n 8 $(firstword $(MAKEFILE_LIST))
+	@grep -A 1 '^##' Makefile
 	# Compiler flags for tests: $(CFLAGS)
