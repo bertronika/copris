@@ -41,13 +41,13 @@ static void utf8_test_codepoint_length(void **state)
 static void utf8_test_incomplete_buffer(void **state)
 {
 	(void)state;
-	char example2[] = {'\xC4', '\0'}; // first byte of č
-	char example3[] = {'\xE2', '\x82', '\xAC', '\0'}; // complete €
-	char example4[] = {'\xF0', '\x9f', '\0'}; // first and second bytes of 🄌
+	char example2[] = "\xC4"; // first byte of č
+	char example3[] = "\xE2\x82\xAC"; // complete €
+	char example4[] = "\xF0\x9f"; // first and second bytes of 🄌
 
 	// Missing last byte
-	char example5[] = {'h', 'r', 'o', '\xC5', '\xA1', '\xC4', '\0'}; // "hrošč"
-	char example6[] = {'5', '0', '\xE2', '\x82', '\0'}; // "50€"
+	char example5[] = "hro\xC5\xA1\xC4"; // "hrošč"
+	char example6[] = "50\xE2\x82"; // "50€"
 
 	int was_terminated = utf8_terminate_incomplete_buffer(example2, (sizeof example2) - 1);
 	assert_string_equal(example2, "");
