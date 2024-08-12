@@ -135,6 +135,14 @@ if (( NUM_OF_INPUT_FILES != NUM_OF_OUTPUT_FILES )); then
 				  "to (re)generate them?"
 fi
 
+touch $COPRIS_FILE || exit 1
+
+$COPRISDBG $COPRIS_FILE < t-null-byte >/dev/null
+compare_files binary "null values go through" t-null-byte $COPRIS_FILE
+
+$COPRISDBG $COPRIS_FILE -f t-feature_file-nul.ini < t-feature_file-nul.md >/dev/null
+compare_files binary "null values go through with -f" t-feature_file-nul.exp $COPRIS_FILE
+
 # check_for_expected_output <program arguments> <test file without extension>
 check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-emphasis"
 check_for_expected_output "-f ${FEATURE_ASCII}" "t-markdown-headings"
