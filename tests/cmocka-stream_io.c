@@ -13,7 +13,8 @@ int verbosity = 0;
 static void expected_stats(size_t sizeof_bytes, int chunks)
 {
 	if (verbosity)
-		printf("Expected %zu byte(s) in %d chunk(s) from stdin\n", sizeof_bytes - 1, chunks);
+		printf("                        Expected %zu byte(s) in %d chunk(s) from stdin\n",
+		       sizeof_bytes - 1, chunks);
 }
 
 // Read no text from stdin
