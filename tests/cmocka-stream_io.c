@@ -159,5 +159,5 @@ int main(int argc, char **argv)
 		cmocka_unit_test(read_4byte_char)
 	};
 
-	return cmocka_run_group_tests_name("read_stdin.c", tests, setup_utstring, teardown_utstring);
+	return cmocka_run_group_tests_name("stream_io.c", tests, setup_utstring, teardown_utstring);
 }
