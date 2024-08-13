@@ -157,12 +157,12 @@ F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 ```
 
 
-## Variables. Custom, user and session commands
+## Variables and session commands
 
 You can use existing command names as variables, as long as you define the command *before*
-using it as a variable. Furthermore, you may define your own variables and use them in existing
-commands. For COPRIS to recognise them, they must be prefixed with `C_`! Variables may be
-interweaved with commands.
+using it as a variable. Furthermore, you may define your own custom variables and use them in
+existing commands. For COPRIS to recognise them, they must be prefixed with `C_`! Variables
+may be interweaved with commands.
 
 ```ini
 # lx300.ini - continued
@@ -172,12 +172,6 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
-You, as a user, can invoke a custom command from within the text. Specify the `-c` argument
-when running COPRIS and begin your text with one of the following commands: `$ENABLE_COMMANDS`,
-`$ENABLE_CMD` or `$CMD`. You may then invoke commands in the text file with omitting their
-`C_` prefix and prepending a dollar sign symbol to them. I.e., if your command is `C_SERIF`,
-`$SERIF` is used in text to invoke it.
-
 COPRIS also provides **session commands**: two command pairs for sending repetitive settings
 to the printer. They may be used to set the code page, text margins, line spacing, font face,
 character density, initialise/reset the printer and so on:
@@ -186,6 +180,35 @@ character density, initialise/reset the printer and so on:
   before it exits
 - `S_BEFORE_TEXT` and `S_AFTER_TEXT` - sent to the printer each time text is received, in
   order `S_BEFORE_TEXT` - *received text* - `S_AFTER_TEXT`
+
+
+## Parsing variables, numerical values and comments in input text
+
+Any custom variable, specified in a printer feature file, can be invoked from within the input
+text. Specify the `-c` argument when running COPRIS and begin your text with one of the following
+commands: `$ENABLE_COMMANDS`, `$ENABLE_CMD` or `$CMD`. You may then call variables in the text
+file by omitting their `C_` prefix and prepending a dollar sign symbol to them. I.e., if your
+variable is `C_SERIF`, `$SERIF` is used in text to invoke it.
+
+Furthermore, apart from already-defined variables, numerical values can be included in text. They
+must be prefixed with the same symbol as custom variables and then specified in decimal, octal
+or hexadecimal notation, as they would be in a printer feature file.
+
+Lastly, comments can be passed in text. They consist of the same prefix character as custom
+variables, followed by a number sign and the text that needs to be commented out. **Be aware**
+that whitespace characters aren't permitted in a comment. This means that, for example in a
+series of custom variables or numerical values, each can be commented out separately, without
+impacting the surrounding ones. For commenting out multiple words, you must find some other
+character, such as underscore or a non-breaking space.
+
+Here's an example of all three of the beforementioned commands. Note the use of non-breaking
+spaces in the comment.
+
+```
+$ENABLE_COMMANDS
+$# Reduce line spacing
+$ESC $0x33 $25
+```
 
 
 # How does COPRIS handle the output serial/parallel/USB/etc. connection?
