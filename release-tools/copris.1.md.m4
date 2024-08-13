@@ -1,6 +1,6 @@
 % COPRIS(1) | m4_esyscmd(`git describe --dirty 2>/dev/null || cat ../VERSION')m4_dnl
 %
-% m4_esyscmd(`date --iso-8601')m4_dnl
+% m4_esyscmd(`date "+%Y-%m-%d"')m4_dnl
 m4_changequote(`[[[', `]]]')m4_dnl
 
 # NAME
@@ -88,3 +88,7 @@ m4_include(common-usage.md.m4)m4_dnl
 
 COPRIS' development repository resides at <https://github.com/bertronika/copris>.
 
+
+# SEE ALSO
+
+**stty**(1), **intercopris**(1)

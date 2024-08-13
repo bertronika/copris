@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-671-g0e84ae0-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-696-gee856c8-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -163,4 +163,7 @@ EXAMPLES
 DEVELOPMENT
        COPRIS’ development repository resides at ⟨https://github.com/bertronika/copris⟩.
 
-                                             2024-07-01                                   COPRIS(1)
+SEE ALSO
+       stty(1), intercopris(1)
+
+                                             2024-08-13                                   COPRIS(1)
