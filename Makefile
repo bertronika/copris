@@ -43,7 +43,7 @@ CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information
 
 # Targets that do not produce an eponymous file
 .PHONY: check-if-tagged release debug install clean distclean help \
-        check analyse analyse-cppcheck analyse-cppcheck-html
+        check analyse analyse-cppcheck analyse-cppcheck-html doc
 
 all:   | check-if-tagged release
 release: copris
@@ -130,3 +130,6 @@ help:
 	@grep -A 1 '^##' Makefile; \
 	 grep -F -m 4 -B 1 -A 2 'FLAGS' Makefile-common.mk
 	# Default installation prefix (overridable with PREFIX=<path>): $(PREFIX)
+
+doc:
+	$(MAKE) -C release-tools

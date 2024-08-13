@@ -220,9 +220,10 @@ file is specified), and lets the operating system's kernel do the rest.
 ## What can be specified as the output?
 
 The last command line argument, output destination, can either be a character device
-(e.g. `/dev/usb/lp0`) or a normal text file. COPRIS simply appends any received text to it. If
-nothing is specified, data will be echoed to the terminal with corresponding `Begin-` and
-`End-Stream-Transcript` markers (`;BST` and `;EST`).
+(e.g. `/dev/usb/lp0`) or a normal text file. COPRIS by default writes to it every time it
+receives and processes data, overwriting any previous contents (this can be configured to append
+instead). If no destination is specified, data will be echoed to the terminal with corresponding
+`Begin-` and `End-Stream-Transcript` markers (`;BST` and `;EST`).
 
 
 # Usage and examples
