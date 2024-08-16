@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
+#include <string.h>
 #include <assert.h>
 
 #include <ini.h>      /* inih library - .ini file parser  */

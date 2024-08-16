@@ -16,8 +16,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <errno.h>
-#include <assert.h>
+#include <string.h>
 #include <strings.h>
+#include <assert.h>
 
 #include <ini.h>      /* inih library - .ini file parser   */
 #include <uthash.h>   /* uthash library - hash table       */
