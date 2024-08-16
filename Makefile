@@ -39,11 +39,14 @@ DEPS_DBG := $(OBJECTS:%.o=%_dbg.d)
 # Cppcheck settings. Note that 'style' includes 'warning', 'performance' and 'portability'.
 CPPCHECK_DIR   = cppcheck_report
 CPPCHECK_XML   = $(CPPCHECK_DIR)/report.xml
-CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --enable=style,information,missingInclude
+CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --include=<(grep VERSION copris.config) \
+                 --enable=style,information,missingInclude --suppress=missingIncludeSystem \
+                 --check-level=exhaustive
 
 # Targets that do not produce an eponymous file
 .PHONY: check-if-tagged release debug install clean distclean help \
-        check analyse analyse-cppcheck analyse-cppcheck-html doc
+        check analyse analyse-cppcheck analyse-cppcheck-html doc \
+        $(CPPCHECK_DIR)/index.html
 
 all:   | check-if-tagged release
 release: copris
@@ -90,7 +93,7 @@ analyse-cppcheck:
 	cppcheck $(CPPCHECK_FLAGS) src/
 
 analyse-cppcheck-html: $(CPPCHECK_DIR)/index.html
-$(CPPCHECK_DIR)/index.html: src/
+$(CPPCHECK_DIR)/index.html:
 	mkdir -p $(CPPCHECK_DIR)
 	cppcheck $(CPPCHECK_FLAGS) --xml src/ 2>$(CPPCHECK_XML)
 	cppcheck-htmlreport --file=$(CPPCHECK_XML) --report-dir=$(CPPCHECK_DIR)
