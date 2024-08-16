@@ -2,7 +2,7 @@
  * Append string number 'count' named 'filename' to pointer
  * list 'filenames'.
  */
-void append_file_name(char *filename, char **filenames, int count);
+void append_file_name(const char *filename, char **filenames, int count);
 
 /*
  * Free 'count' number of pointers in 'filenames' from memory.
