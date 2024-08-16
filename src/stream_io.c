@@ -55,11 +55,10 @@ int copris_handle_stdin(UT_string *copris_text)
 static size_t read_from_stdin(UT_string *copris_text, struct Stats *stats)
 {
 	char buffer[BUFSIZE];
-	size_t buffer_length = 0;
 
 	for (;;) {
 		// Read (binary) data byte by byte from standard input until exhaustion or error
-		buffer_length = fread(buffer, 1, BUFSIZE, stdin);
+		size_t buffer_length = fread(buffer, 1, BUFSIZE, stdin);
 
 		if (ferror(stdin)) {
 			PRINT_SYSTEM_ERROR("fread", "Error reading from standard input");
