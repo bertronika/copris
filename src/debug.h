@@ -1,4 +1,4 @@
-#define MAX_FILENAME_LENGTH 21
+#define MAX_FILENAME_LENGTH 17
 
 /*
  * The debugging interface consists of preprocessor macros, divided into logging and
@@ -68,9 +68,10 @@ extern int verbosity;
  *               -> fopen: No such file or directory
  */
 
+// 4 = strlen("src/")
 #ifdef DEBUG
 #   define PRINT_LOCATION(output)        \
-           fprintf(output, "%*s:%3d: ", MAX_FILENAME_LENGTH, __FILE__, __LINE__)
+           fprintf(output, "%*s:%3d: ", MAX_FILENAME_LENGTH, ((__FILE__) + 4), __LINE__)
 #else
 #   define PRINT_LOCATION(output)        \
            ((void)0)
