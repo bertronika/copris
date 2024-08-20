@@ -11,10 +11,12 @@ readme: $(README)
 manpage: $(MANPAGE) $(MANPAGE).txt
 manpage_ic: $(MANPAGE_IC) $(MANPAGE_IC).txt
 
-$(README): README.md.m4 common-description.md.m4 common-usage.md.m4
+COMMON := $(wildcard common*.md)
+
+$(README): README.md.m4 $(COMMON)
 	m4 -PEE $< | fmt -s -w 100 > $@
 
-$(MANPAGE): copris.1.md.m4 common-description.md.m4 common-usage.md.m4
+$(MANPAGE): copris.1.md.m4 $(COMMON)
 	m4 -PEE $< | pandoc --standalone --to man > $@
 
 $(MANPAGE_IC): intercopris.1.md.m4

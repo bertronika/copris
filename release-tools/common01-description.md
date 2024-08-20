@@ -1,4 +1,3 @@
-m4_changequote(`[[[', `]]]')m4_dnl
 COPRIS is a printer server and text conversion program that bridges the gap between modern, UTF-8-encoded, Markdown-formatted text and (older) dot-matrix and thermal printers.
 
 When provided with the appropriate configuration files and options, COPRIS reads plain text from a local source or the network (with a built-in TCP socket server), applies optional processing methods to it and sends it to the destination device (or file).
@@ -29,29 +28,3 @@ Many printers support commands (escape codes) for formatting printed text (e.g. 
 Any command can be bound to mentioned attributes. If desired, bold emphasis can trigger double-width text, headings may change the font face or size and links can be made underlined. There are no limits, as long as your *printer feature file* contains commands that are understood by the printer (or any other destination device).
 
 You might have noticed that only a subset of the Markdown specification is supported. COPRIS intentionally doesn't alter text layout (white space, paragraphs etc.), since there's no markup/layout engine. You may freely format your input plain-text files to your liking, and COPRIS will preserve the spacing and newlines (just be warned about four leading spaces triggering a code block).
-
----
-
-
-## File format
-
-*Encoding* and *printer feature files* are expected to be in the INI file format:
-
-```ini
-# Comment
-key1 = whitespace separated values
-key2 = whitespace separated values ; inline comment
-...
-```
-
-Left-hand keys should be written out directly as UTF-8 characters or strings, right-hand values are expected to be in either decimal, octal (prefixed by a `0`) or hexadecimal base (prefixed with `0x`). Don't prepend zeroes to decimal numbers for alignment, as they'll be interpreted as octal numbers. Instead, use any amount of spaces (or tabulators).
-
-In case you need a `key` to resolve to a blank `value`, set `@` as the value (e.g. if you want to remove certain characters from the text, or omit rendering some Markdown attributes).
-
-Here are some examples:
-
-```ini
-Å = 0xC5                ; for an encoding file
-F_BOLD_OFF = 0x1B 0x45  ; for a printer feature file
-F_H3_ON = @             ; ditto
-```

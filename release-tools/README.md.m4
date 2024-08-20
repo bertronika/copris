@@ -1,7 +1,13 @@
 m4_changequote(`[[[', `]]]')m4_dnl
 # COPRIS - a converting printer server
 
-m4_include(common-description.md.m4)m4_dnl
+m4_include(common01-description.md)m4_dnl
+
+
+# File format
+
+m4_include(common02-file_format.md)m4_dnl
+
 
 # How do I make an encoding file?
 
@@ -110,7 +116,7 @@ The last command line argument, output destination, can either be a character de
 
 # Usage and examples
 
-m4_include(common-usage.md.m4)m4_dnl
+m4_include(common03-usage.md)m4_dnl
 
 If you need to debug COPRIS or are curious about its internal status, use the `-v/--verbose` parameter up to two times.
 

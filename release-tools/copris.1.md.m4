@@ -16,7 +16,12 @@ m4_changequote(`[[[', `]]]')m4_dnl
 
 # DESCRIPTION
 
-m4_include(common-description.md.m4)m4_dnl
+m4_include(common01-description.md)m4_dnl
+
+
+# FILE FORMAT
+
+m4_include(common02-file_format.md)m4_dnl
 
 
 # OPTIONS
@@ -80,7 +85,7 @@ elsewhere).
 
 # EXAMPLES
 
-m4_include(common-usage.md.m4)m4_dnl
+m4_include(common03-usage.md)m4_dnl
 
 
 # DEVELOPMENT
