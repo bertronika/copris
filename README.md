@@ -184,11 +184,11 @@ character density, initialise/reset the printer and so on:
 
 ## Parsing variables, numerical values and comments in input text
 
-Any custom variable, specified in a printer feature file, can be invoked from within the input
-text. Specify the `-c` argument when running COPRIS and begin your text with one of the following
-commands: `$ENABLE_COMMANDS`, `$ENABLE_CMD` or `$CMD`. You may then call variables in the text
-file by omitting their `C_` prefix and prepending a dollar sign symbol to them. I.e., if your
-variable is `C_SERIF`, `$SERIF` is used in text to invoke it.
+Any custom variable, specified in a printer feature file, can be invoked from within the
+input text. Specify the `-c` argument when running COPRIS and begin your text with `COPRIS
+ENABLE-COMMANDS` and a new line. You may then call variables in the text file by omitting their
+`C_` prefix, prepending them a special symbol, usually a dollar sign (this is configurable in
+`config.h`. I.e., if your variable is `C_SERIF`, `$SERIF` is used in text to invoke it.
 
 Furthermore, apart from already-defined variables, numerical values can be included in text. They
 must be prefixed with the same symbol as custom variables and then specified in decimal, octal
@@ -201,13 +201,12 @@ series of custom variables or numerical values, each can be commented out separa
 impacting the surrounding ones. For commenting out multiple words, you must find some other
 character, such as underscore or a non-breaking space.
 
-Here's an example of all three of the beforementioned commands. Note the use of non-breaking
-spaces in the comment.
+Here's an example of all three of the beforementioned commands:
 
 ```
-$ENABLE_COMMANDS
-$# Reduce line spacing
-$ESC $0x33 $25
+$COPRIS ENABLE-COMMANDS
+$# Reduce line spacing    (non-breaking spaces are used in this line)
+$ESC $0x33 $25            (feature file has a C_ESC command defined)
 ```
 
 

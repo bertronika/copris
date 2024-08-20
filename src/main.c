@@ -57,7 +57,7 @@ static void copris_help(const char *argv0) {
 	       "  -f, --feature FILE      Process Markdown in received text and use session\n"
 	       "                          commands according to printer feature FILE\n"
 	       "  -c, --parse-commands    If using '--feature', recognise printer feature\n"
-	       "                          command invocations in received text (prefixed by %c)\n"
+	       "                          command invocations in received text\n"
 	       "      --dump-commands     Show all possible printer feature commands\n"
 	       "  -d, --daemon            Do not exit after the first network connection\n"
 	       "  -l, --limit LIMIT       Discard the whole chunk of text, received from the\n"
@@ -77,8 +77,10 @@ static void copris_help(const char *argv0) {
 	       "Notes will be shown if COPRIS assumes it is not invoked\n"
 	       "correctly, but never when the quiet argument is present.\n"
 	       "\n"
-	       "If --parse-commands is enabled, received text should begin with either\n"
-	       "$ENABLE_COMMANDS, $ENABLE_CMD or $CMD.\n",
+	       "If --parse-commands is enabled, received text should begin with the\n"
+	       "following line:\n\n"
+	       "COPRIS ENABLE-COMMANDS.\n"
+	       "Any used commands should then be prefixed with '%c'",
 	       argv0, USER_CMD_SYMBOL);
 
 	exit(EXIT_SUCCESS);

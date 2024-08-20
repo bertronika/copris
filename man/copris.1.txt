@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-696-gee856c8-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-702-gdd3bbe8-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -106,7 +106,7 @@ OPTIONS
               If  a printer feature file is being used, recognise feature commands in received text
               and apply them.  Commands must be prefixed with a predefined symbol, which  is  shown
               when  invoking  copris  --version.   This  feature  only works when the received text
-              starts with $ENABLE_COMMANDS, $ENABLE_CMD or $CMD.
+              starts with COPRIS ENABLE-COMMANDS.
 
        --dump-commands
               Show all possible printer feature commands in INI file format (e.g. to be piped  into
@@ -166,4 +166,4 @@ DEVELOPMENT
 SEE ALSO
        stty(1), intercopris(1)
 
-                                             2024-08-13                                   COPRIS(1)
+                                             2024-08-20                                   COPRIS(1)
