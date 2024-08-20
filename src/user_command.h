@@ -1,26 +1,29 @@
+typedef enum modeline {
+	NO_MODELINE   = (1 << 0), // No modeline found at the beginning of text
+	ML_EMPTY      = (1 << 1), // Modeline was found, but contains no command
+	ML_UNKNOWN    = (1 << 2), // Modeline was found, but contains unknown command(s)
+	ML_ENABLE_CMD = (1 << 3), // Modeline instructs us to enable command parsing
+	ML_DISABLE_MD = (1 << 4)  // Modeline instructs us to disable parsing Markdown
+} modeline_t;
 /*
- * Take input text 'copris_text' and scan it for any invocations of feature
- * commands, prefixed by USER_CMD_SYMBOL. If found commands exist in
- * 'features' hash table, substitute them with commands from 'features'.
+ * Check 'copris_text' if there's a "modeline" at the beginning of text:
+ *   COPRIS [ENABLE-COMMAND|ENABLE-CMD] [DISABLE-MARKDOWN|DISABLE-MD]
  *
- * If none of
- *   > $ENABLE_COMMANDS
- *   > $ENABLE_CMD
- *   > $CMD
- * are found at the beginning of 'copris_text', command parsing
- * doesn't commence.
+ * Letters are case-insensitive, order of commands is not important.
+ * At least one command must be specified to make a modeline valid.
  *
- * Comments in text ($#comment_text) are skipped.
- *
- * Return values (user_action_t):
- * - NO_ACTION on success
- * - DISABLE_MARKDOWN when "$DISABLE_MARKDOWN" was found in 'copris_text'
+ * Return modeline_t according to the parsed result.
  */
+modeline_t parse_modeline(UT_string *copris_text);
 
-typedef enum parse_action {
-	NO_ACTION,
-	SKIP_CMD,
-	DISABLE_MARKDOWN
-} parse_action_t;
+/*
+ * Validate 'modeline' commands in 'copris_text', display possible
+ * error messages and remove it from 'copris_text'.
+ */
+void apply_modeline(UT_string *copris_text, modeline_t modeline);
 
-parse_action_t parse_user_commands(UT_string *copris_text, struct Inifile **features);
+/*
+ * Parse comment, number and command variables in 'copris_text'. Get
+ * command variables from 'features'.
+ */
+void parse_variables(UT_string *copris_text, struct Inifile **features);

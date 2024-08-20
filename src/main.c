@@ -493,14 +493,20 @@ int main(int argc, char **argv) {
 		if (utstring_len(copris_text) == 0)
 			continue; // Do not attempt to write/display nothing
 
-		// Stage 2: Handle Markdown and session commands with a printer feature file
+		// Stage 2: Handle variables, session commands and Markdown with a printer feature file
 		if (attrib.copris_flags & HAS_FEATURES) {
-			parse_action_t action = NO_ACTION;
-			// Parse user commands in text
-			if (attrib.copris_flags & USER_COMMANDS)
-				action = parse_user_commands(copris_text, &features);
+			modeline_t modeline = NO_MODELINE;
 
-			if (action != DISABLE_MARKDOWN)
+			if (attrib.copris_flags & USER_COMMANDS) {
+				// Check for the modeline at the beginning of text, which enables variable reading
+				modeline = parse_modeline(copris_text);
+				apply_modeline(copris_text, modeline);
+
+				if (modeline & ML_ENABLE_CMD)
+					parse_variables(copris_text, &features);
+			}
+
+			if (!(modeline & ML_DISABLE_MD))
 				parse_markdown(copris_text, &features);
 
 			apply_session_commands(copris_text, &features, SESSION_PRINT);

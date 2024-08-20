@@ -21,6 +21,7 @@ OBJECTS = src/feature.o       \
           src/socket_io.o     \
           src/stream_io.o     \
           src/recode.o        \
+          src/tokeniser.o     \
           src/user_command.o  \
           src/utf8.o          \
           src/writer.o        \
