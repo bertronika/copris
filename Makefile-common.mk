@@ -14,17 +14,17 @@ LDFLAGS   ?=
 LIBRARIES = inih
 
 # Object files
-OBJECTS = src/feature.o       \
-          src/main-helpers.o  \
-          src/markdown.o      \
-          src/parse_value.o   \
-          src/socket_io.o     \
-          src/stream_io.o     \
-          src/recode.o        \
-          src/tokeniser.o     \
-          src/user_command.o  \
-          src/utf8.o          \
-          src/writer.o        \
+OBJECTS = src/feature.o          \
+          src/main-helpers.o     \
+          src/markdown.o         \
+          src/parse_value.o      \
+          src/parse_variables.o  \
+          src/socket_io.o        \
+          src/stream_io.o        \
+          src/recode.o           \
+          src/tokeniser.o        \
+          src/utf8.o             \
+          src/writer.o           \
           src/main.o
 
 # Additional compiler and linker library flags
