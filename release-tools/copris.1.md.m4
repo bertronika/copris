@@ -24,7 +24,22 @@ m4_include(common01-description.md)m4_dnl
 m4_include(common02-file_format.md)m4_dnl
 
 
-# OPTIONS
+# THE ENCODING FILE
+
+m4_include(common03-encoding.md)m4_dnl
+
+
+# THE PRINTER FEATURE FILE
+
+m4_include(common04-feature.md)m4_dnl
+
+
+# VARIABLES, NUMERICAL VALUES AND COMMENTS
+
+m4_include(common05-variables.md)m4_dnl
+
+
+# COMMAND LINE OPTIONS
 
 **-p**, **\--port** *NUMBER*
 : Run COPRIS as a network server on port *NUMBER*. Superuser
@@ -83,9 +98,9 @@ omit the output file to have text echoed out to standard output (or piped
 elsewhere).
 
 
-# EXAMPLES
+# EXAMPLES OF INVOKING COPRIS
 
-m4_include(common03-usage.md)m4_dnl
+m4_include(common06-usage.md)m4_dnl
 
 
 # DEVELOPMENT
