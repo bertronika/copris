@@ -36,7 +36,7 @@
 #include "feature.h"
 #include "markdown.h"
 #include "main-helpers.h"
-#include "user_command.h"
+#include "parse_variables.h"
 
 /*
  * Verbosity levels:

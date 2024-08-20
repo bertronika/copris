@@ -1,5 +1,5 @@
 /*
- * User feature command parser
+ * Modeline and variable parser
  *
  * Copyright (C) 2024 Nejc Bertoncelj <bertronika at mailo.com>
  *
@@ -21,8 +21,8 @@
 
 #include "Copris.h"
 #include "debug.h"
+#include "parse_variables.h"
 #include "parse_value.h"
-#include "user_command.h"
 #include "tokeniser.h"
 
 modeline_t parse_modeline(UT_string *copris_text)
