@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-702-gdd3bbe8-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-707-gb017772-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -61,9 +61,7 @@ DESCRIPTION
        and  COPRIS will preserve the spacing and newlines (just be warned about four leading spaces
        triggering a code block).
 
-          *   *   *   *   *
-
-   File format
+FILE FORMAT
        Encoding and printer feature files are expected to be in the INI file format:
 
               # Comment
@@ -76,6 +74,8 @@ DESCRIPTION
        (prefixed with 0x).  Don’t prepend zeroes to decimal numbers for alignment,  as  they’ll  be
        interpreted as octal numbers.  Instead, use any amount of spaces (or tabulators).
 
+       One line can contain exactly one definition/command.
+
        In  case you need a key to resolve to a blank value, set @ as the value (e.g. if you want to
        remove certain characters from the text, or omit rendering some Markdown attributes).
 
@@ -85,9 +85,147 @@ DESCRIPTION
               F_BOLD_OFF = 0x1B 0x45  ; for a printer feature file
               F_H3_ON = @             ; ditto
 
-OPTIONS
+THE ENCODING FILE
+       Before making one, check if COPRIS already includes one for your locale  (encodings/  direc‐
+       tory in the source tree).
+
+       The  format  of  an  encoding file is as follows.  Start the line by entering a your desired
+       character, either via the keyboard or copied from somewhere else.  Follow by an equals sign.
+       Then, enter the numerical value of the same character your printer will understand.
+
+       Here’s an example excerpt of the YUSCII encoding:
+
+              # Left-hand letters are readable to us, however, their UTF-8 codes
+              # are unknown to the printer. Therefore, COPRIS replaces them with
+              # the right-hand values, here represented in hexadecimal.
+              Č = 0x5E  ; replacing ^
+              Ž = 0x40  ; replacing @
+              Š = 0x7B  ; replacing [
+
+       You might have noticed that YUSCII overrides some ASCII characters.  Luckily, printer  char‐
+       acter sets often consist of additional characters (Greek letters, box drawing and maths sym‐
+       bols etc.), which can be also specified in an encoding file to imitate the lost ones:
+
+              ^ = 0x27  ; replacement is an acute accent
+              @ = 0xE8  ; replacement is the Greek letter Phi
+              ...
+
+       Have  you  transcribed a national or a well known encoding COPRIS doesn’t yet include?  Con‐
+       tributions are always welcome!
+
+       You may find out that your printer supports a code page, appropriate for your locale, but it
+       isn’t selected by default when you turn it on.  Read on, the chapter about  printer  feature
+       files explains session commands which can be used for setting up the printer.
+
+THE PRINTER FEATURE FILE
+       As  with  encoding files, COPRIS’ source tree might have the right one in the feature-files/
+       directory.  If the file name seems appropriate, check the first few lines of the file to see
+       if your printer/use case is supported.
+
+       Else, consult the printer’s manual.  There should be a section on escape codes.  Generate  a
+       sample  printer feature file (copris --dump-commands > my-printer.ini.  Uncomment the appro‐
+       priate commands and append values from the manual, in the same way as with encoding files.
+
+       Example from Epson’s LX-300 manual, page A-14 (91):
+
+              ASCII   Dec.   Hex.   Description
+              ----------------------------------------
+              ESC 4   52     34     Select Italic Mode
+              ESC 5   53     35     Cancel Italic Mode
+
+       The corresponding printer feature file lines are:
+
+              # lx300.ini
+              F_ITALIC_ON  = 0x1B 0x34  ; hexadecimal notation, 0x1B = ESC
+              F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
+
+   Variables in printer feature files
+       You can use existing command names as variables, as long as you define  the  command  before
+       using  it as a variable.  Furthermore, you may define your own custom variables and use them
+       in existing commands.  For COPRIS to recognise them, they must be prefixed with  C_!   Vari‐
+       ables may be interweaved with commands.
+
+       Examples:
+
+              # lx300.ini - continued
+              C_UNDERLINE_ON  = 0x1B 0x2D 0x31
+              C_UNDERLINE_OFF = 0x1B 0x2D 0x30
+              F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
+              F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
+
+   Session commands
+       COPRIS  provides two command pairs for sending repetitive settings to the printer.  They may
+       be used to set the code page, text margins, line spacing, font face, character density, ini‐
+       tialise/reset the printer and so on:
+
+       • S_AT_STARTUP and S_AT_SHUTDOWN - sent to the printer once after COPRIS starts and once be‐
+         fore it exits
+
+       • S_BEFORE_TEXT and S_AFTER_TEXT - sent to the printer each time text is received, in  order
+         S_BEFORE_TEXT - received text - S_AFTER_TEXT
+
+       Examples:
+
+              # lx300.ini - continued
+              S_AT_STARTUP = 0x07  ; sound the bell (beeper)
+              S_AFTER_TEXT = 0x0C  ; trigger form feed after printing
+
+VARIABLES, NUMERICAL VALUES AND COMMENTS
+       If  you’ve  defined  a printer feature file, and it includes custom variables (prefixed with
+       C_), you may use them directly in input text.
+
+       To allow for that, specify the -c argument when running COPRIS and begin your  text  with  a
+       line,  containing  COPRIS  ENABLE-COMMANDS.  This is called the modeline and tells COPRIS to
+       process variables in input text.
+
+       You may then call variables in the text file by omitting their C_ prefix  and  prepending  a
+       special  symbol  to them, usually a dollar sign (this is configurable in config.h.  I.e., if
+       your variable is C_SERIF, $SERIF is used in text to invoke it.
+
+       Furthermore, apart from already-defined variables, numerical values can be included in text.
+       They must be prefixed with the same symbol as custom variables and then specified  in  deci‐
+       mal, octal or hexadecimal notation, as they would be in a printer feature file.
+
+       Lastly, comments can be passed in text.  They consist of the same prefix character as custom
+       variables, followed by a number sign and the word that needs to be commented out.
+
+       You  cannot comment out a whole line (or multiple space-separated words), only single words.
+       To circumvent that, separate your words with some other character, such as an underscore  or
+       a non-breaking space.
+
+       For proper detection of all of the above commands, they must be prefixed and suffixed by (at
+       least) one space.
+
+       Here are examples of all three of the beforementioned commands:
+
+              COPRIS ENABLE-COMMANDS     (must be included at the top)
+              $# Reduce line spacing     (non-breaking spaces are used in this line)
+              $ESC $0x33 $25             (feature file has a C_ESC command defined)
+
+   The modeline
+       It is expected in the first line of input text in the following format:
+
+              COPRIS <required 1st option> [ optional 2nd option ]
+
+       Above  text  already  mentioned  its  use for for enabling command detection.  It serves one
+       other purpose, disabling parsing Markdown in text.
+
+       Here are both modeline options and their short forms:
+
+       • ENABLE-COMMANDS; ENABLE-CMD
+
+       • DISABLE-MARKDOWN; DISABLE-MD
+
+       Letters are case-insensitive and the order of  options  isn’t  important.   Thus,  following
+       lines are the same:
+
+       • COPRIS ENABLE-COMMANDS DISABLE-MARKDOWN
+
+       • copris disable-md enable-cmd
+
+COMMAND LINE OPTIONS
        -p, --port NUMBER
-              Run COPRIS as a network server on port NUMBER.  Superuser privileges are required  if
+              Run  COPRIS as a network server on port NUMBER.  Superuser privileges are required if
               NUMBER is less than 1024.
 
        -e, --encoding FILE
@@ -95,21 +233,21 @@ OPTIONS
               option can be specified multiple times.
 
        --ignore-missing
-              If  recoding  characters,  do not terminate the program if received text contains any
+              If recoding characters, do not terminate the program if received  text  contains  any
               possibly unwanted multi-byte characters that were not handled by specified FILEs.
 
        -f, --feature FILE
-              Process Markdown formatting in received text and apply session commands according  to
+              Process  Markdown formatting in received text and apply session commands according to
               commands from printer feature FILE.  This option can be specified multiple times.
 
        -c, --parse-commands
-              If  a printer feature file is being used, recognise feature commands in received text
-              and apply them.  Commands must be prefixed with a predefined symbol, which  is  shown
-              when  invoking  copris  --version.   This  feature  only works when the received text
+              If a printer feature file is being used, recognise feature commands in received  text
+              and  apply  them.  Commands must be prefixed with a predefined symbol, which is shown
+              when invoking copris --version.  This feature  only  works  when  the  received  text
               starts with COPRIS ENABLE-COMMANDS.
 
        --dump-commands
-              Show all possible printer feature commands in INI file format (e.g. to be piped  into
+              Show  all possible printer feature commands in INI file format (e.g. to be piped into
               a new printer feature file you are making).
 
        -d, --daemon
@@ -125,7 +263,7 @@ OPTIONS
               Show informative status messages.  If specified twice, show even more messages.
 
        -q, --quiet
-              Do  not  show  any unneccessary messages, except warnings and fatal errors, routed to
+              Do not show any unneccessary messages, except warnings and fatal  errors,  routed  to
               stderr.  This also omits notes, shown if COPRIS assumes it is not invoked properly.
 
        -h, --help
@@ -134,28 +272,28 @@ OPTIONS
        -V, --version
               Show program version, author and build-time options.
 
-       Do not specify a port number if you want to read from standard input.   Likewise,  omit  the
+       Do  not  specify  a port number if you want to read from standard input.  Likewise, omit the
        output file to have text echoed out to standard output (or piped elsewhere).
 
-EXAMPLES
-       Notice:  COPRIS  is in active development.  Some features are still missing, others have not
-       been thoroughly tested yet.  Command line option arguments may change  in  future.   Version
+EXAMPLES OF INVOKING COPRIS
+       Notice: COPRIS is in active development.  Some features are still missing, others  have  not
+       been  thoroughly  tested  yet.  Command line option arguments may change in future.  Version
        1.0 will be tagged when the feature set will be deemed complete.
 
-       Run  as  a simple server on port 8080, perform no text recoding, output received data to the
-       serial port and exit after one connection.  Note that superuser privileges are  required  if
+       Run as a simple server on port 8080, perform no text recoding, output received data  to  the
+       serial  port  and exit after one connection.  Note that superuser privileges are required if
        the specified port is smaller than 1024.
 
               copris -p 8080 /dev/ttyS0
 
-       Serve  on  port 8080 as a daemon (do not exit after first connection), recode text using the
-       slovene.ini encoding file, limit any incoming text to a maximum of 100 characters and  print
+       Serve on port 8080 as a daemon (do not exit after first connection), recode text  using  the
+       slovene.ini  encoding file, limit any incoming text to a maximum of 100 characters and print
        received data to the terminal.  Note that text limit works only when running as a server.
 
               copris -p 8080 -d -e slovene.ini -l 100
 
-       Read  local  file font-showcase.md using the printer feature file epson-escp.ini.  Interpret
-       any possible user commands, found in the local  file.   Output  formatted  text  to  an  USB
+       Read local file font-showcase.md using the printer feature file  epson-escp.ini.   Interpret
+       any  possible  user  commands,  found  in  the  local file.  Output formatted text to an USB
        printer interface on the local computer:
 
               copris -f epson-escp.ini -c /dev/usb/lp0 < font-showcase.md

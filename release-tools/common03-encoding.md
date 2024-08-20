@@ -1,17 +1,13 @@
-Firstly, check if COPRIS already includes one for your locale (`encodings/` directory).
+Before making one, check if COPRIS already includes one for your locale (`encodings/` directory in the source tree).
 
-If not, you can search the Internet for a code page table/listing with characters and their numberical values, which you can then manually convert to an appropriate format.
-
-As a fallback, to at least figure out the character codes of your character set, run the `printchar.sh` test script, included with COPRIS, and pipe its output into the printer. It'll output printable characters, along with their decimal and hexadecimal values.
-
-The format of an encoding file is simple. Start the line by entering a human-readable character, either via your keyboard or copied from somewhere else. Follow by an equals sign (optionally surrounded by spaces). Then, enter the numerical value of that character which your printer will understand.
+The format of an encoding file is as follows. Start the line by entering a your desired character, either via the keyboard or copied from somewhere else. Follow by an equals sign. Then, enter the numerical value of the same character your printer will understand.
 
 Here's an example excerpt of the YUSCII encoding:
 
 ```ini
 # Left-hand letters are readable to us, however, their UTF-8 codes
-# are unknown to the printer.  Therefore, COPRIS replaces them with
-# the right-hand hexadecimal codes.
+# are unknown to the printer. Therefore, COPRIS replaces them with
+# the right-hand values, here represented in hexadecimal.
 Č = 0x5E  ; replacing ^
 Ž = 0x40  ; replacing @
 Š = 0x7B  ; replacing [
@@ -25,6 +21,6 @@ You might have noticed that YUSCII overrides some ASCII characters. Luckily, pri
 ...
 ```
 
-Have you made an encoding file COPRIS doesn't yet include? Contributions are always welcome!
+Have you transcribed a national or a well known encoding COPRIS doesn't yet include? Contributions are always welcome!
 
-You may find out that your printer supports a code page, appropriate for your locale, but it isn't selected by default when you turn it on. Read on, the chapter about printer feature files isn't only about formatting text, it also explains the custom commands that are used for setting up the printer.
+You may find out that your printer supports a code page, appropriate for your locale, but it isn't selected by default when you turn it on. Read on, the chapter about printer feature files explains session commands which can be used for setting up the printer.

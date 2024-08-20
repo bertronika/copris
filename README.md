@@ -53,10 +53,8 @@ markup/layout engine. You may freely format your input plain-text files to your 
 and COPRIS will preserve the spacing and newlines (just be warned about four leading spaces
 triggering a code block).
 
----
 
-
-## File format
+# File format
 
 *Encoding* and *printer feature files* are expected to be in the INI file format:
 
@@ -72,6 +70,8 @@ are expected to be in either decimal, octal (prefixed by a `0`) or hexadecimal b
 with `0x`). Don't prepend zeroes to decimal numbers for alignment, as they'll be interpreted
 as octal numbers. Instead, use any amount of spaces (or tabulators).
 
+One line can contain exactly *one* definition/command.
+
 In case you need a `key` to resolve to a blank `value`, set `@` as the value (e.g. if you want
 to remove certain characters from the text, or omit rendering some Markdown attributes).
 
@@ -83,28 +83,22 @@ F_BOLD_OFF = 0x1B 0x45  ; for a printer feature file
 F_H3_ON = @             ; ditto
 ```
 
-# How do I make an encoding file?
 
-Firstly, check if COPRIS already includes one for your locale (`encodings/` directory).
+# Writing an encoding file
 
-If not, you can search the Internet for a code page table/listing with characters and their
-numberical values, which you can then manually convert to an appropriate format.
+Before making one, check if COPRIS already includes one for your locale (`encodings/` directory
+in the source tree).
 
-As a fallback, to at least figure out the character codes of your character set, run the
-`printchar.sh` test script, included with COPRIS, and pipe its output into the printer. It'll
-output printable characters, along with their decimal and hexadecimal values.
-
-The format of an encoding file is simple. Start the line by entering a human-readable character,
-either via your keyboard or copied from somewhere else. Follow by an equals sign (optionally
-surrounded by spaces). Then, enter the numerical value of that character which your printer
-will understand.
+The format of an encoding file is as follows. Start the line by entering a your desired character,
+either via the keyboard or copied from somewhere else. Follow by an equals sign. Then, enter
+the numerical value of the same character your printer will understand.
 
 Here's an example excerpt of the YUSCII encoding:
 
 ```ini
 # Left-hand letters are readable to us, however, their UTF-8 codes
-# are unknown to the printer.  Therefore, COPRIS replaces them with
-# the right-hand hexadecimal codes.
+# are unknown to the printer. Therefore, COPRIS replaces them with
+# the right-hand values, here represented in hexadecimal.
 Č = 0x5E  ; replacing ^
 Ž = 0x40  ; replacing @
 Š = 0x7B  ; replacing [
@@ -120,24 +114,23 @@ which can be also specified in an encoding file to imitate the lost ones:
 ...
 ```
 
-Have you made an encoding file COPRIS doesn't yet include? Contributions are always welcome!
+Have you transcribed a national or a well known encoding COPRIS doesn't yet include? Contributions
+are always welcome!
 
 You may find out that your printer supports a code page, appropriate for your locale, but it
 isn't selected by default when you turn it on. Read on, the chapter about printer feature files
-isn't only about formatting text, it also explains the custom commands that are used for setting
-up the printer.
+explains session commands which can be used for setting up the printer.
 
 
-# How do I make a printer feature file?
+# Writing a printer feature file
 
-As with encoding files, COPRIS might have the right one in the `feature-files/` directory. If
-the file name seems appropriate, check the first few lines of the file to see if your printer
-is supported.
+As with encoding files, COPRIS' source tree might have the right one in the `feature-files/`
+directory. If the file name seems appropriate, check the first few lines of the file to see if
+your printer/use case is supported.
 
-Else, consult the printer's manual. There should be a section on escape codes. Generate a
-sample printer feature file (`copris --dump-commands > my-printer.ini`, see [copris(1) man
-page](man/copris.1.txt) for details). Uncomment the appropriate commands and append values from
-the manual, in the same way as with encoding files.
+Else, consult the printer's manual. There should be a section on escape codes. Generate a sample
+printer feature file (`copris --dump-commands > my-printer.ini`. Uncomment the appropriate
+commands and append values from the manual, in the same way as with encoding files.
 
 Example from Epson's LX-300 manual, page A-14 (91):
 
@@ -157,12 +150,14 @@ F_ITALIC_OFF = 27 53      ; decimal notation, 27 = ESC
 ```
 
 
-## Variables and session commands
+## Variables in printer feature files
 
 You can use existing command names as variables, as long as you define the command *before*
 using it as a variable. Furthermore, you may define your own custom variables and use them in
 existing commands. For COPRIS to recognise them, they must be prefixed with `C_`! Variables
 may be interweaved with commands.
+
+Examples:
 
 ```ini
 # lx300.ini - continued
@@ -172,42 +167,84 @@ F_H1_ON  = C_UNDERLINE_ON F_ITALIC_ON
 F_H1_OFF = F_ITALIC_OFF C_UNDERLINE_OFF
 ```
 
-COPRIS also provides **session commands**: two command pairs for sending repetitive settings
-to the printer. They may be used to set the code page, text margins, line spacing, font face,
-character density, initialise/reset the printer and so on:
+
+## Session commands
+
+COPRIS provides two command pairs for sending repetitive settings to the printer. They may
+be used to set the code page, text margins, line spacing, font face, character density,
+initialise/reset the printer and so on:
 
 - `S_AT_STARTUP` and `S_AT_SHUTDOWN` - sent to the printer once after COPRIS starts and once
   before it exits
 - `S_BEFORE_TEXT` and `S_AFTER_TEXT` - sent to the printer each time text is received, in
   order `S_BEFORE_TEXT` - *received text* - `S_AFTER_TEXT`
 
+Examples:
 
-## Parsing variables, numerical values and comments in input text
+```ini
+# lx300.ini - continued
+S_AT_STARTUP = 0x07  ; sound the bell (beeper)
+S_AFTER_TEXT = 0x0C  ; trigger form feed after printing
+```
 
-Any custom variable, specified in a printer feature file, can be invoked from within the
-input text. Specify the `-c` argument when running COPRIS and begin your text with `COPRIS
-ENABLE-COMMANDS` and a new line. You may then call variables in the text file by omitting their
-`C_` prefix, prepending them a special symbol, usually a dollar sign (this is configurable in
-`config.h`. I.e., if your variable is `C_SERIF`, `$SERIF` is used in text to invoke it.
+
+# Variables, numerical values and comments in input text
+
+If you've defined a printer feature file, and it includes custom variables (prefixed with `C_`),
+you may use them directly in input text.
+
+To allow for that, specify the `-c` argument when running COPRIS and begin your text with a
+line, containing `COPRIS ENABLE-COMMANDS`. This is called the *modeline* and tells COPRIS to
+process variables in input text.
+
+You may then call variables in the text file by omitting their `C_` prefix and prepending a
+special symbol to them, usually a dollar sign (this is configurable in `config.h`. I.e., if
+your variable is `C_SERIF`, `$SERIF` is used in text to invoke it.
 
 Furthermore, apart from already-defined variables, numerical values can be included in text. They
 must be prefixed with the same symbol as custom variables and then specified in decimal, octal
 or hexadecimal notation, as they would be in a printer feature file.
 
 Lastly, comments can be passed in text. They consist of the same prefix character as custom
-variables, followed by a number sign and the text that needs to be commented out. **Be aware**
-that whitespace characters aren't permitted in a comment. This means that, for example in a
-series of custom variables or numerical values, each can be commented out separately, without
-impacting the surrounding ones. For commenting out multiple words, you must find some other
-character, such as underscore or a non-breaking space.
+variables, followed by a number sign and the word that needs to be commented out.
 
-Here's an example of all three of the beforementioned commands:
+You cannot comment out a whole line (or multiple space-separated words), only single words. To
+circumvent that, separate your words with some other character, such as an underscore or a
+non-breaking space.
+
+For proper detection of all of the above commands, they must be prefixed and suffixed by (at
+least) one space.
+
+Here are examples of all three of the beforementioned commands:
 
 ```
-$COPRIS ENABLE-COMMANDS
-$# Reduce line spacing    (non-breaking spaces are used in this line)
-$ESC $0x33 $25            (feature file has a C_ESC command defined)
+COPRIS ENABLE-COMMANDS     (must be included at the top)
+$# Reduce line spacing     (non-breaking spaces are used in this line)
+$ESC $0x33 $25             (feature file has a C_ESC command defined)
 ```
+
+
+## The modeline
+
+It is expected in the first line of input text in the following format:
+
+```
+COPRIS <required 1st option> [ optional 2nd option ]
+```
+
+Above text already mentioned its use for for enabling command detection. It serves one other
+purpose, disabling parsing Markdown in text.
+
+Here are both modeline options and their short forms:
+
+- `ENABLE-COMMANDS`; `ENABLE-CMD`
+- `DISABLE-MARKDOWN`; `DISABLE-MD`
+
+Letters are case-insensitive and the order of options isn't important. Thus, following lines
+are the same:
+
+- `COPRIS ENABLE-COMMANDS DISABLE-MARKDOWN`
+- `copris disable-md enable-cmd`
 
 
 # How does COPRIS handle the output serial/parallel/USB/etc. connection?
