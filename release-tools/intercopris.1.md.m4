@@ -25,7 +25,7 @@ Intercopris gives you a command prompt, similar to that of a shell. It understan
 - plain text, prefixed with '**t** '
 - various built-in commands (e.g. `dump`, `hex`, `last` etc.), listed when starting the program
 
-After completing a line and pressing return, Intercopris will parse the entered data. If it is a built-in command, it will toggle its internal state or echo out any possible result. If commands are entered, Copris will process them using the supplied printer feature file (which must be specified with `-f FILE`) and send them to the output.
+After completing a line and pressing return, Intercopris will parse the entered data. If it is a built-in command, it will toggle its internal state or echo out any possible result. If commands are entered, Intercopris will process them using the supplied printer feature file (which must be specified with `-f FILE`) and send them to the output.
 
 Intercopris supports saving and reloading command history. To use it, you must create a file whose filename is told to you by the output of `intercopris -h`.
 

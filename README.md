@@ -86,10 +86,10 @@ F_H3_ON = @             ; ditto
 
 # Writing an encoding file
 
-Before making one, check if COPRIS already includes one for your locale (`encodings/` directory
+Before making one, check if COPRIS already includes one for your locale (`encodings` directory
 in the source tree).
 
-The format of an encoding file is as follows. Start the line by entering a your desired character,
+The format of an encoding file is as follows. Start the line by entering your desired character,
 either via the keyboard or copied from somewhere else. Follow by an equals sign. Then, enter
 the numerical value of the same character your printer will understand.
 
@@ -129,7 +129,7 @@ directory. If the file name seems appropriate, check the first few lines of the 
 your printer/use case is supported.
 
 Else, consult the printer's manual. There should be a section on escape codes. Generate a sample
-printer feature file (`copris --dump-commands > my-printer.ini`. Uncomment the appropriate
+printer feature file (`copris --dump-commands > my-printer.ini`). Uncomment the appropriate
 commands and append values from the manual, in the same way as with encoding files.
 
 Example from Epson's LX-300 manual, page A-14 (91):

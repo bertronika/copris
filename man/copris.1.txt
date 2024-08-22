@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-710-g7c3aee6-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-712-g100aad9-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -86,11 +86,11 @@ FILE FORMAT
               F_H3_ON = @             ; ditto
 
 THE ENCODING FILE
-       Before making one, check if COPRIS already includes one for your locale  (encodings/  direc‐
-       tory in the source tree).
+       Before making one, check if COPRIS already includes one for your locale (encodings directory
+       in the source tree).
 
-       The  format  of  an  encoding file is as follows.  Start the line by entering a your desired
-       character, either via the keyboard or copied from somewhere else.  Follow by an equals sign.
+       The format of an encoding file is as follows.  Start the line by entering your desired char‐
+       acter, either via the keyboard or copied from somewhere else.  Follow  by  an  equals  sign.
        Then, enter the numerical value of the same character your printer will understand.
 
        Here’s an example excerpt of the YUSCII encoding:
@@ -102,7 +102,7 @@ THE ENCODING FILE
               Ž = 0x40  ; replacing @
               Š = 0x7B  ; replacing [
 
-       You might have noticed that YUSCII overrides some ASCII characters.  Luckily, printer  char‐
+       You  might have noticed that YUSCII overrides some ASCII characters.  Luckily, printer char‐
        acter sets often consist of additional characters (Greek letters, box drawing and maths sym‐
        bols etc.), which can be also specified in an encoding file to imitate the lost ones:
 
@@ -110,20 +110,20 @@ THE ENCODING FILE
               @ = 0xE8  ; replacement is the Greek letter Phi
               ...
 
-       Have  you  transcribed a national or a well known encoding COPRIS doesn’t yet include?  Con‐
+       Have you transcribed a national or a well known encoding COPRIS doesn’t yet  include?   Con‐
        tributions are always welcome!
 
        You may find out that your printer supports a code page, appropriate for your locale, but it
-       isn’t selected by default when you turn it on.  Read on, the chapter about  printer  feature
+       isn’t  selected  by default when you turn it on.  Read on, the chapter about printer feature
        files explains session commands which can be used for setting up the printer.
 
 THE PRINTER FEATURE FILE
-       As  with  encoding files, COPRIS’ source tree might have the right one in the feature-files/
+       As with encoding files, COPRIS’ source tree might have the right one in  the  feature-files/
        directory.  If the file name seems appropriate, check the first few lines of the file to see
        if your printer/use case is supported.
 
-       Else, consult the printer’s manual.  There should be a section on escape codes.  Generate  a
-       sample  printer feature file (copris --dump-commands > my-printer.ini.  Uncomment the appro‐
+       Else,  consult the printer’s manual.  There should be a section on escape codes.  Generate a
+       sample printer feature file (copris --dump-commands > my-printer.ini).  Uncomment the appro‐
        priate commands and append values from the manual, in the same way as with encoding files.
 
        Example from Epson’s LX-300 manual, page A-14 (91):

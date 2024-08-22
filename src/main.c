@@ -79,8 +79,8 @@ static void copris_help(const char *argv0) {
 	       "\n"
 	       "If --parse-commands is enabled, received text should begin with the\n"
 	       "following line:\n\n"
-	       "COPRIS ENABLE-COMMANDS.\n"
-	       "Any used commands should then be prefixed with '%c'",
+	       "COPRIS ENABLE-COMMANDS\n"
+	       "Any used commands should then be prefixed with '%c'.",
 	       argv0, VAR_SYMBOL);
 
 	exit(EXIT_SUCCESS);

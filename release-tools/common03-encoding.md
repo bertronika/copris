@@ -1,6 +1,6 @@
-Before making one, check if COPRIS already includes one for your locale (`encodings/` directory in the source tree).
+Before making one, check if COPRIS already includes one for your locale (`encodings` directory in the source tree).
 
-The format of an encoding file is as follows. Start the line by entering a your desired character, either via the keyboard or copied from somewhere else. Follow by an equals sign. Then, enter the numerical value of the same character your printer will understand.
+The format of an encoding file is as follows. Start the line by entering your desired character, either via the keyboard or copied from somewhere else. Follow by an equals sign. Then, enter the numerical value of the same character your printer will understand.
 
 Here's an example excerpt of the YUSCII encoding:
 
