@@ -31,56 +31,53 @@ int parse_all_to_commands(const char *value, size_t value_len,
 	CHECK_MALLOC(value_copy);
 
 	int element_count = 0;
-	int variable_count = 0;
-	bool problem = false;
+	// int variable_count = 0;
 
 	char *token = strtok(value_copy, " ");
-	while (token != NULL && !problem) {
+	while (token != NULL) {
 		if (!isdigit(token[0])) {
 			// Value is a variable
 			if (token[0] != 'C' && token[0] != 'F') {
 				PRINT_ERROR_MSG("Variables must be prefixed with either 'C_' or 'F_', and "
 				                "'%s' is with neither of them.", token);
-				problem = true;
 				break;
 			}
+
 			struct Inifile *s;
 			HASH_FIND_STR(*features, token, s);
 			if (s == NULL) {
 				PRINT_ERROR_MSG("Internal variable '%s' does not exist. If it is a custom "
 				                "command, make sure it has the 'C_' prefix.", token);
-				problem = true;
 				break;
-			} else if (s->out_len == 0) {
+			}
+
+			if (s->out_len == 0) {
 				PRINT_ERROR_MSG("Variable '%s' does not (yet) exist. Custom command "
 				                "should be specified after it.", token);
-				problem = true;
 				break;
-			} else {
-				variable_count++;
-
-				utstring_bincpy(parsed_value, s->out, s->out_len);
-				element_count += s->out_len;
 			}
+
+			// variable_count++;
+			utstring_bincpy(parsed_value, s->out, s->out_len);
+			element_count += s->out_len;
 		} else {
 			// Value is a number
 			char parsed_token[MAX_INIFILE_ELEMENT_LENGTH];
 			int new_value_len = parse_number_string(token, parsed_token,
 			                                        (sizeof parsed_token) - 1);
 
-			if (new_value_len == -1) {
-				problem = true;
-			} else {
-				utstring_bincpy(parsed_value, parsed_token, new_value_len);
-				element_count += new_value_len;
-			}
+			if (new_value_len == -1)
+				break;
+
+			utstring_bincpy(parsed_value, parsed_token, new_value_len);
+			element_count += new_value_len;
 		}
 		token = strtok(NULL, " ");
 	}
 
 	free(value_copy);
 
-	if (problem)
+	if (token != NULL)
 		return -1;
 
 	//PRINT_MSG("%d variable(s), %d element(s).", variable_count, element_count);
