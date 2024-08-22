@@ -25,11 +25,12 @@
 #   define NUM_OF_INPUT_FILES 16
 #endif
 
-// Symbol for prefixing invocations of feature commands
-// in text
-#ifndef USER_CMD_SYMBOL
-#   define USER_CMD_SYMBOL '$'
-#endif
+// Symbols for variable detection
+#define VAR_SYMBOL     '$'
+#define VAR_TERMINATOR ';'
+#define VAR_COMMENT    '#'
+#define VAR_SEPARATORS " \n\t!\"%&\'()*+,./:;<=>?@[\\]^`{|}~"
+// removed: -_$#
 
 // Uncomment the following line to overwrite the output
 // file instead of appending to it:

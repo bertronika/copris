@@ -81,7 +81,7 @@ static void copris_help(const char *argv0) {
 	       "following line:\n\n"
 	       "COPRIS ENABLE-COMMANDS.\n"
 	       "Any used commands should then be prefixed with '%c'",
-	       argv0, USER_CMD_SYMBOL);
+	       argv0, VAR_SYMBOL);
 
 	exit(EXIT_SUCCESS);
 }
@@ -96,7 +96,7 @@ static void copris_version(void) {
 	       "  feature files that can be loaded:     %4d\n"
 	       "  Symbol for invoking feature commands:  '%c'\n"
 	       "\n",
-	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, NUM_OF_INPUT_FILES, USER_CMD_SYMBOL);
+	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, NUM_OF_INPUT_FILES, VAR_SYMBOL);
 
 	exit(EXIT_SUCCESS);
 }

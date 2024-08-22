@@ -23,7 +23,6 @@
 #include "debug.h"
 #include "parse_variables.h"
 #include "parse_value.h"
-#include "tokeniser.h"
 
 modeline_t parse_modeline(UT_string *copris_text)
 {
@@ -107,73 +106,83 @@ void apply_modeline(UT_string *copris_text, modeline_t modeline)
 }
 
 static void parse_extracted_variable(UT_string *text, struct Inifile **features,
-                                     char *variable, size_t variable_len);
-static int ispunct_custom(int c);
+                                     UT_string *variable);
 
 void parse_variables(UT_string *copris_text, struct Inifile **features)
 {
-	UT_string *output_text;
-	utstring_new(output_text);
+	UT_string *temp_text, *variable_name;
+	utstring_new(temp_text);
+	utstring_new(variable_name);
 
-	UT_string *inner_token;
-	utstring_new(inner_token);
+	char *s = utstring_body(copris_text);
+	size_t l = utstring_len(copris_text);
 
-	binary_token_t token_nl_storage, token_storage;
-	binary_token_t token_nl = binary_tokeniser(copris_text, '\n', &token_nl_storage, true);
-	while (token_nl.data != NULL) {
-		// printf("str1: '%.*s' (%zu) last: %d\n", (int)token_nl.length, token_nl.data, token_nl.length, token_nl.last);
-		utstring_bincpy(inner_token, token_nl.data, token_nl.length);
-		binary_token_t token = binary_tokeniser(inner_token, ' ', &token_storage, true);
+	while (l > 0) {
+		char *tok = memchr(s, VAR_SYMBOL, l);
+		size_t tok_offset = tok ? (size_t)(tok - s) : l;
 
-		while (token.data != NULL) {
-			if (token.data[0] == USER_CMD_SYMBOL) {
-				// Terminate the token to make it a string (replacing the white space separator),
-				// except the last one, which doesn't have any separator at the end.
-				if (!token_nl.last)
-					token.data[--token.length] = '\0';
-
-				// printf("cmd : '%s' (%zu) last/nl: %d/%d\n", token.data, token.length, token.last, token_nl.last);
-				parse_extracted_variable(output_text, features, token.data, token.length);
-			} else {
-				// printf("str2: '%.*s' (%zu) last: %d\n", (int)token.length, token.data, token.length, token.last);
-				utstring_bincpy(output_text, token.data, token.length);
-			}
-			token = binary_tokeniser(inner_token, ' ', &token_storage, false);
+		// Main separator (VAR_SYMBOL) is located when token offset is zero.
+		if (tok_offset > 0) {
+			// No separator yet, copy text to output
+			utstring_bincpy(temp_text, s, tok_offset);
+			s += tok_offset;
+			l -= tok_offset;
+			continue;
 		}
-		token_nl = binary_tokeniser(copris_text, '\n', &token_nl_storage, false);
-		utstring_clear(inner_token);
-	}
 
-	utstring_free(inner_token);
+		if (s == tok) {
+			// Separator located, treat token like a command
+			const char *tok_end = strpbrk(s, VAR_SEPARATORS);
+			size_t tok_len = tok_end ? (size_t)(tok_end - s) : l;
+			int skip_char = 0;
+
+			if (tok[tok_len - 1] == VAR_SYMBOL) {
+				// $COMMAND$ - discard last two characters (e.g. omit \n)
+				tok[tok_len - 1] = '\0';  // null one
+
+				if (tok_end != NULL)      // discard the other
+					skip_char = 1;
+
+			} else if (tok_end != NULL && tok[tok_len] == VAR_TERMINATOR) {
+				// $VARIABLE; - discard last character (join with following text)
+				skip_char = 1;
+
+			} else if (tok_end != NULL && tok[1] == VAR_COMMENT) {
+				// $#VARIABLE - comment, discard last character
+				skip_char = 1;
+			}
+
+			// printf("tok %2zu: '%.*s', end:%d, skip_char:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL, skip_char);
+			utstring_bincpy(variable_name, tok, tok_len);
+			parse_extracted_variable(temp_text, features, variable_name);
+			utstring_clear(variable_name);
+
+			s += tok_len + skip_char;
+			l -= tok_len + skip_char;
+		}
+	}
+	utstring_free(variable_name);
 
 	utstring_clear(copris_text);
-	utstring_concat(copris_text, output_text);
-	utstring_free(output_text);
+	utstring_concat(copris_text, temp_text);
+	utstring_free(temp_text);
 }
 
 static void parse_extracted_variable(UT_string *text, struct Inifile **features,
-                              char *variable, size_t variable_len)
+                                     UT_string *variable)
 {
 	// Skip the command symbol
-	char *variable_name = variable + 1;
-	--variable_len;
+	char *variable_name = utstring_body(variable) + 1;
+	size_t variable_len = utstring_len(variable) - 1;
 
 	// Comment variable
-	if (*variable_name == '#')
+	if (*variable_name == VAR_COMMENT)
 		return;
 
-	// Check for possible punctuation at the end of the variable and store it
-	char *punct_suffix = NULL;
-	size_t punct_len = 0;
-
-	for (size_t i = 0; i < variable_len; i++) {
-		if (ispunct_custom(variable_name[i])) {
-			punct_suffix = strdup(variable_name + i);
-			CHECK_MALLOC(punct_suffix);
-			punct_len = variable_len - i;
-			variable_name[i] = '\0';
-			break;
-		}
+	// Escaped variable symbol
+	if (*variable_name == VAR_SYMBOL) {
+		utstring_bincpy(text, variable_name, variable_len);
+		return;
 	}
 
 	// Number variable
@@ -186,117 +195,44 @@ static void parse_extracted_variable(UT_string *text, struct Inifile **features,
 			utstring_bincpy(text, parsed_number, element_count);
 		} else {
 			if (LOG_ERROR)
-				PRINT_MSG("Variable '%s' was skipped.", variable);
+				PRINT_MSG("Variable '%s' was skipped.", utstring_body(variable));
 		}
-		goto final;
+		return;
 	}
 
 	// Command variable
 	// Prepare a valid string for lookup
 	char variable_lookup[MAX_INIFILE_ELEMENT_LENGTH];
-	size_t variable_lookup_len = snprintf(variable_lookup, MAX_INIFILE_ELEMENT_LENGTH, \
+	size_t variable_lookup_len = snprintf(variable_lookup, MAX_INIFILE_ELEMENT_LENGTH,
 	                                      "C_%s", variable_name);
 
 	if (variable_lookup_len >= MAX_INIFILE_ELEMENT_LENGTH) {
 		if (LOG_ERROR) {
 			PRINT_MSG("Found command notation in following line, but it is "
 			          "too long to be parsed.");
-			PRINT_MSG(" %.*s...", MAX_INIFILE_ELEMENT_LENGTH, variable);
+			PRINT_MSG(" %.*s...", MAX_INIFILE_ELEMENT_LENGTH, utstring_body(variable));
 		}
 
-		goto final;
+		return;
 	}
 
 	struct Inifile *s = NULL;
 	HASH_FIND_STR(*features, variable_lookup, s);
 
 	if (!s) {
+		utstring_bincpy(text, utstring_body(variable), utstring_len(variable));
 		if (LOG_ERROR)
-			PRINT_MSG("Found variable '%s', but the command is not defined.", variable);
+			PRINT_MSG("Found variable '%s', but the command is not defined.",
+			          utstring_body(variable));
 
-		goto final;
+		return;
 	}
 
 	if (LOG_INFO)
-		PRINT_MSG("Found variable '%s'.", variable);
+		PRINT_MSG("Found variable '%s'.", utstring_body(variable));
 
 	if (s->out_len > 0)
 		utstring_bincpy(text, s->out, s->out_len);
 
-	final:
-	// Append back the found punctuation, if any, including the whitespace separator
-	if (punct_suffix) {
-		utstring_bincpy(text, punct_suffix, punct_len);
-		utstring_bincpy(text, " ", 1);
-		free(punct_suffix);
-	}
 	return;
 }
-
-static int ispunct_custom(int c)
-{
-	// Created using 'make_punct_list()'.
-	switch (c) {
-	case '!':
-	case '"':
-	case '#':
-	case '%':
-	case '&':
-	case '\'':
-	case '(':
-	case ')':
-	case '*':
-	case '+':
-	case ',':
-	case '.':
-	case '/':
-	case ':':
-	case ';':
-	case '<':
-	case '=':
-	case '>':
-	case '?':
-	case '@':
-	case '[':
-	case '\\':
-	case ']':
-	case '^':
-	case '`':
-	case '{':
-	case '|':
-	case '}':
-	case '~':
-		return 1;
-	}
-
-	return 0;
-}
-
-/*
-void make_punct_list(void)
-{
-	unsigned char c[3];
-	c[2] = '\0';
-	for (unsigned char i = 33; i < 127; i++) {
-		if (ispunct(i)) {
-			switch (i) {
-				case '\'':
-				case '\\':
-					c[0] = '\\';
-					c[1] = i;
-					break;
-				case '$':
-				case '_':
-				case '-':
-					continue;
-				default:
-					c[0] = i;
-					c[1] = '\0';
-					break;
-			}
-
-			printf("\tcase '%s':%d\n", c, i);
-		}
-	}
-}
-*/
