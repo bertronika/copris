@@ -21,7 +21,7 @@
 
 #include "Copris.h"
 #include "debug.h"
-#include "parse_variables.h"
+#include "parse_vars.h"
 #include "parse_value.h"
 
 modeline_t parse_modeline(UT_string *copris_text)

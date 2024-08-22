@@ -1,4 +1,4 @@
-#define MAX_FILENAME_LENGTH 17
+#define MAX_FILENAME_LENGTH 14
 
 /*
  * The debugging interface consists of preprocessor macros, divided into logging and
