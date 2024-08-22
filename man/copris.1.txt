@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-707-gb017772-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-710-g7c3aee6-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -179,28 +179,51 @@ VARIABLES, NUMERICAL VALUES AND COMMENTS
        process variables in input text.
 
        You may then call variables in the text file by omitting their C_ prefix  and  prepending  a
-       special  symbol  to them, usually a dollar sign (this is configurable in config.h.  I.e., if
-       your variable is C_SERIF, $SERIF is used in text to invoke it.
+       dollar sign to them.  I.e., if your variable is C_SERIF, $SERIF should be used in text.
 
        Furthermore, apart from already-defined variables, numerical values can be included in text.
-       They must be prefixed with the same symbol as custom variables and then specified  in  deci‐
-       mal, octal or hexadecimal notation, as they would be in a printer feature file.
+       They  must  be  also  be prefixed with a dollar sign and then specified in decimal, octal or
+       hexadecimal notation, as they would be in a printer feature file.
 
-       Lastly, comments can be passed in text.  They consist of the same prefix character as custom
-       variables, followed by a number sign and the word that needs to be commented out.
+       Lastly, comments can be passed in text.  They again consist of a dollar sign, which is  then
+       followed  by  a number sign and the word that needs to be commented out.  You cannot comment
+       out multiple space-separated words, only single words.  To circumvent  that,  separate  them
+       with some other character, such as an underscore or a non-breaking space.
 
-       You  cannot comment out a whole line (or multiple space-separated words), only single words.
-       To circumvent that, separate your words with some other character, such as an underscore  or
-       a non-breaking space.
-
-       For proper detection of all of the above commands, they must be prefixed and suffixed by (at
-       least) one space.
-
-       Here are examples of all three of the beforementioned commands:
+       Here are examples of all three notations:
 
               COPRIS ENABLE-COMMANDS     (must be included at the top)
               $# Reduce line spacing     (non-breaking spaces are used in this line)
               $ESC $0x33 $25             (feature file has a C_ESC command defined)
+
+   Separating variables from text
+       COPRIS  leaves  white space surrounding variables intact when extracting them from text.  If
+       you’d like to omit it, terminate consecutive variables with a semicolon and leave  no  white
+       space after singular ones:
+
+              Characters $0x3B $0x3B terminate $0x2E  ->  Characters ; ; terminate .
+              Characters $0x3B;$0x3B terminate$0x2E   ->  Characters ;; terminate.
+
+       Note that punctuation can be left adjoined with the command.  If a semicolon is wanted after
+       it being used as a separator, specify it twice:
+
+              It sums up to 86 $PERCENT_SIGN.  ->  It sums up to 86 %.
+              val = $BIT_1;$BIT_0;;            ->  val = 10;
+
+       Lines  with  only  one  variable  can  be  useful  for sending configuration parameters to a
+       printer.  However, the new line they leave behind can  be  unwanted.   Therefore,  terminate
+       such variables with the same symbol they begin with:
+
+              ---
+              $SERIF   |
+              text...  | text...
+              ---
+              $SERIF$  | text...
+              text...  |
+              ---
+
+       You might want to have a variable-symbol-prefixed word in your text without COPRIS complain‐
+       ing it isn’t defined.  To escape such problem, prefix that word with another such symbol.
 
    The modeline
        It is expected in the first line of input text in the following format:
@@ -304,4 +327,4 @@ DEVELOPMENT
 SEE ALSO
        stty(1), intercopris(1)
 
-                                             2024-08-20                                   COPRIS(1)
+                                             2024-08-22                                   COPRIS(1)
