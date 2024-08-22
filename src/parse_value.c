@@ -15,6 +15,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <uthash.h>   /* uthash library - hash table       */
 #include <utstring.h> /* uthash library - dynamic strings  */
@@ -35,18 +36,26 @@ int parse_all_to_commands(const char *value, size_t value_len,
 
 	char *token = strtok(value_copy, " ");
 	while (token != NULL && !problem) {
-		if (token[0] == 'C' || token[0] == 'F') {
+		if (!isdigit(token[0])) {
 			// Value is a variable
+			if (token[0] != 'C' && token[0] != 'F') {
+				PRINT_ERROR_MSG("Variables must be prefixed with either 'C_' or 'F_', and "
+				                "'%s' is with neither of them.", token);
+				problem = true;
+				break;
+			}
 			struct Inifile *s;
 			HASH_FIND_STR(*features, token, s);
 			if (s == NULL) {
 				PRINT_ERROR_MSG("Internal variable '%s' does not exist. If it is a custom "
 				                "command, make sure it has the 'C_' prefix.", token);
 				problem = true;
+				break;
 			} else if (s->out_len == 0) {
 				PRINT_ERROR_MSG("Variable '%s' does not (yet) exist. Custom command "
 				                "should be specified after it.", token);
 				problem = true;
+				break;
 			} else {
 				variable_count++;
 
