@@ -193,9 +193,9 @@ S_AFTER_TEXT = 0x0C  ; trigger form feed after printing
 If you've defined a printer feature file, and it includes custom variables (prefixed with `C_`),
 you may use them directly in input text.
 
-To allow for that, specify the `-c` argument when running COPRIS and begin your text with a
-line, containing `COPRIS ENABLE-VARIABLES`. This is called the *modeline* and tells COPRIS to
-process variables in input text.
+To allow for that, specify the `-P/--parse-variables` argument when running COPRIS and begin
+your text with a line, containing `COPRIS ENABLE-VARIABLES`. This is called the *modeline*
+and tells COPRIS to process variables in input text.
 
 You may then call variables in the text file by omitting their `C_` prefix and prepending a
 dollar sign to them. I.e., if your variable is `C_SERIF`, `$SERIF` should be used in text.
@@ -256,7 +256,8 @@ it isn't defined. In that case, prefix such word with two dollar symbols.
 
 ## The modeline
 
-It is expected in the first line of input text when COPRIS is started with `-c`. Its format is:
+It is expected in the first line of input text when COPRIS is started with
+`-P/--parse-variables`. Its format is:
 
 ```
 COPRIS <required 1st option> [ optional 2nd option ]

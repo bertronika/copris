@@ -59,9 +59,9 @@ m4_include(common05-variables.md)m4_dnl
   according to commands from printer feature *FILE*. This option can be
   specified multiple times.
 
-**-c**, **\--parse-commands**
-: If a printer feature file is being used, recognise feature commands in
-  received text and apply them. Commands must be prefixed with a predefined
+**-c**, **\--parse-variables**
+: If a printer feature file is being used, recognise variables in
+  received text and apply them. They must be prefixed with a predefined
   symbol, which is shown when invoking `copris --version`. This feature only
   works when the *received text starts with* `COPRIS ENABLE-VARIABLES`.
 

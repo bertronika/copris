@@ -56,8 +56,8 @@ static void copris_help(const char *argv0) {
 	       "                          catch every multi-byte character in input text\n"
 	       "  -f, --feature FILE      Process Markdown in received text and use session\n"
 	       "                          commands according to printer feature FILE\n"
-	       "  -c, --parse-commands    If using '--feature', recognise printer feature\n"
-	       "                          command invocations in received text\n"
+	       "  -P, --parse-variables   If using '--feature', recognise variables\n"
+	       "                          in received text\n"
 	       "      --dump-commands     Show all possible printer feature commands\n"
 	       "  -d, --daemon            Do not exit after the first network connection\n"
 	       "  -l, --limit LIMIT       Discard the whole chunk of text, received from the\n"
@@ -77,10 +77,10 @@ static void copris_help(const char *argv0) {
 	       "Notes will be shown if COPRIS assumes it is not invoked\n"
 	       "correctly, but never when the quiet argument is present.\n"
 	       "\n"
-	       "If --parse-commands is enabled, received text should begin with the\n"
+	       "If --parse-variables is enabled, received text should begin with the\n"
 	       "following line:\n\n"
 	       "COPRIS ENABLE-VARIABLES\n"
-	       "Any used commands should then be prefixed with '%c'.",
+	       "Any used variables should then be prefixed with '%c'.\n",
 	       argv0, VAR_SYMBOL);
 
 	exit(EXIT_SUCCESS);
@@ -94,7 +94,7 @@ static void copris_version(void) {
 	       "  Maximum .ini file element length:     %4d bytes\n"
 	       "  Maximum number of each encoding and\n"
 	       "  feature files that can be loaded:     %4d\n"
-	       "  Symbol for invoking feature commands:  '%c'\n"
+	       "  Symbol for invoking variables:         '%c'\n"
 	       "\n",
 	       VERSION, BUFSIZE, MAX_INIFILE_ELEMENT_LENGTH, NUM_OF_INPUT_FILES, VAR_SYMBOL);
 
@@ -107,7 +107,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 		{"encoding",         required_argument, NULL, 'e'},
 		{"ignore-missing",   no_argument,       NULL, '<'},
 		{"feature",          required_argument, NULL, 'f'},
-		{"parse-commands",   no_argument,       NULL, 'c'},
+		{"parse-variables",  no_argument,       NULL, 'P'},
 		{"dump-commands",    no_argument,       NULL, ','},
 		{"daemon",           no_argument,       NULL, 'd'},
 		{"limit",            required_argument, NULL, 'l'},
@@ -127,7 +127,7 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 	// Putting a colon in front of the options disables the built-in error reporting
 	// of getopt_long(3) and allows us to specify more appropriate errors (ie. 'You must
 	// specify a printer feature file.' instead of 'option requires an argument -- 'r')
-	while ((c = getopt_long(argc, argv, ":p:e:f:cdl:vqhV", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":p:e:f:Pdl:vqhV", long_options, NULL)) != -1) {
 		switch (c) {
 		case 'p': {
 			unsigned long temp_portno = strtoul(optarg, &parse_error, 10);
@@ -227,8 +227,8 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			attrib->copris_flags |= HAS_FEATURES;
 			break;
 		}
-		case 'c':
-			attrib->copris_flags |= USER_COMMANDS;
+		case 'P':
+			attrib->copris_flags |= PARSE_VARIABLES;
 			break;
 		case ',': {
 			struct Inifile *features = NULL;
@@ -435,9 +435,9 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (attrib.copris_flags & USER_COMMANDS && !(attrib.copris_flags & HAS_FEATURES)) {
-	    attrib.copris_flags &= ~(USER_COMMANDS);
-		PRINT_NOTE("User feature commands cannot be parsed if there's no printer feature "
+	if (attrib.copris_flags & PARSE_VARIABLES && !(attrib.copris_flags & HAS_FEATURES)) {
+	    attrib.copris_flags &= ~(PARSE_VARIABLES);
+		PRINT_NOTE("Variables cannot be parsed if there's no printer feature "
 		           "file loaded.");
 	}
 
@@ -499,7 +499,7 @@ int main(int argc, char **argv) {
 		if (attrib.copris_flags & HAS_FEATURES) {
 			modeline_t modeline = NO_MODELINE;
 
-			if (attrib.copris_flags & USER_COMMANDS) {
+			if (attrib.copris_flags & PARSE_VARIABLES) {
 				// Check for the modeline at the beginning of text, which enables variable reading
 				modeline = parse_modeline(copris_text);
 				apply_modeline(copris_text, modeline);
