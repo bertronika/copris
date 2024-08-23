@@ -44,18 +44,18 @@ text...  |
 ---
 ```
 
-You might want to have a variable-symbol-prefixed word in your text without COPRIS complaining it isn't defined. To escape such problem, prefix that word with another such symbol.
+You might want to have a variable-symbol-prefixed word in your text without COPRIS complaining it isn't defined. In that case, prefix such word with two dollar symbols.
 
 
 ## The modeline
 
-It is expected in the first line of input text in the following format:
+It is expected in the first line of input text when COPRIS is started with `-c`. Its format is:
 
 ```
 COPRIS <required 1st option> [ optional 2nd option ]
 ```
 
-Above text already mentioned its use for for enabling command detection. It serves one other purpose, disabling parsing Markdown in text.
+Previous documentation already mentioned its use for for enabling variables. It serves one other purpose, disabling parsing Markdown in text.
 
 Here are both modeline options and their short forms:
 
