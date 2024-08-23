@@ -194,7 +194,7 @@ If you've defined a printer feature file, and it includes custom variables (pref
 you may use them directly in input text.
 
 To allow for that, specify the `-c` argument when running COPRIS and begin your text with a
-line, containing `COPRIS ENABLE-COMMANDS`. This is called the *modeline* and tells COPRIS to
+line, containing `COPRIS ENABLE-VARIABLES`. This is called the *modeline* and tells COPRIS to
 process variables in input text.
 
 You may then call variables in the text file by omitting their `C_` prefix and prepending a
@@ -212,7 +212,7 @@ other character, such as an underscore or a non-breaking space.
 Here are examples of all three notations:
 
 ```
-COPRIS ENABLE-COMMANDS     (must be included at the top)
+COPRIS ENABLE-VARIABLES    (must be included at the top)
 $# Reduce line spacing     (non-breaking spaces are used in this line)
 $ESC $0x33 $25             (feature file has a C_ESC command defined)
 ```
@@ -267,14 +267,14 @@ other purpose, disabling parsing Markdown in text.
 
 Here are both modeline options and their short forms:
 
-- `ENABLE-COMMANDS`; `ENABLE-CMD`
+- `ENABLE-VARIABLES`; `ENABLE-VARS`
 - `DISABLE-MARKDOWN`; `DISABLE-MD`
 
 Letters are case-insensitive and the order of options isn't important. Thus, following lines
 are the same:
 
-- `COPRIS ENABLE-COMMANDS DISABLE-MARKDOWN`
-- `copris disable-md enable-cmd`
+- `COPRIS ENABLE-VARIABLES DISABLE-MARKDOWN`
+- `copris disable-md enable-vars`
 
 
 # How does COPRIS handle the output serial/parallel/USB/etc. connection?

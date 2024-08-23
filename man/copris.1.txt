@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-716-gb0269f3-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-717-g29325a1-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -175,7 +175,7 @@ VARIABLES, NUMERICAL VALUES AND COMMENTS
        C_), you may use them directly in input text.
 
        To allow for that, specify the -c argument when running COPRIS and begin your  text  with  a
-       line,  containing  COPRIS  ENABLE-COMMANDS.  This is called the modeline and tells COPRIS to
+       line,  containing  COPRIS ENABLE-VARIABLES.  This is called the modeline and tells COPRIS to
        process variables in input text.
 
        You may then call variables in the text file by omitting their C_ prefix  and  prepending  a
@@ -192,7 +192,7 @@ VARIABLES, NUMERICAL VALUES AND COMMENTS
 
        Here are examples of all three notations:
 
-              COPRIS ENABLE-COMMANDS     (must be included at the top)
+              COPRIS ENABLE-VARIABLES    (must be included at the top)
               $# Reduce line spacing     (non-breaking spaces are used in this line)
               $ESC $0x33 $25             (feature file has a C_ESC command defined)
 
@@ -236,16 +236,16 @@ VARIABLES, NUMERICAL VALUES AND COMMENTS
 
        Here are both modeline options and their short forms:
 
-       • ENABLE-COMMANDS; ENABLE-CMD
+       • ENABLE-VARIABLES; ENABLE-VARS
 
        • DISABLE-MARKDOWN; DISABLE-MD
 
        Letters  are  case-insensitive  and  the  order of options isn’t important.  Thus, following
        lines are the same:
 
-       • COPRIS ENABLE-COMMANDS DISABLE-MARKDOWN
+       • COPRIS ENABLE-VARIABLES DISABLE-MARKDOWN
 
-       • copris disable-md enable-cmd
+       • copris disable-md enable-vars
 
 COMMAND LINE OPTIONS
        -p, --port NUMBER
@@ -268,7 +268,7 @@ COMMAND LINE OPTIONS
               If  a printer feature file is being used, recognise feature commands in received text
               and apply them.  Commands must be prefixed with a predefined symbol, which  is  shown
               when  invoking  copris  --version.   This  feature  only works when the received text
-              starts with COPRIS ENABLE-COMMANDS.
+              starts with COPRIS ENABLE-VARIABLES.
 
        --dump-commands
               Show all possible printer feature commands in INI file format (e.g. to be piped  into

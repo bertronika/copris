@@ -2,12 +2,12 @@ typedef enum modeline {
 	NO_MODELINE   = (1 << 0), // No modeline found at the beginning of text
 	ML_EMPTY      = (1 << 1), // Modeline was found, but contains no command
 	ML_UNKNOWN    = (1 << 2), // Modeline was found, but contains unknown command(s)
-	ML_ENABLE_CMD = (1 << 3), // Modeline instructs us to enable command parsing
+	ML_ENABLE_VAR = (1 << 3), // Modeline instructs us to enable variable parsing
 	ML_DISABLE_MD = (1 << 4)  // Modeline instructs us to disable parsing Markdown
 } modeline_t;
 /*
  * Check 'copris_text' if there's a "modeline" at the beginning of text:
- *   COPRIS [ENABLE-COMMAND|ENABLE-CMD] [DISABLE-MARKDOWN|DISABLE-MD]
+ *   COPRIS [ENABLE-VARIABLES|ENABLE-VARS] [DISABLE-MARKDOWN|DISABLE-MD]
  *
  * Letters are case-insensitive, order of commands is not important.
  * At least one command must be specified to make a modeline valid.

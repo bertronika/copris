@@ -79,7 +79,7 @@ static void copris_help(const char *argv0) {
 	       "\n"
 	       "If --parse-commands is enabled, received text should begin with the\n"
 	       "following line:\n\n"
-	       "COPRIS ENABLE-COMMANDS\n"
+	       "COPRIS ENABLE-VARIABLES\n"
 	       "Any used commands should then be prefixed with '%c'.",
 	       argv0, VAR_SYMBOL);
 
@@ -504,7 +504,7 @@ int main(int argc, char **argv) {
 				modeline = parse_modeline(copris_text);
 				apply_modeline(copris_text, modeline);
 
-				if (modeline & ML_ENABLE_CMD)
+				if (modeline & ML_ENABLE_VAR)
 					parse_variables(copris_text, &features);
 			}
 

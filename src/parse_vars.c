@@ -39,10 +39,10 @@ modeline_t parse_modeline(UT_string *copris_text)
 	modeline_t modeline = ML_UNKNOWN;
 	text += 6; // Skip initial 'COPRIS'
 
-	// Allow singular and plural command(s)
-	if (strcasestr(text, "ENABLE-COMMAND") ||
-	    strcasestr(text, "ENABLE-CMD"))
-		modeline |= ML_ENABLE_CMD;
+	// Allow singular and plural VARIABLE(S)
+	if (strcasestr(text, "ENABLE-VARIABLE") ||
+	    strcasestr(text, "ENABLE-VAR"))
+		modeline |= ML_ENABLE_VAR;
 
 	if (strcasestr(text, "DISABLE-MARKDOWN") ||
 	    strcasestr(text, "DISABLE-MD"))
