@@ -14,3 +14,4 @@ cppcheck_report/
 
 # Tests files
 tests/cmocka-*
+!tests/cmocka-*.c
