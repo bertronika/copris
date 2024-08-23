@@ -24,8 +24,8 @@
 #include "debug.h"
 #include "parse_value.h"
 
-int parse_all_to_commands(const char *value, size_t value_len,
-                          UT_string *parsed_value, struct Inifile **features)
+int parse_values_with_variables(const char *value, size_t value_len,
+                                UT_string *parsed_value, struct Inifile **features)
 {
 	char *value_copy = strndup(value, value_len + 1);
 	CHECK_MALLOC(value_copy);
@@ -63,8 +63,8 @@ int parse_all_to_commands(const char *value, size_t value_len,
 		} else {
 			// Value is a number
 			char parsed_token[MAX_INIFILE_ELEMENT_LENGTH];
-			int new_value_len = parse_number_string(token, parsed_token,
-			                                        (sizeof parsed_token) - 1);
+			int new_value_len = parse_values(token, parsed_token,
+			                                 (sizeof parsed_token) - 1);
 
 			if (new_value_len == -1)
 				break;
@@ -84,7 +84,7 @@ int parse_all_to_commands(const char *value, size_t value_len,
 	return element_count;
 }
 
-int parse_number_string(const char *value, char *parsed_value, int parsed_value_len)
+int parse_values(const char *value, char *parsed_value, int parsed_value_len)
 {
 	const char *valuepos = value;
 	char *endptr;   // Remaining text to be converted

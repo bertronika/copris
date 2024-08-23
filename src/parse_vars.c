@@ -188,8 +188,8 @@ static void parse_extracted_variable(UT_string *text, struct Inifile **features,
 	// Number variable
 	if (isdigit(*variable_name)) {
 		char parsed_number[2];
-		// int element_count = parse_number_string(variable_name, &parsed_number, 1);
-		int element_count = parse_number_string(variable_name, parsed_number, 2);
+		// int element_count = parse_values(variable_name, &parsed_number, 1);
+		int element_count = parse_values(variable_name, parsed_number, 2);
 
 		if (element_count != -1) {
 			utstring_bincpy(text, parsed_number, element_count);

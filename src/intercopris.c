@@ -286,8 +286,8 @@ int main(int argc, char **argv)
 
 		int element_count = 0;
 		if (!text_entry) {
-			element_count = parse_all_to_commands(input_ptr, strlen(input_ptr),
-			                                      output_text, &features);
+			element_count = parse_values_with_variables(input_ptr, strlen(input_ptr),
+			                                            output_text, &features);
 
 			// Check for failure. If found, remember the erroneous command only
 			// until the next one is entered.

@@ -173,7 +173,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 	// Parse value if it wasn't explicitly specified to be empty
 	if (*value != '@') {
 		char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
-		element_count = parse_number_string(value, parsed_value, (sizeof parsed_value) - 1);
+		element_count = parse_values(value, parsed_value, (sizeof parsed_value) - 1);
 
 		// Check for a parse error
 		if (element_count == -1) {

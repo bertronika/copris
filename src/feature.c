@@ -194,7 +194,7 @@ static int inih_handler(void *user, const char *section, const char *name, const
 		utstring_new(parsed_value);
 
 		// Resolve variables to numbers and numbers to command values
-		element_count = parse_all_to_commands(value, value_len, parsed_value, features);
+		element_count = parse_values_with_variables(value, value_len, parsed_value, features);
 
 		if (element_count == -1) {
 			PRINT_ERROR_MSG("Failure while processing command '%s'.", name);

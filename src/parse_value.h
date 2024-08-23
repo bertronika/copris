@@ -5,8 +5,8 @@
  *
  * Return number of parsed elements, or -1 on error.
  */
-int parse_all_to_commands(const char *value, size_t value_len,
-                          UT_string *parsed_value, struct Inifile **features);
+int parse_values_with_variables(const char *value, size_t value_len,
+                                UT_string *parsed_value, struct Inifile **features);
 
 /*
  * Parse input string 'value', consisting of decimal, hexadecimal or octal numbers, separated by
@@ -14,4 +14,4 @@ int parse_all_to_commands(const char *value, size_t value_len,
  *
  * Return number of parsed elements, or -1 on error.
  */
-int parse_number_string(const char *value, char *parsed_value, int parsed_value_length);
+int parse_values(const char *value, char *parsed_value, int parsed_value_length);
