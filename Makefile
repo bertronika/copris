@@ -44,8 +44,9 @@ CPPCHECK_FLAGS = --cppcheck-build-dir=$(CPPCHECK_DIR) --include=<(grep VERSION c
                  --check-level=exhaustive
 
 # Targets that do not produce an eponymous file
-.PHONY: check-if-tagged release debug install clean distclean help \
+.PHONY: check-if-tagged release debug clean distclean help \
         check analyse analyse-cppcheck analyse-cppcheck-html doc \
+        install install-copris install-intercopris install-encodings \
         $(CPPCHECK_DIR)/index.html
 
 all:   | check-if-tagged release
@@ -115,10 +116,21 @@ src/intercopris_rel.o src/intercopris_dbg.o: LIBRARIES += readline
 # changed, only the files including it will be recompiled.
 -include $(DEPS_REL) $(DEPS_DBG)
 
-install: copris man/copris.1
-	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(DATADIR)/copris $(DESTDIR)$(MANDIR)/man1
+install: install-copris install-encodings
+
+install-copris: copris man/copris.1
+	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m755 copris $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m644 man/copris.1 $(DESTDIR)$(MANDIR)/man1
+
+install-intercopris: intercopris man/intercopris.1
+	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL) -m755 intercopris $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m644 man/intercopris.1 $(DESTDIR)$(MANDIR)/man1
+
+install-encodings: $(wildcard encodings/*.ini)
+	mkdir -p $(DESTDIR)$(DATADIR)/copris/encodings
+	$(INSTALL) -m644 -t $(DESTDIR)$(DATADIR)/copris $^
 
 clean:
 	rm -f $(OBJS_REL) $(DEPS_REL) src/intercopris_rel.o src/intercopris_rel.d
