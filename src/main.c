@@ -79,7 +79,7 @@ static void copris_help(const char *argv0) {
 	       "\n"
 	       "If --parse-variables is enabled, received text should begin with the\n"
 	       "following line:\n\n"
-	       "COPRIS ENABLE-VARIABLES\n"
+	       "COPRIS ENABLE-VARIABLES\n\n"
 	       "Any used variables should then be prefixed with '%c'.\n",
 	       argv0, VAR_SYMBOL);
 
