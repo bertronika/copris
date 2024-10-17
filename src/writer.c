@@ -19,10 +19,10 @@
 
 // Mode for fopen(3), configured in config.h
 #ifdef OVERWRITE_OUTPUT_FILE
-#   define FOPEN_MODE "w"
+#   define FOPEN_MODE "wb"
 #   define MODE_TEXT  "Written"
 #else
-#   define FOPEN_MODE "a"
+#   define FOPEN_MODE "ab"
 #   define MODE_TEXT  "Appended"
 #endif
 
