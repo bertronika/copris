@@ -114,7 +114,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 
 	bool escaped_char = (text[0] == '\\'); // Detect early escape character
 
-	for (size_t i = 0; text[i] != '\0'; i++) {
+	for (size_t i = 0; i < text_len; i++) {
 		// Catch horizontal rules ('***'/'---') and copy them to output.
 		if (!escaped_char && (i + 4 < text_len && text[i + 4] == '\n' && text[i] == '\n') &&
 		    ((text[i + 1] == '*' && text[i + 2] == '*' && text[i + 3] == '*') ||
