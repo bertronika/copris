@@ -43,6 +43,13 @@ int parse_values_with_variables(const char *value, size_t value_len,
 				break;
 			}
 
+			if (strlen(token) >= MAX_INIFILE_ELEMENT_LENGTH) {
+				PRINT_ERROR_MSG("Following variable is too long to be parsed (ellipsis "
+				                "denotes the cut):");
+				PRINT_ERROR_MSG(" %.*s...", MAX_INIFILE_ELEMENT_LENGTH, token);
+				break;
+			}
+
 			struct Inifile *s;
 			HASH_FIND_STR(*features, token, s);
 			if (s == NULL) {
