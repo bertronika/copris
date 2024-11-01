@@ -87,7 +87,7 @@ m4_include(common05-variables.md)m4_dnl
 : Show informative status messages. If specified twice, show even more messages.
 
 **-q**, **\--quiet**
-: Do not show any unneccessary messages, except warnings and fatal errors, routed
+: Do not show any unnecessary messages, except warnings and fatal errors, routed
   to *stderr*. This also omits *notes*, shown if COPRIS assumes it is not
   invoked properly.
 

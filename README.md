@@ -18,10 +18,10 @@ character *encoding file* that is used to recode received text. By writing or se
 one for your printer and locale, you allow COPRIS to recode (replace) received characters with
 appropriate locale-specific ones, understood by your printer.
 
-This is particulary useful in cases where printer distributors swapped lesser-used ASCII characters
-(such as `~ @ {`) with those from the national alphabet, so they could be typed out directly
-from the non-localised keyboard. By finding similar-looking characters in printer's character
-set, you may, crudely, regain those lost characters.
+This is particularly useful in cases where printer distributors swapped lesser-used ASCII
+characters (such as `~ @ {`) with those from the national alphabet, so they could be typed out
+directly from the non-localised keyboard. By finding similar-looking characters in printer's
+character set, you may, crudely, regain those lost characters.
 
 However, *encoding files* aren't tied only to locale conversions, you may use them to remap any
 character. Examples include typographic quotation marks, em dashes, copyright symbol and others,
@@ -203,7 +203,7 @@ interpreted as a variable (or a series of them).
 
 Furthermore, apart from already-defined variables, numerical values can be included in
 text. They must be written out in the same way as variables - prefixed with a dollar sign, and,
-if specifing a multitude of them, separated by white spaces. They must be in either decimal,
+if specifying a multitude of them, separated by white spaces. They must be in either decimal,
 octal or hexadecimal notation, as they would be in a printer feature file.
 
 Lastly, comments can be passed in text. They again consist of a dollar sign, which is then

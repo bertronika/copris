@@ -23,8 +23,8 @@ End of line with ___combined emphasis.___
 
 ---
 
-**Bold emphasis with *italic* inbetween.**
-*Italic emphasis with **bold** inbetween.*
+**Bold emphasis with *italic* in between.**
+*Italic emphasis with **bold** in between.*
 
-__Bold emphasis with _italic_ inbetween.__
-_Italic emphasis with __bold__ inbetween._
+__Bold emphasis with _italic_ in between.__
+_Italic emphasis with __bold__ in between._

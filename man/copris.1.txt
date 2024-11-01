@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-731-g181e1e5-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-736-gab7893e-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -24,7 +24,7 @@ DESCRIPTION
        lecting  a premade one for your printer and locale, you allow COPRIS to recode (replace) re‐
        ceived characters with appropriate locale-specific ones, understood by your printer.
 
-       This is particulary useful in cases where printer  distributors  swapped  lesser-used  ASCII
+       This is particularly useful in cases where printer distributors  swapped  lesser-used  ASCII
        characters (such as ~ @ {) with those from the national alphabet, so they could be typed out
        directly  from  the  non-localised  keyboard.   By  finding  similar-looking  characters  in
        printer’s character set, you may, crudely, regain those lost characters.
@@ -184,7 +184,7 @@ VARIABLES, NUMERICAL VALUES AND COMMENTS
 
        Furthermore, apart from already-defined variables, numerical values can be included in text.
        They must be written out in the same way as variables - prefixed with a dollar sign, and, if
-       specifing a multitude of them, separated by white spaces.  They must be in  either  decimal,
+       specifying a multitude of them, separated by white spaces.  They must be in either  decimal,
        octal or hexadecimal notation, as they would be in a printer feature file.
 
        Lastly,  comments can be passed in text.  They again consist of a dollar sign, which is then
@@ -276,7 +276,7 @@ COMMAND LINE OPTIONS
               Show informative status messages.  If specified twice, show even more messages.
 
        -q, --quiet
-              Do not show any unneccessary messages, except warnings and fatal  errors,  routed  to
+              Do not show any unnecessary messages, except warnings and  fatal  errors,  routed  to
               stderr.  This also omits notes, shown if COPRIS assumes it is not invoked properly.
 
        -h, --help

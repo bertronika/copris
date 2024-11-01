@@ -23,8 +23,8 @@ End of line with &+B;&+I;combined emphasis.&-I;&-B;
 
 ---
 
-&+B;Bold emphasis with &+I;italic&-I; inbetween.&-B;
-&+I;Italic emphasis with &+B;bold&-B; inbetween.&-I;
+&+B;Bold emphasis with &+I;italic&-I; in between.&-B;
+&+I;Italic emphasis with &+B;bold&-B; in between.&-I;
 
-&+B;Bold emphasis with &+I;italic&-I; inbetween.&-B;
-&+I;Italic emphasis with &+B;bold&-B; inbetween.&-I;
+&+B;Bold emphasis with &+I;italic&-I; in between.&-B;
+&+I;Italic emphasis with &+B;bold&-B; in between.&-I;

@@ -20,7 +20,7 @@ iconv --from-code="$CODEPAGE" \
 	printf '# Character set %s
 # Generated with %s\n\n' "${CODEPAGE^^}" "$(iconv --version | sed '1q')"
 	if grep -q '^$' "$TEMPFILE"; then
-		printf "# Some characters were invalid and were ommited from the listing.\n"
+		printf "# Some characters were invalid and were omitted from the listing.\n"
 	fi
 	# Merge lines of both files, remove empty definitions
 	paste -d' ' "$TEMPFILE" template-postfix.txt | grep -v '^ '

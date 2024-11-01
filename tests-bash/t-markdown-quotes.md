@@ -5,7 +5,7 @@
 > > Value '194' in '194' is out of bounds.
 > > ...
 >
-> I tried with hexadecimal values too and recieved the same "out of bounds" massage.
+> I tried with hexadecimal values too and received the same "out of bounds" massage.
 
 It appears you've hit an unintended limitation. Currently, the parser only works with numbers up to 127 (the maximum of a signed char), which is obviously unwanted.
 

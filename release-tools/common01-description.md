@@ -9,7 +9,7 @@ Two main text processing methods stand out in COPRIS; they are:
 
 Older printers usually don't support multi-byte UTF-8-encoded text. Rather, they use code pages and customised character sets which may vary between different manufacturers. COPRIS can load a character *encoding file* that is used to recode received text. By writing or selecting a premade one for your printer and locale, you allow COPRIS to recode (replace) received characters with appropriate locale-specific ones, understood by your printer.
 
-This is particulary useful in cases where printer distributors swapped lesser-used ASCII characters (such as `~ @ {`) with those from the national alphabet, so they could be typed out directly from the non-localised keyboard. By finding similar-looking characters in printer's character set, you may, crudely, regain those lost characters.
+This is particularly useful in cases where printer distributors swapped lesser-used ASCII characters (such as `~ @ {`) with those from the national alphabet, so they could be typed out directly from the non-localised keyboard. By finding similar-looking characters in printer's character set, you may, crudely, regain those lost characters.
 
 However, *encoding files* aren't tied only to locale conversions, you may use them to remap any character. Examples include typographic quotation marks, em dashes, copyright symbol and others, commonly found in character sets of various printers.
 

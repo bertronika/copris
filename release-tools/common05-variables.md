@@ -4,7 +4,7 @@ To allow for that, begin your text with a line, containing `COPRIS ENABLE-VARIAB
 
 You may then call variables in the text file by prepending a dollar sign to them. I.e., if your variable is `C_SERIF`, `$C_SERIF` should be used in text. If you want to call multiple, write them out space-separated. Note that anything between the dollar sign and the new line is interpreted as a variable (or a series of them).
 
-Furthermore, apart from already-defined variables, numerical values can be included in text. They must be written out in the same way as variables - prefixed with a dollar sign, and, if specifing a multitude of them, separated by white spaces. They must be in either decimal, octal or hexadecimal notation, as they would be in a printer feature file.
+Furthermore, apart from already-defined variables, numerical values can be included in text. They must be written out in the same way as variables - prefixed with a dollar sign, and, if specifying a multitude of them, separated by white spaces. They must be in either decimal, octal or hexadecimal notation, as they would be in a printer feature file.
 
 Lastly, comments can be passed in text. They again consist of a dollar sign, which is then followed by a number sign and your comment message.
 
