@@ -197,61 +197,45 @@ To allow for that, specify the `-P/--parse-variables` argument when running COPR
 your text with a line, containing `COPRIS ENABLE-VARIABLES`. This is called the *modeline*
 and tells COPRIS to process variables in input text.
 
-You may then call variables in the text file by omitting their `C_` prefix and prepending a
-dollar sign to them. I.e., if your variable is `C_SERIF`, `$SERIF` should be used in text.
+You may then call variables in the text file by prepending a dollar sign to them. I.e., if
+your variable is `C_SERIF`, `$C_SERIF` should be used in text. If you want to call multiple,
+write them out space-separated. Note that anything between the dollar sign and the new line is
+interpreted as a variable (or a series of them).
 
-Furthermore, apart from already-defined variables, numerical values can be included in text. They
-must be also be prefixed with a dollar sign and then specified in decimal, octal or hexadecimal
-notation, as they would be in a printer feature file.
+Furthermore, apart from already-defined variables, numerical values can be included in
+text. They must be written out in the same way as variables - prefixed with a dollar sign, and,
+if specifing a multitude of them, separated by white spaces. They must be in either decimal,
+octal or hexadecimal notation, as they would be in a printer feature file.
 
 Lastly, comments can be passed in text. They again consist of a dollar sign, which is then
-followed by a number sign and the word that needs to be commented out. You cannot comment out
-multiple space-separated words, only single words. To circumvent that, separate them with some
-other character, such as an underscore or a non-breaking space.
+followed by a number sign and your comment message.
 
 Here are examples of all three notations:
 
 ```
 COPRIS ENABLE-VARIABLES    (must be included at the top)
-$# Reduce line spacing     (non-breaking spaces are used in this line)
-$ESC $0x33 $25             (feature file has a C_ESC command defined)
+$# This reduces line spacing:
+$C_ESC 0x33 25             (feature file has a C_ESC command defined)
 ```
 
-## Separating variables from text
 
-COPRIS leaves white space surrounding variables intact when extracting them from text. If
-you'd like to omit it, terminate consecutive variables with a semicolon and leave no white
-space after singular ones:
+## Mixing variables and text
 
-```
-Characters $0x3B $0x3B terminate $0x2E  ->  Characters ; ; terminate .
-Characters $0x3B;$0x3B terminate$0x2E   ->  Characters ;; terminate.
-```
+Be wary of mixing variables and text in a sentence. Variables will only get detected properly
+if they're at the end of the sentence, not followed by any punctuation.
 
-Note that punctuation can be left adjoined with the command. If a semicolon is wanted after it
-being used as a separator, specify it twice:
+Meaning:
 
 ```
-It sums up to 86 $PERCENT_SIGN.  ->  It sums up to 86 %.
-val = $BIT_1;$BIT_0;;            ->  val = 10;
+Word count is $C_WC        (works normally)
+The sum is $C_WC words.    (fails - expects a variable named '$WC words.')
 ```
 
-Lines with only one variable can be useful for sending configuration parameters to a
-printer. However, the new line they leave behind can be unwanted. Therefore, terminate such
-variables with the same symbol they begin with:
+For reliable interpretation of variables, dedicate a whole line just for them, and make use of
+Markdown for mixing text and commands.
 
-```
----
-$SERIF   |
-text...  | text...
----
-$SERIF$  | text...
-text...  |
----
-```
-
-You might want to have a variable-symbol-prefixed word in your text without COPRIS complaining
-it isn't defined. In that case, prefix such word with two dollar symbols.
+Lastly, if your input text contains a variable-symbol-prefixed word and you don't want COPRIS
+to interpret it, escape it by prefixing it with another dollar symbols.
 
 
 ## The modeline
