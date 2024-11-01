@@ -14,7 +14,7 @@ int verbosity = 0;
         parse_values(value, parsed_value, (sizeof parsed_value) - 1)
 
 // Check if a valid string value is parsed correctly
-static void parse_value_correct(void **state)
+static void parse_values_correct(void **state)
 {
 	(void)state;
 	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
@@ -33,7 +33,7 @@ static void parse_value_correct(void **state)
 }
 
 // Check if invalid string values throw errors
-static void parse_value_erroneous(void **state)
+static void parse_values_erroneous(void **state)
 {
 	(void)state;
 	char parsed_value[MAX_INIFILE_ELEMENT_LENGTH];
@@ -55,8 +55,8 @@ int main(int argc, char **argv)
 	(void)argv;
 
 	const struct CMUnitTest tests[] = {
-		cmocka_unit_test(parse_value_correct),
-		cmocka_unit_test(parse_value_erroneous),
+		cmocka_unit_test(parse_values_correct),
+		cmocka_unit_test(parse_values_erroneous),
 	};
 
 	return cmocka_run_group_tests_name("parse_value.c", tests, NULL, NULL);
