@@ -1,6 +1,6 @@
 If you've defined a printer feature file, and it includes custom variables (prefixed with `C_`), you may use them directly in input text.
 
-To allow for that, specify the `-P/--parse-variables` argument when running COPRIS and begin your text with a line, containing `COPRIS ENABLE-VARIABLES`. This is called the *modeline* and tells COPRIS to process variables in input text.
+To allow for that, begin your text with a line, containing `COPRIS ENABLE-VARIABLES`. This is called the *modeline* and tells COPRIS to process variables in input text.
 
 You may then call variables in the text file by prepending a dollar sign to them. I.e., if your variable is `C_SERIF`, `$C_SERIF` should be used in text. If you want to call multiple, write them out space-separated. Note that anything between the dollar sign and the new line is interpreted as a variable (or a series of them).
 
@@ -35,7 +35,7 @@ Lastly, if your input text contains a variable-symbol-prefixed word and you don'
 
 ## The modeline
 
-It is expected in the first line of input text when COPRIS is started with `-P/--parse-variables`. Its format is:
+It is expected in the first line of received text. Its format is:
 
 ```
 COPRIS <required 1st option> [ optional 2nd option ]
