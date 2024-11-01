@@ -105,8 +105,8 @@ void apply_modeline(UT_string *copris_text, modeline_t modeline)
 	utstring_free(temp_text);
 }
 
-static void parse_extracted_variable(UT_string *text, struct Inifile **features,
-                                     UT_string *variable);
+static int parse_extracted_variable(UT_string *text, struct Inifile **features,
+                                    UT_string *variable);
 
 void parse_variables(UT_string *copris_text, struct Inifile **features)
 {
@@ -131,31 +131,23 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 		}
 
 		if (s == tok) {
-			// Separator located, treat token like a command
-			const char *tok_end = strpbrk(s, VAR_SEPARATORS);
+			// Separator located, treat token like a command until the end of line
+			const char *tok_end = strchr(s, '\n');
 			size_t tok_len = tok_end ? (size_t)(tok_end - s) : l;
 			int skip_char = 0;
 
-			if (tok[tok_len - 1] == VAR_SYMBOL) {
-				// $COMMAND$ - discard last two characters (e.g. omit \n)
-				tok[tok_len - 1] = '\0';  // null one
-
-				if (tok_end != NULL)      // discard the other
-					skip_char = 1;
-
-			} else if (tok_end != NULL && tok[tok_len] == VAR_TERMINATOR) {
-				// $VARIABLE; - discard last character (join with following text)
-				skip_char = 1;
-
-			} else if (tok_end != NULL && tok[1] == VAR_COMMENT) {
+			if (tok_end != NULL && tok[1] == VAR_COMMENT) {
 				// $#VARIABLE - comment, discard last character
 				skip_char = 1;
 			}
 
 			// printf("tok %2zu: '%.*s', end:%d, skip_char:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL, skip_char);
 			utstring_bincpy(variable_name, tok, tok_len);
-			parse_extracted_variable(temp_text, features, variable_name);
+			int error = parse_extracted_variable(temp_text, features, variable_name);
 			utstring_clear(variable_name);
+
+			if (error)
+				skip_char = 1;
 
 			s += tok_len + skip_char;
 			l -= tok_len + skip_char;
@@ -168,71 +160,44 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 	utstring_free(temp_text);
 }
 
-static void parse_extracted_variable(UT_string *text, struct Inifile **features,
-                                     UT_string *variable)
+static int parse_extracted_variable(UT_string *text, struct Inifile **features,
+                                    UT_string *variable)
 {
 	// Skip the command symbol
 	char *variable_name = utstring_body(variable) + 1;
 	size_t variable_len = utstring_len(variable) - 1;
+	// TODO len>0?
 
 	// Comment variable
 	if (*variable_name == VAR_COMMENT)
-		return;
+		return 0;
 
 	// Escaped variable symbol
 	if (*variable_name == VAR_SYMBOL) {
 		utstring_bincpy(text, variable_name, variable_len);
-		return;
+		return 0;
 	}
 
-	// Number variable
-	if (isdigit(*variable_name)) {
-		char parsed_number[2];
-		// int element_count = parse_values(variable_name, &parsed_number, 1);
-		int element_count = parse_values(variable_name, parsed_number, 2);
+	int element_count = parse_values_with_variables(variable_name, variable_len, text, features);
 
-		if (element_count != -1) {
-			utstring_bincpy(text, parsed_number, element_count);
-		} else {
-			if (LOG_ERROR)
-				PRINT_MSG("Variable '%s' was skipped.", utstring_body(variable));
-		}
-		return;
-	}
-
-	// Command variable
-	// Prepare a valid string for lookup
-	char variable_lookup[MAX_INIFILE_ELEMENT_LENGTH];
-	size_t variable_lookup_len = snprintf(variable_lookup, MAX_INIFILE_ELEMENT_LENGTH,
-	                                      "C_%s", variable_name);
-
-	if (variable_lookup_len >= MAX_INIFILE_ELEMENT_LENGTH) {
-		if (LOG_ERROR) {
-			PRINT_MSG("Found command notation in following line, but it is "
-			          "too long to be parsed.");
-			PRINT_MSG(" %.*s...", MAX_INIFILE_ELEMENT_LENGTH, utstring_body(variable));
-		}
-
-		return;
-	}
-
-	struct Inifile *s = NULL;
-	HASH_FIND_STR(*features, variable_lookup, s);
-
-	if (!s) {
-		utstring_bincpy(text, utstring_body(variable), utstring_len(variable));
+	if (element_count == -1) {
 		if (LOG_ERROR)
-			PRINT_MSG("Found variable '%s', but the command is not defined.",
-			          utstring_body(variable));
+			PRINT_MSG("Variable '%s' was skipped.", utstring_body(variable));
 
-		return;
+		return -1;
 	}
+
+	// if (!s) {
+	// 	utstring_bincpy(text, utstring_body(variable), utstring_len(variable));
+	// 	if (LOG_ERROR)
+	// 		PRINT_MSG("Found variable '%s', but the command is not defined.",
+	// 		          utstring_body(variable));
+
+	// 	return;
+	// }
 
 	if (LOG_INFO)
 		PRINT_MSG("Found variable '%s'.", utstring_body(variable));
 
-	if (s->out_len > 0)
-		utstring_bincpy(text, s->out, s->out_len);
-
-	return;
+	return 0;
 }

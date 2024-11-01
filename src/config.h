@@ -27,10 +27,7 @@
 
 // Symbols for variable detection
 #define VAR_SYMBOL     '$'
-#define VAR_TERMINATOR ';'
 #define VAR_COMMENT    '#'
-#define VAR_SEPARATORS " \n\t!\"%&\'()*+,./:;<=>?@[\\]^`{|}~"
-// removed: -_$#
 
 // Uncomment the following line to overwrite the output
 // file instead of appending to it:
