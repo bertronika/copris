@@ -38,9 +38,7 @@ modeline_t parse_modeline(UT_string *copris_text)
 	modeline_t modeline = ML_UNKNOWN;
 	text += 6; // Skip initial 'COPRIS'
 
-	// Allow singular and plural VARIABLE(S)
-	if (strcasestr(text, "ENABLE-VARIABLE") ||
-	    strcasestr(text, "ENABLE-VAR"))
+	if (strcasestr(text, "ENABLE-VAR"))
 		modeline |= ML_ENABLE_VAR;
 
 	if (strcasestr(text, "DISABLE-MARKDOWN") ||
