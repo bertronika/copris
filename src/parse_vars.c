@@ -118,10 +118,12 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 	size_t l = utstring_len(copris_text);
 
 	while (l > 0) {
+		// Find the next symbol denoting a variable
 		char *tok = memchr(s, VAR_SYMBOL, l);
 		size_t tok_offset = tok ? (size_t)(tok - s) : l;
 
-		// Main separator (VAR_SYMBOL) is located when token offset is zero.
+		// Main separator (VAR_SYMBOL) is located when token offset is zero,
+		// else, it's ordinary text or data
 		if (tok_offset > 0) {
 			// No separator yet, copy text to output
 			utstring_bincpy(temp_text, s, tok_offset);
@@ -134,23 +136,25 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 			// Separator located, treat token like a command until the end of line
 			const char *tok_end = strchr(s, '\n');
 			size_t tok_len = tok_end ? (size_t)(tok_end - s) : l;
-			int skip_char = 0;
+			int skip_newline = 0;
 
 			if (tok_end != NULL && tok[1] == VAR_COMMENT) {
-				// $#VARIABLE - comment, discard last character
-				skip_char = 1;
+				// Line begins with $# - interpret as comment, discard its new line
+				skip_newline = 1;
 			}
 
-			// printf("tok %2zu: '%.*s', end:%d, skip_char:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL, skip_char);
+			// printf("tok %2zu: '%.*s', end:%d, skip_newline:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL, skip_newline);
+
+			// Parse contents of the variable
 			utstring_bincpy(variable_name, tok, tok_len);
 			int error = parse_extracted_variable(temp_text, features, variable_name);
 			utstring_clear(variable_name);
 
 			if (error)
-				skip_char = 1;
+				skip_newline = 1;
 
-			s += tok_len + skip_char;
-			l -= tok_len + skip_char;
+			s += tok_len + skip_newline;
+			l -= tok_len + skip_newline;
 		}
 	}
 	utstring_free(variable_name);
