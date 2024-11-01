@@ -4,7 +4,7 @@ README = ../README.md
 MANPAGE    = ../man/copris.1
 MANPAGE_IC = ../man/intercopris.1
 
-.PHONY: all readme manpage manpage_ic
+.PHONY: all readme manpage manpage_ic codespell codespell-full
 
 all: readme manpage manpage_ic
 readme: $(README)
@@ -24,3 +24,12 @@ $(MANPAGE_IC): intercopris.1.md.m4
 
 %.1.txt: %.1
 	MANWIDTH=100 man -l $< | col -bx > $@
+
+SPELL_TARGETS = encodings/ feature-files/ release-tools/ src/ tests/ tests-bash/ DEVELOPMENT.md Makefile* printchar.sh
+SPELL_IGNORE  = *.o,*.d,encodings/template-*
+
+codespell: SPELL_IGNORE := $(SPELL_IGNORE),encodings/*.ini,encodings/*.exp
+codespell: codespell-full
+
+codespell-full:
+	cd .. && codespell -f -L jus -S "$(SPELL_IGNORE)" $(SPELL_TARGETS)
