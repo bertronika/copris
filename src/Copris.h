@@ -9,7 +9,6 @@
 #define HAS_FEATURES     (1 << 2)
 #define MUST_CUTOFF      (1 << 3)
 #define ENCODING_NO_STOP (1 << 4)
-#define PARSE_VARIABLES  (1 << 5)
 
 struct Attribs {
 	unsigned int portno; /* Listening port of this server                        */
