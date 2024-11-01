@@ -141,6 +141,7 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 			if (tok_end != NULL && tok[1] == VAR_COMMENT) {
 				// Line begins with $# - interpret as comment, discard its new line
 				skip_newline = 1;
+				goto skip_parse;
 			}
 
 			// printf("tok %2zu: '%.*s', end:%d, skip_newline:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL, skip_newline);
@@ -150,9 +151,12 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 			int error = parse_extracted_variable(temp_text, features, variable_name);
 			utstring_clear(variable_name);
 
+			// If parse fails, nothing, except the newline, gets copied to output.
+			// Thus, remove it.
 			if (error)
 				skip_newline = 1;
 
+			skip_parse:
 			s += tok_len + skip_newline;
 			l -= tok_len + skip_newline;
 		}
@@ -171,10 +175,6 @@ static int parse_extracted_variable(UT_string *text, struct Inifile **features,
 	char *variable_name = utstring_body(variable) + 1;
 	size_t variable_len = utstring_len(variable) - 1;
 	// TODO len>0?
-
-	// Comment variable
-	if (*variable_name == VAR_COMMENT)
-		return 0;
 
 	// Escaped variable symbol
 	if (*variable_name == VAR_SYMBOL) {
