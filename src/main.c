@@ -393,15 +393,8 @@ int main(int argc, char **argv) {
 	if (attrib.copris_flags & HAS_ENCODING) {
 		for (int i = 0; i < attrib.encoding_file_count; i++) {
 			error = load_encoding_file(attrib.encoding_files[i], &encoding);
-			if (error) {
-				if (verbosity)
-					return EXIT_FAILURE;
-
-				// Missing encoding files are not a fatal error when --quiet
-				unload_encoding_definitions(&encoding);
-				attrib.copris_flags &= ~HAS_ENCODING;
-				PRINT_ERROR_MSG("Continuing without character recoding.");
-			}
+			if (error)
+				return EXIT_FAILURE;
 
 			if ((attrib.copris_flags & ENCODING_NO_STOP) && LOG_INFO)
 				PRINT_MSG("Forcing recoding even in case of missing encoding definitions.");
@@ -416,15 +409,8 @@ int main(int argc, char **argv) {
 
 		for (int i = 0; i < attrib.feature_file_count; i++) {
 			error = load_printer_feature_file(attrib.feature_files[i], &features);
-			if (error) {
-				if (verbosity)
-					return EXIT_FAILURE;
-
-				// Missing printer feature files are as well not a fatal error in quiet mode
-				unload_printer_feature_commands(&features);
-				attrib.copris_flags &= ~HAS_FEATURES;
-				PRINT_ERROR_MSG("Continuing without printer features.");
-			}
+			if (error)
+				return EXIT_FAILURE;
 		}
 	}
 
