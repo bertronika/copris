@@ -360,6 +360,13 @@ int main(int argc, char **argv) {
 	if (error)
 		return error;
 
+	if (verbosity != 0 && !isatty(STDIN_FILENO)) {
+		verbosity = 0;
+		PRINT_LOCATION(stderr);
+		fputs("COPRIS seems to be running in a pipe. All non-fatal messages have been muted.\n",
+		      stderr);
+	}
+
 	if (argc < 2)
 		PRINT_NOTE("COPRIS won't do much without any arguments. "
 		           "Try using the '--help' option.");
