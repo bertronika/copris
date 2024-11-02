@@ -119,5 +119,5 @@ int main(int argc, char **argv)
 		cmocka_unit_test(parse_values_with_variables_erroneous),
 	};
 
-	return cmocka_run_group_tests_name("parse_value.c", tests, NULL, NULL);
+	return cmocka_run_group_tests_name((__FILE__) + 7, tests, NULL, NULL);
 }

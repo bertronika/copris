@@ -156,5 +156,5 @@ int main(int argc, char **argv)
 		cmocka_unit_test(read_with_null_value)
 	};
 
-	return cmocka_run_group_tests_name("stream_io.c", tests, setup_utstring, teardown_utstring);
+	return cmocka_run_group_tests_name((__FILE__) + 7, tests, setup_utstring, teardown_utstring);
 }

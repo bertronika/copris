@@ -82,5 +82,5 @@ int main(int argc, char **argv)
 		cmocka_unit_test(utf8_test_incomplete_buffer)
 	};
 
-	return cmocka_run_group_tests_name("utf8.c", tests, NULL, NULL);
+	return cmocka_run_group_tests_name((__FILE__) + 7, tests, NULL, NULL);
 }

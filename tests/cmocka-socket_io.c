@@ -232,5 +232,5 @@ int main(int argc, char **argv)
 		cmocka_unit_test(         byte_limit_cutoff_multibyte2)
 	};
 
-	return cmocka_run_group_tests_name("socket_io.c", tests, setup_utstring, teardown_utstring);
+	return cmocka_run_group_tests_name((__FILE__) + 7, tests, setup_utstring, teardown_utstring);
 }
