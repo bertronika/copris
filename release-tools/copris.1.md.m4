@@ -107,6 +107,11 @@ elsewhere).
 m4_include(common06-usage.md)m4_dnl
 
 
+# KNOWN DEFICIENCIES
+
+m4_include(common07-issues.md)m4_dnl
+
+
 # DEVELOPMENT
 
 COPRIS' development repository resides at <https://github.com/bertronika/copris>.

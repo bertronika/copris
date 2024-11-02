@@ -73,3 +73,6 @@ sudo make install [DESTDIR=...] [PREFIX=...]
 
 By default a non-stripped release binary is built, which includes some debugging symbols for crash diagnosis. Many more targets are present for debugging and development purposes, run `make help` to review them.
 
+# Known deficiencies
+
+m4_include(common07-issues.md)m4_dnl

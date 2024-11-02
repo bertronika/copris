@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-736-gab7893e-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-738-gb46fc88-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -311,10 +311,21 @@ EXAMPLES OF INVOKING COPRIS
 
               copris -f epson-escp.ini -c /dev/usb/lp0 < font-showcase.md
 
+KNOWN DEFICIENCIES
+       • no warning is produced if there’s a typo or an unknown option in the modeline
+
+       • DOS/Windows style line endings (\r\n) aren’t supported
+
+       • markup in Markdown quotes is ignored
+
+       • since signals aren’t caught, COPRIS doesn’t exit cleanly when interrupted
+
+       • when sending data over the network, not all errors are send back to te sender
+
 DEVELOPMENT
        COPRIS’ development repository resides at ⟨https://github.com/bertronika/copris⟩.
 
 SEE ALSO
        stty(1), intercopris(1)
 
-                                             2024-11-01                                   COPRIS(1)
+                                             2024-11-02                                   COPRIS(1)

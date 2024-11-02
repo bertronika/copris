@@ -1,0 +1,5 @@
+- no warning is produced if there's a typo or an unknown option in the modeline
+- DOS/Windows style line endings (`\r\n`) aren't supported
+- markup in Markdown quotes is ignored
+- since signals aren't caught, COPRIS doesn't exit cleanly when interrupted
+- when sending data over the network, not all errors are send back to the sender
