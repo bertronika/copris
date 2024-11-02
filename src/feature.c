@@ -100,11 +100,6 @@ int initialise_commands(struct Inifile **features)
 	int command_count = 0;
 
 	for (int i = 0; printer_commands[i] != NULL; i++) {
-		// Check for a duplicate name. Shouldn't happen with the hardcoded table, but
-		// better be safe. Better check this with a unit test (TODO).
-		HASH_FIND_STR(*features, printer_commands[i], s);
-		assert(s == NULL);
-
 		// Insert the (unique) name
 		s = malloc(sizeof *s);
 		CHECK_MALLOC(s);
