@@ -18,7 +18,7 @@ MOCKS = isatty accept close getnameinfo inet_ntoa read write \
 # puts fputs printf fprintf
 
 # Tests build configuration
-DEFINES = -DUNIT_TESTS -DBUFSIZE=10 -DMAX_INIFILE_ELEMENT_LENGTH=10
+DEFINES = -DUNIT_TESTS -DBUFSIZE=10
 
 CFLAGS    += $(DBGFLAGS) $(DEFINES)
 # -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-puts -fno-builtin-fputs
