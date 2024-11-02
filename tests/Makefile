@@ -10,7 +10,7 @@ include ../Makefile-common.mk
 LIBRARIES += cmocka
 
 # List of sources that have unit tests (sorted by approximate complexity)
-TESTED_SOURCES = parse_value.c utf8.c stream_io.c socket_io.c
+TESTED_SOURCES = parse_value.c utf8.c stream_io.c socket_io.c feature.c
 
 # List of mocked functions for unit tests
 MOCKS = isatty accept close getnameinfo inet_ntoa read write \
