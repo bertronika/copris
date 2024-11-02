@@ -131,7 +131,6 @@ int parse_values(const char *value, char *parsed_value, int parsed_value_len)
 		parsed_value[i++] = (char)temp_value;
 		valuepos = endptr;
 	}
-	parsed_value[i] = '\0';
 
 	// Return number of parsed bytes
 	return i;
