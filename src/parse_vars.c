@@ -173,8 +173,11 @@ static int parse_extracted_variable(UT_string *text, struct Inifile **features,
 	size_t variable_len = utstring_len(variable) - 1;
 	// TODO len>0?
 
-	// Escaped variable symbol
-	if (*variable_name == VAR_SYMBOL) {
+	bool seems_escaped     = variable_name[0] == VAR_SYMBOL;
+	bool look_like_command = variable_name[1] == '_' &&
+	                       ( variable_name[0] == 'C' || variable_name[0] == 'F' );
+
+	if (seems_escaped || !look_like_command) {
 		utstring_bincpy(text, variable_name, variable_len);
 		return 0;
 	}
