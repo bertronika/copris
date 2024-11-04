@@ -359,8 +359,10 @@ crash diagnosis. Many more targets are present for debugging and development pur
 
 # Known deficiencies
 
-- no warning is produced if there's a typo or an unknown option in the modeline
-- DOS/Windows style line endings (`\r\n`) aren't supported
+- no warning is produced if there's a typo in the modeline, or an unknown option mixed with
+valid ones
+- DOS/Windows style line endings (`\r\n`) aren't supported - process input text through
+*dos2unix(1)* if necessary
 - markup in Markdown quotes is ignored
 - since signals aren't caught, COPRIS doesn't exit cleanly when interrupted
-- when sending data over the network, not all errors are send back to te sender
+- when sending data over the network, not all errors are send back to the sender
