@@ -28,7 +28,6 @@
 
 int copris_write_file(const char *output_file, UT_string *copris_text)
 {
-	// Open output file, set for (a)ppending text to it
 	FILE *file_ptr = fopen(output_file, FOPEN_MODE);
 	if (file_ptr == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Failed to open output file '%s'.", output_file);
