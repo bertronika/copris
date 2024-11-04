@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-746-g93b7992-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-748-gab10576-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -203,13 +203,13 @@ VARIABLES, NUMERICAL VALUES AND COMMENTS
        Meaning:
 
               Word count is $C_WC        (works normally)
-              The sum is $C_WC words.    (fails - expects a variable named '$WC words.')
+              The sum is $C_WC words.    (fails - expects a variable named '$C_WC words.')
 
        For  reliable interpretation of variables, dedicate a whole line just for them, and make use
        of Markdown for mixing text and commands.
 
        Lastly, if your input text contains a variable-symbol-prefixed word and you don’t  want  CO‐
-       PRIS to interpret it, escape it by prefixing it with another dollar symbols.
+       PRIS to interpret it, escape it by prefixing it with another dollar symbol.
 
    The modeline
        It is expected in the first line of received text.  Its format is:

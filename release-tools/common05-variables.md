@@ -25,12 +25,12 @@ Meaning:
 
 ```
 Word count is $C_WC        (works normally)
-The sum is $C_WC words.    (fails - expects a variable named '$WC words.')
+The sum is $C_WC words.    (fails - expects a variable named '$C_WC words.')
 ```
 
 For reliable interpretation of variables, dedicate a whole line just for them, and make use of Markdown for mixing text and commands.
 
-Lastly, if your input text contains a variable-symbol-prefixed word and you don't want COPRIS to interpret it, escape it by prefixing it with another dollar symbols.
+Lastly, if your input text contains a variable-symbol-prefixed word and you don't want COPRIS to interpret it, escape it by prefixing it with another dollar symbol.
 
 
 ## The modeline
