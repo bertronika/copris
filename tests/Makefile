@@ -11,7 +11,7 @@ LIBRARIES += cmocka
 
 # List of sources that have unit tests (sorted by approximate complexity)
 TESTED_SOURCES = parse_value.c utf8.c stream_io.c socket_io.c \
-                 feature.c recode.c main-helpers.c
+                 feature.c recode.c main-helpers.c parse_vars.c
 
 # List of mocked functions for unit tests
 MOCKS = isatty accept close getnameinfo inet_ntoa read write \
