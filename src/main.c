@@ -168,12 +168,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				return 1;
 			}
 
-			// TODO: is this check necessary after checking pathconf for errors?
-// 			if (strlen(optarg) >= max_path_len) {
-// 				PRINT_ERROR_MSG("Translation file's name is too long.");
-// 				return 1;
-// 			}
-
 			if (attrib->encoding_file_count == NUM_OF_INPUT_FILES) {
 				PRINT_ERROR_MSG("Too many encoding files were provided. Either "
 				                "combine some of them or recompile COPRIS with a "
@@ -204,12 +198,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 				PRINT_SYSTEM_ERROR("pathconf", "Error querying printer feature file '%s'.", optarg);
 				return 1;
 			}
-
-			// TODO: is this check necessary after checking pathconf for errors?
-// 			if (strlen(optarg) >= max_path_len) {
-// 				PRINT_ERROR_MSG("Printer set file's name is too long.");
-// 				return 1;
-// 			}
 
 			if (attrib->feature_file_count == NUM_OF_INPUT_FILES) {
 				PRINT_ERROR_MSG("Too many printer feature files were provided. Either "
