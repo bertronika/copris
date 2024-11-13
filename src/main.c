@@ -342,7 +342,12 @@ int main(int argc, char **argv) {
 	if (error)
 		return error;
 
-	if (verbosity != 0 && !isatty(STDOUT_FILENO)) {
+	// If no port number was specified by the user, assume input from stdin
+	bool is_stdin = false;
+	if (attrib.portno == 0)
+		is_stdin = true;
+
+	if (is_stdin && verbosity != 0 && !isatty(STDOUT_FILENO)) {
 		verbosity = 0;
 		PRINT_LOCATION(stderr);
 		fputs("COPRIS seems to be running in a pipe. All non-fatal messages have been muted.\n",
@@ -358,11 +363,6 @@ int main(int argc, char **argv) {
 
 	if (LOG_DEBUG)
 		PRINT_MSG("COPRIS started with PID %d.", getpid());
-
-	// If no port number was specified by the user, assume input from stdin
-	bool is_stdin = false;
-	if (attrib.portno == 0)
-		is_stdin = true;
 
 	if (attrib.limitnum && is_stdin)
 		PRINT_NOTE("Limit number cannot be used while reading from stdin, continuing without the "
