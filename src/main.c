@@ -302,12 +302,6 @@ static int parse_arguments(int argc, char **argv, struct Attribs *attrib) {
 			return 1;
 		}
 
-		// TODO: is this check necessary after checking pathconf for errors?
-// 		if (strlen(argv[optind]) >= max_path_len) {
-// 			PRINT_ERROR_MSG("Destination filename is too long.");
-// 			return 1;
-// 		}
-
 		int tmperr = access(argv[optind], W_OK);
 		if (tmperr != 0) {
 			PRINT_SYSTEM_ERROR("access", "Unable to write to output file. Does it "
