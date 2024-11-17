@@ -17,18 +17,9 @@
 #include "debug.h"
 #include "writer.h"
 
-// Mode for fopen(3), configured in config.h
-#ifdef OVERWRITE_OUTPUT_FILE
-#   define FOPEN_MODE "wb"
-#   define MODE_TEXT  "Written"
-#else
-#   define FOPEN_MODE "ab"
-#   define MODE_TEXT  "Appended"
-#endif
-
 int copris_write_file(const char *output_file, UT_string *copris_text)
 {
-	FILE *file_ptr = fopen(output_file, FOPEN_MODE);
+	FILE *file_ptr = fopen(output_file, "w");
 	if (file_ptr == NULL) {
 		PRINT_SYSTEM_ERROR("fopen", "Failed to open output file '%s'.", output_file);
 		return -1;
@@ -46,7 +37,7 @@ int copris_write_file(const char *output_file, UT_string *copris_text)
 		                "not enough bytes transferred.");
 		error = -1;
 	} else if (LOG_INFO) {
-		PRINT_MSG(MODE_TEXT " %zu byte(s) to %s.", written_text_length, output_file);
+		PRINT_MSG("Written %zu byte(s) to %s.", written_text_length, output_file);
 	}
 
 	// Flush streams to file and close it

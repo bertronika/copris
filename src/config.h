@@ -28,7 +28,3 @@
 // Symbols for variable detection
 #define VAR_SYMBOL     '$'
 #define VAR_COMMENT    '#'
-
-// Uncomment the following line to overwrite the output
-// file instead of appending to it:
-// #define OVERWRITE_OUTPUT_FILE
