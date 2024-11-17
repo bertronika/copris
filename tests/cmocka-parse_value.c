@@ -22,7 +22,7 @@ static void parse_values_correct(void **state)
 	// Check if numbers in various bases get properly parsed
 	int count = CALL_PARSE("0102 101 0x72 0x74");
 	assert_int_equal(count, 4);
-	assert_memory_equal(parsed_value, "Bert", count);
+	assert_string_equal(parsed_value, "Bert");
 
 	// Check if a NUL value gets properly parsed
 	count = CALL_PARSE("0x01 0x00 0x01");
