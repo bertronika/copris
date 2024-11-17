@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <utstring.h>
 
-#define MAX_INIFILE_ELEMENT_LENGTH 10
 #include "../src/Copris.h"
 #include "../src/parse_value.h"
 
