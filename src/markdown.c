@@ -63,7 +63,8 @@ typedef enum attribute {
         insert_code_helper(string, features, converted_text)
 
 #define MARKUP_ALLOWED       \
-        (!inline_code_on && !code_block_on && !code_block_open && !link_on)
+        (!inline_code_on && !inline_code_esc_on && \
+         !code_block_on && !code_block_open && !link_on)
 
 static void insert_code_helper(const char *, struct Inifile **, UT_string *);
 
@@ -87,6 +88,7 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 	bool bold_on = false;
 	bool italic_on = false;
 	bool inline_code_on = false;
+	bool inline_code_esc_on = false; // Escaped form: "`` ... ``"
 	bool code_block_on = false;
 	bool link_on = false;
 
@@ -179,10 +181,12 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 			if (text[i + 1] != '\n') // Keep blockquotes without any text
 				i += 1;
 
-		// Inline code: "`", and two block code variants: "```" at beginning/end of block
-		//              or "    " (four spaces) on each line.
+		// Inline code: "`...`", "``...``" and two block code variants: "```" at beginning/end
+		//              of block or "    " (four spaces) on each line.
 		} else if (!escaped_char && text[i] == '`' && !code_block_open) {
-			if (i + 2 < text_len && text[i + 1] == '`' && text[i + 2] == '`') {
+			// Triple backticks - a code block
+			if (i + 2 < text_len && text[i + 1] == '`' && text[i + 2] == '`' &&
+			    !inline_code_esc_on) {
 				text_attribute |= CODE_BLOCK;
 				code_block_on = !code_block_on;
 				i += 2;
@@ -190,8 +194,15 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 				// Skip the info string (usually for syntax highlighting)
 				while (text[i] != '\n' && i + 1 < text_len)
 					i++;
-
-			} else {
+			// Double backticks - a special form for escaping backticks within inline text
+			} else if (i + 2 < text_len && text[i + 1] == '`' && text[i + 2] != '`'
+			           && last_char != '`') {
+				text_attribute |= INLINE_CODE;
+				inline_code_esc_on = !inline_code_esc_on;
+				inline_code_on = !inline_code_on;
+				i += 1;
+			// Single backticks - inline text
+			} else if (!inline_code_esc_on) {
 				text_attribute |= INLINE_CODE;
 				inline_code_on = !inline_code_on;
 			}
