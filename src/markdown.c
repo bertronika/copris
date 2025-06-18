@@ -231,8 +231,9 @@ void parse_markdown(UT_string *copris_text, struct Inifile **features)
 					code_block_open = false;
 				}
 			}
-
-			utstring_bincpy(converted_text, &text[i], 1);
+			// Don't copy the backslash to output, except if it was escaped
+			if (text[i] != '\\' || (i > 0 && text[i - 1] == '\\' && text[i] == '\\'))
+				utstring_bincpy(converted_text, &text[i], 1);
 
 		} else if (text_attribute == (ITALIC | BOLD)) {
 			if (bold_on)
