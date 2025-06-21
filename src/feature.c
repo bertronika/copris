@@ -248,6 +248,10 @@ static int validate_command_pairs(const char *filename, struct Inifile **feature
 		if (s->out_len == 0)
 			continue; /* Looks like it's not */
 
+		// '@' found, meaning the command is empty on purpose
+		else if (*s->out == '@')
+			s->out_len = 0;
+
 		// Get command's pair - swap suffix _ON with _OFF or vice versa
 		char command_pair[MAX_INIFILE_ELEMENT_LENGTH];
 		memcpy(command_pair, printer_commands[i], command_len);
@@ -272,10 +276,11 @@ static int validate_command_pairs(const char *filename, struct Inifile **feature
 			                filename, printer_commands[i], command_pair);
 
 			return -1;
-		// '@' found, meaning the command is empty on purpose
-		} else if (*s->out == '@') {
-			s->out_len = 0;
 		}
+
+		// '@' found, meaning the command is empty on purpose
+		if (*s->out == '@')
+			s->out_len = 0;
 	}
 
 	if (LOG_DEBUG)
