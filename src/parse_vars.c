@@ -134,29 +134,23 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 			// Separator located, treat token like a command until the end of line
 			const char *tok_end = strchr(s, '\n');
 			size_t tok_len = tok_end ? (size_t)(tok_end - s) : l;
-			int skip_newline = 0;
 
 			if (tok_end != NULL && tok[1] == VAR_COMMENT) {
-				// Line begins with $# - interpret as comment, discard its new line
-				skip_newline = 1;
+				// Line begins with $# - interpret as comment
 				goto skip_parse;
 			}
 
-			// printf("tok %2zu: '%.*s', end:%d, skip_newline:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL, skip_newline);
+			// printf("tok %2zu: '%.*s', end:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL);
 
 			// Parse contents of the variable
 			utstring_bincpy(variable_name, tok, tok_len);
-			int error = parse_extracted_variable(temp_text, features, variable_name);
+			parse_extracted_variable(temp_text, features, variable_name);
 			utstring_clear(variable_name);
 
-			// If parse fails, nothing, except the newline, gets copied to output.
-			// Thus, remove it.
-			if (error)
-				skip_newline = 1;
-
 			skip_parse:
-			s += tok_len + skip_newline;
-			l -= tok_len + skip_newline;
+			// Also skip the new line
+			s += tok_len + 1;
+			l -= tok_len + 1;
 		}
 	}
 	utstring_free(variable_name);
