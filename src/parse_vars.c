@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include <uthash.h>   /* uthash library - hash table      */
@@ -174,8 +175,11 @@ static int parse_extracted_variable(UT_string *text, struct Inifile **features,
 	// TODO len>0?
 
 	bool seems_escaped     = variable_name[0] == VAR_SYMBOL;
-	bool look_like_command = variable_name[1] == '_' &&
-	                       ( variable_name[0] == 'C' || variable_name[0] == 'F' );
+	bool look_like_command = (  variable_name[1] == '_' &&
+	                          ( variable_name[0] == 'C' || variable_name[0] == 'F' )
+	                         ) || (
+	                            isdigit(variable_name[0])
+	                         );
 
 	if (seems_escaped || !look_like_command) {
 		utstring_bincpy(text, variable_name, variable_len);
