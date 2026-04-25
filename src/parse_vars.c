@@ -114,6 +114,7 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 
 	char *s = utstring_body(copris_text);
 	size_t l = utstring_len(copris_text);
+	int new_line = 0;
 
 	while (l > 0) {
 		// Find the next symbol denoting a variable
@@ -135,12 +136,12 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 			const char *tok_end = strchr(s, '\n');
 			size_t tok_len = tok_end ? (size_t)(tok_end - s) : l;
 
-			if (tok_end != NULL && tok[1] == VAR_COMMENT) {
+			// printf("tok %2zu: '%.*s', end:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL);
+
+			if (/*tok_end != NULL &&*/ tok[1] == VAR_COMMENT) {
 				// Line begins with $# - interpret as comment
 				goto skip_parse;
 			}
-
-			// printf("tok %2zu: '%.*s', end:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL);
 
 			// Parse contents of the variable
 			utstring_bincpy(variable_name, tok, tok_len);
@@ -148,9 +149,10 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 			utstring_clear(variable_name);
 
 			skip_parse:
-			// Also skip the new line
-			s += tok_len + 1;
-			l -= tok_len + 1;
+			// Skip the new line, if there's one
+			new_line = (tok_end == NULL) ? 0 : 1;
+			s += tok_len + new_line;
+			l -= tok_len + new_line;
 		}
 	}
 	utstring_free(variable_name);
