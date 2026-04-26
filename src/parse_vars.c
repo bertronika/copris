@@ -200,15 +200,6 @@ static int parse_extracted_variable(UT_string *text, struct Inifile **features,
 		return -1;
 	}
 
-	// if (!s) {
-	// 	utstring_bincpy(text, utstring_body(variable), utstring_len(variable));
-	// 	if (LOG_ERROR)
-	// 		PRINT_MSG("Found variable '%s', but the command is not defined.",
-	// 		          utstring_body(variable));
-
-	// 	return;
-	// }
-
 	if (LOG_INFO)
 		PRINT_MSG("Found variable '%s'.", utstring_body(variable));
 
