@@ -73,6 +73,8 @@ static void check_parse_variables(void **state)
 	APPLY_PARSE_TEST("No variable", "No variable");
 	APPLY_PARSE_TEST("$", "$");
 	APPLY_PARSE_TEST("Symbol $ in between", "Symbol $ in between");
+	APPLY_PARSE_TEST("At the end $", "At the end $");
+	APPLY_PARSE_TEST("At the end $\n", "At the end $\n");
 
 	// Variables
 	//  - defined TODO
@@ -82,8 +84,12 @@ static void check_parse_variables(void **state)
 	APPLY_PARSE_TEST("55 $;ENINH\n60 NP\n", "55 $;ENINH\n60 NP\n");
 
 	// Numerical values
-	APPLY_PARSE_TEST("$0x43", "\x43");
-	APPLY_PARSE_TEST("$ 0x43", "$ 0x43");
+	APPLY_PARSE_TEST("$0x43",   "\x43");
+	APPLY_PARSE_TEST("$0x63\n", "\x63");
+	APPLY_PARSE_TEST("$0x63 0x6F",   "\x63\x6F");
+	APPLY_PARSE_TEST("$0x70 0x72\n", "\x70\x72");
+	APPLY_PARSE_TEST("$ 0x43",   "$ 0x43");
+	APPLY_PARSE_TEST("$ 0x63\n", "$ 0x63\n");
 
 	// Comments
 	APPLY_PARSE_TEST("$# Comment\n", ""); // New line after a recognised variable should be skipped
