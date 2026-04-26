@@ -146,7 +146,7 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 				goto skip_parse;
 			}
 
-			if (/*tok_end != NULL &&*/ tok[1] == VAR_COMMENT) {
+			if (tok[1] == VAR_COMMENT) {
 				// Line begins with $# - interpret as comment
 				goto skip_parse;
 			}
