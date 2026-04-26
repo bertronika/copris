@@ -166,24 +166,25 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 static int parse_extracted_variable(UT_string *text, struct Inifile **features,
                                     UT_string *variable)
 {
-	// Skip the command symbol
-	char *variable_name = utstring_body(variable) + 1;
-	size_t variable_len = utstring_len(variable) - 1;
+	char *variable_name = utstring_body(variable);
+	size_t variable_len = utstring_len(variable);
 	// TODO len>0?
 
-	bool seems_escaped     = variable_name[0] == VAR_SYMBOL;
-	bool look_like_command = (  variable_name[1] == '_' &&
-	                          ( variable_name[0] == 'C' || variable_name[0] == 'F' )
+	bool seems_escaped     = variable_name[1] == VAR_SYMBOL;
+	bool look_like_command = (  variable_name[2] == '_' &&
+	                          ( variable_name[1] == 'C' || variable_name[1] == 'F' )
 	                         ) || (
-	                            isdigit(variable_name[0])
+	                            isdigit(variable_name[1])
 	                         );
 
 	if (seems_escaped || !look_like_command) {
-		utstring_bincpy(text, variable_name - 1, variable_len + 1);
+		utstring_bincpy(text, variable_name, variable_len);
 		return -1;
 	}
 
-	int element_count = parse_values_with_variables(variable_name, variable_len, text, features);
+	// +- 1 to skip the command symbol
+	int element_count = parse_values_with_variables(variable_name + 1, variable_len - 1,
+	                                                text, features);
 
 	if (element_count == -1) {
 		if (LOG_ERROR)
