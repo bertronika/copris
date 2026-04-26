@@ -115,6 +115,7 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 	char *s = utstring_body(copris_text);
 	size_t l = utstring_len(copris_text);
 	int new_line = 0;
+	int error = 0;
 
 	while (l > 0) {
 		// Find the next symbol denoting a variable
@@ -145,12 +146,12 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 
 			// Parse contents of the variable
 			utstring_bincpy(variable_name, tok, tok_len);
-			parse_extracted_variable(temp_text, features, variable_name);
+			error = parse_extracted_variable(temp_text, features, variable_name);
 			utstring_clear(variable_name);
 
 			skip_parse:
 			// Skip the new line, if there's one
-			new_line = (tok_end == NULL) ? 0 : 1;
+			new_line = (tok_end == NULL || error) ? 0 : 1;
 			s += tok_len + new_line;
 			l -= tok_len + new_line;
 		}
@@ -178,8 +179,8 @@ static int parse_extracted_variable(UT_string *text, struct Inifile **features,
 	                         );
 
 	if (seems_escaped || !look_like_command) {
-		utstring_bincpy(text, variable_name, variable_len);
-		return 0;
+		utstring_bincpy(text, variable_name - 1, variable_len + 1);
+		return -1;
 	}
 
 	int element_count = parse_values_with_variables(variable_name, variable_len, text, features);
