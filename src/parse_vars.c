@@ -115,7 +115,7 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 	char *s = utstring_body(copris_text);
 	size_t l = utstring_len(copris_text);
 	int new_line = 0;
-	int error = 0;
+	int nothing_parsed = 0;
 
 	while (l > 0) {
 		// Find the next symbol denoting a variable
@@ -139,6 +139,13 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 
 			// printf("tok %2zu: '%.*s', end:%d\n", tok_len, (int)tok_len, tok, tok_end == NULL);
 
+			if (tok_len == 1) {
+				// $ is standalone, copy it to output
+				utstring_bincpy(temp_text, tok, tok_len);
+				nothing_parsed = 1;
+				goto skip_parse;
+			}
+
 			if (/*tok_end != NULL &&*/ tok[1] == VAR_COMMENT) {
 				// Line begins with $# - interpret as comment
 				goto skip_parse;
@@ -146,12 +153,12 @@ void parse_variables(UT_string *copris_text, struct Inifile **features)
 
 			// Parse contents of the variable
 			utstring_bincpy(variable_name, tok, tok_len);
-			error = parse_extracted_variable(temp_text, features, variable_name);
+			nothing_parsed = parse_extracted_variable(temp_text, features, variable_name);
 			utstring_clear(variable_name);
 
 			skip_parse:
 			// Skip the new line, if there's one
-			new_line = (tok_end == NULL || error) ? 0 : 1;
+			new_line = (tok_end == NULL || nothing_parsed) ? 0 : 1;
 			s += tok_len + new_line;
 			l -= tok_len + new_line;
 		}
@@ -168,7 +175,7 @@ static int parse_extracted_variable(UT_string *text, struct Inifile **features,
 {
 	char *variable_name = utstring_body(variable);
 	size_t variable_len = utstring_len(variable);
-	// TODO len>0?
+	assert(variable_len > 1);
 
 	bool seems_escaped     = variable_name[1] == VAR_SYMBOL;
 	bool look_like_command = (  variable_name[2] == '_' &&
