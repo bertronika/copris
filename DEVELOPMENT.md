@@ -3,6 +3,21 @@
 This document describes various aspects of COPRIS development.
 
 
+## Building COPRIS, its documentation and unit tests
+
+Making release and debug builds is done via the *Makefile* in the root directory. Running `make help`
+will show most of the available targets.
+
+Build flags, linker settings and object files are set in *Makefile-common.mk* in the root directory.
+
+*README.md* and Man pages are generated via files in the *release-tools* directory. Each chapter
+gets its own Markdown file.
+
+There are two categories of unit tests. Some are written in Bash and reside in the *tests-bash*
+directory. Others, located in the *tests* directory are written in C and compiled via their own
+*Makefile*. Running `make help` there will show the important targets.
+
+
 ## External libraries
 
 - inih (<https://github.com/benhoyt/inih#readme>)
@@ -28,6 +43,15 @@ This document describes various aspects of COPRIS development.
 
 - cmocka framework (<https://api.cmocka.org/>)
 
+Useful commands for testing single files:
+
+```
+cd tests
+make cmocka-recode && ./$_
+make cmocka-parse_value && ./$_ 2>/dev/null
+make USERFLAGS=-Wno-unused-function cmocka-parse_vars && ./$_
+
+```
 
 ## Various utilities
 
