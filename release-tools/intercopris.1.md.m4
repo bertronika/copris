@@ -22,7 +22,7 @@ It is intended to be used for experimenting with printers by providing a straigh
 Intercopris gives you a command prompt, similar to that of a shell. It understands three different types of data:
 
 - numerical values in hexadecimal (0x*NN*), decimal (*NN*) or octal (0*NN*) notation, separated with whitespace
-- plain text, prefixed with '**t** '
+- plain text, prefixed with '**t** '
 - various built-in commands (e.g. `dump`, `hex`, `last` etc.), listed when starting the program
 
 After completing a line and pressing return, Intercopris will parse the entered data. If it is a built-in command, it will toggle its internal state or echo out any possible result. If commands are entered, Intercopris will process them using the supplied printer feature file (which must be specified with `-f FILE`) and send them to the output.

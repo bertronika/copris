@@ -2,4 +2,4 @@
 - DOS/Windows style line endings (`\r\n`) aren't supported - process input text through *dos2unix(1)* if necessary
 - markup in Markdown quotes is ignored
 - since signals aren't caught, COPRIS doesn't exit cleanly when interrupted
-- when sending data over the network, not all errors are send back to the sender
+- when sending data over the network, not all errors are sent back to the sender
