@@ -48,6 +48,8 @@ m4_include(common05-variables.md)m4_dnl
 **-e**, **\--encoding** *FILE*
 : Recode characters in received text according to definitions from encoding
   *FILE*. This option can be specified multiple times with different *FILE*s.
+  Consult the **FILE FORMAT** and **THE ENCODING FILE** chapters above for
+  details.
 
 **\--ignore-missing**
 : If recoding characters, do not terminate the program if received text
@@ -58,16 +60,9 @@ m4_include(common05-variables.md)m4_dnl
 : Process Markdown markup and variables in received text and apply session
   commands according to printer feature *FILE*. This option can be specified
   multiple times with different *FILE*s.
-
-    To use commands from FILE as variables in received text, they must be
-    prefixed with a predefined symbol, which is shown when invoking
-    `copris --version`. This feature only works when the received text
-    *starts with* `COPRIS ENABLE-VARIABLES`.
-
-    To use commands from FILE but ignore parsing Markdown in received text,
-    it should begin with `COPRIS DISABLE-MARKDOWN`.
-
-    Read the *Modeline* chapter for more information.
+  Consult the **FILE FORMAT**, **THE PRINTER FEATURE FILE** and
+  **VARIABLES, NUMERICAL VALUES AND COMMENTS** chapters above for
+  details.
 
 **\--dump-commands**
 : Show all possible printer feature commands in INI file format
