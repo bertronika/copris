@@ -1,4 +1,4 @@
-INTERCOPRIS(1)                         0.9-711-g7dfbf22-dirty                        INTERCOPRIS(1)
+INTERCOPRIS(1)                         0.9-777-gfbb5ac7-dirty                        INTERCOPRIS(1)
 
 NAME
        intercopris - an interactive command interpreter
@@ -19,7 +19,7 @@ DESCRIPTION
        • numerical values in hexadecimal (0xNN), decimal (NN) or octal  (0NN)  notation,  separated
          with whitespace
 
-       • plain text, prefixed with ‘t’
+       • plain text, prefixed with `t '
 
        • various built-in commands (e.g. dump, hex, last etc.), listed when starting the program
 
@@ -50,4 +50,4 @@ DEVELOPMENT
 SEE ALSO
        copris(1), readline(3)
 
-                                             2024-08-22                              INTERCOPRIS(1)
+                                             2026-04-27                              INTERCOPRIS(1)

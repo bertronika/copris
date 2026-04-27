@@ -42,10 +42,10 @@ invoked by following Markdown attributes:
 by default
 - *links* via angle brackets (`< >`)
 
-Any command can be bound to mentioned attributes. If desired, bold emphasis can trigger
-double-width text, headings may change the font face or size and links can be made
-underlined. There are no limits, as long as your *printer feature file* contains commands that
-are understood by the printer (or any other destination device).
+Any command can be bound to mentioned attributes. If desired, bold emphasis can trigger double-width
+text, headings may change the font face or size and links can be made underlined. There are
+no limits, as long as your *printer feature file* contains commands that are understood by the
+printer (or any other destination device).
 
 You might have noticed that only a subset of the Markdown specification is supported. COPRIS
 intentionally doesn't alter text layout (white space, paragraphs etc.), since there's no
@@ -366,4 +366,4 @@ valid ones
 *dos2unix(1)* if necessary
 - markup in Markdown quotes is ignored
 - since signals aren't caught, COPRIS doesn't exit cleanly when interrupted
-- when sending data over the network, not all errors are send back to the sender
+- when sending data over the network, not all errors are sent back to the sender
