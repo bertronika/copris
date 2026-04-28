@@ -1,4 +1,4 @@
-COPRIS(1)                              0.9-777-gfbb5ac7-dirty                             COPRIS(1)
+COPRIS(1)                              0.9-781-g611e6b2-dirty                             COPRIS(1)
 
 NAME
        copris - a converting printer server
@@ -71,8 +71,14 @@ FILE FORMAT
 
        Left-hand keys should be written out directly as UTF-8  characters  or  strings,  right-hand
        values  are  expected  to  be in either decimal, octal (prefixed by a 0) or hexadecimal base
-       (prefixed with 0x).  Don’t prepend zeroes to decimal numbers for alignment,  as  they’ll  be
-       interpreted as octal numbers.  Instead, use any amount of spaces (or tabulators).
+       (prefixed with 0x).
+
+       No indentation is permitted before writing out left-hand keys.  White space at beginning  of
+       lines  will  result  in (sometimes) confusing error messages - unfortunately a limitation of
+       the parsing library we use.
+
+       However, any amount of spaces (or tabulators) are allowed after that.  Keep in mind  not  to
+       prepend zeroes to decimal numbers for alignment, as they’ll be interpreted as octal numbers.
 
        One line can contain exactly one definition/command.
 
@@ -84,6 +90,7 @@ FILE FORMAT
               Å = 0xC5                ; for an encoding file
               F_BOLD_OFF = 0x1B 0x45  ; for a printer feature file
               F_H3_ON = @             ; ditto
+                NOT_ALLOWED = 7       ; forbidden leading spaces
 
 THE ENCODING FILE
        Before making one, check if COPRIS already includes one for your locale (encodings directory
@@ -324,4 +331,4 @@ DEVELOPMENT
 SEE ALSO
        stty(1), intercopris(1)
 
-                                             2026-04-27                                   COPRIS(1)
+                                             2026-04-28                                   COPRIS(1)
