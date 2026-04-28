@@ -30,6 +30,7 @@
 static int inih_handler(void *, const char *, const char *, const char *);
 
 bool error_known = false;
+int previous_definition_count = 0;
 
 int load_encoding_file(const char *filename, struct Inifile **encoding)
 {
@@ -65,7 +66,8 @@ int load_encoding_file(const char *filename, struct Inifile **encoding)
 		goto close_file;
 	}
 
-	int definition_count = HASH_COUNT(*encoding);
+	int definition_count = HASH_COUNT(*encoding) - previous_definition_count;
+	previous_definition_count = definition_count;
 
 	if (LOG_INFO)
 		PRINT_MSG("Loaded %d definitions from encoding file '%s'.", definition_count, filename);

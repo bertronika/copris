@@ -32,6 +32,8 @@
 static int inih_handler(void *, const char *, const char *, const char *);
 static int validate_command_pairs(const char *, struct Inifile **);
 
+int previous_command_count = 0;
+
 int load_printer_feature_file(const char *filename, struct Inifile **features)
 {
 	FILE *file = fopen(filename, "r");
@@ -68,6 +70,9 @@ int load_printer_feature_file(const char *filename, struct Inifile **features)
 		if (s->out_len > 0)
 			command_count++;
 	}
+
+	command_count -= previous_command_count;
+	previous_command_count = command_count;
 
 	if (LOG_INFO)
 		PRINT_MSG("Loaded %d commands from printer feature file '%s'.", command_count, filename);
