@@ -7,7 +7,11 @@ key2 = whitespace separated values ; inline comment
 ...
 ```
 
-Left-hand keys should be written out directly as UTF-8 characters or strings, right-hand values are expected to be in either decimal, octal (prefixed by a `0`) or hexadecimal base (prefixed with `0x`). Don't prepend zeroes to decimal numbers for alignment, as they'll be interpreted as octal numbers. Instead, use any amount of spaces (or tabulators).
+Left-hand keys should be written out directly as UTF-8 characters or strings, right-hand values are expected to be in either decimal, octal (prefixed by a `0`) or hexadecimal base (prefixed with `0x`).
+
+No indentation is permitted before writing out left-hand keys. White space at beginning of lines will result in (sometimes) confusing error messages - unfortunately a limitation of the parsing library we use.
+
+However, any amount of spaces (or tabulators) are allowed after that. Keep in mind not to prepend zeroes to decimal numbers for alignment, as they'll be interpreted as octal numbers.
 
 One line can contain exactly *one* definition/command.
 
@@ -19,4 +23,5 @@ Here are some examples:
 Å = 0xC5                ; for an encoding file
 F_BOLD_OFF = 0x1B 0x45  ; for a printer feature file
 F_H3_ON = @             ; ditto
+  NOT_ALLOWED = 7       ; forbidden leading spaces
 ```
