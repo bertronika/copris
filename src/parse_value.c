@@ -53,14 +53,15 @@ int parse_values_with_variables(const char *value, size_t value_len,
 			struct Inifile *s;
 			HASH_FIND_STR(*features, token, s);
 			if (s == NULL) {
-				PRINT_ERROR_MSG("Internal variable '%s' does not exist. If it is a custom "
-				                "command, make sure it has the 'C_' prefix.", token);
+				PRINT_ERROR_MSG("Variable '%s' does not (yet) exist. If it is a custom command, "
+				                "make sure it has the 'C_' prefix. You must also define it "
+				                "first and use it later.", token);
 				break;
 			}
 
 			if (s->out_len == 0) {
-				PRINT_ERROR_MSG("Variable '%s' does not (yet) exist. Custom command "
-				                "should be specified after it.", token);
+				PRINT_ERROR_MSG("Internal variable '%s' has not (yet) been defined. You must "
+				                "define it first and use it later.", token);
 				break;
 			}
 
