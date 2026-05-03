@@ -157,7 +157,7 @@ compare_files "git tag and VERSION values match" \
 
 MAX_FILENAME_LENGTH="$(grep -Po '#define MAX_FILENAME_LENGTH \K[0-9]+' ../src/debug.h || exit 1)"
 compare_files "any source file names exceed MAX_FILENAME_LENGTH of ${MAX_FILENAME_LENGTH}" \
-              <(cd .. && ls -1 src/*.c | strings -n $((MAX_FILENAME_LENGTH + 1))) /dev/null
+              <(cd ../src && ls -1 *.c | strings -n $((MAX_FILENAME_LENGTH + 1))) /dev/null
               # + 1 accounts for a new line
 
 #compare_files "any program strings are longer than 80 characters" \
