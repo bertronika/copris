@@ -32,12 +32,13 @@ int copris_write_file(const char *output_file, UT_string *copris_text)
 	size_t text_length = utstring_len(copris_text);
 	size_t written_text_length = fwrite(utstring_body(copris_text), 1, text_length, file_ptr);
 
+	if (LOG_INFO)
+		PRINT_MSG("Written %zu byte(s) to %s.", written_text_length, output_file);
+
 	if (written_text_length < text_length) {
-		PRINT_ERROR_MSG("fwrite: Failure while appending to output file; "
+		PRINT_ERROR_MSG("fwrite: Failure while writing to output file; "
 		                "not enough bytes transferred.");
 		error = -1;
-	} else if (LOG_INFO) {
-		PRINT_MSG("Written %zu byte(s) to %s.", written_text_length, output_file);
 	}
 
 	// Flush streams to file and close it
@@ -55,24 +56,23 @@ int copris_write_file(const char *output_file, UT_string *copris_text)
 
 int copris_write_stdout(UT_string *copris_text)
 {
-	int error = 0;
-	size_t text_length = utstring_len(copris_text);
-
 	if (LOG_ERROR)
 		puts("; BST"); // Begin-Stream-Transcript
 
+	size_t text_length = utstring_len(copris_text);
 	size_t written_text_length = fwrite(utstring_body(copris_text), 1, text_length, stdout);
 
 	if (LOG_ERROR)
 		puts("; EST"); // End-Stream-Transcript
 
+	if (LOG_INFO)
+		PRINT_MSG("Written %zu byte(s) to stdout.", written_text_length);
+
 	if (written_text_length < text_length) {
 		PRINT_ERROR_MSG("fwrite: Failure while writing to stdout; "
 		                "not enough bytes transferred.");
-		error = -1;
-	} else if (LOG_INFO) {
-		PRINT_MSG("Appended %zu byte(s) to stdout.", written_text_length);
+		return -1;
 	}
 
-	return error;
+	return 0;
 }
