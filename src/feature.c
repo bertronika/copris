@@ -306,9 +306,6 @@ int dump_printer_feature_commands(struct Inifile **features)
 		if (*s->in != code_prefix) {
 			code_prefix = *s->in;
 			switch (code_prefix) {
-			//case 'C':
-				//puts("# Non-printable commands");
-				//break;
 			case 'F':
 				puts("# Text formatting commands; both parts of a pair must be defined.");
 				break;
